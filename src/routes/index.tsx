@@ -639,116 +639,166 @@ function How() {
 
 /* ---------- product screens ---------- */
 
-function PhoneMock({
-  header, accent, children, className = "",
-}: { header: string; accent: string; children: React.ReactNode; className?: string }) {
-  return (
-    <div className={`relative mx-auto w-full max-w-[280px] ${className}`}>
-      <div className="rounded-[2.4rem] bg-foreground p-2 shadow-elegant">
-        <div className="overflow-hidden rounded-[2rem] bg-background">
-          <div
-            className="flex items-center justify-between px-5 pt-4 pb-3 text-xs font-semibold text-primary-foreground"
-            style={{ background: accent }}
-          >
-            <span>9:41</span>
-            <span>MyTijaara</span>
-            <span>●●●</span>
-          </div>
-          <div className="p-4">
-            <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-              {header}
-            </p>
-            {children}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function ProductScreens() {
+  const tiles = [
+    { i: UtensilsCrossed, l: "Food", tone: "primary" as const },
+    { i: ShoppingBasket, l: "Groceries", tone: "gold" as const },
+    { i: Pill, l: "Pharmacy", tone: "primary" as const },
+    { i: Wrench, l: "Artisans", tone: "gold" as const },
+    { i: Package, l: "Parcels", tone: "gold" as const },
+    { i: Car, l: "Car rental", tone: "primary" as const },
+    { i: Store, l: "Shops", tone: "gold" as const },
+    { i: Star, l: "Top rated", tone: "primary" as const },
+  ];
+
   return (
-    <section className="relative overflow-hidden py-24 sm:py-32">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+    <section className="relative overflow-hidden bg-surface py-24 sm:py-32">
+      <div className="pointer-events-none absolute inset-0 bg-hero-gradient opacity-70" />
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
           <Reveal>
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-primary">
-              Product screens
+              Inside the app
             </span>
             <h2 className="mt-5 font-display text-4xl font-bold tracking-tight sm:text-5xl">
               Clean, calm, familiar.
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Designed so anyone can use it — from your cousin at Uni to your grandma.
+              A home screen that puts every errand one tap away — designed so anyone can use it.
             </p>
           </Reveal>
         </div>
 
-        <div className="mt-20 grid gap-10 lg:grid-cols-3 lg:gap-6">
-          <Reveal delay={0}>
-            <PhoneMock header="Home" accent="var(--gradient-primary)" className="lg:mt-16">
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { i: UtensilsCrossed, l: "Food" },
-                  { i: ShoppingBasket, l: "Grocery" },
-                  { i: Pill, l: "Pharmacy" },
-                  { i: Package, l: "Parcel" },
-                  { i: Car, l: "Car" },
-                  { i: Wrench, l: "Artisan" },
-                ].map(({ i: Icon, l }) => (
-                  <div key={l} className="flex flex-col items-center gap-1 rounded-2xl bg-primary-soft p-3">
-                    <Icon className="h-5 w-5 text-primary" />
-                    <span className="text-[10px] font-semibold">{l}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-3 rounded-2xl bg-gradient-to-br from-primary to-[oklch(0.42_0.1_156)] p-3 text-primary-foreground">
-                <p className="text-[10px] opacity-80">Free delivery</p>
-                <p className="text-sm font-bold">On your first order</p>
-              </div>
-            </PhoneMock>
-          </Reveal>
+        <div className="relative mx-auto mt-20 flex max-w-md justify-center">
+          {/* soft glow behind phone */}
+          <div className="pointer-events-none absolute -inset-10 rounded-[3rem] bg-primary-soft blur-3xl opacity-60" />
 
-          <Reveal delay={120}>
-            <PhoneMock header="Tracking" accent="var(--gradient-primary)">
-              <div className="h-32 rounded-2xl bg-[radial-gradient(circle_at_60%_40%,color-mix(in_oklab,var(--primary)_25%,transparent),transparent_60%)] bg-primary-soft relative overflow-hidden">
-                <div className="absolute left-6 top-6 h-2 w-2 rounded-full bg-primary ring-4 ring-primary/20" />
-                <div className="absolute right-6 bottom-6 h-2 w-2 rounded-full bg-gold ring-4 ring-gold/30" />
-                <svg className="absolute inset-0" viewBox="0 0 200 128">
-                  <path d="M20 20 Q100 40 180 100" fill="none" stroke="oklch(0.36 0.09 156)" strokeWidth="2" strokeDasharray="4 4" />
-                </svg>
-              </div>
-              <div className="mt-3 rounded-2xl border border-border p-3">
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-full bg-gold-gradient" />
-                  <div className="flex-1">
-                    <p className="text-xs font-bold">Chinedu is on the way</p>
-                    <p className="text-[10px] text-muted-foreground">Arriving in 8 min</p>
+          <Reveal>
+            <div className="relative">
+              {/* Phone frame */}
+              <div className="relative w-[320px] rounded-[2.75rem] bg-foreground p-[10px] shadow-elegant sm:w-[360px]">
+                {/* notch */}
+                <div className="absolute left-1/2 top-3 z-20 h-6 w-28 -translate-x-1/2 rounded-full bg-foreground" />
+                <div className="relative overflow-hidden rounded-[2.25rem] bg-background">
+                  {/* status bar */}
+                  <div className="flex items-center justify-between px-6 pt-3 pb-2 text-[11px] font-semibold text-foreground">
+                    <span>9:41</span>
+                    <span className="opacity-0">.</span>
+                    <span className="flex items-center gap-1 opacity-80">
+                      <span className="h-1 w-3 rounded-sm bg-foreground/70" />
+                      <span className="h-1.5 w-3 rounded-sm bg-foreground/70" />
+                      <span className="h-2 w-4 rounded-sm bg-foreground" />
+                    </span>
+                  </div>
+
+                  {/* content */}
+                  <div className="px-5 pb-6 pt-3">
+                    <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                      <MapPin className="h-3.5 w-3.5 text-primary" />
+                      Deliver to <span className="font-bold text-foreground">Lekki, Lagos</span>
+                    </div>
+                    <h3 className="mt-2 font-display text-[22px] font-bold leading-tight text-foreground">
+                      What do you need today?
+                    </h3>
+
+                    {/* search */}
+                    <div className="mt-4 flex items-center gap-2 rounded-2xl border border-border bg-surface px-3.5 py-2.5">
+                      <svg className="h-4 w-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="11" cy="11" r="7" />
+                        <path d="m20 20-3.5-3.5" />
+                      </svg>
+                      <span className="text-xs text-muted-foreground">Search food, shops, artisans…</span>
+                    </div>
+
+                    {/* 8 tiles grid */}
+                    <div className="mt-4 grid grid-cols-4 gap-3">
+                      {tiles.map(({ i: Icon, l, tone }) => (
+                        <div key={l} className="flex flex-col items-center gap-1.5">
+                          <div
+                            className={`grid h-12 w-12 place-items-center rounded-full ${
+                              tone === "primary" ? "bg-primary-soft" : "bg-gold/20"
+                            }`}
+                          >
+                            <Icon
+                              className={`h-5 w-5 ${
+                                tone === "primary" ? "text-primary" : "text-[color:var(--gold-foreground)]"
+                              }`}
+                            />
+                          </div>
+                          <span className="text-[9.5px] font-semibold text-foreground">{l}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* promo card */}
+                    <div className="mt-5 overflow-hidden rounded-2xl border border-border bg-card">
+                      <div className="relative h-24 bg-gold-gradient">
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_-20%,white/40,transparent_60%)]" />
+                        <Sparkles className="absolute right-4 top-4 h-5 w-5 text-white/70" />
+                      </div>
+                      <div className="flex items-start justify-between gap-3 p-3">
+                        <div>
+                          <p className="text-[13px] font-bold text-foreground">Free delivery this week</p>
+                          <p className="mt-0.5 text-[11px] text-muted-foreground">On orders over ₦5,000 near you.</p>
+                        </div>
+                        <span className="rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-bold text-primary">
+                          New
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* active order */}
+                    <div className="mt-3 flex items-center gap-3 rounded-2xl border border-border bg-card p-2.5">
+                      <div className="grid h-9 w-9 place-items-center rounded-full bg-primary-gradient text-primary-foreground">
+                        <Package className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[12px] font-bold text-foreground">Rider is 4 min away</p>
+                        <p className="truncate text-[10px] text-muted-foreground">Order #TJ-2841 · Jollof Republic</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* home indicator */}
+                  <div className="flex justify-center pb-2">
+                    <div className="h-1 w-24 rounded-full bg-foreground/80" />
                   </div>
                 </div>
               </div>
-            </PhoneMock>
-          </Reveal>
 
-          <Reveal delay={240}>
-            <PhoneMock header="Book artisan" accent="var(--gradient-primary)" className="lg:mt-16">
-              {[
-                { n: "Adaeze O.", r: "Electrician", s: "4.9" },
-                { n: "Musa I.", r: "Plumber", s: "4.8" },
-                { n: "Blessing E.", r: "Cleaner", s: "5.0" },
-              ].map((p) => (
-                <div key={p.n} className="mb-2 flex items-center gap-3 rounded-2xl border border-border p-2.5">
-                  <div className="h-9 w-9 rounded-full bg-primary-gradient" />
-                  <div className="flex-1">
-                    <p className="text-xs font-bold">{p.n}</p>
-                    <p className="text-[10px] text-muted-foreground">{p.r}</p>
-                  </div>
-                  <div className="flex items-center gap-0.5 text-[10px] font-semibold text-gold">
-                    <Star className="h-3 w-3 fill-current" /> {p.s}
-                  </div>
+              {/* Floating card — breakfast */}
+              <div className="absolute -left-16 top-24 hidden animate-float rounded-2xl border border-border bg-card p-3 shadow-soft sm:flex sm:items-center sm:gap-2.5">
+                <div className="grid h-9 w-9 place-items-center rounded-full bg-primary-soft">
+                  <UtensilsCrossed className="h-4 w-4 text-primary" />
                 </div>
-              ))}
-            </PhoneMock>
+                <div>
+                  <p className="text-[12px] font-bold text-foreground">Breakfast on the way</p>
+                  <p className="text-[10px] text-muted-foreground">Arriving in 12 min</p>
+                </div>
+              </div>
+
+              {/* Floating card — artisan booked */}
+              <div className="absolute -right-20 bottom-28 hidden animate-float-slower rounded-2xl border border-border bg-card p-3 shadow-soft sm:flex sm:items-center sm:gap-2.5">
+                <div className="grid h-9 w-9 place-items-center rounded-full bg-gold/20">
+                  <Wrench className="h-4 w-4 text-[color:var(--gold-foreground)]" />
+                </div>
+                <div>
+                  <p className="text-[12px] font-bold text-foreground">Electrician booked</p>
+                  <p className="text-[10px] text-muted-foreground">Today · 4:30 PM</p>
+                </div>
+              </div>
+
+              {/* Floating card — rating */}
+              <div className="absolute -left-10 bottom-10 hidden animate-float rounded-2xl border border-border bg-card p-3 shadow-soft md:flex md:items-center md:gap-2.5">
+                <div className="grid h-9 w-9 place-items-center rounded-full bg-gold-gradient">
+                  <Star className="h-4 w-4 text-gold-foreground" />
+                </div>
+                <div>
+                  <p className="text-[12px] font-bold text-foreground">4.9 average rating</p>
+                  <p className="text-[10px] text-muted-foreground">Across 12k+ orders</p>
+                </div>
+              </div>
+            </div>
           </Reveal>
         </div>
       </div>
