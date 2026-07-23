@@ -25,14 +25,14 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "One app for food, groceries, pharmacy, parcels, artisans, car rentals and local shops. Built for Nigerians.",
+          "Order food, groceries and pharmacy items, book trusted artisans, send packages, rent cars and shop from businesses around you — all from one app built for Nigerians.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "MyTijaara — Everything you need, all in one place" },
       {
         name: "twitter:description",
-        content: "One app for food, groceries, pharmacy, parcels, artisans and more. Built for Nigerians.",
+        content: "Order food, groceries and pharmacy items, book trusted artisans, send packages, rent cars and shop from businesses around you — all from one app built for Nigerians.",
       },
     ],
   }),
