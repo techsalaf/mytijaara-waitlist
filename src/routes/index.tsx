@@ -486,13 +486,14 @@ function Moments() {
 /* ---------- services grid ---------- */
 
 const SERVICES = [
-  { icon: UtensilsCrossed, title: "Order food", body: "From your favorite spots to hidden gems, hot and fast." },
-  { icon: ShoppingBasket, title: "Buy groceries", body: "Fresh food, market runs and household staples in one basket." },
-  { icon: Pill, title: "Buy pharmacy items", body: "Prescriptions and everyday medicine, delivered discreetly." },
-  { icon: Store, title: "Shop local businesses", body: "Support the shops in your neighborhood, in a few taps." },
-  { icon: Package, title: "Send parcels", body: "Same-day pickup and delivery across your city." },
-  { icon: Car, title: "Rent a car", body: "Verified drivers and cars for a trip or a full day out." },
-  { icon: Wrench, title: "Book artisans", body: "Plumbers, electricians, cleaners — trusted and reviewed." },
+  { icon: UtensilsCrossed, title: "Order food", body: "Local favourites and top restaurants delivered hot." },
+  { icon: ShoppingBasket, title: "Buy groceries", body: "Fresh produce and weekly essentials in one basket." },
+  { icon: Pill, title: "Pharmacy items", body: "Prescription refills and everyday health needs." },
+  { icon: Store, title: "Shop local", body: "Discover businesses and vendors around you." },
+  { icon: Package, title: "Send parcels", body: "Same-day delivery across town, tracked end-to-end." },
+  { icon: Car, title: "Rent a car", body: "Trusted rentals for the day, week, or that big trip." },
+  { icon: Wrench, title: "Book artisans", body: "Electricians, plumbers, cleaners — vetted and rated." },
+  { icon: Sparkles, title: "Home services", body: "From laundry to fumigation, handled the right way." },
 ];
 
 function Services() {
@@ -513,50 +514,26 @@ function Services() {
           </Reveal>
         </div>
 
-        <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {SERVICES.map((s, i) => {
             const Icon = s.icon;
-            const featured = i === 0;
+            const alt = i % 2 === 1;
             return (
-              <Reveal key={s.title} delay={i * 50}>
-                <div
-                  className={`group relative h-full overflow-hidden rounded-3xl border p-7 transition-all hover:-translate-y-1 hover:shadow-elegant ${
-                    featured
-                      ? "border-primary/20 bg-primary-gradient text-primary-foreground sm:col-span-2 lg:col-span-1 lg:row-span-2"
-                      : "border-border bg-card"
-                  }`}
-                >
-                  {featured && (
-                    <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-gold opacity-20 blur-3xl" />
-                  )}
+              <Reveal key={s.title} delay={i * 40}>
+                <div className="group relative h-full rounded-3xl border border-border bg-card p-7 transition-all hover:-translate-y-1 hover:border-primary/25 hover:shadow-soft">
                   <div
                     className={`grid h-12 w-12 place-items-center rounded-2xl ${
-                      featured
-                        ? "bg-primary-foreground/15 text-primary-foreground"
-                        : "bg-primary-soft text-primary"
+                      alt ? "bg-gold/20" : "bg-primary-soft"
                     }`}
                   >
-                    <Icon className="h-6 w-6" />
+                    <Icon className={`h-6 w-6 ${alt ? "text-[color:var(--gold-foreground)]" : "text-primary"}`} />
                   </div>
-                  <h3
-                    className={`mt-5 font-display text-xl font-bold ${
-                      featured ? "text-primary-foreground" : "text-foreground"
-                    }`}
-                  >
+                  <h3 className="mt-6 font-display text-lg font-bold text-foreground">
                     {s.title}
                   </h3>
-                  <p
-                    className={`mt-2 text-sm leading-relaxed ${
-                      featured ? "text-primary-foreground/85" : "text-muted-foreground"
-                    }`}
-                  >
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                     {s.body}
                   </p>
-                  {featured && (
-                    <div className="mt-8 inline-flex items-center gap-2 text-sm font-semibold">
-                      Start with food <ArrowRight className="h-4 w-4" />
-                    </div>
-                  )}
                 </div>
               </Reveal>
             );
