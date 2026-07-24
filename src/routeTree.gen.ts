@@ -19,10 +19,21 @@ import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-password'
 import { Route as AdminWaitlistRouteImport } from './routes/admin.waitlist'
 import { Route as AdminReferralsRouteImport } from './routes/admin.referrals'
+import { Route as AdminCmsRouteImport } from './routes/admin.cms'
 import { Route as AdminReferralsIndexRouteImport } from './routes/admin.referrals.index'
+import { Route as AdminCmsIndexRouteImport } from './routes/admin.cms.index'
 import { Route as AdminReferralsLeaderboardRouteImport } from './routes/admin.referrals.leaderboard'
 import { Route as AdminReferralsAnalyticsRouteImport } from './routes/admin.referrals.analytics'
 import { Route as AdminReferralsIdRouteImport } from './routes/admin.referrals.$id'
+import { Route as AdminCmsTestimonialsRouteImport } from './routes/admin.cms.testimonials'
+import { Route as AdminCmsStatisticsRouteImport } from './routes/admin.cms.statistics'
+import { Route as AdminCmsSocialRouteImport } from './routes/admin.cms.social'
+import { Route as AdminCmsSeoRouteImport } from './routes/admin.cms.seo'
+import { Route as AdminCmsNavigationRouteImport } from './routes/admin.cms.navigation'
+import { Route as AdminCmsFooterRouteImport } from './routes/admin.cms.footer'
+import { Route as AdminCmsFeaturesRouteImport } from './routes/admin.cms.features'
+import { Route as AdminCmsFaqsRouteImport } from './routes/admin.cms.faqs'
+import { Route as AdminCmsAnnouncementRouteImport } from './routes/admin.cms.announcement'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -74,10 +85,20 @@ const AdminReferralsRoute = AdminReferralsRouteImport.update({
   path: '/referrals',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCmsRoute = AdminCmsRouteImport.update({
+  id: '/cms',
+  path: '/cms',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminReferralsIndexRoute = AdminReferralsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminReferralsRoute,
+} as any)
+const AdminCmsIndexRoute = AdminCmsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminCmsRoute,
 } as any)
 const AdminReferralsLeaderboardRoute =
   AdminReferralsLeaderboardRouteImport.update({
@@ -95,11 +116,57 @@ const AdminReferralsIdRoute = AdminReferralsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AdminReferralsRoute,
 } as any)
+const AdminCmsTestimonialsRoute = AdminCmsTestimonialsRouteImport.update({
+  id: '/testimonials',
+  path: '/testimonials',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
+const AdminCmsStatisticsRoute = AdminCmsStatisticsRouteImport.update({
+  id: '/statistics',
+  path: '/statistics',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
+const AdminCmsSocialRoute = AdminCmsSocialRouteImport.update({
+  id: '/social',
+  path: '/social',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
+const AdminCmsSeoRoute = AdminCmsSeoRouteImport.update({
+  id: '/seo',
+  path: '/seo',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
+const AdminCmsNavigationRoute = AdminCmsNavigationRouteImport.update({
+  id: '/navigation',
+  path: '/navigation',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
+const AdminCmsFooterRoute = AdminCmsFooterRouteImport.update({
+  id: '/footer',
+  path: '/footer',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
+const AdminCmsFeaturesRoute = AdminCmsFeaturesRouteImport.update({
+  id: '/features',
+  path: '/features',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
+const AdminCmsFaqsRoute = AdminCmsFaqsRouteImport.update({
+  id: '/faqs',
+  path: '/faqs',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
+const AdminCmsAnnouncementRoute = AdminCmsAnnouncementRouteImport.update({
+  id: '/announcement',
+  path: '/announcement',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/admin/cms': typeof AdminCmsRouteWithChildren
   '/admin/referrals': typeof AdminReferralsRouteWithChildren
   '/admin/waitlist': typeof AdminWaitlistRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -107,9 +174,19 @@ export interface FileRoutesByFullPath {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/session-expired': typeof AuthSessionExpiredRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/cms/announcement': typeof AdminCmsAnnouncementRoute
+  '/admin/cms/faqs': typeof AdminCmsFaqsRoute
+  '/admin/cms/features': typeof AdminCmsFeaturesRoute
+  '/admin/cms/footer': typeof AdminCmsFooterRoute
+  '/admin/cms/navigation': typeof AdminCmsNavigationRoute
+  '/admin/cms/seo': typeof AdminCmsSeoRoute
+  '/admin/cms/social': typeof AdminCmsSocialRoute
+  '/admin/cms/statistics': typeof AdminCmsStatisticsRoute
+  '/admin/cms/testimonials': typeof AdminCmsTestimonialsRoute
   '/admin/referrals/$id': typeof AdminReferralsIdRoute
   '/admin/referrals/analytics': typeof AdminReferralsAnalyticsRoute
   '/admin/referrals/leaderboard': typeof AdminReferralsLeaderboardRoute
+  '/admin/cms/': typeof AdminCmsIndexRoute
   '/admin/referrals/': typeof AdminReferralsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -121,9 +198,19 @@ export interface FileRoutesByTo {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/session-expired': typeof AuthSessionExpiredRoute
   '/admin': typeof AdminIndexRoute
+  '/admin/cms/announcement': typeof AdminCmsAnnouncementRoute
+  '/admin/cms/faqs': typeof AdminCmsFaqsRoute
+  '/admin/cms/features': typeof AdminCmsFeaturesRoute
+  '/admin/cms/footer': typeof AdminCmsFooterRoute
+  '/admin/cms/navigation': typeof AdminCmsNavigationRoute
+  '/admin/cms/seo': typeof AdminCmsSeoRoute
+  '/admin/cms/social': typeof AdminCmsSocialRoute
+  '/admin/cms/statistics': typeof AdminCmsStatisticsRoute
+  '/admin/cms/testimonials': typeof AdminCmsTestimonialsRoute
   '/admin/referrals/$id': typeof AdminReferralsIdRoute
   '/admin/referrals/analytics': typeof AdminReferralsAnalyticsRoute
   '/admin/referrals/leaderboard': typeof AdminReferralsLeaderboardRoute
+  '/admin/cms': typeof AdminCmsIndexRoute
   '/admin/referrals': typeof AdminReferralsIndexRoute
 }
 export interface FileRoutesById {
@@ -131,6 +218,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/admin/cms': typeof AdminCmsRouteWithChildren
   '/admin/referrals': typeof AdminReferralsRouteWithChildren
   '/admin/waitlist': typeof AdminWaitlistRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -138,9 +226,19 @@ export interface FileRoutesById {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/session-expired': typeof AuthSessionExpiredRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/cms/announcement': typeof AdminCmsAnnouncementRoute
+  '/admin/cms/faqs': typeof AdminCmsFaqsRoute
+  '/admin/cms/features': typeof AdminCmsFeaturesRoute
+  '/admin/cms/footer': typeof AdminCmsFooterRoute
+  '/admin/cms/navigation': typeof AdminCmsNavigationRoute
+  '/admin/cms/seo': typeof AdminCmsSeoRoute
+  '/admin/cms/social': typeof AdminCmsSocialRoute
+  '/admin/cms/statistics': typeof AdminCmsStatisticsRoute
+  '/admin/cms/testimonials': typeof AdminCmsTestimonialsRoute
   '/admin/referrals/$id': typeof AdminReferralsIdRoute
   '/admin/referrals/analytics': typeof AdminReferralsAnalyticsRoute
   '/admin/referrals/leaderboard': typeof AdminReferralsLeaderboardRoute
+  '/admin/cms/': typeof AdminCmsIndexRoute
   '/admin/referrals/': typeof AdminReferralsIndexRoute
 }
 export interface FileRouteTypes {
@@ -149,6 +247,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/admin/cms'
     | '/admin/referrals'
     | '/admin/waitlist'
     | '/auth/forgot-password'
@@ -156,9 +255,19 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/auth/session-expired'
     | '/admin/'
+    | '/admin/cms/announcement'
+    | '/admin/cms/faqs'
+    | '/admin/cms/features'
+    | '/admin/cms/footer'
+    | '/admin/cms/navigation'
+    | '/admin/cms/seo'
+    | '/admin/cms/social'
+    | '/admin/cms/statistics'
+    | '/admin/cms/testimonials'
     | '/admin/referrals/$id'
     | '/admin/referrals/analytics'
     | '/admin/referrals/leaderboard'
+    | '/admin/cms/'
     | '/admin/referrals/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -170,15 +279,26 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/auth/session-expired'
     | '/admin'
+    | '/admin/cms/announcement'
+    | '/admin/cms/faqs'
+    | '/admin/cms/features'
+    | '/admin/cms/footer'
+    | '/admin/cms/navigation'
+    | '/admin/cms/seo'
+    | '/admin/cms/social'
+    | '/admin/cms/statistics'
+    | '/admin/cms/testimonials'
     | '/admin/referrals/$id'
     | '/admin/referrals/analytics'
     | '/admin/referrals/leaderboard'
+    | '/admin/cms'
     | '/admin/referrals'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/auth'
+    | '/admin/cms'
     | '/admin/referrals'
     | '/admin/waitlist'
     | '/auth/forgot-password'
@@ -186,9 +306,19 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/auth/session-expired'
     | '/admin/'
+    | '/admin/cms/announcement'
+    | '/admin/cms/faqs'
+    | '/admin/cms/features'
+    | '/admin/cms/footer'
+    | '/admin/cms/navigation'
+    | '/admin/cms/seo'
+    | '/admin/cms/social'
+    | '/admin/cms/statistics'
+    | '/admin/cms/testimonials'
     | '/admin/referrals/$id'
     | '/admin/referrals/analytics'
     | '/admin/referrals/leaderboard'
+    | '/admin/cms/'
     | '/admin/referrals/'
   fileRoutesById: FileRoutesById
 }
@@ -270,12 +400,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReferralsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/cms': {
+      id: '/admin/cms'
+      path: '/cms'
+      fullPath: '/admin/cms'
+      preLoaderRoute: typeof AdminCmsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/referrals/': {
       id: '/admin/referrals/'
       path: '/'
       fullPath: '/admin/referrals/'
       preLoaderRoute: typeof AdminReferralsIndexRouteImport
       parentRoute: typeof AdminReferralsRoute
+    }
+    '/admin/cms/': {
+      id: '/admin/cms/'
+      path: '/'
+      fullPath: '/admin/cms/'
+      preLoaderRoute: typeof AdminCmsIndexRouteImport
+      parentRoute: typeof AdminCmsRoute
     }
     '/admin/referrals/leaderboard': {
       id: '/admin/referrals/leaderboard'
@@ -298,8 +442,101 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReferralsIdRouteImport
       parentRoute: typeof AdminReferralsRoute
     }
+    '/admin/cms/testimonials': {
+      id: '/admin/cms/testimonials'
+      path: '/testimonials'
+      fullPath: '/admin/cms/testimonials'
+      preLoaderRoute: typeof AdminCmsTestimonialsRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/cms/statistics': {
+      id: '/admin/cms/statistics'
+      path: '/statistics'
+      fullPath: '/admin/cms/statistics'
+      preLoaderRoute: typeof AdminCmsStatisticsRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/cms/social': {
+      id: '/admin/cms/social'
+      path: '/social'
+      fullPath: '/admin/cms/social'
+      preLoaderRoute: typeof AdminCmsSocialRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/cms/seo': {
+      id: '/admin/cms/seo'
+      path: '/seo'
+      fullPath: '/admin/cms/seo'
+      preLoaderRoute: typeof AdminCmsSeoRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/cms/navigation': {
+      id: '/admin/cms/navigation'
+      path: '/navigation'
+      fullPath: '/admin/cms/navigation'
+      preLoaderRoute: typeof AdminCmsNavigationRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/cms/footer': {
+      id: '/admin/cms/footer'
+      path: '/footer'
+      fullPath: '/admin/cms/footer'
+      preLoaderRoute: typeof AdminCmsFooterRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/cms/features': {
+      id: '/admin/cms/features'
+      path: '/features'
+      fullPath: '/admin/cms/features'
+      preLoaderRoute: typeof AdminCmsFeaturesRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/cms/faqs': {
+      id: '/admin/cms/faqs'
+      path: '/faqs'
+      fullPath: '/admin/cms/faqs'
+      preLoaderRoute: typeof AdminCmsFaqsRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/cms/announcement': {
+      id: '/admin/cms/announcement'
+      path: '/announcement'
+      fullPath: '/admin/cms/announcement'
+      preLoaderRoute: typeof AdminCmsAnnouncementRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
   }
 }
+
+interface AdminCmsRouteChildren {
+  AdminCmsAnnouncementRoute: typeof AdminCmsAnnouncementRoute
+  AdminCmsFaqsRoute: typeof AdminCmsFaqsRoute
+  AdminCmsFeaturesRoute: typeof AdminCmsFeaturesRoute
+  AdminCmsFooterRoute: typeof AdminCmsFooterRoute
+  AdminCmsNavigationRoute: typeof AdminCmsNavigationRoute
+  AdminCmsSeoRoute: typeof AdminCmsSeoRoute
+  AdminCmsSocialRoute: typeof AdminCmsSocialRoute
+  AdminCmsStatisticsRoute: typeof AdminCmsStatisticsRoute
+  AdminCmsTestimonialsRoute: typeof AdminCmsTestimonialsRoute
+  AdminCmsIndexRoute: typeof AdminCmsIndexRoute
+}
+
+const AdminCmsRouteChildren: AdminCmsRouteChildren = {
+  AdminCmsAnnouncementRoute: AdminCmsAnnouncementRoute,
+  AdminCmsFaqsRoute: AdminCmsFaqsRoute,
+  AdminCmsFeaturesRoute: AdminCmsFeaturesRoute,
+  AdminCmsFooterRoute: AdminCmsFooterRoute,
+  AdminCmsNavigationRoute: AdminCmsNavigationRoute,
+  AdminCmsSeoRoute: AdminCmsSeoRoute,
+  AdminCmsSocialRoute: AdminCmsSocialRoute,
+  AdminCmsStatisticsRoute: AdminCmsStatisticsRoute,
+  AdminCmsTestimonialsRoute: AdminCmsTestimonialsRoute,
+  AdminCmsIndexRoute: AdminCmsIndexRoute,
+}
+
+const AdminCmsRouteWithChildren = AdminCmsRoute._addFileChildren(
+  AdminCmsRouteChildren,
+)
 
 interface AdminReferralsRouteChildren {
   AdminReferralsIdRoute: typeof AdminReferralsIdRoute
@@ -320,12 +557,14 @@ const AdminReferralsRouteWithChildren = AdminReferralsRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminCmsRoute: typeof AdminCmsRouteWithChildren
   AdminReferralsRoute: typeof AdminReferralsRouteWithChildren
   AdminWaitlistRoute: typeof AdminWaitlistRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminCmsRoute: AdminCmsRouteWithChildren,
   AdminReferralsRoute: AdminReferralsRouteWithChildren,
   AdminWaitlistRoute: AdminWaitlistRoute,
   AdminIndexRoute: AdminIndexRoute,
