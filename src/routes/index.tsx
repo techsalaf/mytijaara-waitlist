@@ -12,6 +12,16 @@ import afternoonImg from "@/assets/moment-afternoon.jpg";
 import eveningImg from "@/assets/moment-evening.jpg";
 import nightImg from "@/assets/moment-night.jpg";
 
+import screenHome from "@/assets/screens/screen-customer-1.png.asset.json";
+import screenLocation from "@/assets/screens/screen-customer-2.png.asset.json";
+import screenWallet from "@/assets/screens/screen-customer-3.png.asset.json";
+import screenGroceries from "@/assets/screens/screen-customer-4-groceries.png.asset.json";
+import screenFood from "@/assets/screens/screen-customer-5-food.png.asset.json";
+import screenParcel from "@/assets/screens/screen-customer-6-parcel.png.asset.json";
+import screenPharmacy from "@/assets/screens/screen-customer-7-pharmacy.png.asset.json";
+import screenRentals from "@/assets/screens/screen-customer-9-rentals.png.asset.json";
+import screenData from "@/assets/screens/screen-customer-10-data.png.asset.json";
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
