@@ -1174,7 +1174,7 @@ function Waitlist() {
                   </button>
                 </div>
                 <p className="text-xs text-primary-foreground/60">
-                  No spam. Unsubscribe anytime.
+                  No spam. Just a launch update when we're live near you.
                 </p>
               </form>
             )}
@@ -1207,8 +1207,11 @@ function FAQ() {
               FAQ
             </span>
             <h2 className="mt-5 font-display text-4xl font-bold tracking-tight sm:text-5xl">
-              Questions, answered.
+              Answers, straight up.
             </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Short answers to the questions we hear the most.
+            </p>
           </Reveal>
         </div>
         <div className="mt-14 divide-y divide-border rounded-3xl border border-border bg-card">
