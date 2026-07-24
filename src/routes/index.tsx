@@ -1275,6 +1275,7 @@ function Landing() {
         <Services />
         <Why />
         <How />
+        <InsideTheApp />
         <ProductScreens />
         <BuiltForNigerians />
         <Partners />
