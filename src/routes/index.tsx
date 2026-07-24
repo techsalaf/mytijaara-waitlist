@@ -21,6 +21,9 @@ import screenParcel from "@/assets/screens/screen-customer-6-parcel.png.asset.js
 import screenPharmacy from "@/assets/screens/screen-customer-7-pharmacy.png.asset.json";
 import screenRentals from "@/assets/screens/screen-customer-9-rentals.png.asset.json";
 import screenData from "@/assets/screens/screen-customer-10-data.png.asset.json";
+import screenVendor from "@/assets/screens/screen-vendor-1.png.asset.json";
+import screenRider from "@/assets/screens/screen-rider-1.png.asset.json";
+import screenArtisans from "@/assets/screens/screen-customer-8-artisans.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
