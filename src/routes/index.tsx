@@ -661,19 +661,33 @@ const insideScreens = [
   { src: screenGroceries.url, caption: "Fresh groceries, same day", tag: "Groceries" },
 ];
 
-function ScreenCard({ src, caption, tag }: { src: string; caption: string; tag: string }) {
+function ScreenCard({
+  src,
+  caption,
+  tag,
+  onOpen,
+}: {
+  src: string;
+  caption: string;
+  tag: string;
+  onOpen: () => void;
+}) {
   return (
     <div className="group relative w-[220px] shrink-0 sm:w-[248px]">
-      <div className="relative overflow-hidden rounded-[2rem] border border-border bg-foreground p-[6px] shadow-soft transition-transform duration-500 group-hover:-translate-y-1">
-        <div className="overflow-hidden rounded-[1.75rem] bg-background">
-          <img
-            src={src}
-            alt={caption}
-            loading="lazy"
-            className="block h-[460px] w-full object-cover object-top sm:h-[520px]"
-          />
-        </div>
-      </div>
+      <button
+        type="button"
+        onClick={onOpen}
+        className="block w-full overflow-hidden rounded-[2rem] transition-transform duration-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary group-hover:-translate-y-1"
+        aria-label={`Open preview: ${caption}`}
+      >
+        <img
+          src={src}
+          alt={caption}
+          loading="lazy"
+          draggable={false}
+          className="block h-[460px] w-full select-none object-contain sm:h-[520px]"
+        />
+      </button>
       <div className="mt-4 px-1">
         <span className="inline-flex items-center rounded-full bg-primary-soft px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
           {tag}
@@ -686,10 +700,144 @@ function ScreenCard({ src, caption, tag }: { src: string; caption: string; tag: 
   );
 }
 
+function ScreenModal({
+  screen,
+  onClose,
+}: {
+  screen: { src: string; caption: string; tag: string } | null;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    if (!screen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [screen, onClose]);
+
+  if (!screen) return null;
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={screen.caption}
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-foreground/85 p-4 backdrop-blur-md animate-fade-up"
+      onClick={onClose}
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close preview"
+        className="absolute right-4 top-4 grid h-11 w-11 place-items-center rounded-full bg-card text-foreground shadow-soft transition hover:scale-105 sm:right-6 sm:top-6"
+      >
+        <X className="h-5 w-5" />
+      </button>
+      <div
+        className="relative flex max-h-full max-w-full flex-col items-center gap-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <img
+          src={screen.src}
+          alt={screen.caption}
+          className="max-h-[82vh] w-auto max-w-full rounded-[2rem] object-contain shadow-elegant"
+        />
+        <div className="text-center">
+          <span className="inline-flex items-center rounded-full bg-gold/90 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-gold-foreground">
+            {screen.tag}
+          </span>
+          <p className="mt-2 text-sm font-semibold text-primary-foreground">
+            {screen.caption}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function InsideTheApp() {
-  // two rows, moving in opposite directions
-  const rowA = [insideScreens[0], insideScreens[2], insideScreens[4], insideScreens[6], insideScreens[8]];
-  const rowB = [insideScreens[1], insideScreens[3], insideScreens[5], insideScreens[7], insideScreens[0]];
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const offsetRef = useRef(0);
+  const halfWidthRef = useRef(0);
+  const pausedRef = useRef(false);
+  const draggingRef = useRef(false);
+  const movedRef = useRef(false);
+  const dragStartXRef = useRef(0);
+  const dragStartOffsetRef = useRef(0);
+  const [active, setActive] = useState<null | { src: string; caption: string; tag: string }>(null);
+
+  const loop = [...insideScreens, ...insideScreens];
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    const measure = () => {
+      halfWidthRef.current = track.scrollWidth / 2;
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(track);
+
+    let raf = 0;
+    let last = performance.now();
+    const speed = 40; // px per second
+
+    const tick = (now: number) => {
+      const dt = (now - last) / 1000;
+      last = now;
+      if (!pausedRef.current && !draggingRef.current && halfWidthRef.current > 0) {
+        offsetRef.current -= speed * dt;
+        if (offsetRef.current <= -halfWidthRef.current) {
+          offsetRef.current += halfWidthRef.current;
+        }
+        track.style.transform = `translate3d(${offsetRef.current}px, 0, 0)`;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, []);
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    draggingRef.current = true;
+    movedRef.current = false;
+    dragStartXRef.current = e.clientX;
+    dragStartOffsetRef.current = offsetRef.current;
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!draggingRef.current) return;
+    const dx = e.clientX - dragStartXRef.current;
+    if (Math.abs(dx) > 4) movedRef.current = true;
+    let next = dragStartOffsetRef.current + dx;
+    const half = halfWidthRef.current;
+    if (half > 0) {
+      next = ((next % half) - half) % half;
+      if (next > 0) next -= half;
+    }
+    offsetRef.current = next;
+    if (trackRef.current) {
+      trackRef.current.style.transform = `translate3d(${next}px, 0, 0)`;
+    }
+  };
+  const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!draggingRef.current) return;
+    draggingRef.current = false;
+    try {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {}
+  };
 
   return (
     <section className="relative overflow-hidden bg-background py-24 sm:py-32">
@@ -704,210 +852,46 @@ function InsideTheApp() {
               Nine screens. One tidy life.
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              A peek at the real MyTijaara — from food to fuel money, groceries to getaways. Everything you actually do in a week, in one calm app.
+              A peek at the real MyTijaara — from food to fuel money, groceries to getaways. Swipe, drag, or tap any screen to see it up close.
             </p>
           </Reveal>
         </div>
 
-        <div className="relative mt-16 space-y-10">
-          {/* edge fades */}
+        <div className="relative mt-16">
           <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-background to-transparent sm:w-32" />
           <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-background to-transparent sm:w-32" />
 
-          {/* row A — left */}
-          <div className="group/row overflow-hidden">
+          <div
+            className="overflow-hidden touch-pan-y"
+            onMouseEnter={() => (pausedRef.current = true)}
+            onMouseLeave={() => (pausedRef.current = false)}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={endDrag}
+            onPointerCancel={endDrag}
+            style={{ cursor: "grab" }}
+          >
             <div
-              className="flex w-max gap-6 animate-marquee group-hover/row:[animation-play-state:paused]"
-              style={{ animationDuration: "48s" }}
+              ref={trackRef}
+              className="flex w-max gap-6 will-change-transform"
+              style={{ transform: "translate3d(0,0,0)" }}
             >
-              {[...rowA, ...rowA].map((s, i) => (
-                <ScreenCard key={`a-${i}`} {...s} />
-              ))}
-            </div>
-          </div>
-
-          {/* row B — right */}
-          <div className="group/row overflow-hidden">
-            <div
-              className="flex w-max gap-6 animate-marquee group-hover/row:[animation-play-state:paused]"
-              style={{ animationDuration: "60s", animationDirection: "reverse" }}
-            >
-              {[...rowB, ...rowB].map((s, i) => (
-                <ScreenCard key={`b-${i}`} {...s} />
+              {loop.map((s, i) => (
+                <ScreenCard
+                  key={`s-${i}`}
+                  {...s}
+                  onOpen={() => {
+                    if (movedRef.current) return;
+                    setActive(s);
+                  }}
+                />
               ))}
             </div>
           </div>
         </div>
       </div>
-    </section>
-  );
-}
 
-/* ---------- product screens ---------- */
-
-function ProductScreens() {
-  const tiles = [
-    { i: UtensilsCrossed, l: "Food", tone: "primary" as const },
-    { i: ShoppingBasket, l: "Groceries", tone: "gold" as const },
-    { i: Pill, l: "Pharmacy", tone: "primary" as const },
-    { i: Wrench, l: "Artisans", tone: "gold" as const },
-    { i: Package, l: "Parcels", tone: "gold" as const },
-    { i: Car, l: "Car rental", tone: "primary" as const },
-    { i: Store, l: "Shops", tone: "gold" as const },
-    { i: Star, l: "Top rated", tone: "primary" as const },
-  ];
-
-  return (
-    <section className="relative overflow-hidden bg-surface py-24 sm:py-32">
-      <div className="pointer-events-none absolute inset-0 bg-hero-gradient opacity-70" />
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="mx-auto max-w-2xl text-center">
-          <Reveal>
-            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-primary">
-              Designed with care
-            </span>
-            <h2 className="mt-5 font-display text-4xl font-bold tracking-tight sm:text-5xl">
-              Clean, calm, familiar.
-            </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              A home screen that puts every errand one tap away — designed so anyone can use it.
-            </p>
-          </Reveal>
-        </div>
-
-        <div className="relative mx-auto mt-20 flex max-w-md justify-center">
-          {/* soft glow behind phone */}
-          <div className="pointer-events-none absolute -inset-10 rounded-[3rem] bg-primary-soft blur-3xl opacity-60" />
-
-          <Reveal>
-            <div className="relative">
-              {/* Phone frame */}
-              <div className="relative w-[320px] rounded-[2.75rem] bg-foreground p-[10px] shadow-elegant sm:w-[360px]">
-                {/* notch */}
-                <div className="absolute left-1/2 top-3 z-20 h-6 w-28 -translate-x-1/2 rounded-full bg-foreground" />
-                <div className="relative overflow-hidden rounded-[2.25rem] bg-background">
-                  {/* status bar */}
-                  <div className="flex items-center justify-between px-6 pt-3 pb-2 text-[11px] font-semibold text-foreground">
-                    <span>9:41</span>
-                    <span className="opacity-0">.</span>
-                    <span className="flex items-center gap-1 opacity-80">
-                      <span className="h-1 w-3 rounded-sm bg-foreground/70" />
-                      <span className="h-1.5 w-3 rounded-sm bg-foreground/70" />
-                      <span className="h-2 w-4 rounded-sm bg-foreground" />
-                    </span>
-                  </div>
-
-                  {/* content */}
-                  <div className="px-5 pb-6 pt-3">
-                    <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5 text-primary" />
-                      Deliver to <span className="font-bold text-foreground">Lekki, Lagos</span>
-                    </div>
-                    <h3 className="mt-2 font-display text-[22px] font-bold leading-tight text-foreground">
-                      What do you need today?
-                    </h3>
-
-                    {/* search */}
-                    <div className="mt-4 flex items-center gap-2 rounded-2xl border border-border bg-surface px-3.5 py-2.5">
-                      <svg className="h-4 w-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="11" cy="11" r="7" />
-                        <path d="m20 20-3.5-3.5" />
-                      </svg>
-                      <span className="text-xs text-muted-foreground">Search food, shops, artisans…</span>
-                    </div>
-
-                    {/* 8 tiles grid */}
-                    <div className="mt-4 grid grid-cols-4 gap-3">
-                      {tiles.map(({ i: Icon, l, tone }) => (
-                        <div key={l} className="flex flex-col items-center gap-1.5">
-                          <div
-                            className={`grid h-12 w-12 place-items-center rounded-full ${
-                              tone === "primary" ? "bg-primary-soft" : "bg-gold/20"
-                            }`}
-                          >
-                            <Icon
-                              className={`h-5 w-5 ${
-                                tone === "primary" ? "text-primary" : "text-[color:var(--gold-foreground)]"
-                              }`}
-                            />
-                          </div>
-                          <span className="text-[9.5px] font-semibold text-foreground">{l}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* promo card */}
-                    <div className="mt-5 overflow-hidden rounded-2xl border border-border bg-card">
-                      <div className="relative h-24 bg-gold-gradient">
-                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_-20%,white/40,transparent_60%)]" />
-                        <Sparkles className="absolute right-4 top-4 h-5 w-5 text-white/70" />
-                      </div>
-                      <div className="flex items-start justify-between gap-3 p-3">
-                        <div>
-                          <p className="text-[13px] font-bold text-foreground">Free delivery this week</p>
-                          <p className="mt-0.5 text-[11px] text-muted-foreground">On orders over ₦5,000 near you.</p>
-                        </div>
-                        <span className="rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-bold text-primary">
-                          New
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* active order */}
-                    <div className="mt-3 flex items-center gap-3 rounded-2xl border border-border bg-card p-2.5">
-                      <div className="grid h-9 w-9 place-items-center rounded-full bg-primary-gradient text-primary-foreground">
-                        <Package className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-[12px] font-bold text-foreground">Rider is 4 min away</p>
-                        <p className="truncate text-[10px] text-muted-foreground">Order #TJ-2841 · Jollof Republic</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* home indicator */}
-                  <div className="flex justify-center pb-2">
-                    <div className="h-1 w-24 rounded-full bg-foreground/80" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Floating card — breakfast */}
-              <div className="absolute -left-16 top-24 hidden animate-float rounded-2xl border border-border bg-card p-3 shadow-soft sm:flex sm:items-center sm:gap-2.5">
-                <div className="grid h-9 w-9 place-items-center rounded-full bg-primary-soft">
-                  <UtensilsCrossed className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-[12px] font-bold text-foreground">Breakfast on the way</p>
-                  <p className="text-[10px] text-muted-foreground">Arriving in 12 min</p>
-                </div>
-              </div>
-
-              {/* Floating card — artisan booked */}
-              <div className="absolute -right-20 bottom-28 hidden animate-float-slower rounded-2xl border border-border bg-card p-3 shadow-soft sm:flex sm:items-center sm:gap-2.5">
-                <div className="grid h-9 w-9 place-items-center rounded-full bg-gold/20">
-                  <Wrench className="h-4 w-4 text-[color:var(--gold-foreground)]" />
-                </div>
-                <div>
-                  <p className="text-[12px] font-bold text-foreground">Electrician booked</p>
-                  <p className="text-[10px] text-muted-foreground">Today · 4:30 PM</p>
-                </div>
-              </div>
-
-              {/* Floating card — rating */}
-              <div className="absolute -left-10 bottom-10 hidden animate-float rounded-2xl border border-border bg-card p-3 shadow-soft md:flex md:items-center md:gap-2.5">
-                <div className="grid h-9 w-9 place-items-center rounded-full bg-gold-gradient">
-                  <Star className="h-4 w-4 text-gold-foreground" />
-                </div>
-                <div>
-                  <p className="text-[12px] font-bold text-foreground">4.9 average rating</p>
-                  <p className="text-[10px] text-muted-foreground">Across 12k+ orders</p>
-                </div>
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </div>
+      <ScreenModal screen={active} onClose={() => setActive(null)} />
     </section>
   );
 }
