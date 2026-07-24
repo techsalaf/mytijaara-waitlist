@@ -1,0 +1,91 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { StatCard, SectionCard } from "@/components/admin/ui-bits";
+import { Award, TrendingUp, Users, Share2, ArrowRight } from "lucide-react";
+import { referralLeaderboard, formatNumber, signupTrend } from "@/lib/mock-data";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
+export const Route = createFileRoute("/admin/referrals/")({
+  component: ReferralOverview,
+});
+
+function ReferralOverview() {
+  const totalRefs = referralLeaderboard.reduce((s, u) => s + u.referrals, 0);
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatCard label="Total referrals" value={formatNumber(totalRefs)} delta={24.6} icon={Share2} />
+        <StatCard label="Active referrers" value={referralLeaderboard.length} delta={8.2} icon={Users} />
+        <StatCard label="Avg per referrer" value={(totalRefs / referralLeaderboard.length).toFixed(1)} icon={Award} />
+        <StatCard label="Viral coefficient" value="1.42" delta={0.18} icon={TrendingUp} hint="Above the 1.0 threshold" />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <SectionCard title="Referral growth" description="Signups attributed to referral link" className="lg:col-span-2">
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={signupTrend.map((d) => ({ ...d, refs: Math.round(d.signups * 0.42) }))}>
+                <defs>
+                  <linearGradient id="refG" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#D4A017" stopOpacity={0.4} />
+                    <stop offset="100%" stopColor="#D4A017" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 12 }} />
+                <Area type="monotone" dataKey="refs" stroke="#D4A017" strokeWidth={2.5} fill="url(#refG)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Program settings" description="Current reward structure">
+          <div className="space-y-3 text-sm">
+            <SettingRow label="Referrer reward" value="₦500 credit" />
+            <SettingRow label="Referred user reward" value="₦250 credit" />
+            <SettingRow label="Minimum for payout" value="3 verified" />
+            <SettingRow label="Bonus milestone" value="10 refs = ₦5,000" />
+          </div>
+          <Button variant="outline" size="sm" className="mt-4 w-full">Edit program</Button>
+        </SectionCard>
+      </div>
+
+      <SectionCard
+        title="Top referrers"
+        description="This month's leaders"
+        actions={<Button asChild variant="ghost" size="sm"><Link to="/admin/referrals/leaderboard">Full leaderboard <ArrowRight className="ml-1 h-3 w-3" /></Link></Button>}
+      >
+        <div className="space-y-2">
+          {referralLeaderboard.slice(0, 5).map((u) => (
+            <Link key={u.id} to="/admin/referrals/$id" params={{ id: u.id }} className="flex items-center gap-3 rounded-xl border border-border/60 p-3 hover:bg-muted/40">
+              <Badge className="bg-[#D4A017]/20 text-[#8a6b0f] font-bold">#{u.rank}</Badge>
+              <div className="grid h-9 w-9 place-items-center rounded-full bg-[#0D7A46]/10 text-xs font-semibold text-[#0D7A46]">
+                {u.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="font-medium">{u.name}</div>
+                <div className="text-xs text-muted-foreground">{u.city} · {u.email}</div>
+              </div>
+              <div className="text-right">
+                <div className="font-bold">{u.referrals} refs</div>
+                <div className="text-xs text-[#D4A017] font-semibold">{u.points} pts</div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </SectionCard>
+    </div>
+  );
+}
+
+function SettingRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between rounded-lg bg-muted/30 px-3 py-2">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-semibold">{value}</span>
+    </div>
+  );
+}
