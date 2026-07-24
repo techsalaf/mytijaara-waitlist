@@ -647,6 +647,102 @@ function How() {
   );
 }
 
+/* ---------- inside the app (real screens carousel) ---------- */
+
+const insideScreens = [
+  { src: screenFood.url, caption: "Craving jollof? Order in taps", tag: "Food" },
+  { src: screenWallet.url, caption: "One wallet for every payment", tag: "Wallet" },
+  { src: screenRentals.url, caption: "Rent a car for the weekend", tag: "Car Rental" },
+  { src: screenHome.url, caption: "Everything on one home screen", tag: "Home" },
+  { src: screenParcel.url, caption: "Send parcels across Nigeria", tag: "Parcels" },
+  { src: screenPharmacy.url, caption: "Genuine meds, delivered fast", tag: "Pharmacy" },
+  { src: screenData.url, caption: "Buy data & airtime instantly", tag: "Data & Airtime" },
+  { src: screenLocation.url, caption: "Deliver to anywhere in Lagos", tag: "Locations" },
+  { src: screenGroceries.url, caption: "Fresh groceries, same day", tag: "Groceries" },
+];
+
+function ScreenCard({ src, caption, tag }: { src: string; caption: string; tag: string }) {
+  return (
+    <div className="group relative w-[220px] shrink-0 sm:w-[248px]">
+      <div className="relative overflow-hidden rounded-[2rem] border border-border bg-foreground p-[6px] shadow-soft transition-transform duration-500 group-hover:-translate-y-1">
+        <div className="overflow-hidden rounded-[1.75rem] bg-background">
+          <img
+            src={src}
+            alt={caption}
+            loading="lazy"
+            className="block h-[460px] w-full object-cover object-top sm:h-[520px]"
+          />
+        </div>
+      </div>
+      <div className="mt-4 px-1">
+        <span className="inline-flex items-center rounded-full bg-primary-soft px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+          {tag}
+        </span>
+        <p className="mt-1.5 text-sm font-semibold leading-snug text-foreground">
+          {caption}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function InsideTheApp() {
+  // two rows, moving in opposite directions
+  const rowA = [insideScreens[0], insideScreens[2], insideScreens[4], insideScreens[6], insideScreens[8]];
+  const rowB = [insideScreens[1], insideScreens[3], insideScreens[5], insideScreens[7], insideScreens[0]];
+
+  return (
+    <section className="relative overflow-hidden bg-background py-24 sm:py-32">
+      <div className="pointer-events-none absolute inset-0 bg-hero-gradient opacity-40" />
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="mx-auto max-w-2xl text-center">
+          <Reveal>
+            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-primary">
+              Inside the app
+            </span>
+            <h2 className="mt-5 font-display text-4xl font-bold tracking-tight sm:text-5xl">
+              Nine screens. One tidy life.
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              A peek at the real MyTijaara — from food to fuel money, groceries to getaways. Everything you actually do in a week, in one calm app.
+            </p>
+          </Reveal>
+        </div>
+
+        <div className="relative mt-16 space-y-10">
+          {/* edge fades */}
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-background to-transparent sm:w-32" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-background to-transparent sm:w-32" />
+
+          {/* row A — left */}
+          <div className="group/row overflow-hidden">
+            <div
+              className="flex w-max gap-6 animate-marquee group-hover/row:[animation-play-state:paused]"
+              style={{ animationDuration: "48s" }}
+            >
+              {[...rowA, ...rowA].map((s, i) => (
+                <ScreenCard key={`a-${i}`} {...s} />
+              ))}
+            </div>
+          </div>
+
+          {/* row B — right */}
+          <div className="group/row overflow-hidden">
+            <div
+              className="flex w-max gap-6 animate-marquee group-hover/row:[animation-play-state:paused]"
+              style={{ animationDuration: "60s", animationDirection: "reverse" }}
+            >
+              {[...rowB, ...rowB].map((s, i) => (
+                <ScreenCard key={`b-${i}`} {...s} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ---------- product screens ---------- */
 
 function ProductScreens() {
