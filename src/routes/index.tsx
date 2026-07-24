@@ -948,7 +948,7 @@ function BuiltForNigerians() {
                 Made here. For here.
               </h2>
               <p className="mt-5 max-w-lg text-lg text-muted-foreground">
-                Nigerian streets, Nigerian shops, Nigerian traffic — MyTijaara is
+                We know Nigerian streets, Nigerian shops, Nigerian tastes — MyTijaara is
                 built with all of it in mind. Not a copy of something from abroad.
               </p>
               <ul className="mt-8 space-y-4">
@@ -1035,7 +1035,7 @@ function Partners() {
               A better way to earn.
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Vendors, riders and artisans — see the tools you'll use every day.
+              Vendors, riders and artisans — MyTijaara helps you find more customers.
             </p>
           </Reveal>
         </div>
