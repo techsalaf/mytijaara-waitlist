@@ -432,13 +432,14 @@ function Moments() {
               Everyday moments
             </span>
             <h2 className="mt-5 font-display text-4xl font-bold tracking-tight sm:text-5xl">
-              A day, made simpler.
+              A day with MyTijaara.
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
               From your first cup to your last errand — MyTijaara moves with you.
             </p>
           </Reveal>
         </div>
+
 
         <div className="mt-16 space-y-16 lg:space-y-24">
           {MOMENTS.map((m, i) => {
@@ -487,10 +488,24 @@ function Moments() {
         </div>
 
         <Reveal>
-          <p className="mt-16 text-center font-display text-2xl font-semibold text-foreground/80">
-            All from MyTijaara.
-          </p>
+          <div className="mt-20 flex flex-col items-center gap-4">
+            <span className="h-px w-16 bg-gradient-to-r from-transparent via-gold to-transparent" />
+            <p className="font-display text-3xl font-bold tracking-tight sm:text-4xl">
+              All from{" "}
+              <span className="relative inline-block">
+                <span className="bg-gradient-to-r from-primary via-primary to-gold bg-clip-text text-transparent">
+                  MyTijaara
+                </span>
+                <span className="absolute -bottom-1 left-0 h-1 w-full rounded-full bg-gradient-to-r from-primary/40 to-gold/40" />
+              </span>
+              <span className="text-foreground">.</span>
+            </p>
+            <p className="max-w-sm text-center text-sm text-muted-foreground">
+              One app. Every moment of your day, handled with care.
+            </p>
+          </div>
         </Reveal>
+
       </div>
     </section>
   );

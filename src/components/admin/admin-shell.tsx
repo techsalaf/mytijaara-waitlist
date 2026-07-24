@@ -15,8 +15,9 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Sheet, SheetContent, SheetTrigger,
+  Sheet, SheetContent,
 } from "@/components/ui/sheet";
+
 import { cn } from "@/lib/utils";
 
 type NavItem = { label: string; to: string; icon: React.ComponentType<{ className?: string }>; badge?: string };
@@ -109,11 +110,10 @@ export function AdminShell() {
       <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
         {/* Topbar */}
         <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border/60 bg-white/80 px-4 backdrop-blur-md lg:px-6">
-          <SheetTrigger asChild onClick={() => setMobileOpen(true)}>
-            <Button variant="ghost" size="icon" className="lg:hidden">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
+          <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setMobileOpen(true)}>
+            <Menu className="h-5 w-5" />
+          </Button>
+
 
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
