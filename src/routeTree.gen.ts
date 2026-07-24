@@ -19,12 +19,21 @@ import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-password'
 import { Route as AdminWaitlistRouteImport } from './routes/admin.waitlist'
 import { Route as AdminReferralsRouteImport } from './routes/admin.referrals'
+import { Route as AdminMediaRouteImport } from './routes/admin.media'
+import { Route as AdminEmailRouteImport } from './routes/admin.email'
 import { Route as AdminCmsRouteImport } from './routes/admin.cms'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminReferralsIndexRouteImport } from './routes/admin.referrals.index'
+import { Route as AdminEmailIndexRouteImport } from './routes/admin.email.index'
 import { Route as AdminCmsIndexRouteImport } from './routes/admin.cms.index'
 import { Route as AdminReferralsLeaderboardRouteImport } from './routes/admin.referrals.leaderboard'
 import { Route as AdminReferralsAnalyticsRouteImport } from './routes/admin.referrals.analytics'
 import { Route as AdminReferralsIdRouteImport } from './routes/admin.referrals.$id'
+import { Route as AdminEmailTemplatesRouteImport } from './routes/admin.email.templates'
+import { Route as AdminEmailScheduledRouteImport } from './routes/admin.email.scheduled'
+import { Route as AdminEmailDraftsRouteImport } from './routes/admin.email.drafts'
+import { Route as AdminEmailBuilderRouteImport } from './routes/admin.email.builder'
+import { Route as AdminEmailIdRouteImport } from './routes/admin.email.$id'
 import { Route as AdminCmsTestimonialsRouteImport } from './routes/admin.cms.testimonials'
 import { Route as AdminCmsStatisticsRouteImport } from './routes/admin.cms.statistics'
 import { Route as AdminCmsSocialRouteImport } from './routes/admin.cms.social'
@@ -85,15 +94,35 @@ const AdminReferralsRoute = AdminReferralsRouteImport.update({
   path: '/referrals',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminMediaRoute = AdminMediaRouteImport.update({
+  id: '/media',
+  path: '/media',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminEmailRoute = AdminEmailRouteImport.update({
+  id: '/email',
+  path: '/email',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCmsRoute = AdminCmsRouteImport.update({
   id: '/cms',
   path: '/cms',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminReferralsIndexRoute = AdminReferralsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminReferralsRoute,
+} as any)
+const AdminEmailIndexRoute = AdminEmailIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminEmailRoute,
 } as any)
 const AdminCmsIndexRoute = AdminCmsIndexRouteImport.update({
   id: '/',
@@ -115,6 +144,31 @@ const AdminReferralsIdRoute = AdminReferralsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => AdminReferralsRoute,
+} as any)
+const AdminEmailTemplatesRoute = AdminEmailTemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => AdminEmailRoute,
+} as any)
+const AdminEmailScheduledRoute = AdminEmailScheduledRouteImport.update({
+  id: '/scheduled',
+  path: '/scheduled',
+  getParentRoute: () => AdminEmailRoute,
+} as any)
+const AdminEmailDraftsRoute = AdminEmailDraftsRouteImport.update({
+  id: '/drafts',
+  path: '/drafts',
+  getParentRoute: () => AdminEmailRoute,
+} as any)
+const AdminEmailBuilderRoute = AdminEmailBuilderRouteImport.update({
+  id: '/builder',
+  path: '/builder',
+  getParentRoute: () => AdminEmailRoute,
+} as any)
+const AdminEmailIdRoute = AdminEmailIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminEmailRoute,
 } as any)
 const AdminCmsTestimonialsRoute = AdminCmsTestimonialsRouteImport.update({
   id: '/testimonials',
@@ -166,7 +220,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/cms': typeof AdminCmsRouteWithChildren
+  '/admin/email': typeof AdminEmailRouteWithChildren
+  '/admin/media': typeof AdminMediaRoute
   '/admin/referrals': typeof AdminReferralsRouteWithChildren
   '/admin/waitlist': typeof AdminWaitlistRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -183,15 +240,23 @@ export interface FileRoutesByFullPath {
   '/admin/cms/social': typeof AdminCmsSocialRoute
   '/admin/cms/statistics': typeof AdminCmsStatisticsRoute
   '/admin/cms/testimonials': typeof AdminCmsTestimonialsRoute
+  '/admin/email/$id': typeof AdminEmailIdRoute
+  '/admin/email/builder': typeof AdminEmailBuilderRoute
+  '/admin/email/drafts': typeof AdminEmailDraftsRoute
+  '/admin/email/scheduled': typeof AdminEmailScheduledRoute
+  '/admin/email/templates': typeof AdminEmailTemplatesRoute
   '/admin/referrals/$id': typeof AdminReferralsIdRoute
   '/admin/referrals/analytics': typeof AdminReferralsAnalyticsRoute
   '/admin/referrals/leaderboard': typeof AdminReferralsLeaderboardRoute
   '/admin/cms/': typeof AdminCmsIndexRoute
+  '/admin/email/': typeof AdminEmailIndexRoute
   '/admin/referrals/': typeof AdminReferralsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/media': typeof AdminMediaRoute
   '/admin/waitlist': typeof AdminWaitlistRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -207,10 +272,16 @@ export interface FileRoutesByTo {
   '/admin/cms/social': typeof AdminCmsSocialRoute
   '/admin/cms/statistics': typeof AdminCmsStatisticsRoute
   '/admin/cms/testimonials': typeof AdminCmsTestimonialsRoute
+  '/admin/email/$id': typeof AdminEmailIdRoute
+  '/admin/email/builder': typeof AdminEmailBuilderRoute
+  '/admin/email/drafts': typeof AdminEmailDraftsRoute
+  '/admin/email/scheduled': typeof AdminEmailScheduledRoute
+  '/admin/email/templates': typeof AdminEmailTemplatesRoute
   '/admin/referrals/$id': typeof AdminReferralsIdRoute
   '/admin/referrals/analytics': typeof AdminReferralsAnalyticsRoute
   '/admin/referrals/leaderboard': typeof AdminReferralsLeaderboardRoute
   '/admin/cms': typeof AdminCmsIndexRoute
+  '/admin/email': typeof AdminEmailIndexRoute
   '/admin/referrals': typeof AdminReferralsIndexRoute
 }
 export interface FileRoutesById {
@@ -218,7 +289,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/cms': typeof AdminCmsRouteWithChildren
+  '/admin/email': typeof AdminEmailRouteWithChildren
+  '/admin/media': typeof AdminMediaRoute
   '/admin/referrals': typeof AdminReferralsRouteWithChildren
   '/admin/waitlist': typeof AdminWaitlistRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
@@ -235,10 +309,16 @@ export interface FileRoutesById {
   '/admin/cms/social': typeof AdminCmsSocialRoute
   '/admin/cms/statistics': typeof AdminCmsStatisticsRoute
   '/admin/cms/testimonials': typeof AdminCmsTestimonialsRoute
+  '/admin/email/$id': typeof AdminEmailIdRoute
+  '/admin/email/builder': typeof AdminEmailBuilderRoute
+  '/admin/email/drafts': typeof AdminEmailDraftsRoute
+  '/admin/email/scheduled': typeof AdminEmailScheduledRoute
+  '/admin/email/templates': typeof AdminEmailTemplatesRoute
   '/admin/referrals/$id': typeof AdminReferralsIdRoute
   '/admin/referrals/analytics': typeof AdminReferralsAnalyticsRoute
   '/admin/referrals/leaderboard': typeof AdminReferralsLeaderboardRoute
   '/admin/cms/': typeof AdminCmsIndexRoute
+  '/admin/email/': typeof AdminEmailIndexRoute
   '/admin/referrals/': typeof AdminReferralsIndexRoute
 }
 export interface FileRouteTypes {
@@ -247,7 +327,10 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/admin/analytics'
     | '/admin/cms'
+    | '/admin/email'
+    | '/admin/media'
     | '/admin/referrals'
     | '/admin/waitlist'
     | '/auth/forgot-password'
@@ -264,15 +347,23 @@ export interface FileRouteTypes {
     | '/admin/cms/social'
     | '/admin/cms/statistics'
     | '/admin/cms/testimonials'
+    | '/admin/email/$id'
+    | '/admin/email/builder'
+    | '/admin/email/drafts'
+    | '/admin/email/scheduled'
+    | '/admin/email/templates'
     | '/admin/referrals/$id'
     | '/admin/referrals/analytics'
     | '/admin/referrals/leaderboard'
     | '/admin/cms/'
+    | '/admin/email/'
     | '/admin/referrals/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/admin/analytics'
+    | '/admin/media'
     | '/admin/waitlist'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -288,17 +379,26 @@ export interface FileRouteTypes {
     | '/admin/cms/social'
     | '/admin/cms/statistics'
     | '/admin/cms/testimonials'
+    | '/admin/email/$id'
+    | '/admin/email/builder'
+    | '/admin/email/drafts'
+    | '/admin/email/scheduled'
+    | '/admin/email/templates'
     | '/admin/referrals/$id'
     | '/admin/referrals/analytics'
     | '/admin/referrals/leaderboard'
     | '/admin/cms'
+    | '/admin/email'
     | '/admin/referrals'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/auth'
+    | '/admin/analytics'
     | '/admin/cms'
+    | '/admin/email'
+    | '/admin/media'
     | '/admin/referrals'
     | '/admin/waitlist'
     | '/auth/forgot-password'
@@ -315,10 +415,16 @@ export interface FileRouteTypes {
     | '/admin/cms/social'
     | '/admin/cms/statistics'
     | '/admin/cms/testimonials'
+    | '/admin/email/$id'
+    | '/admin/email/builder'
+    | '/admin/email/drafts'
+    | '/admin/email/scheduled'
+    | '/admin/email/templates'
     | '/admin/referrals/$id'
     | '/admin/referrals/analytics'
     | '/admin/referrals/leaderboard'
     | '/admin/cms/'
+    | '/admin/email/'
     | '/admin/referrals/'
   fileRoutesById: FileRoutesById
 }
@@ -400,11 +506,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReferralsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/media': {
+      id: '/admin/media'
+      path: '/media'
+      fullPath: '/admin/media'
+      preLoaderRoute: typeof AdminMediaRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/email': {
+      id: '/admin/email'
+      path: '/email'
+      fullPath: '/admin/email'
+      preLoaderRoute: typeof AdminEmailRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/cms': {
       id: '/admin/cms'
       path: '/cms'
       fullPath: '/admin/cms'
       preLoaderRoute: typeof AdminCmsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/referrals/': {
@@ -413,6 +540,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/referrals/'
       preLoaderRoute: typeof AdminReferralsIndexRouteImport
       parentRoute: typeof AdminReferralsRoute
+    }
+    '/admin/email/': {
+      id: '/admin/email/'
+      path: '/'
+      fullPath: '/admin/email/'
+      preLoaderRoute: typeof AdminEmailIndexRouteImport
+      parentRoute: typeof AdminEmailRoute
     }
     '/admin/cms/': {
       id: '/admin/cms/'
@@ -441,6 +575,41 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/referrals/$id'
       preLoaderRoute: typeof AdminReferralsIdRouteImport
       parentRoute: typeof AdminReferralsRoute
+    }
+    '/admin/email/templates': {
+      id: '/admin/email/templates'
+      path: '/templates'
+      fullPath: '/admin/email/templates'
+      preLoaderRoute: typeof AdminEmailTemplatesRouteImport
+      parentRoute: typeof AdminEmailRoute
+    }
+    '/admin/email/scheduled': {
+      id: '/admin/email/scheduled'
+      path: '/scheduled'
+      fullPath: '/admin/email/scheduled'
+      preLoaderRoute: typeof AdminEmailScheduledRouteImport
+      parentRoute: typeof AdminEmailRoute
+    }
+    '/admin/email/drafts': {
+      id: '/admin/email/drafts'
+      path: '/drafts'
+      fullPath: '/admin/email/drafts'
+      preLoaderRoute: typeof AdminEmailDraftsRouteImport
+      parentRoute: typeof AdminEmailRoute
+    }
+    '/admin/email/builder': {
+      id: '/admin/email/builder'
+      path: '/builder'
+      fullPath: '/admin/email/builder'
+      preLoaderRoute: typeof AdminEmailBuilderRouteImport
+      parentRoute: typeof AdminEmailRoute
+    }
+    '/admin/email/$id': {
+      id: '/admin/email/$id'
+      path: '/$id'
+      fullPath: '/admin/email/$id'
+      preLoaderRoute: typeof AdminEmailIdRouteImport
+      parentRoute: typeof AdminEmailRoute
     }
     '/admin/cms/testimonials': {
       id: '/admin/cms/testimonials'
@@ -538,6 +707,28 @@ const AdminCmsRouteWithChildren = AdminCmsRoute._addFileChildren(
   AdminCmsRouteChildren,
 )
 
+interface AdminEmailRouteChildren {
+  AdminEmailIdRoute: typeof AdminEmailIdRoute
+  AdminEmailBuilderRoute: typeof AdminEmailBuilderRoute
+  AdminEmailDraftsRoute: typeof AdminEmailDraftsRoute
+  AdminEmailScheduledRoute: typeof AdminEmailScheduledRoute
+  AdminEmailTemplatesRoute: typeof AdminEmailTemplatesRoute
+  AdminEmailIndexRoute: typeof AdminEmailIndexRoute
+}
+
+const AdminEmailRouteChildren: AdminEmailRouteChildren = {
+  AdminEmailIdRoute: AdminEmailIdRoute,
+  AdminEmailBuilderRoute: AdminEmailBuilderRoute,
+  AdminEmailDraftsRoute: AdminEmailDraftsRoute,
+  AdminEmailScheduledRoute: AdminEmailScheduledRoute,
+  AdminEmailTemplatesRoute: AdminEmailTemplatesRoute,
+  AdminEmailIndexRoute: AdminEmailIndexRoute,
+}
+
+const AdminEmailRouteWithChildren = AdminEmailRoute._addFileChildren(
+  AdminEmailRouteChildren,
+)
+
 interface AdminReferralsRouteChildren {
   AdminReferralsIdRoute: typeof AdminReferralsIdRoute
   AdminReferralsAnalyticsRoute: typeof AdminReferralsAnalyticsRoute
@@ -557,14 +748,20 @@ const AdminReferralsRouteWithChildren = AdminReferralsRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminCmsRoute: typeof AdminCmsRouteWithChildren
+  AdminEmailRoute: typeof AdminEmailRouteWithChildren
+  AdminMediaRoute: typeof AdminMediaRoute
   AdminReferralsRoute: typeof AdminReferralsRouteWithChildren
   AdminWaitlistRoute: typeof AdminWaitlistRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminCmsRoute: AdminCmsRouteWithChildren,
+  AdminEmailRoute: AdminEmailRouteWithChildren,
+  AdminMediaRoute: AdminMediaRoute,
   AdminReferralsRoute: AdminReferralsRouteWithChildren,
   AdminWaitlistRoute: AdminWaitlistRoute,
   AdminIndexRoute: AdminIndexRoute,
