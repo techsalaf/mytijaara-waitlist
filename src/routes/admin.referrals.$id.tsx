@@ -32,7 +32,7 @@ function RefDetail() {
         </Button>
         <div className="flex items-center gap-4">
           <div className="grid h-16 w-16 place-items-center rounded-2xl bg-[#0D7A46] text-lg font-bold text-white">
-            {u.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
+            {u.name.split(" ").map((n: string) => n[0]).slice(0, 2).join("")}
           </div>
           <div>
             <div className="text-xs font-semibold uppercase tracking-widest text-[#D4A017]">Rank #{u.rank}</div>

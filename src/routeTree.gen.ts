@@ -17,6 +17,12 @@ import { Route as AuthSessionExpiredRouteImport } from './routes/auth.session-ex
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-password'
+import { Route as AdminWaitlistRouteImport } from './routes/admin.waitlist'
+import { Route as AdminReferralsRouteImport } from './routes/admin.referrals'
+import { Route as AdminReferralsIndexRouteImport } from './routes/admin.referrals.index'
+import { Route as AdminReferralsLeaderboardRouteImport } from './routes/admin.referrals.leaderboard'
+import { Route as AdminReferralsAnalyticsRouteImport } from './routes/admin.referrals.analytics'
+import { Route as AdminReferralsIdRouteImport } from './routes/admin.referrals.$id'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -58,36 +64,84 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => AuthRoute,
 } as any)
+const AdminWaitlistRoute = AdminWaitlistRouteImport.update({
+  id: '/waitlist',
+  path: '/waitlist',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminReferralsRoute = AdminReferralsRouteImport.update({
+  id: '/referrals',
+  path: '/referrals',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminReferralsIndexRoute = AdminReferralsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminReferralsRoute,
+} as any)
+const AdminReferralsLeaderboardRoute =
+  AdminReferralsLeaderboardRouteImport.update({
+    id: '/leaderboard',
+    path: '/leaderboard',
+    getParentRoute: () => AdminReferralsRoute,
+  } as any)
+const AdminReferralsAnalyticsRoute = AdminReferralsAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminReferralsRoute,
+} as any)
+const AdminReferralsIdRoute = AdminReferralsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminReferralsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/admin/referrals': typeof AdminReferralsRouteWithChildren
+  '/admin/waitlist': typeof AdminWaitlistRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/session-expired': typeof AuthSessionExpiredRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/referrals/$id': typeof AdminReferralsIdRoute
+  '/admin/referrals/analytics': typeof AdminReferralsAnalyticsRoute
+  '/admin/referrals/leaderboard': typeof AdminReferralsLeaderboardRoute
+  '/admin/referrals/': typeof AdminReferralsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/admin/waitlist': typeof AdminWaitlistRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/session-expired': typeof AuthSessionExpiredRoute
   '/admin': typeof AdminIndexRoute
+  '/admin/referrals/$id': typeof AdminReferralsIdRoute
+  '/admin/referrals/analytics': typeof AdminReferralsAnalyticsRoute
+  '/admin/referrals/leaderboard': typeof AdminReferralsLeaderboardRoute
+  '/admin/referrals': typeof AdminReferralsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/admin/referrals': typeof AdminReferralsRouteWithChildren
+  '/admin/waitlist': typeof AdminWaitlistRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/session-expired': typeof AuthSessionExpiredRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/referrals/$id': typeof AdminReferralsIdRoute
+  '/admin/referrals/analytics': typeof AdminReferralsAnalyticsRoute
+  '/admin/referrals/leaderboard': typeof AdminReferralsLeaderboardRoute
+  '/admin/referrals/': typeof AdminReferralsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -95,30 +149,47 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/admin/referrals'
+    | '/admin/waitlist'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/session-expired'
     | '/admin/'
+    | '/admin/referrals/$id'
+    | '/admin/referrals/analytics'
+    | '/admin/referrals/leaderboard'
+    | '/admin/referrals/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/admin/waitlist'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/session-expired'
     | '/admin'
+    | '/admin/referrals/$id'
+    | '/admin/referrals/analytics'
+    | '/admin/referrals/leaderboard'
+    | '/admin/referrals'
   id:
     | '__root__'
     | '/'
     | '/admin'
     | '/auth'
+    | '/admin/referrals'
+    | '/admin/waitlist'
     | '/auth/forgot-password'
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/session-expired'
     | '/admin/'
+    | '/admin/referrals/$id'
+    | '/admin/referrals/analytics'
+    | '/admin/referrals/leaderboard'
+    | '/admin/referrals/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -185,14 +256,78 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthForgotPasswordRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/admin/waitlist': {
+      id: '/admin/waitlist'
+      path: '/waitlist'
+      fullPath: '/admin/waitlist'
+      preLoaderRoute: typeof AdminWaitlistRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/referrals': {
+      id: '/admin/referrals'
+      path: '/referrals'
+      fullPath: '/admin/referrals'
+      preLoaderRoute: typeof AdminReferralsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/referrals/': {
+      id: '/admin/referrals/'
+      path: '/'
+      fullPath: '/admin/referrals/'
+      preLoaderRoute: typeof AdminReferralsIndexRouteImport
+      parentRoute: typeof AdminReferralsRoute
+    }
+    '/admin/referrals/leaderboard': {
+      id: '/admin/referrals/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/admin/referrals/leaderboard'
+      preLoaderRoute: typeof AdminReferralsLeaderboardRouteImport
+      parentRoute: typeof AdminReferralsRoute
+    }
+    '/admin/referrals/analytics': {
+      id: '/admin/referrals/analytics'
+      path: '/analytics'
+      fullPath: '/admin/referrals/analytics'
+      preLoaderRoute: typeof AdminReferralsAnalyticsRouteImport
+      parentRoute: typeof AdminReferralsRoute
+    }
+    '/admin/referrals/$id': {
+      id: '/admin/referrals/$id'
+      path: '/$id'
+      fullPath: '/admin/referrals/$id'
+      preLoaderRoute: typeof AdminReferralsIdRouteImport
+      parentRoute: typeof AdminReferralsRoute
+    }
   }
 }
 
+interface AdminReferralsRouteChildren {
+  AdminReferralsIdRoute: typeof AdminReferralsIdRoute
+  AdminReferralsAnalyticsRoute: typeof AdminReferralsAnalyticsRoute
+  AdminReferralsLeaderboardRoute: typeof AdminReferralsLeaderboardRoute
+  AdminReferralsIndexRoute: typeof AdminReferralsIndexRoute
+}
+
+const AdminReferralsRouteChildren: AdminReferralsRouteChildren = {
+  AdminReferralsIdRoute: AdminReferralsIdRoute,
+  AdminReferralsAnalyticsRoute: AdminReferralsAnalyticsRoute,
+  AdminReferralsLeaderboardRoute: AdminReferralsLeaderboardRoute,
+  AdminReferralsIndexRoute: AdminReferralsIndexRoute,
+}
+
+const AdminReferralsRouteWithChildren = AdminReferralsRoute._addFileChildren(
+  AdminReferralsRouteChildren,
+)
+
 interface AdminRouteChildren {
+  AdminReferralsRoute: typeof AdminReferralsRouteWithChildren
+  AdminWaitlistRoute: typeof AdminWaitlistRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminReferralsRoute: AdminReferralsRouteWithChildren,
+  AdminWaitlistRoute: AdminWaitlistRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
