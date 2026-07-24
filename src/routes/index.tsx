@@ -668,7 +668,7 @@ function ProductScreens() {
         <div className="mx-auto max-w-2xl text-center">
           <Reveal>
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-primary">
-              Inside the app
+              Designed with care
             </span>
             <h2 className="mt-5 font-display text-4xl font-bold tracking-tight sm:text-5xl">
               Clean, calm, familiar.
