@@ -901,68 +901,87 @@ function InsideTheApp() {
 
 /* ---------- built for Nigerians ---------- */
 
+const NG_CARDS = [
+  {
+    title: "Suya night",
+    emoji: "🍢",
+    bg: "bg-[oklch(0.94_0.06_70)]",
+    fg: "text-[oklch(0.45_0.15_45)]",
+  },
+  {
+    title: "Owambe fit",
+    emoji: "👗",
+    bg: "bg-[oklch(0.93_0.05_240)]",
+    fg: "text-[oklch(0.42_0.18_250)]",
+  },
+  {
+    title: "Market run",
+    emoji: "🛍️",
+    bg: "bg-[oklch(0.93_0.05_240)]",
+    fg: "text-[oklch(0.42_0.18_250)]",
+  },
+  {
+    title: "Home fix",
+    emoji: "🔧",
+    bg: "bg-[oklch(0.94_0.06_70)]",
+    fg: "text-[oklch(0.45_0.15_45)]",
+  },
+];
+
 function BuiltForNigerians() {
   const points = [
-    "Pay with cards, transfers or on delivery",
-    "Prices in Naira. No hidden fees.",
-    "Support in English and pidgin",
-    "Available across major Nigerian cities",
+    "Pay how you already pay — card, transfer or on delivery.",
+    "Prices in naira. No surprise conversions.",
+    "Support that speaks your language, based in Nigeria.",
+    "Works with the shops and services on your street.",
   ];
   return (
     <section className="relative overflow-hidden py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="relative overflow-hidden rounded-4xl border border-border bg-card p-8 shadow-soft sm:p-14">
-          <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary-soft" />
-          <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-gold/15" />
-          <div className="relative grid gap-10 lg:grid-cols-2 lg:items-center">
-            <div>
-              <Reveal>
-                <span className="text-xs font-semibold uppercase tracking-widest text-gold">
-                  Built for Nigerians
-                </span>
-                <h2 className="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl">
-                  From Lagos to Kano, and everywhere in between.
-                </h2>
-                <p className="mt-5 text-lg text-muted-foreground">
-                  We know Nigerian streets, Nigerian traffic, Nigerian tastes. MyTijaara is
-                  designed for how we really live — not copied from somewhere else.
-                </p>
-                <ul className="mt-8 space-y-3">
-                  {points.map((p) => (
-                    <li key={p} className="flex items-start gap-3">
-                      <span className="mt-0.5 grid h-6 w-6 place-items-center rounded-full bg-primary text-primary-foreground">
-                        <Check className="h-3.5 w-3.5" />
-                      </span>
-                      <span className="text-base text-foreground">{p}</span>
-                    </li>
-                  ))}
-                </ul>
-              </Reveal>
-            </div>
-            <Reveal delay={120}>
-              <div className="relative mx-auto grid max-w-md grid-cols-2 gap-4">
-                {[
-                  { c: "Lagos", n: "Mainland • Island" },
-                  { c: "Abuja", n: "FCT" },
-                  { c: "Port Harcourt", n: "Rivers" },
-                  { c: "Ibadan", n: "Oyo" },
-                  { c: "Kano", n: "Kano" },
-                  { c: "Enugu", n: "Enugu" },
-                ].map((city, i) => (
-                  <div
-                    key={city.c}
-                    className={`rounded-2xl border border-border bg-background p-4 shadow-soft ${
-                      i % 2 ? "mt-6" : ""
-                    }`}
-                  >
-                    <MapPin className="h-4 w-4 text-primary" />
-                    <p className="mt-2 font-display text-lg font-bold">{city.c}</p>
-                    <p className="text-xs text-muted-foreground">{city.n}</p>
-                  </div>
+        <div className="relative grid gap-10 lg:grid-cols-2 lg:items-center">
+          <div>
+            <Reveal>
+              <span className="inline-flex items-center rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-foreground/70">
+                Built for Nigerians
+              </span>
+              <h2 className="mt-6 font-display text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+                Made here. For here.
+              </h2>
+              <p className="mt-5 max-w-lg text-lg text-muted-foreground">
+                Nigerian streets, Nigerian shops, Nigerian traffic — MyTijaara is
+                built with all of it in mind. Not a copy of something from abroad.
+              </p>
+              <ul className="mt-8 space-y-4">
+                {points.map((p) => (
+                  <li key={p} className="flex items-start gap-3">
+                    <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-gold text-gold-foreground">
+                      <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                    </span>
+                    <span className="text-base text-foreground/85">{p}</span>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </Reveal>
           </div>
+          <Reveal delay={120}>
+            <div className="mx-auto grid w-full max-w-md grid-cols-2 gap-4 sm:gap-5">
+              {NG_CARDS.map((c, i) => (
+                <div
+                  key={c.title}
+                  className={`group relative flex aspect-[3/4] flex-col justify-between overflow-hidden rounded-3xl ${c.bg} p-5 transition-transform hover:-translate-y-1 ${
+                    i % 2 ? "mt-8" : ""
+                  }`}
+                >
+                  <div className="text-4xl sm:text-5xl transition-transform group-hover:scale-110 group-hover:-rotate-6">
+                    {c.emoji}
+                  </div>
+                  <p className={`font-display text-base font-bold sm:text-lg ${c.fg}`}>
+                    {c.title}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </Reveal>
         </div>
       </div>
     </section>
@@ -977,62 +996,93 @@ const PARTNERS = [
     title: "Grow your shop with MyTijaara.",
     body: "Reach new customers in your area without setting up your own store, app or delivery team.",
     perks: ["New customers, every day", "Simple dashboard on your phone", "Get paid on time"],
+    cta: "Join as vendor",
+    image: screenVendor.url,
+    accent: "from-primary/95 via-primary/80 to-primary/40",
   },
   {
     tag: "For riders",
     title: "Earn on your schedule.",
     body: "Deliver food, packages and groceries. Choose when you work, get paid weekly.",
     perks: ["Flexible hours", "Weekly payouts", "In-app support 24/7"],
+    cta: "Join as rider",
+    image: screenRider.url,
+    accent: "from-[oklch(0.28_0.08_156)]/95 via-[oklch(0.32_0.09_156)]/75 to-[oklch(0.4_0.1_156)]/30",
   },
   {
     tag: "For artisans",
     title: "Meet more clients — get paid faster.",
     body: "Show off your work, get booked in your area and get paid straight to your account.",
     perks: ["Verified profile", "Bookings that fit your day", "Fair, upfront pricing"],
+    cta: "Join as artisan",
+    image: screenArtisans.url,
+    accent: "from-[oklch(0.35_0.1_156)]/95 via-[oklch(0.45_0.12_156)]/70 to-gold/25",
   },
 ];
 
 function Partners() {
   return (
-    <section id="partners" className="bg-surface py-24 sm:py-32">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+    <section id="partners" className="relative overflow-hidden bg-surface py-24 sm:py-32">
+      <div className="pointer-events-none absolute inset-0 bg-hero-gradient opacity-40" />
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
           <Reveal>
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-primary">
+              <Sparkles className="h-3.5 w-3.5 text-gold" />
               Grow with us
             </span>
             <h2 className="mt-5 font-display text-4xl font-bold tracking-tight sm:text-5xl">
               A better way to earn.
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Vendors, riders and artisans — MyTijaara helps you find more customers.
+              Vendors, riders and artisans — see the tools you'll use every day.
             </p>
           </Reveal>
         </div>
-        <div className="mt-14 grid gap-6 lg:grid-cols-3">
+
+        <div className="mt-16 grid gap-6 lg:grid-cols-3 lg:gap-7">
           {PARTNERS.map((p, i) => (
             <Reveal key={p.tag} delay={i * 100}>
-              <div className="group h-full rounded-3xl border border-border bg-card p-8 transition-all hover:-translate-y-1 hover:border-primary/25 hover:shadow-elegant">
-                <span className="inline-flex rounded-full bg-primary-soft px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
-                  {p.tag}
-                </span>
-                <h3 className="mt-5 font-display text-2xl font-bold">{p.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{p.body}</p>
-                <ul className="mt-6 space-y-2.5 border-t border-border pt-6">
-                  {p.perks.map((perk) => (
-                    <li key={perk} className="flex items-center gap-2.5 text-sm">
-                      <Check className="h-4 w-4 text-primary" />
-                      <span>{perk}</span>
-                    </li>
-                  ))}
-                </ul>
-                <a
-                  href="#waitlist"
-                  className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-primary transition-transform hover:translate-x-0.5"
-                >
-                  Join as {p.tag.replace("For ", "").replace(/s$/, "")} <ArrowRight className="h-4 w-4" />
-                </a>
-              </div>
+              <article className="group relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-border bg-card shadow-soft transition-all hover:-translate-y-2 hover:shadow-elegant">
+                {/* Image header — no phone frame added */}
+                <div className="relative h-80 overflow-hidden bg-[oklch(0.96_0.01_140)] sm:h-96">
+                  <div className={`pointer-events-none absolute inset-0 bg-gradient-to-b ${p.accent} opacity-90`} />
+                  <img
+                    src={p.image}
+                    alt={`${p.tag} screen`}
+                    loading="lazy"
+                    className="absolute left-1/2 top-8 w-[62%] -translate-x-1/2 select-none drop-shadow-2xl transition-transform duration-700 group-hover:-translate-y-2 group-hover:scale-[1.03]"
+                    style={{ transformOrigin: "50% 0%" }}
+                  />
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-card to-transparent" />
+                  <span className="absolute left-5 top-5 inline-flex rounded-full bg-white/95 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-primary shadow-soft backdrop-blur">
+                    {p.tag}
+                  </span>
+                </div>
+
+                {/* Body */}
+                <div className="flex flex-1 flex-col p-7">
+                  <h3 className="font-display text-2xl font-bold leading-tight">{p.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{p.body}</p>
+                  <ul className="mt-6 space-y-2.5 border-t border-border pt-6">
+                    {p.perks.map((perk) => (
+                      <li key={perk} className="flex items-center gap-2.5 text-sm">
+                        <span className="grid h-5 w-5 place-items-center rounded-full bg-primary-soft text-primary">
+                          <Check className="h-3 w-3" strokeWidth={3} />
+                        </span>
+                        <span className="text-foreground/85">{perk}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <a
+                    href="#waitlist"
+                    className="mt-8 inline-flex items-center justify-center gap-2 self-start rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-soft transition-all hover:scale-[1.03] hover:shadow-elegant"
+                  >
+                    {p.cta}
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </a>
+                </div>
+              </article>
             </Reveal>
           ))}
         </div>
