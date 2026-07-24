@@ -18,14 +18,22 @@ import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-passw
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-password'
 import { Route as AdminWaitlistRouteImport } from './routes/admin.waitlist'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminSystemHealthRouteImport } from './routes/admin.system-health'
+import { Route as AdminRolesRouteImport } from './routes/admin.roles'
 import { Route as AdminReferralsRouteImport } from './routes/admin.referrals'
+import { Route as AdminProfileRouteImport } from './routes/admin.profile'
+import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
 import { Route as AdminMediaRouteImport } from './routes/admin.media'
 import { Route as AdminEmailRouteImport } from './routes/admin.email'
 import { Route as AdminCmsRouteImport } from './routes/admin.cms'
+import { Route as AdminAuditLogsRouteImport } from './routes/admin.audit-logs'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminReferralsIndexRouteImport } from './routes/admin.referrals.index'
 import { Route as AdminEmailIndexRouteImport } from './routes/admin.email.index'
 import { Route as AdminCmsIndexRouteImport } from './routes/admin.cms.index'
+import { Route as AdminUsersIdRouteImport } from './routes/admin.users.$id'
+import { Route as AdminRolesIdRouteImport } from './routes/admin.roles.$id'
 import { Route as AdminReferralsLeaderboardRouteImport } from './routes/admin.referrals.leaderboard'
 import { Route as AdminReferralsAnalyticsRouteImport } from './routes/admin.referrals.analytics'
 import { Route as AdminReferralsIdRouteImport } from './routes/admin.referrals.$id'
@@ -89,9 +97,34 @@ const AdminWaitlistRoute = AdminWaitlistRouteImport.update({
   path: '/waitlist',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSystemHealthRoute = AdminSystemHealthRouteImport.update({
+  id: '/system-health',
+  path: '/system-health',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRolesRoute = AdminRolesRouteImport.update({
+  id: '/roles',
+  path: '/roles',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminReferralsRoute = AdminReferralsRouteImport.update({
   id: '/referrals',
   path: '/referrals',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProfileRoute = AdminProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminMediaRoute = AdminMediaRouteImport.update({
@@ -107,6 +140,11 @@ const AdminEmailRoute = AdminEmailRouteImport.update({
 const AdminCmsRoute = AdminCmsRouteImport.update({
   id: '/cms',
   path: '/cms',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAuditLogsRoute = AdminAuditLogsRouteImport.update({
+  id: '/audit-logs',
+  path: '/audit-logs',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
@@ -128,6 +166,16 @@ const AdminCmsIndexRoute = AdminCmsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminCmsRoute,
+} as any)
+const AdminUsersIdRoute = AdminUsersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminUsersRoute,
+} as any)
+const AdminRolesIdRoute = AdminRolesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminRolesRoute,
 } as any)
 const AdminReferralsLeaderboardRoute =
   AdminReferralsLeaderboardRouteImport.update({
@@ -221,10 +269,16 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/audit-logs': typeof AdminAuditLogsRoute
   '/admin/cms': typeof AdminCmsRouteWithChildren
   '/admin/email': typeof AdminEmailRouteWithChildren
   '/admin/media': typeof AdminMediaRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/profile': typeof AdminProfileRoute
   '/admin/referrals': typeof AdminReferralsRouteWithChildren
+  '/admin/roles': typeof AdminRolesRouteWithChildren
+  '/admin/system-health': typeof AdminSystemHealthRoute
+  '/admin/users': typeof AdminUsersRouteWithChildren
   '/admin/waitlist': typeof AdminWaitlistRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -248,6 +302,8 @@ export interface FileRoutesByFullPath {
   '/admin/referrals/$id': typeof AdminReferralsIdRoute
   '/admin/referrals/analytics': typeof AdminReferralsAnalyticsRoute
   '/admin/referrals/leaderboard': typeof AdminReferralsLeaderboardRoute
+  '/admin/roles/$id': typeof AdminRolesIdRoute
+  '/admin/users/$id': typeof AdminUsersIdRoute
   '/admin/cms/': typeof AdminCmsIndexRoute
   '/admin/email/': typeof AdminEmailIndexRoute
   '/admin/referrals/': typeof AdminReferralsIndexRoute
@@ -256,7 +312,13 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/audit-logs': typeof AdminAuditLogsRoute
   '/admin/media': typeof AdminMediaRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/profile': typeof AdminProfileRoute
+  '/admin/roles': typeof AdminRolesRouteWithChildren
+  '/admin/system-health': typeof AdminSystemHealthRoute
+  '/admin/users': typeof AdminUsersRouteWithChildren
   '/admin/waitlist': typeof AdminWaitlistRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -280,6 +342,8 @@ export interface FileRoutesByTo {
   '/admin/referrals/$id': typeof AdminReferralsIdRoute
   '/admin/referrals/analytics': typeof AdminReferralsAnalyticsRoute
   '/admin/referrals/leaderboard': typeof AdminReferralsLeaderboardRoute
+  '/admin/roles/$id': typeof AdminRolesIdRoute
+  '/admin/users/$id': typeof AdminUsersIdRoute
   '/admin/cms': typeof AdminCmsIndexRoute
   '/admin/email': typeof AdminEmailIndexRoute
   '/admin/referrals': typeof AdminReferralsIndexRoute
@@ -290,10 +354,16 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/audit-logs': typeof AdminAuditLogsRoute
   '/admin/cms': typeof AdminCmsRouteWithChildren
   '/admin/email': typeof AdminEmailRouteWithChildren
   '/admin/media': typeof AdminMediaRoute
+  '/admin/notifications': typeof AdminNotificationsRoute
+  '/admin/profile': typeof AdminProfileRoute
   '/admin/referrals': typeof AdminReferralsRouteWithChildren
+  '/admin/roles': typeof AdminRolesRouteWithChildren
+  '/admin/system-health': typeof AdminSystemHealthRoute
+  '/admin/users': typeof AdminUsersRouteWithChildren
   '/admin/waitlist': typeof AdminWaitlistRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -317,6 +387,8 @@ export interface FileRoutesById {
   '/admin/referrals/$id': typeof AdminReferralsIdRoute
   '/admin/referrals/analytics': typeof AdminReferralsAnalyticsRoute
   '/admin/referrals/leaderboard': typeof AdminReferralsLeaderboardRoute
+  '/admin/roles/$id': typeof AdminRolesIdRoute
+  '/admin/users/$id': typeof AdminUsersIdRoute
   '/admin/cms/': typeof AdminCmsIndexRoute
   '/admin/email/': typeof AdminEmailIndexRoute
   '/admin/referrals/': typeof AdminReferralsIndexRoute
@@ -328,10 +400,16 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/admin/analytics'
+    | '/admin/audit-logs'
     | '/admin/cms'
     | '/admin/email'
     | '/admin/media'
+    | '/admin/notifications'
+    | '/admin/profile'
     | '/admin/referrals'
+    | '/admin/roles'
+    | '/admin/system-health'
+    | '/admin/users'
     | '/admin/waitlist'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -355,6 +433,8 @@ export interface FileRouteTypes {
     | '/admin/referrals/$id'
     | '/admin/referrals/analytics'
     | '/admin/referrals/leaderboard'
+    | '/admin/roles/$id'
+    | '/admin/users/$id'
     | '/admin/cms/'
     | '/admin/email/'
     | '/admin/referrals/'
@@ -363,7 +443,13 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/admin/analytics'
+    | '/admin/audit-logs'
     | '/admin/media'
+    | '/admin/notifications'
+    | '/admin/profile'
+    | '/admin/roles'
+    | '/admin/system-health'
+    | '/admin/users'
     | '/admin/waitlist'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -387,6 +473,8 @@ export interface FileRouteTypes {
     | '/admin/referrals/$id'
     | '/admin/referrals/analytics'
     | '/admin/referrals/leaderboard'
+    | '/admin/roles/$id'
+    | '/admin/users/$id'
     | '/admin/cms'
     | '/admin/email'
     | '/admin/referrals'
@@ -396,10 +484,16 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/admin/analytics'
+    | '/admin/audit-logs'
     | '/admin/cms'
     | '/admin/email'
     | '/admin/media'
+    | '/admin/notifications'
+    | '/admin/profile'
     | '/admin/referrals'
+    | '/admin/roles'
+    | '/admin/system-health'
+    | '/admin/users'
     | '/admin/waitlist'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -423,6 +517,8 @@ export interface FileRouteTypes {
     | '/admin/referrals/$id'
     | '/admin/referrals/analytics'
     | '/admin/referrals/leaderboard'
+    | '/admin/roles/$id'
+    | '/admin/users/$id'
     | '/admin/cms/'
     | '/admin/email/'
     | '/admin/referrals/'
@@ -499,11 +595,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminWaitlistRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/system-health': {
+      id: '/admin/system-health'
+      path: '/system-health'
+      fullPath: '/admin/system-health'
+      preLoaderRoute: typeof AdminSystemHealthRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/roles': {
+      id: '/admin/roles'
+      path: '/roles'
+      fullPath: '/admin/roles'
+      preLoaderRoute: typeof AdminRolesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/referrals': {
       id: '/admin/referrals'
       path: '/referrals'
       fullPath: '/admin/referrals'
       preLoaderRoute: typeof AdminReferralsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/profile': {
+      id: '/admin/profile'
+      path: '/profile'
+      fullPath: '/admin/profile'
+      preLoaderRoute: typeof AdminProfileRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/notifications': {
+      id: '/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AdminNotificationsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/media': {
@@ -525,6 +656,13 @@ declare module '@tanstack/react-router' {
       path: '/cms'
       fullPath: '/admin/cms'
       preLoaderRoute: typeof AdminCmsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/audit-logs': {
+      id: '/admin/audit-logs'
+      path: '/audit-logs'
+      fullPath: '/admin/audit-logs'
+      preLoaderRoute: typeof AdminAuditLogsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/analytics': {
@@ -554,6 +692,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/cms/'
       preLoaderRoute: typeof AdminCmsIndexRouteImport
       parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/users/$id': {
+      id: '/admin/users/$id'
+      path: '/$id'
+      fullPath: '/admin/users/$id'
+      preLoaderRoute: typeof AdminUsersIdRouteImport
+      parentRoute: typeof AdminUsersRoute
+    }
+    '/admin/roles/$id': {
+      id: '/admin/roles/$id'
+      path: '/$id'
+      fullPath: '/admin/roles/$id'
+      preLoaderRoute: typeof AdminRolesIdRouteImport
+      parentRoute: typeof AdminRolesRoute
     }
     '/admin/referrals/leaderboard': {
       id: '/admin/referrals/leaderboard'
@@ -747,22 +899,58 @@ const AdminReferralsRouteWithChildren = AdminReferralsRoute._addFileChildren(
   AdminReferralsRouteChildren,
 )
 
+interface AdminRolesRouteChildren {
+  AdminRolesIdRoute: typeof AdminRolesIdRoute
+}
+
+const AdminRolesRouteChildren: AdminRolesRouteChildren = {
+  AdminRolesIdRoute: AdminRolesIdRoute,
+}
+
+const AdminRolesRouteWithChildren = AdminRolesRoute._addFileChildren(
+  AdminRolesRouteChildren,
+)
+
+interface AdminUsersRouteChildren {
+  AdminUsersIdRoute: typeof AdminUsersIdRoute
+}
+
+const AdminUsersRouteChildren: AdminUsersRouteChildren = {
+  AdminUsersIdRoute: AdminUsersIdRoute,
+}
+
+const AdminUsersRouteWithChildren = AdminUsersRoute._addFileChildren(
+  AdminUsersRouteChildren,
+)
+
 interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminAuditLogsRoute: typeof AdminAuditLogsRoute
   AdminCmsRoute: typeof AdminCmsRouteWithChildren
   AdminEmailRoute: typeof AdminEmailRouteWithChildren
   AdminMediaRoute: typeof AdminMediaRoute
+  AdminNotificationsRoute: typeof AdminNotificationsRoute
+  AdminProfileRoute: typeof AdminProfileRoute
   AdminReferralsRoute: typeof AdminReferralsRouteWithChildren
+  AdminRolesRoute: typeof AdminRolesRouteWithChildren
+  AdminSystemHealthRoute: typeof AdminSystemHealthRoute
+  AdminUsersRoute: typeof AdminUsersRouteWithChildren
   AdminWaitlistRoute: typeof AdminWaitlistRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminAuditLogsRoute: AdminAuditLogsRoute,
   AdminCmsRoute: AdminCmsRouteWithChildren,
   AdminEmailRoute: AdminEmailRouteWithChildren,
   AdminMediaRoute: AdminMediaRoute,
+  AdminNotificationsRoute: AdminNotificationsRoute,
+  AdminProfileRoute: AdminProfileRoute,
   AdminReferralsRoute: AdminReferralsRouteWithChildren,
+  AdminRolesRoute: AdminRolesRouteWithChildren,
+  AdminSystemHealthRoute: AdminSystemHealthRoute,
+  AdminUsersRoute: AdminUsersRouteWithChildren,
   AdminWaitlistRoute: AdminWaitlistRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
