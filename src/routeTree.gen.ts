@@ -20,6 +20,7 @@ import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-pas
 import { Route as AdminWaitlistRouteImport } from './routes/admin.waitlist'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminSystemHealthRouteImport } from './routes/admin.system-health'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminRolesRouteImport } from './routes/admin.roles'
 import { Route as AdminReferralsRouteImport } from './routes/admin.referrals'
 import { Route as AdminProfileRouteImport } from './routes/admin.profile'
@@ -29,10 +30,19 @@ import { Route as AdminEmailRouteImport } from './routes/admin.email'
 import { Route as AdminCmsRouteImport } from './routes/admin.cms'
 import { Route as AdminAuditLogsRouteImport } from './routes/admin.audit-logs'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
+import { Route as AdminSettingsIndexRouteImport } from './routes/admin.settings.index'
 import { Route as AdminReferralsIndexRouteImport } from './routes/admin.referrals.index'
 import { Route as AdminEmailIndexRouteImport } from './routes/admin.email.index'
 import { Route as AdminCmsIndexRouteImport } from './routes/admin.cms.index'
 import { Route as AdminUsersIdRouteImport } from './routes/admin.users.$id'
+import { Route as AdminSettingsSystemRouteImport } from './routes/admin.settings.system'
+import { Route as AdminSettingsSocialRouteImport } from './routes/admin.settings.social'
+import { Route as AdminSettingsSmtpRouteImport } from './routes/admin.settings.smtp'
+import { Route as AdminSettingsSeoRouteImport } from './routes/admin.settings.seo'
+import { Route as AdminSettingsIntegrationsRouteImport } from './routes/admin.settings.integrations'
+import { Route as AdminSettingsCompanyRouteImport } from './routes/admin.settings.company'
+import { Route as AdminSettingsBrandingRouteImport } from './routes/admin.settings.branding'
+import { Route as AdminSettingsApiKeysRouteImport } from './routes/admin.settings.api-keys'
 import { Route as AdminRolesIdRouteImport } from './routes/admin.roles.$id'
 import { Route as AdminReferralsLeaderboardRouteImport } from './routes/admin.referrals.leaderboard'
 import { Route as AdminReferralsAnalyticsRouteImport } from './routes/admin.referrals.analytics'
@@ -107,6 +117,11 @@ const AdminSystemHealthRoute = AdminSystemHealthRouteImport.update({
   path: '/system-health',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminRolesRoute = AdminRolesRouteImport.update({
   id: '/roles',
   path: '/roles',
@@ -152,6 +167,11 @@ const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSettingsIndexRoute = AdminSettingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminSettingsRoute,
+} as any)
 const AdminReferralsIndexRoute = AdminReferralsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -171,6 +191,47 @@ const AdminUsersIdRoute = AdminUsersIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => AdminUsersRoute,
+} as any)
+const AdminSettingsSystemRoute = AdminSettingsSystemRouteImport.update({
+  id: '/system',
+  path: '/system',
+  getParentRoute: () => AdminSettingsRoute,
+} as any)
+const AdminSettingsSocialRoute = AdminSettingsSocialRouteImport.update({
+  id: '/social',
+  path: '/social',
+  getParentRoute: () => AdminSettingsRoute,
+} as any)
+const AdminSettingsSmtpRoute = AdminSettingsSmtpRouteImport.update({
+  id: '/smtp',
+  path: '/smtp',
+  getParentRoute: () => AdminSettingsRoute,
+} as any)
+const AdminSettingsSeoRoute = AdminSettingsSeoRouteImport.update({
+  id: '/seo',
+  path: '/seo',
+  getParentRoute: () => AdminSettingsRoute,
+} as any)
+const AdminSettingsIntegrationsRoute =
+  AdminSettingsIntegrationsRouteImport.update({
+    id: '/integrations',
+    path: '/integrations',
+    getParentRoute: () => AdminSettingsRoute,
+  } as any)
+const AdminSettingsCompanyRoute = AdminSettingsCompanyRouteImport.update({
+  id: '/company',
+  path: '/company',
+  getParentRoute: () => AdminSettingsRoute,
+} as any)
+const AdminSettingsBrandingRoute = AdminSettingsBrandingRouteImport.update({
+  id: '/branding',
+  path: '/branding',
+  getParentRoute: () => AdminSettingsRoute,
+} as any)
+const AdminSettingsApiKeysRoute = AdminSettingsApiKeysRouteImport.update({
+  id: '/api-keys',
+  path: '/api-keys',
+  getParentRoute: () => AdminSettingsRoute,
 } as any)
 const AdminRolesIdRoute = AdminRolesIdRouteImport.update({
   id: '/$id',
@@ -277,6 +338,7 @@ export interface FileRoutesByFullPath {
   '/admin/profile': typeof AdminProfileRoute
   '/admin/referrals': typeof AdminReferralsRouteWithChildren
   '/admin/roles': typeof AdminRolesRouteWithChildren
+  '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/admin/system-health': typeof AdminSystemHealthRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/admin/waitlist': typeof AdminWaitlistRoute
@@ -303,10 +365,19 @@ export interface FileRoutesByFullPath {
   '/admin/referrals/analytics': typeof AdminReferralsAnalyticsRoute
   '/admin/referrals/leaderboard': typeof AdminReferralsLeaderboardRoute
   '/admin/roles/$id': typeof AdminRolesIdRoute
+  '/admin/settings/api-keys': typeof AdminSettingsApiKeysRoute
+  '/admin/settings/branding': typeof AdminSettingsBrandingRoute
+  '/admin/settings/company': typeof AdminSettingsCompanyRoute
+  '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
+  '/admin/settings/seo': typeof AdminSettingsSeoRoute
+  '/admin/settings/smtp': typeof AdminSettingsSmtpRoute
+  '/admin/settings/social': typeof AdminSettingsSocialRoute
+  '/admin/settings/system': typeof AdminSettingsSystemRoute
   '/admin/users/$id': typeof AdminUsersIdRoute
   '/admin/cms/': typeof AdminCmsIndexRoute
   '/admin/email/': typeof AdminEmailIndexRoute
   '/admin/referrals/': typeof AdminReferralsIndexRoute
+  '/admin/settings/': typeof AdminSettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -343,10 +414,19 @@ export interface FileRoutesByTo {
   '/admin/referrals/analytics': typeof AdminReferralsAnalyticsRoute
   '/admin/referrals/leaderboard': typeof AdminReferralsLeaderboardRoute
   '/admin/roles/$id': typeof AdminRolesIdRoute
+  '/admin/settings/api-keys': typeof AdminSettingsApiKeysRoute
+  '/admin/settings/branding': typeof AdminSettingsBrandingRoute
+  '/admin/settings/company': typeof AdminSettingsCompanyRoute
+  '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
+  '/admin/settings/seo': typeof AdminSettingsSeoRoute
+  '/admin/settings/smtp': typeof AdminSettingsSmtpRoute
+  '/admin/settings/social': typeof AdminSettingsSocialRoute
+  '/admin/settings/system': typeof AdminSettingsSystemRoute
   '/admin/users/$id': typeof AdminUsersIdRoute
   '/admin/cms': typeof AdminCmsIndexRoute
   '/admin/email': typeof AdminEmailIndexRoute
   '/admin/referrals': typeof AdminReferralsIndexRoute
+  '/admin/settings': typeof AdminSettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -362,6 +442,7 @@ export interface FileRoutesById {
   '/admin/profile': typeof AdminProfileRoute
   '/admin/referrals': typeof AdminReferralsRouteWithChildren
   '/admin/roles': typeof AdminRolesRouteWithChildren
+  '/admin/settings': typeof AdminSettingsRouteWithChildren
   '/admin/system-health': typeof AdminSystemHealthRoute
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/admin/waitlist': typeof AdminWaitlistRoute
@@ -388,10 +469,19 @@ export interface FileRoutesById {
   '/admin/referrals/analytics': typeof AdminReferralsAnalyticsRoute
   '/admin/referrals/leaderboard': typeof AdminReferralsLeaderboardRoute
   '/admin/roles/$id': typeof AdminRolesIdRoute
+  '/admin/settings/api-keys': typeof AdminSettingsApiKeysRoute
+  '/admin/settings/branding': typeof AdminSettingsBrandingRoute
+  '/admin/settings/company': typeof AdminSettingsCompanyRoute
+  '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
+  '/admin/settings/seo': typeof AdminSettingsSeoRoute
+  '/admin/settings/smtp': typeof AdminSettingsSmtpRoute
+  '/admin/settings/social': typeof AdminSettingsSocialRoute
+  '/admin/settings/system': typeof AdminSettingsSystemRoute
   '/admin/users/$id': typeof AdminUsersIdRoute
   '/admin/cms/': typeof AdminCmsIndexRoute
   '/admin/email/': typeof AdminEmailIndexRoute
   '/admin/referrals/': typeof AdminReferralsIndexRoute
+  '/admin/settings/': typeof AdminSettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -408,6 +498,7 @@ export interface FileRouteTypes {
     | '/admin/profile'
     | '/admin/referrals'
     | '/admin/roles'
+    | '/admin/settings'
     | '/admin/system-health'
     | '/admin/users'
     | '/admin/waitlist'
@@ -434,10 +525,19 @@ export interface FileRouteTypes {
     | '/admin/referrals/analytics'
     | '/admin/referrals/leaderboard'
     | '/admin/roles/$id'
+    | '/admin/settings/api-keys'
+    | '/admin/settings/branding'
+    | '/admin/settings/company'
+    | '/admin/settings/integrations'
+    | '/admin/settings/seo'
+    | '/admin/settings/smtp'
+    | '/admin/settings/social'
+    | '/admin/settings/system'
     | '/admin/users/$id'
     | '/admin/cms/'
     | '/admin/email/'
     | '/admin/referrals/'
+    | '/admin/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -474,10 +574,19 @@ export interface FileRouteTypes {
     | '/admin/referrals/analytics'
     | '/admin/referrals/leaderboard'
     | '/admin/roles/$id'
+    | '/admin/settings/api-keys'
+    | '/admin/settings/branding'
+    | '/admin/settings/company'
+    | '/admin/settings/integrations'
+    | '/admin/settings/seo'
+    | '/admin/settings/smtp'
+    | '/admin/settings/social'
+    | '/admin/settings/system'
     | '/admin/users/$id'
     | '/admin/cms'
     | '/admin/email'
     | '/admin/referrals'
+    | '/admin/settings'
   id:
     | '__root__'
     | '/'
@@ -492,6 +601,7 @@ export interface FileRouteTypes {
     | '/admin/profile'
     | '/admin/referrals'
     | '/admin/roles'
+    | '/admin/settings'
     | '/admin/system-health'
     | '/admin/users'
     | '/admin/waitlist'
@@ -518,10 +628,19 @@ export interface FileRouteTypes {
     | '/admin/referrals/analytics'
     | '/admin/referrals/leaderboard'
     | '/admin/roles/$id'
+    | '/admin/settings/api-keys'
+    | '/admin/settings/branding'
+    | '/admin/settings/company'
+    | '/admin/settings/integrations'
+    | '/admin/settings/seo'
+    | '/admin/settings/smtp'
+    | '/admin/settings/social'
+    | '/admin/settings/system'
     | '/admin/users/$id'
     | '/admin/cms/'
     | '/admin/email/'
     | '/admin/referrals/'
+    | '/admin/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -609,6 +728,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSystemHealthRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/roles': {
       id: '/admin/roles'
       path: '/roles'
@@ -672,6 +798,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAnalyticsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/settings/': {
+      id: '/admin/settings/'
+      path: '/'
+      fullPath: '/admin/settings/'
+      preLoaderRoute: typeof AdminSettingsIndexRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
     '/admin/referrals/': {
       id: '/admin/referrals/'
       path: '/'
@@ -699,6 +832,62 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/users/$id'
       preLoaderRoute: typeof AdminUsersIdRouteImport
       parentRoute: typeof AdminUsersRoute
+    }
+    '/admin/settings/system': {
+      id: '/admin/settings/system'
+      path: '/system'
+      fullPath: '/admin/settings/system'
+      preLoaderRoute: typeof AdminSettingsSystemRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
+    '/admin/settings/social': {
+      id: '/admin/settings/social'
+      path: '/social'
+      fullPath: '/admin/settings/social'
+      preLoaderRoute: typeof AdminSettingsSocialRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
+    '/admin/settings/smtp': {
+      id: '/admin/settings/smtp'
+      path: '/smtp'
+      fullPath: '/admin/settings/smtp'
+      preLoaderRoute: typeof AdminSettingsSmtpRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
+    '/admin/settings/seo': {
+      id: '/admin/settings/seo'
+      path: '/seo'
+      fullPath: '/admin/settings/seo'
+      preLoaderRoute: typeof AdminSettingsSeoRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
+    '/admin/settings/integrations': {
+      id: '/admin/settings/integrations'
+      path: '/integrations'
+      fullPath: '/admin/settings/integrations'
+      preLoaderRoute: typeof AdminSettingsIntegrationsRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
+    '/admin/settings/company': {
+      id: '/admin/settings/company'
+      path: '/company'
+      fullPath: '/admin/settings/company'
+      preLoaderRoute: typeof AdminSettingsCompanyRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
+    '/admin/settings/branding': {
+      id: '/admin/settings/branding'
+      path: '/branding'
+      fullPath: '/admin/settings/branding'
+      preLoaderRoute: typeof AdminSettingsBrandingRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
+    '/admin/settings/api-keys': {
+      id: '/admin/settings/api-keys'
+      path: '/api-keys'
+      fullPath: '/admin/settings/api-keys'
+      preLoaderRoute: typeof AdminSettingsApiKeysRouteImport
+      parentRoute: typeof AdminSettingsRoute
     }
     '/admin/roles/$id': {
       id: '/admin/roles/$id'
@@ -911,6 +1100,34 @@ const AdminRolesRouteWithChildren = AdminRolesRoute._addFileChildren(
   AdminRolesRouteChildren,
 )
 
+interface AdminSettingsRouteChildren {
+  AdminSettingsApiKeysRoute: typeof AdminSettingsApiKeysRoute
+  AdminSettingsBrandingRoute: typeof AdminSettingsBrandingRoute
+  AdminSettingsCompanyRoute: typeof AdminSettingsCompanyRoute
+  AdminSettingsIntegrationsRoute: typeof AdminSettingsIntegrationsRoute
+  AdminSettingsSeoRoute: typeof AdminSettingsSeoRoute
+  AdminSettingsSmtpRoute: typeof AdminSettingsSmtpRoute
+  AdminSettingsSocialRoute: typeof AdminSettingsSocialRoute
+  AdminSettingsSystemRoute: typeof AdminSettingsSystemRoute
+  AdminSettingsIndexRoute: typeof AdminSettingsIndexRoute
+}
+
+const AdminSettingsRouteChildren: AdminSettingsRouteChildren = {
+  AdminSettingsApiKeysRoute: AdminSettingsApiKeysRoute,
+  AdminSettingsBrandingRoute: AdminSettingsBrandingRoute,
+  AdminSettingsCompanyRoute: AdminSettingsCompanyRoute,
+  AdminSettingsIntegrationsRoute: AdminSettingsIntegrationsRoute,
+  AdminSettingsSeoRoute: AdminSettingsSeoRoute,
+  AdminSettingsSmtpRoute: AdminSettingsSmtpRoute,
+  AdminSettingsSocialRoute: AdminSettingsSocialRoute,
+  AdminSettingsSystemRoute: AdminSettingsSystemRoute,
+  AdminSettingsIndexRoute: AdminSettingsIndexRoute,
+}
+
+const AdminSettingsRouteWithChildren = AdminSettingsRoute._addFileChildren(
+  AdminSettingsRouteChildren,
+)
+
 interface AdminUsersRouteChildren {
   AdminUsersIdRoute: typeof AdminUsersIdRoute
 }
@@ -933,6 +1150,7 @@ interface AdminRouteChildren {
   AdminProfileRoute: typeof AdminProfileRoute
   AdminReferralsRoute: typeof AdminReferralsRouteWithChildren
   AdminRolesRoute: typeof AdminRolesRouteWithChildren
+  AdminSettingsRoute: typeof AdminSettingsRouteWithChildren
   AdminSystemHealthRoute: typeof AdminSystemHealthRoute
   AdminUsersRoute: typeof AdminUsersRouteWithChildren
   AdminWaitlistRoute: typeof AdminWaitlistRoute
@@ -949,6 +1167,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminProfileRoute: AdminProfileRoute,
   AdminReferralsRoute: AdminReferralsRouteWithChildren,
   AdminRolesRoute: AdminRolesRouteWithChildren,
+  AdminSettingsRoute: AdminSettingsRouteWithChildren,
   AdminSystemHealthRoute: AdminSystemHealthRoute,
   AdminUsersRoute: AdminUsersRouteWithChildren,
   AdminWaitlistRoute: AdminWaitlistRoute,
