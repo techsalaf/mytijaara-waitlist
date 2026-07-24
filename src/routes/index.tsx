@@ -1260,7 +1260,7 @@ function Landing() {
         <Why />
         <How />
         <InsideTheApp />
-        <ProductScreens />
+
         <BuiltForNigerians />
         <Partners />
         <Waitlist />
