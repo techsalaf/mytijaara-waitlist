@@ -1,10 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import {
   Search, Filter, Download, Plus, MoreHorizontal, CheckCircle2, XCircle,
-  Eye, Pencil, Trash2, ChevronLeft, ChevronRight, Tag,
+  Eye, Pencil, Trash2, ChevronLeft, ChevronRight, Tag, UsersRound,
 } from "lucide-react";
-import { PageHeader, StatCard } from "@/components/admin/ui-bits";
+import { PageHeader, StatCard, EmptyState, confirmDestructive } from "@/components/admin/ui-bits";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -18,9 +18,11 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { waitlistUsers, type WaitlistUser } from "@/lib/mock-data";
+import { type WaitlistUser } from "@/lib/mock-data";
 import { Users, UserCheck, Percent, Award } from "lucide-react";
 import { toast } from "sonner";
+import { waitlistApi } from "@/lib/api";
+import { toCsv, downloadCsv } from "@/lib/csv";
 
 export const Route = createFileRoute("/admin/waitlist")({
   head: () => ({ meta: [{ title: "Waitlist — MyTijaara Admin" }, { name: "robots", content: "noindex" }] }),
