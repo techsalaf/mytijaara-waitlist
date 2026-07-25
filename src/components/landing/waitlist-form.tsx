@@ -80,7 +80,7 @@ export function WaitlistForm() {
 
   const onSubmit = handleSubmit(async (data) => {
     // Honeypot: silently drop bot submissions.
-    if (data.website && data.website.length > 0) {
+    if (data.website) {
       setSubmittedCity(data.city);
       return;
     }
