@@ -5,7 +5,8 @@ import {
   ArrowRight, Check, Star, MapPin, Clock, Shield, Sparkles, Menu, X,
   Sun, Sunset, Moon, Coffee, ChevronDown, Facebook, Instagram, Twitter,
 } from "lucide-react";
-import { waitlistApi } from "@/lib/api";
+import { WaitlistForm } from "@/components/landing/waitlist-form";
+import { WaitlistCount } from "@/components/landing/waitlist-count";
 
 import heroImg from "@/assets/hero-illustration.png";
 import morningImg from "@/assets/moment-morning.jpg";
@@ -276,7 +277,7 @@ function Hero() {
                 ))}
               </div>
               <span>
-                <strong className="text-foreground">2,400+</strong> Nigerians already on the waitlist
+                <WaitlistCount />
               </span>
               <div className="flex items-center gap-1 text-gold">
                 {Array.from({ length: 5 }).map((_, i) => (
