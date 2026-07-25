@@ -5,6 +5,7 @@ import {
   ArrowRight, Check, Star, MapPin, Clock, Shield, Sparkles, Menu, X,
   Sun, Sunset, Moon, Coffee, ChevronDown, Facebook, Instagram, Twitter,
 } from "lucide-react";
+import { waitlistApi } from "@/lib/api";
 
 import heroImg from "@/assets/hero-illustration.png";
 import morningImg from "@/assets/moment-morning.jpg";
@@ -1109,18 +1110,45 @@ function Partners() {
 /* ---------- waitlist ---------- */
 
 function Waitlist() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [city, setCity] = useState("");
+  const [interest, setInterest] = useState("");
   const [role, setRole] = useState("customer");
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const submit = (e: React.FormEvent) => {
+
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
-    setSubmitted(true);
+    if (!name.trim() || !email.trim() || !city) return;
+    setSubmitting(true);
+    try {
+      await waitlistApi.create({
+        name: name.trim(), email: email.trim(), phone: phone.trim(),
+        city, source: "organic", status: "active",
+        tags: [role, ...(interest ? [interest] : [])],
+      });
+      setSubmitted(true);
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  const CITIES = ["Lagos", "Abuja", "Port Harcourt", "Ibadan", "Kano", "Benin City", "Enugu", "Kaduna", "Other"];
+  const INTERESTS = [
+    { v: "food", l: "🍽️ Food" },
+    { v: "groceries", l: "🛒 Groceries" },
+    { v: "pharmacy", l: "💊 Pharmacy" },
+    { v: "artisans", l: "🧑‍🔧 Artisans" },
+    { v: "rentals", l: "🏠 Rentals" },
+    { v: "parcel", l: "📦 Parcel" },
+  ];
+
   return (
     <section id="waitlist" className="relative overflow-hidden py-24 sm:py-32">
       <div className="mx-auto max-w-5xl px-4 sm:px-6">
-        <div className="relative overflow-hidden rounded-4xl bg-primary-gradient p-8 text-primary-foreground shadow-elegant sm:p-16">
+        <div className="relative overflow-hidden rounded-4xl bg-primary-gradient p-6 text-primary-foreground shadow-elegant sm:p-16">
           <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-gold opacity-25 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-white/5 blur-3xl" />
 
@@ -1144,11 +1172,11 @@ function Waitlist() {
                 </div>
                 <p className="mt-4 font-display text-xl font-bold">You're on the list! 🎉</p>
                 <p className="mt-2 text-sm text-primary-foreground/80">
-                  We'll email you as soon as MyTijaara launches in your city.
+                  We'll message you as soon as MyTijaara launches in {city}.
                 </p>
               </div>
             ) : (
-              <form onSubmit={submit} className="mt-10 space-y-4">
+              <form onSubmit={submit} className="mt-10 space-y-4 text-left">
                 <div className="flex flex-wrap justify-center gap-2">
                   {[
                     { v: "customer", l: "I'm a customer" },
@@ -1170,25 +1198,53 @@ function Waitlist() {
                     </button>
                   ))}
                 </div>
-                <div className="mx-auto flex max-w-lg flex-col gap-2 sm:flex-row">
-                  <label htmlFor="email" className="sr-only">Email address</label>
-                  <input
-                    id="email"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@email.com"
-                    className="flex-1 rounded-full border border-primary-foreground/20 bg-primary-foreground/10 px-5 py-3.5 text-sm text-primary-foreground placeholder:text-primary-foreground/60 outline-none focus:border-gold focus:bg-primary-foreground/15"
-                  />
-                  <button
-                    type="submit"
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-gold-gradient px-6 py-3.5 text-sm font-bold text-gold-foreground shadow-soft transition-transform hover:scale-[1.03]"
-                  >
-                    Join the waitlist <ArrowRight className="h-4 w-4" />
-                  </button>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <FieldW label="Full name" required>
+                    <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Adaeze Okafor" required maxLength={100} className={inputCls} />
+                  </FieldW>
+                  <FieldW label="Email" required>
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" required maxLength={255} className={inputCls} />
+                  </FieldW>
+                  <FieldW label="WhatsApp number">
+                    <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+234 803 000 0000" maxLength={20} className={inputCls} />
+                  </FieldW>
+                  <FieldW label="City" required>
+                    <select value={city} onChange={(e) => setCity(e.target.value)} required className={inputCls + " appearance-none"}>
+                      <option value="" className="text-neutral-900">Pick your city…</option>
+                      {CITIES.map((c) => <option key={c} value={c} className="text-neutral-900">{c}</option>)}
+                    </select>
+                  </FieldW>
                 </div>
-                <p className="text-xs text-primary-foreground/60">
+
+                <div>
+                  <div className="mb-2 text-xs font-semibold text-primary-foreground/80">What would you use it for? <span className="font-normal opacity-70">(optional)</span></div>
+                  <div className="flex flex-wrap gap-2">
+                    {INTERESTS.map((it) => (
+                      <button
+                        key={it.v}
+                        type="button"
+                        onClick={() => setInterest(interest === it.v ? "" : it.v)}
+                        className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                          interest === it.v
+                            ? "bg-gold-gradient text-gold-foreground shadow-soft"
+                            : "border border-primary-foreground/25 text-primary-foreground/85 hover:bg-primary-foreground/10"
+                        }`}
+                      >
+                        {it.l}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gold-gradient px-6 py-3.5 text-sm font-bold text-gold-foreground shadow-soft transition-transform hover:scale-[1.02] disabled:opacity-70"
+                >
+                  {submitting ? "Joining…" : <>Join the waitlist <ArrowRight className="h-4 w-4" /></>}
+                </button>
+                <p className="text-center text-xs text-primary-foreground/60">
                   No spam. Just a launch update when we're live near you.
                 </p>
               </form>
@@ -1199,6 +1255,21 @@ function Waitlist() {
     </section>
   );
 }
+
+const inputCls =
+  "w-full rounded-2xl border border-primary-foreground/20 bg-primary-foreground/10 px-4 py-3 text-sm text-primary-foreground placeholder:text-primary-foreground/50 outline-none focus:border-gold focus:bg-primary-foreground/15";
+
+function FieldW({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-xs font-semibold text-primary-foreground/80">
+        {label}{required && <span className="text-gold"> *</span>}
+      </span>
+      {children}
+    </label>
+  );
+}
+
 
 /* ---------- FAQ ---------- */
 
