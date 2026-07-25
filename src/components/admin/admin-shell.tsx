@@ -8,15 +8,15 @@ import {
 import { getSession, signOut, type AdminSession } from "@/lib/auth-mock";
 import { notifications } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Sheet, SheetContent,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { CommandPalette } from "./command-palette";
+import { AdminSkeleton } from "./admin-skeleton";
+import { initTheme } from "@/lib/theme";
 
 import { cn } from "@/lib/utils";
 
@@ -61,29 +61,29 @@ const nav: NavGroup[] = [
 
 export function AdminShell() {
   const [session, setSession] = useState<AdminSession | null>(null);
+  const [checked, setChecked] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
+    initTheme();
     const s = getSession();
     if (!s) {
       navigate({ to: "/auth/login" });
     } else {
       setSession(s);
     }
+    setChecked(true);
   }, [navigate]);
 
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
 
-  if (!session) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="animate-pulse text-sm text-muted-foreground">Loading admin…</div>
-      </div>
-    );
+  if (!checked || !session) {
+    return <AdminSkeleton />;
   }
 
   const handleSignOut = () => {
@@ -92,11 +92,12 @@ export function AdminShell() {
   };
 
   const unreadCount = notifications.filter((n) => n.unread).length;
+  const isMac = typeof navigator !== "undefined" && /mac/i.test(navigator.platform);
 
   return (
-    <div className="flex min-h-screen bg-[#F8FAF8]">
+    <div className="flex min-h-screen bg-[#F8FAF8] dark:bg-neutral-950">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 lg:z-30 border-r border-border/60 bg-white">
+      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 lg:z-30 border-r border-border/60 bg-white dark:bg-neutral-900">
         <SidebarContent pathname={pathname} />
       </aside>
 
@@ -109,19 +110,22 @@ export function AdminShell() {
 
       <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
         {/* Topbar */}
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border/60 bg-white/80 px-4 backdrop-blur-md lg:px-6">
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border/60 bg-white/80 px-4 backdrop-blur-md lg:px-6 dark:bg-neutral-900/80">
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setMobileOpen(true)}>
             <Menu className="h-5 w-5" />
           </Button>
 
-
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search users, campaigns, settings…"
-              className="pl-9 h-9 bg-muted/40 border-transparent focus-visible:bg-white"
-            />
-          </div>
+          <button
+            onClick={() => setPaletteOpen(true)}
+            className="group relative flex h-9 w-full max-w-md items-center gap-2 rounded-md bg-muted/40 px-3 text-left text-sm text-muted-foreground transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0D7A46]/40"
+          >
+            <Search className="h-4 w-4" />
+            <span className="hidden sm:inline">Search or jump to…</span>
+            <span className="inline sm:hidden">Search</span>
+            <kbd className="ml-auto hidden items-center gap-0.5 rounded border border-border bg-white px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground shadow-sm sm:inline-flex dark:bg-neutral-800">
+              {isMac ? "⌘" : "Ctrl"}<span>K</span>
+            </kbd>
+          </button>
 
           <div className="flex items-center gap-2">
             <DropdownMenu>
@@ -172,6 +176,10 @@ export function AdminShell() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setPaletteOpen(true)}>
+                  <Search className="mr-2 h-4 w-4" /> Command palette
+                  <span className="ml-auto text-[10px] text-muted-foreground">{isMac ? "⌘K" : "Ctrl K"}</span>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/admin/profile"><UserCircle2 className="mr-2 h-4 w-4" /> Profile</Link>
                 </DropdownMenuItem>
@@ -191,6 +199,8 @@ export function AdminShell() {
           <Outlet />
         </main>
       </div>
+
+      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
     </div>
   );
 }
@@ -256,10 +266,7 @@ function SidebarContent({ pathname }: { pathname: string }) {
       <div className="border-t border-border/60 p-4">
         <div className="rounded-xl bg-gradient-to-br from-[#0D7A46] to-[#166534] p-4 text-white">
           <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-[#D4A017]">Pro tip</div>
-          <div className="text-sm font-medium leading-snug">Launch day is 42 days away — check your growth digest.</div>
-          <Button size="sm" variant="secondary" className="mt-3 h-7 w-full bg-white/10 text-white hover:bg-white/20">
-            View digest
-          </Button>
+          <div className="text-sm font-medium leading-snug">Press <kbd className="rounded bg-white/20 px-1 font-mono">⌘K</kbd> anywhere to jump.</div>
         </div>
       </div>
     </div>

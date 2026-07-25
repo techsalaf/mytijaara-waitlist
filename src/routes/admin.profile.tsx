@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { PageHeader, SectionCard } from "@/components/admin/ui-bits";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -7,8 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Save, Shield, Smartphone, Monitor, LogOut, Key } from "lucide-react";
+import { Save, Shield, Smartphone, Monitor, Monitor as MonitorIcon, LogOut, Key, Sun, Moon } from "lucide-react";
 import { toast } from "sonner";
+import { getStoredTheme, setTheme, type Theme } from "@/lib/theme";
 
 export const Route = createFileRoute("/admin/profile")({
   head: () => ({ meta: [{ title: "My Profile — MyTijaara Admin" }, { name: "robots", content: "noindex" }] }),
@@ -114,7 +116,8 @@ function ProfilePage() {
 
         <TabsContent value="preferences" className="mt-4">
           <SectionCard title="Preferences">
-            <div className="space-y-3">
+            <ThemePicker />
+            <div className="mt-4 space-y-3">
               {[
                 { label: "Email me weekly digest", desc: "Every Monday morning", on: true },
                 { label: "Email me campaign reports", desc: "After every send finishes", on: true },
@@ -136,3 +139,41 @@ function ProfilePage() {
     </div>
   );
 }
+
+function ThemePicker() {
+  const [theme, setThemeState] = useState<Theme>("light");
+  useEffect(() => { setThemeState(getStoredTheme()); }, []);
+  const pick = (t: Theme) => { setTheme(t); setThemeState(t); toast.success(`Theme set to ${t}`); };
+  const opts: { value: Theme; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+    { value: "light", label: "Light", icon: Sun },
+    { value: "dark", label: "Dark", icon: Moon },
+    { value: "system", label: "System", icon: MonitorIcon },
+  ];
+  return (
+    <div className="rounded-xl border border-border/60 p-4">
+      <div className="mb-3">
+        <div className="text-sm font-medium">Appearance</div>
+        <div className="text-xs text-muted-foreground">Choose how the admin looks on this device.</div>
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        {opts.map((o) => {
+          const active = theme === o.value;
+          return (
+            <button
+              key={o.value}
+              onClick={() => pick(o.value)}
+              className={
+                "flex flex-col items-center gap-1.5 rounded-lg border p-3 text-xs font-medium transition-colors " +
+                (active ? "border-[#0D7A46] bg-[#0D7A46]/5 text-[#0D7A46]" : "border-border/60 hover:bg-muted/50")
+              }
+            >
+              <o.icon className="h-4 w-4" />
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
