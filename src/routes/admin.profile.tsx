@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { PageHeader, SectionCard } from "@/components/admin/ui-bits";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -7,8 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Save, Shield, Smartphone, Monitor, LogOut, Key } from "lucide-react";
+import { Save, Shield, Smartphone, Monitor, Monitor as MonitorIcon, LogOut, Key, Sun, Moon } from "lucide-react";
 import { toast } from "sonner";
+import { getStoredTheme, setTheme, type Theme } from "@/lib/theme";
 
 export const Route = createFileRoute("/admin/profile")({
   head: () => ({ meta: [{ title: "My Profile — MyTijaara Admin" }, { name: "robots", content: "noindex" }] }),
