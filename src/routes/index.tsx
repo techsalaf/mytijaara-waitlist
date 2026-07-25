@@ -5,6 +5,7 @@ import {
   ArrowRight, Check, Star, MapPin, Clock, Shield, Sparkles, Menu, X,
   Sun, Sunset, Moon, Coffee, ChevronDown, Facebook, Instagram, Twitter,
 } from "lucide-react";
+import { waitlistApi } from "@/lib/api";
 
 import heroImg from "@/assets/hero-illustration.png";
 import morningImg from "@/assets/moment-morning.jpg";
