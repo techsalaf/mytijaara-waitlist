@@ -370,3 +370,23 @@ function StatusBadge({ status }: { status: WaitlistUser["status"] }) {
   };
   return <span className={"inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize " + map[status]}>{status}</span>;
 }
+
+function RowMenu({ user, onView, onDelete }: { user: WaitlistUser; onView: (u: WaitlistUser) => void; onDelete: (id: string) => void }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-7 w-7"><MoreHorizontal className="h-4 w-4" /></Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuItem onClick={() => onView(user)}><Eye className="mr-2 h-3.5 w-3.5" /> View</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => toast.success("Edit dialog would open")}><Pencil className="mr-2 h-3.5 w-3.5" /> Edit</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => toast.success(`Emailed ${user.email}`)}>Email user</DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem className="text-red-600" onClick={() => onDelete(user.id)}>
+          <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
