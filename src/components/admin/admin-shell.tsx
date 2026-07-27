@@ -95,7 +95,7 @@ export function AdminShell() {
   const isMac = typeof navigator !== "undefined" && /mac/i.test(navigator.platform);
 
   return (
-    <div className="flex min-h-screen bg-[#F8FAF8] dark:bg-neutral-950">
+    <div className="flex min-h-screen bg-surface">
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 lg:z-30 border-r border-border/60 bg-card">
         <SidebarContent pathname={pathname} />
