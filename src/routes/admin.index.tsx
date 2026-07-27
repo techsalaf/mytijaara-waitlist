@@ -54,20 +54,20 @@ function DashboardPage() {
               <AreaChart data={signupTrend}>
                 <defs>
                   <linearGradient id="signupG" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#0D7A46" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="#0D7A46" stopOpacity={0} />
+                    <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="verifG" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#D4A017" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#D4A017" stopOpacity={0} />
+                    <stop offset="0%" stopColor="var(--gold)" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="var(--gold)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                 <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 12 }} />
-                <Area type="monotone" dataKey="signups" stroke="#0D7A46" strokeWidth={2.5} fill="url(#signupG)" name="Signups" />
-                <Area type="monotone" dataKey="verified" stroke="#D4A017" strokeWidth={2.5} fill="url(#verifG)" name="Verified" />
+                <Area type="monotone" dataKey="signups" stroke="var(--primary)" strokeWidth={2.5} fill="url(#signupG)" name="Signups" />
+                <Area type="monotone" dataKey="verified" stroke="var(--gold)" strokeWidth={2.5} fill="url(#verifG)" name="Verified" />
               </AreaChart>
             </ResponsiveContainer>
           </div>

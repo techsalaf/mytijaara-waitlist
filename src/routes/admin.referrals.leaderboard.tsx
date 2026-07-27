@@ -14,7 +14,7 @@ function Leaderboard() {
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-3">
         <Podium user={second} place={2} icon={Medal} color="from-slate-300 to-slate-400" />
-        <Podium user={first} place={1} icon={Trophy} color="from-[#D4A017] to-[#b8860b]" featured />
+        <Podium user={first} place={1} icon={Trophy} color="from-gold to-[color-mix(in_oklab,var(--gold)_70%,black)]" featured />
         <Podium user={third} place={3} icon={Award} color="from-amber-700 to-amber-800" />
       </div>
 

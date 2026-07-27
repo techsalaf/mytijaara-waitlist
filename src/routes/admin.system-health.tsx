@@ -61,7 +61,7 @@ function HealthPage() {
               <XAxis dataKey="h" tick={{ fontSize: 10, fill: "#64748b" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 10, fill: "#64748b" }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 12 }} />
-              <Line type="monotone" dataKey="latency" stroke="#0D7A46" strokeWidth={2.5} dot={false} />
+              <Line type="monotone" dataKey="latency" stroke="var(--primary)" strokeWidth={2.5} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>

@@ -28,15 +28,15 @@ function ReferralOverview() {
               <AreaChart data={signupTrend.map((d) => ({ ...d, refs: Math.round(d.signups * 0.42) }))}>
                 <defs>
                   <linearGradient id="refG" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#D4A017" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="#D4A017" stopOpacity={0} />
+                    <stop offset="0%" stopColor="var(--gold)" stopOpacity={0.4} />
+                    <stop offset="100%" stopColor="var(--gold)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                 <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 12 }} />
-                <Area type="monotone" dataKey="refs" stroke="#D4A017" strokeWidth={2.5} fill="url(#refG)" />
+                <Area type="monotone" dataKey="refs" stroke="var(--gold)" strokeWidth={2.5} fill="url(#refG)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>

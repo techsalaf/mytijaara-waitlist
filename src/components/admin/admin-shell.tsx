@@ -117,7 +117,7 @@ export function AdminShell() {
 
           <button
             onClick={() => setPaletteOpen(true)}
-            className="group relative flex h-9 w-full max-w-md items-center gap-2 rounded-md bg-muted/40 px-3 text-left text-sm text-muted-foreground transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0D7A46]/40"
+            className="group relative flex h-9 w-full max-w-md items-center gap-2 rounded-md bg-muted/40 px-3 text-left text-sm text-muted-foreground transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           >
             <Search className="h-4 w-4" />
             <span className="hidden sm:inline">Search or jump to…</span>

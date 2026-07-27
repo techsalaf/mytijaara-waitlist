@@ -33,7 +33,7 @@ function ReferralAnalytics() {
                 <XAxis dataKey="channel" tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 12 }} />
-                <Bar dataKey="value" fill="#0D7A46" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="value" fill="var(--primary)" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -61,8 +61,8 @@ function ReferralAnalytics() {
               <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 12 }} />
-              <Line type="monotone" dataKey="clicks" stroke="#D4A017" strokeWidth={2.5} dot={false} name="Clicks" />
-              <Line type="monotone" dataKey="refs" stroke="#0D7A46" strokeWidth={2.5} dot={false} name="Signups" />
+              <Line type="monotone" dataKey="clicks" stroke="var(--gold)" strokeWidth={2.5} dot={false} name="Clicks" />
+              <Line type="monotone" dataKey="refs" stroke="var(--primary)" strokeWidth={2.5} dot={false} name="Signups" />
             </LineChart>
           </ResponsiveContainer>
         </div>

@@ -110,53 +110,53 @@ export function EmptyState({
 }
 
 function EmptyIllustration({ variant }: { variant: "default" | "search" | "inbox" | "chart" }) {
-  // Palette: green #0D7A46, deep #166534, gold #D4A017
+  // Palette: design tokens only — var(--primary), var(--gold), var(--card)
   const common = "h-32 w-40";
   if (variant === "search") {
     return (
       <svg className={common} viewBox="0 0 160 128" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-        <ellipse cx="80" cy="112" rx="56" ry="6" fill="#0D7A46" fillOpacity="0.08" />
-        <circle cx="70" cy="58" r="30" fill="#F0F7F3" stroke="#0D7A46" strokeWidth="2.5" />
-        <circle cx="70" cy="58" r="20" fill="#fff" stroke="#166534" strokeWidth="1.5" strokeDasharray="3 3" />
-        <path d="M92 80l16 16" stroke="#166534" strokeWidth="4" strokeLinecap="round" />
-        <circle cx="118" cy="34" r="6" fill="#D4A017" fillOpacity="0.35" />
-        <circle cx="30" cy="88" r="4" fill="#D4A017" fillOpacity="0.5" />
+        <ellipse cx="80" cy="112" rx="56" ry="6" fill="var(--primary)" fillOpacity="0.08" />
+        <circle cx="70" cy="58" r="30" fill="var(--primary-soft)" stroke="var(--primary)" strokeWidth="2.5" />
+        <circle cx="70" cy="58" r="20" fill="var(--card)" stroke="var(--primary)" strokeWidth="1.5" strokeDasharray="3 3" />
+        <path d="M92 80l16 16" stroke="var(--primary)" strokeWidth="4" strokeLinecap="round" />
+        <circle cx="118" cy="34" r="6" fill="var(--gold)" fillOpacity="0.35" />
+        <circle cx="30" cy="88" r="4" fill="var(--gold)" fillOpacity="0.5" />
       </svg>
     );
   }
   if (variant === "inbox") {
     return (
       <svg className={common} viewBox="0 0 160 128" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-        <ellipse cx="80" cy="112" rx="56" ry="6" fill="#0D7A46" fillOpacity="0.08" />
-        <rect x="34" y="42" width="92" height="60" rx="8" fill="#fff" stroke="#0D7A46" strokeWidth="2" />
-        <path d="M34 72h30l6 10h20l6-10h30" stroke="#166534" strokeWidth="2" fill="#F0F7F3" />
-        <rect x="52" y="30" width="56" height="18" rx="3" fill="#D4A017" fillOpacity="0.25" stroke="#D4A017" strokeWidth="1.5" />
-        <circle cx="130" cy="34" r="6" fill="#D4A017" />
+        <ellipse cx="80" cy="112" rx="56" ry="6" fill="var(--primary)" fillOpacity="0.08" />
+        <rect x="34" y="42" width="92" height="60" rx="8" fill="var(--card)" stroke="var(--primary)" strokeWidth="2" />
+        <path d="M34 72h30l6 10h20l6-10h30" stroke="var(--primary)" strokeWidth="2" fill="var(--primary-soft)" />
+        <rect x="52" y="30" width="56" height="18" rx="3" fill="var(--gold)" fillOpacity="0.25" stroke="var(--gold)" strokeWidth="1.5" />
+        <circle cx="130" cy="34" r="6" fill="var(--gold)" />
       </svg>
     );
   }
   if (variant === "chart") {
     return (
       <svg className={common} viewBox="0 0 160 128" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-        <ellipse cx="80" cy="112" rx="56" ry="6" fill="#0D7A46" fillOpacity="0.08" />
-        <rect x="30" y="34" width="100" height="68" rx="8" fill="#fff" stroke="#0D7A46" strokeWidth="2" />
-        <rect x="46" y="70" width="12" height="22" rx="2" fill="#0D7A46" fillOpacity="0.3" />
-        <rect x="66" y="58" width="12" height="34" rx="2" fill="#0D7A46" fillOpacity="0.55" />
-        <rect x="86" y="46" width="12" height="46" rx="2" fill="#0D7A46" />
-        <rect x="106" y="62" width="12" height="30" rx="2" fill="#D4A017" />
+        <ellipse cx="80" cy="112" rx="56" ry="6" fill="var(--primary)" fillOpacity="0.08" />
+        <rect x="30" y="34" width="100" height="68" rx="8" fill="var(--card)" stroke="var(--primary)" strokeWidth="2" />
+        <rect x="46" y="70" width="12" height="22" rx="2" fill="var(--primary)" fillOpacity="0.3" />
+        <rect x="66" y="58" width="12" height="34" rx="2" fill="var(--primary)" fillOpacity="0.55" />
+        <rect x="86" y="46" width="12" height="46" rx="2" fill="var(--primary)" />
+        <rect x="106" y="62" width="12" height="30" rx="2" fill="var(--gold)" />
       </svg>
     );
   }
   // default: sparkles + list
   return (
     <svg className={common} viewBox="0 0 160 128" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-      <ellipse cx="80" cy="112" rx="56" ry="6" fill="#0D7A46" fillOpacity="0.08" />
-      <rect x="34" y="28" width="92" height="76" rx="10" fill="#fff" stroke="#0D7A46" strokeWidth="2" />
-      <rect x="46" y="46" width="60" height="6" rx="3" fill="#0D7A46" fillOpacity="0.25" />
-      <rect x="46" y="60" width="42" height="6" rx="3" fill="#0D7A46" fillOpacity="0.15" />
-      <rect x="46" y="74" width="52" height="6" rx="3" fill="#0D7A46" fillOpacity="0.15" />
-      <path d="M120 30l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#D4A017" />
-      <circle cx="30" cy="94" r="4" fill="#D4A017" fillOpacity="0.6" />
+      <ellipse cx="80" cy="112" rx="56" ry="6" fill="var(--primary)" fillOpacity="0.08" />
+      <rect x="34" y="28" width="92" height="76" rx="10" fill="var(--card)" stroke="var(--primary)" strokeWidth="2" />
+      <rect x="46" y="46" width="60" height="6" rx="3" fill="var(--primary)" fillOpacity="0.25" />
+      <rect x="46" y="60" width="42" height="6" rx="3" fill="var(--primary)" fillOpacity="0.15" />
+      <rect x="46" y="74" width="52" height="6" rx="3" fill="var(--primary)" fillOpacity="0.15" />
+      <path d="M120 30l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="var(--gold)" />
+      <circle cx="30" cy="94" r="4" fill="var(--gold)" fillOpacity="0.6" />
     </svg>
   );
 }

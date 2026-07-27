@@ -9,7 +9,7 @@ export const Route = createFileRoute("/auth")({
 function AuthLayout() {
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
-      <div className="relative hidden overflow-hidden bg-gradient-to-br from-[#0D7A46] via-[#166534] to-[#0a5533] lg:block">
+      <div className="relative hidden overflow-hidden bg-primary-gradient lg:block">
         <div className="absolute inset-0 opacity-30" style={{
           backgroundImage:
             "radial-gradient(circle at 20% 10%, rgba(212,160,23,0.35), transparent 45%), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.15), transparent 40%)",
