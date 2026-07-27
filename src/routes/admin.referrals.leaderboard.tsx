@@ -23,7 +23,7 @@ function Leaderboard() {
           {rest.map((u) => (
             <Link key={u.id} to="/admin/referrals/$id" params={{ id: u.id }} className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-muted/50">
               <div className="w-8 text-center text-sm font-bold text-muted-foreground">#{u.rank}</div>
-              <div className="grid h-8 w-8 place-items-center rounded-full bg-[#0D7A46]/10 text-[10px] font-semibold text-[#0D7A46]">
+              <div className="grid h-8 w-8 place-items-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
                 {u.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
               </div>
               <div className="min-w-0 flex-1">
@@ -31,7 +31,7 @@ function Leaderboard() {
                 <div className="text-xs text-muted-foreground">{u.city}</div>
               </div>
               <div className="text-sm font-semibold">{u.referrals}</div>
-              <Badge variant="secondary" className="bg-[#D4A017]/10 text-[#8a6b0f]">{u.points} pts</Badge>
+              <Badge variant="secondary" className="bg-gold/10 text-gold-foreground">{u.points} pts</Badge>
             </Link>
           ))}
         </div>
@@ -51,11 +51,11 @@ function Podium({ user, place, icon: Icon, color, featured }: any) {
       <div className="text-xs text-muted-foreground">{user.city}</div>
       <div className="mt-3 grid grid-cols-2 gap-2">
         <div className="rounded-lg bg-muted/40 py-1.5">
-          <div className="text-base font-bold text-[#0D7A46]">{user.referrals}</div>
+          <div className="text-base font-bold text-primary">{user.referrals}</div>
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Refs</div>
         </div>
         <div className="rounded-lg bg-muted/40 py-1.5">
-          <div className="text-base font-bold text-[#D4A017]">{user.points}</div>
+          <div className="text-base font-bold text-gold">{user.points}</div>
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Points</div>
         </div>
       </div>

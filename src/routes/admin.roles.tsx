@@ -16,7 +16,7 @@ function RolesPage() {
       <PageHeader
         title="Roles & Permissions"
         description="Control what each team member can access and do."
-        actions={<Button asChild size="sm" className="bg-[#0D7A46] hover:bg-[#166534]"><Link to="/admin/roles/$id" params={{ id: "new" }}><Plus className="mr-2 h-4 w-4" /> Create role</Link></Button>}
+        actions={<Button asChild size="sm" className="bg-primary hover:bg-primary/90"><Link to="/admin/roles/$id" params={{ id: "new" }}><Plus className="mr-2 h-4 w-4" /> Create role</Link></Button>}
       />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {roles.map((r) => (

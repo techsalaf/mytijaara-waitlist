@@ -35,7 +35,7 @@ function MediaPage() {
       <PageHeader
         title="Media Library"
         description={`${mediaFiles.length} files · 218 MB of 500 MB used`}
-        actions={<Button size="sm" className="bg-[#0D7A46] hover:bg-[#166534]"><Upload className="mr-2 h-4 w-4" /> Upload</Button>}
+        actions={<Button size="sm" className="bg-primary hover:bg-primary/90"><Upload className="mr-2 h-4 w-4" /> Upload</Button>}
       />
 
       <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
@@ -44,7 +44,7 @@ function MediaPage() {
           {folders.map((f) => (
             <button key={f} onClick={() => setFolder(f)} className={cn(
               "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium",
-              folder === f ? "bg-[#0D7A46] text-white" : "text-foreground/70 hover:bg-muted"
+              folder === f ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:bg-muted"
             )}>
               <Folder className="h-4 w-4" />
               <span className="flex-1 text-left capitalize">{f}</span>
@@ -68,8 +68,8 @@ function MediaPage() {
               </SelectContent>
             </Select>
             <div className="flex overflow-hidden rounded-lg border border-border/60">
-              <button className={cn("p-2", view === "grid" ? "bg-[#0D7A46] text-white" : "hover:bg-muted")} onClick={() => setView("grid")}><Grid3x3 className="h-4 w-4" /></button>
-              <button className={cn("p-2", view === "list" ? "bg-[#0D7A46] text-white" : "hover:bg-muted")} onClick={() => setView("list")}><List className="h-4 w-4" /></button>
+              <button className={cn("p-2", view === "grid" ? "bg-primary text-primary-foreground" : "hover:bg-muted")} onClick={() => setView("grid")}><Grid3x3 className="h-4 w-4" /></button>
+              <button className={cn("p-2", view === "list" ? "bg-primary text-primary-foreground" : "hover:bg-muted")} onClick={() => setView("list")}><List className="h-4 w-4" /></button>
             </div>
           </div>
 

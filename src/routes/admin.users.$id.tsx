@@ -14,7 +14,7 @@ export const Route = createFileRoute("/admin/users/$id")({
     if (!u) throw notFound();
     return u;
   },
-  notFoundComponent: () => <div className="text-center p-10">User not found. <Link to="/admin/users" className="text-[#0D7A46]">Go back</Link></div>,
+  notFoundComponent: () => <div className="text-center p-10">User not found. <Link to="/admin/users" className="text-primary">Go back</Link></div>,
   component: UserDetail,
 });
 
@@ -37,7 +37,7 @@ function UserDetail() {
       </Button>
 
       <div className="flex flex-wrap items-center gap-4">
-        <div className="grid h-16 w-16 place-items-center rounded-2xl bg-[#0D7A46] text-lg font-bold text-white">{u.avatar}</div>
+        <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary text-lg font-bold text-white">{u.avatar}</div>
         <div>
           <h1 className="text-2xl font-bold">{u.name}</h1>
           <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
@@ -72,8 +72,8 @@ function UserDetail() {
         <ol className="relative space-y-4 border-l-2 border-border/60 pl-6">
           {timeline.map((e, i) => (
             <li key={i} className="relative">
-              <span className="absolute -left-[30px] top-1 grid h-4 w-4 place-items-center rounded-full border-2 border-[#0D7A46] bg-white">
-                <Circle className="h-1.5 w-1.5 fill-[#0D7A46] text-[#0D7A46]" />
+              <span className="absolute -left-[30px] top-1 grid h-4 w-4 place-items-center rounded-full border-2 border-primary bg-white">
+                <Circle className="h-1.5 w-1.5 fill-[#0D7A46] text-primary" />
               </span>
               <div className="text-sm">{e.action}</div>
               <div className="text-xs text-muted-foreground">{e.time}</div>

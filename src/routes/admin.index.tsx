@@ -33,7 +33,7 @@ function DashboardPage() {
             <Button variant="outline" size="sm">
               <Calendar className="mr-2 h-4 w-4" /> Last 30 days
             </Button>
-            <Button size="sm" className="bg-[#0D7A46] hover:bg-[#166534]">
+            <Button size="sm" className="bg-primary hover:bg-primary/90">
               <Sparkles className="mr-2 h-4 w-4" /> Weekly digest
             </Button>
           </>
@@ -108,7 +108,7 @@ function DashboardPage() {
                   <span className="text-muted-foreground">{c.users} users · <span className="text-emerald-600">+{c.growth}%</span></span>
                 </div>
                 <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                  <div className="h-full rounded-full bg-[#0D7A46]" style={{ width: `${(c.users / 89) * 100}%` }} />
+                  <div className="h-full rounded-full bg-primary" style={{ width: `${(c.users / 89) * 100}%` }} />
                 </div>
               </div>
             ))}
@@ -148,16 +148,16 @@ function DashboardPage() {
               <div className="text-xs font-medium">Welcome to MyTijaara</div>
               <div className="mt-2 grid grid-cols-3 gap-2 text-center text-xs">
                 <div><div className="font-bold">1,847</div><div className="text-muted-foreground">Sent</div></div>
-                <div><div className="font-bold text-[#0D7A46]">48.2%</div><div className="text-muted-foreground">Opens</div></div>
-                <div><div className="font-bold text-[#D4A017]">12.7%</div><div className="text-muted-foreground">Clicks</div></div>
+                <div><div className="font-bold text-primary">48.2%</div><div className="text-muted-foreground">Opens</div></div>
+                <div><div className="font-bold text-gold">12.7%</div><div className="text-muted-foreground">Clicks</div></div>
               </div>
             </div>
             <div className="rounded-xl border border-border/60 p-3">
               <div className="text-xs font-medium">Lagos Early Access</div>
               <div className="mt-2 grid grid-cols-3 gap-2 text-center text-xs">
                 <div><div className="font-bold">892</div><div className="text-muted-foreground">Sent</div></div>
-                <div><div className="font-bold text-[#0D7A46]">57.4%</div><div className="text-muted-foreground">Opens</div></div>
-                <div><div className="font-bold text-[#D4A017]">20.9%</div><div className="text-muted-foreground">Clicks</div></div>
+                <div><div className="font-bold text-primary">57.4%</div><div className="text-muted-foreground">Opens</div></div>
+                <div><div className="font-bold text-gold">20.9%</div><div className="text-muted-foreground">Clicks</div></div>
               </div>
             </div>
             <Button asChild variant="ghost" size="sm" className="w-full">
@@ -191,11 +191,11 @@ function DashboardPage() {
               {referralLeaderboard.slice(0, 6).map((u) => (
                 <tr key={u.id} className="border-b border-border/40 last:border-0">
                   <td className="py-2.5">
-                    <Badge variant="secondary" className="bg-[#D4A017]/15 text-[#8a6b0f] font-bold">#{u.rank}</Badge>
+                    <Badge variant="secondary" className="bg-gold/15 text-gold-foreground font-bold">#{u.rank}</Badge>
                   </td>
                   <td className="py-2.5">
                     <div className="flex items-center gap-2">
-                      <div className="grid h-7 w-7 place-items-center rounded-full bg-[#0D7A46]/10 text-[10px] font-semibold text-[#0D7A46]">
+                      <div className="grid h-7 w-7 place-items-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
                         {u.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
                       </div>
                       <div>
@@ -207,7 +207,7 @@ function DashboardPage() {
                   <td className="py-2.5 text-muted-foreground">{u.city}</td>
                   <td className="py-2.5 text-right font-semibold">{u.referrals}</td>
                   <td className="py-2.5 text-right">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-[#D4A017]/10 px-2 py-0.5 text-xs font-semibold text-[#8a6b0f]">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-gold/10 px-2 py-0.5 text-xs font-semibold text-gold-foreground">
                       <Award className="h-3 w-3" /> {u.points}
                     </span>
                   </td>

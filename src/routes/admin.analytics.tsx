@@ -64,7 +64,7 @@ function Analytics() {
                 <span className="text-muted-foreground">{f.value.toLocaleString()} · {f.pct}%</span>
               </div>
               <div className="h-8 overflow-hidden rounded-lg bg-muted">
-                <div className="flex h-full items-center justify-end bg-gradient-to-r from-[#0D7A46] to-[#166534] px-3 text-xs font-semibold text-white" style={{ width: `${f.pct}%` }}>
+                <div className="flex h-full items-center justify-end bg-gradient-to-r from-primary to-[color-mix(in_oklab,var(--primary)_75%,black)] px-3 text-xs font-semibold text-white" style={{ width: `${f.pct}%` }}>
                   {f.pct}%
                 </div>
               </div>

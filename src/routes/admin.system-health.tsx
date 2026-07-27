@@ -32,17 +32,17 @@ function HealthPage() {
         {statuses.map((s) => (
           <div key={s.label} className="rounded-2xl border border-border/60 bg-white p-5 shadow-sm">
             <div className="flex items-start justify-between">
-              <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#0D7A46]/10 text-[#0D7A46]">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
                 <s.icon className="h-5 w-5" />
               </div>
               <Badge className={
                 s.status === "operational" ? "bg-emerald-50 text-emerald-700" :
-                s.status === "degraded" ? "bg-[#D4A017]/15 text-[#8a6b0f]" :
+                s.status === "degraded" ? "bg-gold/15 text-gold-foreground" :
                 "bg-red-50 text-red-700"
               }>
                 <span className={"mr-1 inline-block h-1.5 w-1.5 rounded-full " + (
                   s.status === "operational" ? "bg-emerald-500" :
-                  s.status === "degraded" ? "bg-[#D4A017]" : "bg-red-500"
+                  s.status === "degraded" ? "bg-gold" : "bg-red-500"
                 )} />
                 {s.status}
               </Badge>
@@ -73,7 +73,7 @@ function HealthPage() {
           <span className="font-semibold">44%</span>
         </div>
         <div className="h-3 overflow-hidden rounded-full bg-muted">
-          <div className="h-full rounded-full bg-gradient-to-r from-[#0D7A46] to-[#166534]" style={{ width: "44%" }} />
+          <div className="h-full rounded-full bg-gradient-to-r from-primary to-[color-mix(in_oklab,var(--primary)_75%,black)]" style={{ width: "44%" }} />
         </div>
       </SectionCard>
     </div>

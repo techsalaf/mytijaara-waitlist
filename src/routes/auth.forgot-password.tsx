@@ -24,7 +24,7 @@ function ForgotPage() {
   if (sent) {
     return (
       <div>
-        <div className="grid h-14 w-14 place-items-center rounded-2xl bg-[#0D7A46]/10 text-[#0D7A46]">
+        <div className="grid h-14 w-14 place-items-center rounded-2xl bg-primary/10 text-primary">
           <MailCheck className="h-6 w-6" />
         </div>
         <h1 className="mt-5 text-2xl font-bold tracking-tight">Check your inbox</h1>
@@ -51,7 +51,7 @@ function ForgotPage() {
           <Label htmlFor="email">Work email</Label>
           <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@mytijaara.com" className="mt-1.5" />
         </div>
-        <Button type="submit" disabled={loading} className="h-11 w-full bg-[#0D7A46] hover:bg-[#166534]">
+        <Button type="submit" disabled={loading} className="h-11 w-full bg-primary hover:bg-primary/90">
           {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending…</> : "Send reset link"}
         </Button>
       </form>

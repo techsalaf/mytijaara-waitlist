@@ -31,7 +31,7 @@ export function StatCard({
       <div className="flex items-start justify-between">
         <div className="text-sm font-medium text-muted-foreground">{label}</div>
         {Icon && (
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#0D7A46]/10 text-[#0D7A46]">
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/10 text-primary">
             <Icon className="h-4 w-4" />
           </div>
         )}
@@ -98,7 +98,7 @@ export function EmptyState({
       {illustration !== "none" ? (
         <EmptyIllustration variant={illustration} />
       ) : Icon ? (
-        <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[#0D7A46]/10 text-[#0D7A46]">
+        <div className="grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 text-primary">
           <Icon className="h-5 w-5" />
         </div>
       ) : null}

@@ -21,7 +21,7 @@ function AuthLayout() {
             </div>
             <div>
               <div className="text-sm font-bold">MyTijaara</div>
-              <div className="text-[10px] font-medium uppercase tracking-widest text-[#D4A017]">Admin</div>
+              <div className="text-[10px] font-medium uppercase tracking-widest text-gold">Admin</div>
             </div>
           </Link>
           <div>
@@ -29,7 +29,7 @@ function AuthLayout() {
               "Everything Nigerians need in one place — and one control panel to run it all."
             </blockquote>
             <div className="mt-4 flex items-center gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-full bg-[#D4A017] text-sm font-bold text-[#166534]">
+              <div className="grid h-10 w-10 place-items-center rounded-full bg-gold text-sm font-bold text-primary">
                 AO
               </div>
               <div>

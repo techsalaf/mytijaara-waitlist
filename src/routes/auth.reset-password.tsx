@@ -62,11 +62,11 @@ function ResetPage() {
             </li>
           ))}
         </ul>
-        <Button type="submit" disabled={!valid || loading} className="h-11 w-full bg-[#0D7A46] hover:bg-[#166534]">
+        <Button type="submit" disabled={!valid || loading} className="h-11 w-full bg-primary hover:bg-primary/90">
           {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Updating…</> : "Update password"}
         </Button>
         <div className="text-center text-xs text-muted-foreground">
-          Remember your password? <Link to="/auth/login" className="font-medium text-[#0D7A46] hover:underline">Sign in</Link>
+          Remember your password? <Link to="/auth/login" className="font-medium text-primary hover:underline">Sign in</Link>
         </div>
       </form>
     </div>

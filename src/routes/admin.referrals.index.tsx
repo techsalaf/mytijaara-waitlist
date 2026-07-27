@@ -61,8 +61,8 @@ function ReferralOverview() {
         <div className="space-y-2">
           {referralLeaderboard.slice(0, 5).map((u) => (
             <Link key={u.id} to="/admin/referrals/$id" params={{ id: u.id }} className="flex items-center gap-3 rounded-xl border border-border/60 p-3 hover:bg-muted/40">
-              <Badge className="bg-[#D4A017]/20 text-[#8a6b0f] font-bold">#{u.rank}</Badge>
-              <div className="grid h-9 w-9 place-items-center rounded-full bg-[#0D7A46]/10 text-xs font-semibold text-[#0D7A46]">
+              <Badge className="bg-gold/20 text-gold-foreground font-bold">#{u.rank}</Badge>
+              <div className="grid h-9 w-9 place-items-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                 {u.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
               </div>
               <div className="min-w-0 flex-1">
@@ -71,7 +71,7 @@ function ReferralOverview() {
               </div>
               <div className="text-right">
                 <div className="font-bold">{u.referrals} refs</div>
-                <div className="text-xs text-[#D4A017] font-semibold">{u.points} pts</div>
+                <div className="text-xs text-gold font-semibold">{u.points} pts</div>
               </div>
             </Link>
           ))}

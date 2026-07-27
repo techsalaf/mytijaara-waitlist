@@ -30,16 +30,16 @@ function NotificationsPage() {
           <SectionCard>
             <div className="space-y-2">
               {notifications.map((n) => (
-                <div key={n.id} className={cn("flex items-start gap-3 rounded-xl border p-4", n.unread ? "border-[#0D7A46]/30 bg-[#0D7A46]/[0.03]" : "border-border/60")}>
+                <div key={n.id} className={cn("flex items-start gap-3 rounded-xl border p-4", n.unread ? "border-primary/30 bg-primary/[0.03]" : "border-border/60")}>
                   <div className={cn("grid h-9 w-9 place-items-center rounded-xl",
                     n.type === "success" ? "bg-emerald-100 text-emerald-700" :
-                    n.type === "warning" ? "bg-[#D4A017]/15 text-[#8a6b0f]" :
-                    "bg-[#0D7A46]/10 text-[#0D7A46]"
+                    n.type === "warning" ? "bg-gold/15 text-gold-foreground" :
+                    "bg-primary/10 text-primary"
                   )}><Bell className="h-4 w-4" /></div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-semibold">{n.title}</span>
-                      {n.unread && <span className="h-1.5 w-1.5 rounded-full bg-[#D4A017]" />}
+                      {n.unread && <span className="h-1.5 w-1.5 rounded-full bg-gold" />}
                     </div>
                     <p className="text-sm text-muted-foreground">{n.body}</p>
                     <div className="mt-1 text-xs text-muted-foreground">{n.time}</div>

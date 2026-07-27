@@ -133,14 +133,14 @@ export function AdminShell() {
                 <Button variant="ghost" size="icon" className="relative">
                   <Bell className="h-5 w-5" />
                   {unreadCount > 0 && (
-                    <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#D4A017]" />
+                    <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-gold" />
                   )}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-80">
                 <DropdownMenuLabel className="flex items-center justify-between">
                   <span>Notifications</span>
-                  <Link to="/admin/notifications" className="text-xs font-normal text-[#0D7A46] hover:underline">
+                  <Link to="/admin/notifications" className="text-xs font-normal text-primary hover:underline">
                     View all
                   </Link>
                 </DropdownMenuLabel>
@@ -149,7 +149,7 @@ export function AdminShell() {
                   <DropdownMenuItem key={n.id} className="flex flex-col items-start gap-0.5 py-2.5">
                     <div className="flex w-full items-center gap-2">
                       <span className="text-sm font-medium">{n.title}</span>
-                      {n.unread && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#D4A017]" />}
+                      {n.unread && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-gold" />}
                     </div>
                     <span className="text-xs text-muted-foreground line-clamp-1">{n.body}</span>
                     <span className="text-[10px] text-muted-foreground">{n.time}</span>
@@ -161,7 +161,7 @@ export function AdminShell() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2 rounded-full py-1 pl-1 pr-3 hover:bg-muted/60">
-                  <div className="grid h-8 w-8 place-items-center rounded-full bg-[#0D7A46] text-xs font-semibold text-white">
+                  <div className="grid h-8 w-8 place-items-center rounded-full bg-primary text-xs font-semibold text-white">
                     {session.avatar}
                   </div>
                   <span className="hidden text-sm font-medium sm:inline">{session.name.split(" ")[0]}</span>
@@ -209,12 +209,12 @@ function SidebarContent({ pathname }: { pathname: string }) {
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center gap-2 border-b border-border/60 px-5">
-        <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#0D7A46] text-white">
+        <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground">
           <Sparkles className="h-4 w-4" />
         </div>
         <div className="flex flex-col leading-tight">
           <span className="text-sm font-bold tracking-tight">MyTijaara</span>
-          <span className="text-[10px] font-medium uppercase tracking-widest text-[#D4A017]">Admin</span>
+          <span className="text-[10px] font-medium uppercase tracking-widest text-gold">Admin</span>
         </div>
       </div>
 
@@ -238,7 +238,7 @@ function SidebarContent({ pathname }: { pathname: string }) {
                     className={cn(
                       "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                       active
-                        ? "bg-[#0D7A46] text-white shadow-sm"
+                        ? "bg-primary text-primary-foreground shadow-sm"
                         : "text-foreground/70 hover:bg-muted hover:text-foreground",
                     )}
                   >
@@ -249,7 +249,7 @@ function SidebarContent({ pathname }: { pathname: string }) {
                         variant="secondary"
                         className={cn(
                           "h-5 px-1.5 text-[10px] font-semibold",
-                          active ? "bg-white/20 text-white" : "bg-[#0D7A46]/10 text-[#0D7A46]",
+                          active ? "bg-white/20 text-white" : "bg-primary/10 text-primary",
                         )}
                       >
                         {item.badge}
@@ -264,8 +264,8 @@ function SidebarContent({ pathname }: { pathname: string }) {
       </nav>
 
       <div className="border-t border-border/60 p-4">
-        <div className="rounded-xl bg-gradient-to-br from-[#0D7A46] to-[#166534] p-4 text-white">
-          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-[#D4A017]">Pro tip</div>
+        <div className="rounded-xl bg-gradient-to-br from-primary to-[color-mix(in_oklab,var(--primary)_75%,black)] p-4 text-white">
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-gold">Pro tip</div>
           <div className="text-sm font-medium leading-snug">Press <kbd className="rounded bg-white/20 px-1 font-mono">⌘K</kbd> anywhere to jump.</div>
         </div>
       </div>

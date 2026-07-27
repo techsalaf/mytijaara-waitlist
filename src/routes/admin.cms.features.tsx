@@ -27,13 +27,13 @@ function FeaturesEditor() {
       <SectionCard
         title="Features grid"
         description="Reorder, edit or add features shown on the landing page"
-        actions={<Button size="sm" className="bg-[#0D7A46] hover:bg-[#166534]"><Plus className="mr-2 h-4 w-4" /> Add feature</Button>}
+        actions={<Button size="sm" className="bg-primary hover:bg-primary/90"><Plus className="mr-2 h-4 w-4" /> Add feature</Button>}
       >
         <div className="space-y-2">
           {features.map((f, i) => (
             <div key={i} className="flex items-start gap-3 rounded-xl border border-border/60 p-3">
               <button className="mt-1 cursor-grab text-muted-foreground"><GripVertical className="h-4 w-4" /></button>
-              <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#0D7A46]/10 text-[#0D7A46]">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
                 <f.icon className="h-5 w-5" />
               </div>
               <div className="grid flex-1 gap-2 sm:grid-cols-2">

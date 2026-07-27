@@ -14,7 +14,7 @@ export const Route = createFileRoute("/admin/cms/faqs")({
     <SectionCard
       title="Frequently asked questions"
       description="Drag to reorder. Toggle to show or hide."
-      actions={<Button size="sm" className="bg-[#0D7A46] hover:bg-[#166534]"><Plus className="mr-2 h-4 w-4" /> Add FAQ</Button>}
+      actions={<Button size="sm" className="bg-primary hover:bg-primary/90"><Plus className="mr-2 h-4 w-4" /> Add FAQ</Button>}
     >
       <Accordion type="multiple" className="space-y-2">
         {faqs.map((f) => (
