@@ -176,3 +176,9 @@
 @utility animate-fade-up { animation: fade-up 0.8s ease-out both; }
 @utility animate-pulse-glow { animation: pulse-glow 2.4s ease-out infinite; }
 @utility animate-marquee { animation: marquee 40s linear infinite; }
+
+@keyframes digit-in {
+  from { opacity: 0; transform: translateY(-45%) scale(0.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@utility animate-digit-in { animation: digit-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
