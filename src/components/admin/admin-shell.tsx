@@ -16,7 +16,6 @@ import {
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { CommandPalette } from "./command-palette";
 import { AdminSkeleton } from "./admin-skeleton";
-import { initTheme } from "@/lib/theme";
 
 import { cn } from "@/lib/utils";
 
