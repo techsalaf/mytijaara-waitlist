@@ -37,7 +37,7 @@ export function LaunchCountdown() {
       <div className="mx-auto max-w-5xl px-4 sm:px-6">
         <div className="relative overflow-hidden rounded-4xl bg-primary-gradient p-6 text-primary-foreground shadow-elegant sm:p-12">
           <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 animate-float-slower rounded-full bg-gold opacity-25 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-28 -left-16 h-72 w-72 animate-float rounded-full bg-white/5 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-28 -left-16 h-72 w-72 animate-float rounded-full bg-primary-foreground/5 blur-3xl" />
 
           <div className="relative mx-auto max-w-2xl text-center">
             <span

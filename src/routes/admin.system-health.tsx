@@ -30,7 +30,7 @@ function HealthPage() {
       />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {statuses.map((s) => (
-          <div key={s.label} className="rounded-2xl border border-border/60 bg-white p-5 shadow-sm">
+          <div key={s.label} className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
             <div className="flex items-start justify-between">
               <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
                 <s.icon className="h-5 w-5" />

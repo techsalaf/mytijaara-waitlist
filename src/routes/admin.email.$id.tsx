@@ -13,7 +13,7 @@ export const Route = createFileRoute("/admin/email/$id")({
     return c;
   },
   notFoundComponent: () => (
-    <div className="rounded-xl border border-border/60 bg-white p-10 text-center">
+    <div className="rounded-xl border border-border/60 bg-card p-10 text-center">
       <p>Campaign not found.</p>
       <Button asChild variant="link"><Link to="/admin/email">Back to campaigns</Link></Button>
     </div>

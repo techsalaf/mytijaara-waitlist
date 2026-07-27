@@ -14,9 +14,9 @@ function AuthLayout() {
           backgroundImage:
             "radial-gradient(circle at 20% 10%, rgba(212,160,23,0.35), transparent 45%), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.15), transparent 40%)",
         }} />
-        <div className="relative flex h-full flex-col justify-between p-12 text-white">
+        <div className="relative flex h-full flex-col justify-between p-12 text-primary-foreground">
           <Link to="/" className="flex items-center gap-2">
-            <div className="grid h-10 w-10 place-items-center rounded-xl bg-white/10 backdrop-blur">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary-foreground/10 backdrop-blur">
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
@@ -34,7 +34,7 @@ function AuthLayout() {
               </div>
               <div>
                 <div className="text-sm font-medium">Adaeze Okafor</div>
-                <div className="text-xs text-white/70">Head of Product, MyTijaara</div>
+                <div className="text-xs text-primary-foreground/70">Head of Product, MyTijaara</div>
               </div>
             </div>
           </div>

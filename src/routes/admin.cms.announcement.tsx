@@ -35,7 +35,7 @@ export const Route = createFileRoute("/admin/cms/announcement")({
         </div>
       </SectionCard>
       <SectionCard title="Preview">
-        <div className="rounded-lg bg-primary px-4 py-2.5 text-center text-sm text-white">
+        <div className="rounded-lg bg-primary px-4 py-2.5 text-center text-sm text-primary-foreground">
           <Megaphone className="mr-1.5 inline h-4 w-4" />
           🚀 Early access opens August 15 — join the waitlist now.{" "}
           <a href="#" className="ml-2 font-semibold underline">Join now →</a>

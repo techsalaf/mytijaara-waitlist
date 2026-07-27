@@ -9,7 +9,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/admin/referrals/$id")({
   component: RefDetail,
   notFoundComponent: () => (
-    <div className="rounded-xl border border-border/60 bg-white p-10 text-center">
+    <div className="rounded-xl border border-border/60 bg-card p-10 text-center">
       <p>Referrer not found.</p>
       <Button asChild variant="link"><Link to="/admin/referrals/leaderboard">Back to leaderboard</Link></Button>
     </div>
@@ -31,7 +31,7 @@ function RefDetail() {
           <Link to="/admin/referrals/leaderboard"><ArrowLeft className="mr-1 h-3 w-3" /> Back to leaderboard</Link>
         </Button>
         <div className="flex items-center gap-4">
-          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary text-lg font-bold text-white">
+          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary text-lg font-bold text-primary-foreground">
             {u.name.split(" ").map((n: string) => n[0]).slice(0, 2).join("")}
           </div>
           <div>

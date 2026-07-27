@@ -27,7 +27,7 @@ export function StatCard({
 }) {
   const positive = (delta ?? 0) >= 0;
   return (
-    <div className="rounded-2xl border border-border/60 bg-white p-5 shadow-sm dark:bg-neutral-900">
+    <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
       <div className="flex items-start justify-between">
         <div className="text-sm font-medium text-muted-foreground">{label}</div>
         {Icon && (
@@ -65,7 +65,7 @@ export function SectionCard({
   className?: string;
 }) {
   return (
-    <div className={cn("rounded-2xl border border-border/60 bg-white shadow-sm dark:bg-neutral-900", className)}>
+    <div className={cn("rounded-2xl border border-border/60 bg-card shadow-sm", className)}>
       {(title || actions) && (
         <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border/60 px-5 py-4">
           <div className="min-w-0">
@@ -94,7 +94,7 @@ export function EmptyState({
   illustration?: "default" | "search" | "inbox" | "chart" | "none";
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/70 bg-muted/20 px-6 py-12 text-center dark:bg-neutral-900/40">
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/70 bg-muted/20 px-6 py-12 text-center/40">
       {illustration !== "none" ? (
         <EmptyIllustration variant={illustration} />
       ) : Icon ? (

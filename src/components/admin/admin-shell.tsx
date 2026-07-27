@@ -97,7 +97,7 @@ export function AdminShell() {
   return (
     <div className="flex min-h-screen bg-[#F8FAF8] dark:bg-neutral-950">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 lg:z-30 border-r border-border/60 bg-white dark:bg-neutral-900">
+      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 lg:z-30 border-r border-border/60 bg-card">
         <SidebarContent pathname={pathname} />
       </aside>
 
@@ -110,7 +110,7 @@ export function AdminShell() {
 
       <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
         {/* Topbar */}
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border/60 bg-white/80 px-4 backdrop-blur-md lg:px-6 dark:bg-neutral-900/80">
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border/60 bg-card/80 px-4 backdrop-blur-md lg:px-6 ">
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setMobileOpen(true)}>
             <Menu className="h-5 w-5" />
           </Button>
@@ -122,7 +122,7 @@ export function AdminShell() {
             <Search className="h-4 w-4" />
             <span className="hidden sm:inline">Search or jump to…</span>
             <span className="inline sm:hidden">Search</span>
-            <kbd className="ml-auto hidden items-center gap-0.5 rounded border border-border bg-white px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground shadow-sm sm:inline-flex dark:bg-neutral-800">
+            <kbd className="ml-auto hidden items-center gap-0.5 rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground shadow-sm sm:inline-flex">
               {isMac ? "⌘" : "Ctrl"}<span>K</span>
             </kbd>
           </button>
@@ -161,7 +161,7 @@ export function AdminShell() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2 rounded-full py-1 pl-1 pr-3 hover:bg-muted/60">
-                  <div className="grid h-8 w-8 place-items-center rounded-full bg-primary text-xs font-semibold text-white">
+                  <div className="grid h-8 w-8 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                     {session.avatar}
                   </div>
                   <span className="hidden text-sm font-medium sm:inline">{session.name.split(" ")[0]}</span>
@@ -242,14 +242,14 @@ function SidebarContent({ pathname }: { pathname: string }) {
                         : "text-foreground/70 hover:bg-muted hover:text-foreground",
                     )}
                   >
-                    <Icon className={cn("h-4 w-4 shrink-0", active ? "text-white" : "text-muted-foreground")} />
+                    <Icon className={cn("h-4 w-4 shrink-0", active ? "text-primary-foreground" : "text-muted-foreground")} />
                     <span className="flex-1 truncate">{item.label}</span>
                     {item.badge && (
                       <Badge
                         variant="secondary"
                         className={cn(
                           "h-5 px-1.5 text-[10px] font-semibold",
-                          active ? "bg-white/20 text-white" : "bg-primary/10 text-primary",
+                          active ? "bg-primary-foreground/20 text-primary-foreground" : "bg-primary/10 text-primary",
                         )}
                       >
                         {item.badge}
@@ -264,9 +264,9 @@ function SidebarContent({ pathname }: { pathname: string }) {
       </nav>
 
       <div className="border-t border-border/60 p-4">
-        <div className="rounded-xl bg-gradient-to-br from-primary to-[color-mix(in_oklab,var(--primary)_75%,black)] p-4 text-white">
+        <div className="rounded-xl bg-gradient-to-br from-primary to-[color-mix(in_oklab,var(--primary)_75%,black)] p-4 text-primary-foreground">
           <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-gold">Pro tip</div>
-          <div className="text-sm font-medium leading-snug">Press <kbd className="rounded bg-white/20 px-1 font-mono">⌘K</kbd> anywhere to jump.</div>
+          <div className="text-sm font-medium leading-snug">Press <kbd className="rounded bg-primary-foreground/20 px-1 font-mono">⌘K</kbd> anywhere to jump.</div>
         </div>
       </div>
     </div>

@@ -10,8 +10,8 @@ export const Route = createFileRoute("/admin/email/templates")({
     <SectionCard title="Email templates" description="Reusable email designs" actions={<Button size="sm" className="bg-primary hover:bg-primary/90"><Plus className="mr-2 h-4 w-4" /> New template</Button>}>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {emailTemplates.map((t) => (
-          <div key={t.id} className="overflow-hidden rounded-xl border border-border/60 bg-white shadow-sm">
-            <div className="grid aspect-video place-items-center bg-gradient-to-br from-primary to-[color-mix(in_oklab,var(--primary)_75%,black)] text-white">
+          <div key={t.id} className="overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">
+            <div className="grid aspect-video place-items-center bg-gradient-to-br from-primary to-[color-mix(in_oklab,var(--primary)_75%,black)] text-primary-foreground">
               <Mail className="h-8 w-8 opacity-70" />
             </div>
             <div className="p-3">

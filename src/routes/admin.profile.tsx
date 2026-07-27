@@ -33,7 +33,7 @@ function ProfilePage() {
         <TabsContent value="profile" className="mt-4">
           <SectionCard actions={<Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => toast.success("Saved")}><Save className="mr-2 h-4 w-4" /> Save</Button>}>
             <div className="mb-6 flex items-center gap-4">
-              <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary text-lg font-bold text-white">AO</div>
+              <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary text-lg font-bold text-primary-foreground">AO</div>
               <div>
                 <Button variant="outline" size="sm">Change photo</Button>
                 <div className="mt-1 text-xs text-muted-foreground">JPG or PNG, max 2MB</div>

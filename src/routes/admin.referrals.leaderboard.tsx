@@ -42,8 +42,8 @@ function Leaderboard() {
 
 function Podium({ user, place, icon: Icon, color, featured }: any) {
   return (
-    <Link to="/admin/referrals/$id" params={{ id: user.id }} className={`relative overflow-hidden rounded-2xl border border-border/60 bg-white p-5 text-center shadow-sm ${featured ? "md:-translate-y-2 md:shadow-lg" : ""}`}>
-      <div className={`mx-auto grid h-14 w-14 place-items-center rounded-full bg-gradient-to-br ${color} text-white shadow-md`}>
+    <Link to="/admin/referrals/$id" params={{ id: user.id }} className={`relative overflow-hidden rounded-2xl border border-border/60 bg-card p-5 text-center shadow-sm ${featured ? "md:-translate-y-2 md:shadow-lg" : ""}`}>
+      <div className={`mx-auto grid h-14 w-14 place-items-center rounded-full bg-gradient-to-br ${color} text-primary-foreground shadow-md`}>
         <Icon className="h-6 w-6" />
       </div>
       <div className="mt-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">#{place}</div>
