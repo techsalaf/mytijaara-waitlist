@@ -1,7 +1,7 @@
 /** Skeleton shell shown while the auth guard verifies the session. */
 export function AdminSkeleton() {
   return (
-    <div className="flex min-h-screen bg-[#F8FAF8]">
+    <div className="flex min-h-screen bg-surface">
       <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 border-r border-border/60 bg-card">
         <div className="flex h-16 items-center gap-2 border-b border-border/60 px-5">
           <div className="h-9 w-9 animate-pulse rounded-xl bg-muted" />
