@@ -28,15 +28,15 @@ function ReferralOverview() {
               <AreaChart data={signupTrend.map((d) => ({ ...d, refs: Math.round(d.signups * 0.42) }))}>
                 <defs>
                   <linearGradient id="refG" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#D4A017" stopOpacity={0.4} />
-                    <stop offset="100%" stopColor="#D4A017" stopOpacity={0} />
+                    <stop offset="0%" stopColor="var(--gold)" stopOpacity={0.4} />
+                    <stop offset="100%" stopColor="var(--gold)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
                 <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 12 }} />
-                <Area type="monotone" dataKey="refs" stroke="#D4A017" strokeWidth={2.5} fill="url(#refG)" />
+                <Area type="monotone" dataKey="refs" stroke="var(--gold)" strokeWidth={2.5} fill="url(#refG)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -61,8 +61,8 @@ function ReferralOverview() {
         <div className="space-y-2">
           {referralLeaderboard.slice(0, 5).map((u) => (
             <Link key={u.id} to="/admin/referrals/$id" params={{ id: u.id }} className="flex items-center gap-3 rounded-xl border border-border/60 p-3 hover:bg-muted/40">
-              <Badge className="bg-[#D4A017]/20 text-[#8a6b0f] font-bold">#{u.rank}</Badge>
-              <div className="grid h-9 w-9 place-items-center rounded-full bg-[#0D7A46]/10 text-xs font-semibold text-[#0D7A46]">
+              <Badge className="bg-gold/20 text-gold-foreground font-bold">#{u.rank}</Badge>
+              <div className="grid h-9 w-9 place-items-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                 {u.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
               </div>
               <div className="min-w-0 flex-1">
@@ -71,7 +71,7 @@ function ReferralOverview() {
               </div>
               <div className="text-right">
                 <div className="font-bold">{u.referrals} refs</div>
-                <div className="text-xs text-[#D4A017] font-semibold">{u.points} pts</div>
+                <div className="text-xs text-gold font-semibold">{u.points} pts</div>
               </div>
             </Link>
           ))}

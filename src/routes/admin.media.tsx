@@ -35,7 +35,7 @@ function MediaPage() {
       <PageHeader
         title="Media Library"
         description={`${mediaFiles.length} files · 218 MB of 500 MB used`}
-        actions={<Button size="sm" className="bg-[#0D7A46] hover:bg-[#166534]"><Upload className="mr-2 h-4 w-4" /> Upload</Button>}
+        actions={<Button size="sm" className="bg-primary hover:bg-primary/90"><Upload className="mr-2 h-4 w-4" /> Upload</Button>}
       />
 
       <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
@@ -44,7 +44,7 @@ function MediaPage() {
           {folders.map((f) => (
             <button key={f} onClick={() => setFolder(f)} className={cn(
               "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium",
-              folder === f ? "bg-[#0D7A46] text-white" : "text-foreground/70 hover:bg-muted"
+              folder === f ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:bg-muted"
             )}>
               <Folder className="h-4 w-4" />
               <span className="flex-1 text-left capitalize">{f}</span>
@@ -54,7 +54,7 @@ function MediaPage() {
         </aside>
 
         <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border/60 bg-white p-3 shadow-sm">
+          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border/60 bg-card p-3 shadow-sm">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Search files…" value={q} onChange={(e) => setQ(e.target.value)} className="pl-9" />
@@ -68,18 +68,18 @@ function MediaPage() {
               </SelectContent>
             </Select>
             <div className="flex overflow-hidden rounded-lg border border-border/60">
-              <button className={cn("p-2", view === "grid" ? "bg-[#0D7A46] text-white" : "hover:bg-muted")} onClick={() => setView("grid")}><Grid3x3 className="h-4 w-4" /></button>
-              <button className={cn("p-2", view === "list" ? "bg-[#0D7A46] text-white" : "hover:bg-muted")} onClick={() => setView("list")}><List className="h-4 w-4" /></button>
+              <button className={cn("p-2", view === "grid" ? "bg-primary text-primary-foreground" : "hover:bg-muted")} onClick={() => setView("grid")}><Grid3x3 className="h-4 w-4" /></button>
+              <button className={cn("p-2", view === "list" ? "bg-primary text-primary-foreground" : "hover:bg-muted")} onClick={() => setView("list")}><List className="h-4 w-4" /></button>
             </div>
           </div>
 
           {view === "grid" ? (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
               {items.map((m) => (
-                <button key={m.id} onClick={() => setSelected(m)} className="group overflow-hidden rounded-xl border border-border/60 bg-white text-left shadow-sm transition-shadow hover:shadow-md">
+                <button key={m.id} onClick={() => setSelected(m)} className="group overflow-hidden rounded-xl border border-border/60 bg-card text-left shadow-sm transition-shadow hover:shadow-md">
                   <div className="aspect-square bg-muted">
                     {m.type === "image" && <img src={m.url} alt={m.name} loading="lazy" className="h-full w-full object-cover" />}
-                    {m.type === "video" && <div className="grid h-full place-items-center bg-slate-900 text-white"><FileVideo className="h-8 w-8" /></div>}
+                    {m.type === "video" && <div className="grid h-full place-items-center bg-slate-900 text-primary-foreground"><FileVideo className="h-8 w-8" /></div>}
                     {m.type === "document" && <div className="grid h-full place-items-center bg-slate-100"><FileText className="h-8 w-8 text-muted-foreground" /></div>}
                   </div>
                   <div className="p-2">
@@ -90,7 +90,7 @@ function MediaPage() {
               ))}
             </div>
           ) : (
-            <div className="overflow-hidden rounded-2xl border border-border/60 bg-white">
+            <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
               <table className="w-full text-sm">
                 <thead className="bg-muted/40 text-left text-xs uppercase tracking-wider text-muted-foreground">
                   <tr><th className="p-3">Name</th><th className="p-3">Folder</th><th className="p-3">Size</th><th className="p-3">Uploaded</th></tr>

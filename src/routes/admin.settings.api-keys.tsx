@@ -13,7 +13,7 @@ const keys = [
 
 export const Route = createFileRoute("/admin/settings/api-keys")({
   component: () => (
-    <SectionCard title="API keys" description="Use these to authenticate backend requests." actions={<Button size="sm" className="bg-[#0D7A46] hover:bg-[#166534]"><Plus className="mr-2 h-4 w-4" /> Generate key</Button>}>
+    <SectionCard title="API keys" description="Use these to authenticate backend requests." actions={<Button size="sm" className="bg-primary hover:bg-primary/90"><Plus className="mr-2 h-4 w-4" /> Generate key</Button>}>
       <div className="space-y-2">
         {keys.map((k) => (
           <div key={k.key} className="flex flex-wrap items-center gap-3 rounded-xl border border-border/60 p-3">

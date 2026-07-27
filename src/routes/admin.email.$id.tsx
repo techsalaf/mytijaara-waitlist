@@ -13,7 +13,7 @@ export const Route = createFileRoute("/admin/email/$id")({
     return c;
   },
   notFoundComponent: () => (
-    <div className="rounded-xl border border-border/60 bg-white p-10 text-center">
+    <div className="rounded-xl border border-border/60 bg-card p-10 text-center">
       <p>Campaign not found.</p>
       <Button asChild variant="link"><Link to="/admin/email">Back to campaigns</Link></Button>
     </div>
@@ -53,8 +53,8 @@ function CampaignDetail() {
               <XAxis dataKey="h" tick={{ fontSize: 10, fill: "#64748b" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 10, fill: "#64748b" }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 12 }} />
-              <Bar dataKey="opens" fill="#0D7A46" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="clicks" fill="#D4A017" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="opens" fill="var(--primary)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="clicks" fill="var(--gold)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

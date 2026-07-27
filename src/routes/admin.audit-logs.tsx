@@ -24,9 +24,9 @@ export const Route = createFileRoute("/admin/audit-logs")({
         </div>
         <ol className="relative space-y-4 border-l-2 border-border/60 pl-6">
           {activityLog.map((e) => (
-            <li key={e.id} className="relative rounded-xl border border-border/60 bg-white p-4">
-              <span className="absolute -left-[30px] top-4 grid h-4 w-4 place-items-center rounded-full border-2 border-[#0D7A46] bg-white">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#0D7A46]" />
+            <li key={e.id} className="relative rounded-xl border border-border/60 bg-card p-4">
+              <span className="absolute -left-[30px] top-4 grid h-4 w-4 place-items-center rounded-full border-2 border-primary bg-card">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
               </span>
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-sm font-semibold">{e.user}</span>

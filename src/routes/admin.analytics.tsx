@@ -40,16 +40,16 @@ function Analytics() {
             <AreaChart data={signupTrend.map((d) => ({ ...d, visitors: d.signups * 12 + Math.floor(Math.random() * 100) }))}>
               <defs>
                 <linearGradient id="visG" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#0D7A46" stopOpacity={0.4} />
-                  <stop offset="100%" stopColor="#0D7A46" stopOpacity={0} />
+                  <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.4} />
+                  <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
               <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 11, fill: "#64748b" }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 12 }} />
-              <Area type="monotone" dataKey="visitors" stroke="#0D7A46" fill="url(#visG)" strokeWidth={2.5} />
-              <Line type="monotone" dataKey="signups" stroke="#D4A017" strokeWidth={2.5} dot={false} />
+              <Area type="monotone" dataKey="visitors" stroke="var(--primary)" fill="url(#visG)" strokeWidth={2.5} />
+              <Line type="monotone" dataKey="signups" stroke="var(--gold)" strokeWidth={2.5} dot={false} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -64,7 +64,7 @@ function Analytics() {
                 <span className="text-muted-foreground">{f.value.toLocaleString()} · {f.pct}%</span>
               </div>
               <div className="h-8 overflow-hidden rounded-lg bg-muted">
-                <div className="flex h-full items-center justify-end bg-gradient-to-r from-[#0D7A46] to-[#166534] px-3 text-xs font-semibold text-white" style={{ width: `${f.pct}%` }}>
+                <div className="flex h-full items-center justify-end bg-gradient-to-r from-primary to-[color-mix(in_oklab,var(--primary)_75%,black)] px-3 text-xs font-semibold text-primary-foreground" style={{ width: `${f.pct}%` }}>
                   {f.pct}%
                 </div>
               </div>

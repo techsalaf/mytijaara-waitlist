@@ -31,9 +31,9 @@ function ProfilePage() {
         </TabsList>
 
         <TabsContent value="profile" className="mt-4">
-          <SectionCard actions={<Button size="sm" className="bg-[#0D7A46] hover:bg-[#166534]" onClick={() => toast.success("Saved")}><Save className="mr-2 h-4 w-4" /> Save</Button>}>
+          <SectionCard actions={<Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => toast.success("Saved")}><Save className="mr-2 h-4 w-4" /> Save</Button>}>
             <div className="mb-6 flex items-center gap-4">
-              <div className="grid h-16 w-16 place-items-center rounded-2xl bg-[#0D7A46] text-lg font-bold text-white">AO</div>
+              <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary text-lg font-bold text-primary-foreground">AO</div>
               <div>
                 <Button variant="outline" size="sm">Change photo</Button>
                 <div className="mt-1 text-xs text-muted-foreground">JPG or PNG, max 2MB</div>
@@ -55,7 +55,7 @@ function ProfilePage() {
               <div><Label>Current password</Label><Input type="password" className="mt-1.5" /></div>
               <div><Label>New password</Label><Input type="password" className="mt-1.5" /></div>
               <div><Label>Confirm password</Label><Input type="password" className="mt-1.5" /></div>
-              <Button className="mt-2 bg-[#0D7A46] hover:bg-[#166534]" onClick={() => toast.success("Password updated")}><Key className="mr-2 h-4 w-4" /> Update password</Button>
+              <Button className="mt-2 bg-primary hover:bg-primary/90" onClick={() => toast.success("Password updated")}><Key className="mr-2 h-4 w-4" /> Update password</Button>
             </div>
           </SectionCard>
         </TabsContent>
@@ -164,7 +164,7 @@ function ThemePicker() {
               onClick={() => pick(o.value)}
               className={
                 "flex flex-col items-center gap-1.5 rounded-lg border p-3 text-xs font-medium transition-colors " +
-                (active ? "border-[#0D7A46] bg-[#0D7A46]/5 text-[#0D7A46]" : "border-border/60 hover:bg-muted/50")
+                (active ? "border-primary bg-primary/5 text-primary" : "border-border/60 hover:bg-muted/50")
               }
             >
               <o.icon className="h-4 w-4" />

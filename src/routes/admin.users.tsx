@@ -20,7 +20,7 @@ function UsersPage() {
       <PageHeader
         title="Team members"
         description="Admins, editors and support staff with access to this panel."
-        actions={<Button size="sm" className="bg-[#0D7A46] hover:bg-[#166534]"><Plus className="mr-2 h-4 w-4" /> Invite member</Button>}
+        actions={<Button size="sm" className="bg-primary hover:bg-primary/90"><Plus className="mr-2 h-4 w-4" /> Invite member</Button>}
       />
       <SectionCard>
         <div className="mb-4 flex gap-2">
@@ -46,7 +46,7 @@ function UsersPage() {
                 <tr key={u.id} className="border-t border-border/40">
                   <td className="py-3">
                     <div className="flex items-center gap-3">
-                      <div className="grid h-9 w-9 place-items-center rounded-full bg-[#0D7A46]/10 text-xs font-semibold text-[#0D7A46]">{u.avatar}</div>
+                      <div className="grid h-9 w-9 place-items-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{u.avatar}</div>
                       <div>
                         <div className="font-medium">{u.name}</div>
                         <div className="text-xs text-muted-foreground">{u.email}</div>
@@ -55,7 +55,7 @@ function UsersPage() {
                   </td>
                   <td className="py-3"><Badge variant="secondary">{u.role}</Badge></td>
                   <td className="py-3">
-                    <Badge className={u.status === "active" ? "bg-emerald-50 text-emerald-700" : "bg-[#D4A017]/15 text-[#8a6b0f]"}>{u.status}</Badge>
+                    <Badge className={u.status === "active" ? "bg-emerald-50 text-emerald-700" : "bg-gold/15 text-gold-foreground"}>{u.status}</Badge>
                   </td>
                   <td className="py-3 text-muted-foreground text-xs">{u.lastActive}</td>
                   <td className="py-3 text-right">

@@ -11,7 +11,7 @@ export const Route = createFileRoute("/admin/settings/system")({
       <SectionCard title="Backups">
         <div className="flex items-center justify-between rounded-xl border border-border/60 p-4">
           <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-lg bg-[#0D7A46]/10 text-[#0D7A46]"><Database className="h-5 w-5" /></div>
+            <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary"><Database className="h-5 w-5" /></div>
             <div>
               <div className="font-semibold text-sm">Daily backups</div>
               <div className="text-xs text-muted-foreground">Last backup: 3 hours ago · Retention 30 days</div>

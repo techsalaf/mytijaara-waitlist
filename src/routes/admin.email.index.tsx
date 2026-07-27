@@ -33,14 +33,14 @@ export const Route = createFileRoute("/admin/email/")({
                 <tr key={c.id} className="border-t border-border/40">
                   <td className="py-3">
                     <Link to="/admin/email/$id" params={{ id: c.id }} className="block">
-                      <div className="font-medium hover:text-[#0D7A46]">{c.name}</div>
+                      <div className="font-medium hover:text-primary">{c.name}</div>
                       <div className="text-xs text-muted-foreground truncate max-w-md">{c.subject}</div>
                     </Link>
                   </td>
                   <td className="py-3">
                     <Badge className={
                       c.status === "sent" ? "bg-emerald-50 text-emerald-700" :
-                      c.status === "scheduled" ? "bg-[#D4A017]/15 text-[#8a6b0f]" :
+                      c.status === "scheduled" ? "bg-gold/15 text-gold-foreground" :
                       "bg-muted text-muted-foreground"
                     }>{c.status}</Badge>
                   </td>

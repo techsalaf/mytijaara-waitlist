@@ -26,7 +26,7 @@ function RoleDetail() {
 
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{isNew ? "Create role" : `Edit: ${role.name}`}</h1>
-        <Button size="sm" className="bg-[#0D7A46] hover:bg-[#166534]" onClick={() => toast.success("Role saved")}><Save className="mr-2 h-4 w-4" /> Save</Button>
+        <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => toast.success("Role saved")}><Save className="mr-2 h-4 w-4" /> Save</Button>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[380px_1fr]">

@@ -29,7 +29,7 @@ function SettingsLayout() {
       <PageHeader
         title="Settings"
         description="Configure your workspace, branding, integrations and more."
-        actions={<Button size="sm" className="bg-[#0D7A46] hover:bg-[#166534]" onClick={() => toast.success("Saved")}><Save className="mr-2 h-4 w-4" /> Save changes</Button>}
+        actions={<Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => toast.success("Saved")}><Save className="mr-2 h-4 w-4" /> Save changes</Button>}
       />
       <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
         <aside className="space-y-0.5">
@@ -38,7 +38,7 @@ function SettingsLayout() {
             return (
               <Link key={t.to} to={t.to} className={cn(
                 "block rounded-lg px-3 py-2 text-sm font-medium",
-                active ? "bg-[#0D7A46] text-white" : "text-foreground/70 hover:bg-muted"
+                active ? "bg-primary text-primary-foreground" : "text-foreground/70 hover:bg-muted"
               )}>{t.label}</Link>
             );
           })}

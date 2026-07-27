@@ -16,7 +16,6 @@ import {
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { CommandPalette } from "./command-palette";
 import { AdminSkeleton } from "./admin-skeleton";
-import { initTheme } from "@/lib/theme";
 
 import { cn } from "@/lib/utils";
 
@@ -60,31 +59,26 @@ const nav: NavGroup[] = [
 ];
 
 export function AdminShell() {
+  // Auth is enforced by <AdminAuthGate> in src/routes/admin.tsx — by the time
+  // this renders a session exists; we only read it for the profile menu.
   const [session, setSession] = useState<AdminSession | null>(null);
-  const [checked, setChecked] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    initTheme();
-    const s = getSession();
-    if (!s) {
-      navigate({ to: "/auth/login" });
-    } else {
-      setSession(s);
-    }
-    setChecked(true);
-  }, [navigate]);
+    setSession(getSession());
+  }, []);
 
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
 
-  if (!checked || !session) {
+  if (!session) {
     return <AdminSkeleton />;
   }
+
 
   const handleSignOut = () => {
     signOut();
@@ -95,9 +89,9 @@ export function AdminShell() {
   const isMac = typeof navigator !== "undefined" && /mac/i.test(navigator.platform);
 
   return (
-    <div className="flex min-h-screen bg-[#F8FAF8] dark:bg-neutral-950">
+    <div className="flex min-h-screen bg-surface">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 lg:z-30 border-r border-border/60 bg-white dark:bg-neutral-900">
+      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 lg:z-30 border-r border-border/60 bg-card">
         <SidebarContent pathname={pathname} />
       </aside>
 
@@ -110,19 +104,19 @@ export function AdminShell() {
 
       <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
         {/* Topbar */}
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border/60 bg-white/80 px-4 backdrop-blur-md lg:px-6 dark:bg-neutral-900/80">
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border/60 bg-card/80 px-4 backdrop-blur-md lg:px-6 ">
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setMobileOpen(true)}>
             <Menu className="h-5 w-5" />
           </Button>
 
           <button
             onClick={() => setPaletteOpen(true)}
-            className="group relative flex h-9 w-full max-w-md items-center gap-2 rounded-md bg-muted/40 px-3 text-left text-sm text-muted-foreground transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0D7A46]/40"
+            className="group relative flex h-9 w-full max-w-md items-center gap-2 rounded-md bg-muted/40 px-3 text-left text-sm text-muted-foreground transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           >
             <Search className="h-4 w-4" />
             <span className="hidden sm:inline">Search or jump to…</span>
             <span className="inline sm:hidden">Search</span>
-            <kbd className="ml-auto hidden items-center gap-0.5 rounded border border-border bg-white px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground shadow-sm sm:inline-flex dark:bg-neutral-800">
+            <kbd className="ml-auto hidden items-center gap-0.5 rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground shadow-sm sm:inline-flex">
               {isMac ? "⌘" : "Ctrl"}<span>K</span>
             </kbd>
           </button>
@@ -133,14 +127,14 @@ export function AdminShell() {
                 <Button variant="ghost" size="icon" className="relative">
                   <Bell className="h-5 w-5" />
                   {unreadCount > 0 && (
-                    <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#D4A017]" />
+                    <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-gold" />
                   )}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-80">
                 <DropdownMenuLabel className="flex items-center justify-between">
                   <span>Notifications</span>
-                  <Link to="/admin/notifications" className="text-xs font-normal text-[#0D7A46] hover:underline">
+                  <Link to="/admin/notifications" className="text-xs font-normal text-primary hover:underline">
                     View all
                   </Link>
                 </DropdownMenuLabel>
@@ -149,7 +143,7 @@ export function AdminShell() {
                   <DropdownMenuItem key={n.id} className="flex flex-col items-start gap-0.5 py-2.5">
                     <div className="flex w-full items-center gap-2">
                       <span className="text-sm font-medium">{n.title}</span>
-                      {n.unread && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[#D4A017]" />}
+                      {n.unread && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-gold" />}
                     </div>
                     <span className="text-xs text-muted-foreground line-clamp-1">{n.body}</span>
                     <span className="text-[10px] text-muted-foreground">{n.time}</span>
@@ -161,7 +155,7 @@ export function AdminShell() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2 rounded-full py-1 pl-1 pr-3 hover:bg-muted/60">
-                  <div className="grid h-8 w-8 place-items-center rounded-full bg-[#0D7A46] text-xs font-semibold text-white">
+                  <div className="grid h-8 w-8 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                     {session.avatar}
                   </div>
                   <span className="hidden text-sm font-medium sm:inline">{session.name.split(" ")[0]}</span>
@@ -209,12 +203,12 @@ function SidebarContent({ pathname }: { pathname: string }) {
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center gap-2 border-b border-border/60 px-5">
-        <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#0D7A46] text-white">
+        <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground">
           <Sparkles className="h-4 w-4" />
         </div>
         <div className="flex flex-col leading-tight">
           <span className="text-sm font-bold tracking-tight">MyTijaara</span>
-          <span className="text-[10px] font-medium uppercase tracking-widest text-[#D4A017]">Admin</span>
+          <span className="text-[10px] font-medium uppercase tracking-widest text-gold">Admin</span>
         </div>
       </div>
 
@@ -238,18 +232,18 @@ function SidebarContent({ pathname }: { pathname: string }) {
                     className={cn(
                       "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                       active
-                        ? "bg-[#0D7A46] text-white shadow-sm"
+                        ? "bg-primary text-primary-foreground shadow-sm"
                         : "text-foreground/70 hover:bg-muted hover:text-foreground",
                     )}
                   >
-                    <Icon className={cn("h-4 w-4 shrink-0", active ? "text-white" : "text-muted-foreground")} />
+                    <Icon className={cn("h-4 w-4 shrink-0", active ? "text-primary-foreground" : "text-muted-foreground")} />
                     <span className="flex-1 truncate">{item.label}</span>
                     {item.badge && (
                       <Badge
                         variant="secondary"
                         className={cn(
                           "h-5 px-1.5 text-[10px] font-semibold",
-                          active ? "bg-white/20 text-white" : "bg-[#0D7A46]/10 text-[#0D7A46]",
+                          active ? "bg-primary-foreground/20 text-primary-foreground" : "bg-primary/10 text-primary",
                         )}
                       >
                         {item.badge}
@@ -264,9 +258,9 @@ function SidebarContent({ pathname }: { pathname: string }) {
       </nav>
 
       <div className="border-t border-border/60 p-4">
-        <div className="rounded-xl bg-gradient-to-br from-[#0D7A46] to-[#166534] p-4 text-white">
-          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-[#D4A017]">Pro tip</div>
-          <div className="text-sm font-medium leading-snug">Press <kbd className="rounded bg-white/20 px-1 font-mono">⌘K</kbd> anywhere to jump.</div>
+        <div className="rounded-xl bg-gradient-to-br from-primary to-[color-mix(in_oklab,var(--primary)_75%,black)] p-4 text-primary-foreground">
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-gold">Pro tip</div>
+          <div className="text-sm font-medium leading-snug">Press <kbd className="rounded bg-primary-foreground/20 px-1 font-mono">⌘K</kbd> anywhere to jump.</div>
         </div>
       </div>
     </div>

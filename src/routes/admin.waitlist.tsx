@@ -135,7 +135,7 @@ function WaitlistPage() {
             <Button variant="outline" size="sm" onClick={exportCsv}>
               <Download className="mr-2 h-4 w-4" /> Export
             </Button>
-            <Button size="sm" className="bg-[#0D7A46] hover:bg-[#166534]">
+            <Button size="sm" className="bg-primary hover:bg-primary/90">
               <Plus className="mr-2 h-4 w-4" /> Add user
             </Button>
           </>
@@ -149,7 +149,7 @@ function WaitlistPage() {
         <StatCard label="Conversion" value="4.7%" delta={0.4} icon={Percent} />
       </div>
 
-      <div className="rounded-2xl border border-border/60 bg-white shadow-sm dark:bg-neutral-900">
+      <div className="rounded-2xl border border-border/60 bg-card shadow-sm">
         <div className="flex flex-wrap items-center gap-2 border-b border-border/60 p-4">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -182,7 +182,7 @@ function WaitlistPage() {
         </div>
 
         {selected.size > 0 && (
-          <div className="flex flex-wrap items-center gap-2 border-b border-border/60 bg-[#0D7A46]/5 px-4 py-2 text-sm">
+          <div className="flex flex-wrap items-center gap-2 border-b border-border/60 bg-primary/5 px-4 py-2 text-sm">
             <span className="font-medium">{selected.size} selected</span>
             <div className="ml-auto flex flex-wrap gap-2">
               <Button size="sm" variant="outline" onClick={() => bulkAction("Verify")}><CheckCircle2 className="mr-1 h-3 w-3" /> Verify</Button>
@@ -220,7 +220,7 @@ function WaitlistPage() {
                   <td className="p-3"><Checkbox checked={selected.has(u.id)} onCheckedChange={() => toggle(u.id)} /></td>
                   <td className="p-3">
                     <div className="flex items-center gap-2">
-                      <div className="grid h-8 w-8 place-items-center rounded-full bg-[#0D7A46]/10 text-[10px] font-semibold text-[#0D7A46]">
+                      <div className="grid h-8 w-8 place-items-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
                         {u.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
                       </div>
                       <div className="min-w-0">
@@ -264,7 +264,7 @@ function WaitlistPage() {
           {!loading && rows.map((u) => (
             <div key={u.id} className="flex items-start gap-3 p-4">
               <Checkbox checked={selected.has(u.id)} onCheckedChange={() => toggle(u.id)} className="mt-1" />
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#0D7A46]/10 text-xs font-semibold text-[#0D7A46]">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                 {u.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
               </div>
               <div className="min-w-0 flex-1">
@@ -313,7 +313,7 @@ function WaitlistPage() {
             <>
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-3">
-                  <div className="grid h-10 w-10 place-items-center rounded-full bg-[#0D7A46]/10 text-sm font-semibold text-[#0D7A46]">
+                  <div className="grid h-10 w-10 place-items-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
                     {view.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
                   </div>
                   {view.name}
@@ -342,7 +342,7 @@ function WaitlistPage() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setView(null)}>Close</Button>
-                <Button className="bg-[#0D7A46] hover:bg-[#166534]" onClick={() => { toast.success("Saved"); setView(null); }}>Save changes</Button>
+                <Button className="bg-primary hover:bg-primary/90" onClick={() => { toast.success("Saved"); setView(null); }}>Save changes</Button>
               </DialogFooter>
             </>
           )}
@@ -364,8 +364,8 @@ function Field({ label, children, className }: { label: string; children: React.
 function StatusBadge({ status }: { status: WaitlistUser["status"] }) {
   const map: Record<string, string> = {
     active: "bg-emerald-50 text-emerald-700",
-    invited: "bg-[#D4A017]/15 text-[#8a6b0f]",
-    onboarded: "bg-[#0D7A46]/10 text-[#0D7A46]",
+    invited: "bg-gold/15 text-gold-foreground",
+    onboarded: "bg-primary/10 text-primary",
     unsubscribed: "bg-muted text-muted-foreground",
   };
   return <span className={"inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize " + map[status]}>{status}</span>;

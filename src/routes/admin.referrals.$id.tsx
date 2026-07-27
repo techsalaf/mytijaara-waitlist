@@ -9,7 +9,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/admin/referrals/$id")({
   component: RefDetail,
   notFoundComponent: () => (
-    <div className="rounded-xl border border-border/60 bg-white p-10 text-center">
+    <div className="rounded-xl border border-border/60 bg-card p-10 text-center">
       <p>Referrer not found.</p>
       <Button asChild variant="link"><Link to="/admin/referrals/leaderboard">Back to leaderboard</Link></Button>
     </div>
@@ -31,11 +31,11 @@ function RefDetail() {
           <Link to="/admin/referrals/leaderboard"><ArrowLeft className="mr-1 h-3 w-3" /> Back to leaderboard</Link>
         </Button>
         <div className="flex items-center gap-4">
-          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-[#0D7A46] text-lg font-bold text-white">
+          <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary text-lg font-bold text-primary-foreground">
             {u.name.split(" ").map((n: string) => n[0]).slice(0, 2).join("")}
           </div>
           <div>
-            <div className="text-xs font-semibold uppercase tracking-widest text-[#D4A017]">Rank #{u.rank}</div>
+            <div className="text-xs font-semibold uppercase tracking-widest text-gold">Rank #{u.rank}</div>
             <h1 className="text-2xl font-bold">{u.name}</h1>
             <div className="text-sm text-muted-foreground">{u.email} · {u.city}</div>
           </div>
@@ -68,7 +68,7 @@ function RefDetail() {
                 <div className="text-sm font-medium">Referred user #{i + 1}</div>
                 <div className="text-xs text-muted-foreground">Joined {i + 1} day{i ? "s" : ""} ago</div>
               </div>
-              <Badge variant="secondary" className={i % 3 === 0 ? "bg-[#D4A017]/15 text-[#8a6b0f]" : "bg-emerald-50 text-emerald-700"}>
+              <Badge variant="secondary" className={i % 3 === 0 ? "bg-gold/15 text-gold-foreground" : "bg-emerald-50 text-emerald-700"}>
                 {i % 3 === 0 ? "Invited" : "Verified"}
               </Badge>
             </div>

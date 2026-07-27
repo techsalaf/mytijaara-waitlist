@@ -16,7 +16,7 @@ export const Route = createFileRoute("/admin/cms/statistics")({
           { label: "Riders signed up", value: "500+" },
         ].map((s, i) => (
           <div key={i} className="rounded-xl border border-border/60 p-4">
-            <div className="mb-3 flex items-center gap-2 text-[#0D7A46]"><TrendingUp className="h-4 w-4" /><span className="text-xs font-semibold uppercase tracking-wider">Stat {i + 1}</span></div>
+            <div className="mb-3 flex items-center gap-2 text-primary"><TrendingUp className="h-4 w-4" /><span className="text-xs font-semibold uppercase tracking-wider">Stat {i + 1}</span></div>
             <Label className="text-xs">Value</Label>
             <Input defaultValue={s.value} className="mt-1" />
             <Label className="mt-3 text-xs">Label</Label>

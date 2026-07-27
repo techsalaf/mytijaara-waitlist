@@ -43,7 +43,7 @@ function LoginPage() {
         <div>
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Password</Label>
-            <Link to="/auth/forgot-password" className="text-xs font-medium text-[#0D7A46] hover:underline">
+            <Link to="/auth/forgot-password" className="text-xs font-medium text-primary hover:underline">
               Forgot password?
             </Link>
           </div>
@@ -57,7 +57,7 @@ function LoginPage() {
         <label className="flex items-center gap-2 text-sm">
           <Checkbox defaultChecked /> <span>Keep me signed in for 30 days</span>
         </label>
-        <Button type="submit" disabled={loading} className="h-11 w-full bg-[#0D7A46] hover:bg-[#166534]">
+        <Button type="submit" disabled={loading} className="h-11 w-full bg-primary hover:bg-primary/90">
           {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing in…</> : "Sign in"}
         </Button>
         <div className="rounded-lg border border-dashed border-border/70 bg-muted/30 p-3 text-xs text-muted-foreground">

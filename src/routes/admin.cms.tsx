@@ -35,7 +35,7 @@ function CmsLayout() {
             <Button variant="outline" size="sm" asChild>
               <Link to="/" target="_blank"><Eye className="mr-2 h-4 w-4" /> Preview site</Link>
             </Button>
-            <Button size="sm" className="bg-[#0D7A46] hover:bg-[#166534]" onClick={() => toast.success("Published to production")}>
+            <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => toast.success("Published to production")}>
               <Save className="mr-2 h-4 w-4" /> Publish changes
             </Button>
           </>
@@ -47,7 +47,7 @@ function CmsLayout() {
           return (
             <Link key={t.to} to={t.to} className={cn(
               "border-b-2 px-3 py-2 text-sm font-medium transition-colors",
-              active ? "border-[#0D7A46] text-[#0D7A46]" : "border-transparent text-muted-foreground hover:text-foreground"
+              active ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
             )}>{t.label}</Link>
           );
         })}

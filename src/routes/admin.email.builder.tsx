@@ -74,7 +74,7 @@ Share your unique referral link to move up the list and unlock rewards.
           <div className="mt-4 flex flex-wrap justify-end gap-2">
             <Button variant="outline" size="sm"><Eye className="mr-2 h-4 w-4" /> Preview</Button>
             <Button variant="outline" size="sm" onClick={() => toast.success("Draft saved")}><Save className="mr-2 h-4 w-4" /> Save draft</Button>
-            <Button size="sm" className="bg-[#0D7A46] hover:bg-[#166534]" onClick={() => toast.success("Campaign queued for sending")}>
+            <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => toast.success("Campaign queued for sending")}>
               <Send className="mr-2 h-4 w-4" /> Send now
             </Button>
           </div>
@@ -94,7 +94,7 @@ Share your unique referral link to move up the list and unlock rewards.
             </Select>
             <div className="mt-4 rounded-lg bg-muted/40 p-3 text-xs">
               <div className="font-medium">Estimated reach</div>
-              <div className="mt-1 text-2xl font-bold text-[#0D7A46]">2,847</div>
+              <div className="mt-1 text-2xl font-bold text-primary">2,847</div>
               <div className="text-muted-foreground">recipients after suppressions</div>
             </div>
           </SectionCard>

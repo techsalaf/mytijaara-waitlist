@@ -24,7 +24,7 @@ function EmailLayout() {
         title="Email Marketing"
         description="Design, schedule and track email campaigns."
         actions={
-          <Button asChild size="sm" className="bg-[#0D7A46] hover:bg-[#166534]">
+          <Button asChild size="sm" className="bg-primary hover:bg-primary/90">
             <Link to="/admin/email/builder"><Plus className="mr-2 h-4 w-4" /> New campaign</Link>
           </Button>
         }
@@ -35,7 +35,7 @@ function EmailLayout() {
           return (
             <Link key={t.to} to={t.to} className={cn(
               "border-b-2 px-4 py-2 text-sm font-medium transition-colors",
-              active ? "border-[#0D7A46] text-[#0D7A46]" : "border-transparent text-muted-foreground hover:text-foreground"
+              active ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
             )}>{t.label}</Link>
           );
         })}
