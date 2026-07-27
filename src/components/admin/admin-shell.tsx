@@ -60,31 +60,26 @@ const nav: NavGroup[] = [
 ];
 
 export function AdminShell() {
+  // Auth is enforced by <AdminAuthGate> in src/routes/admin.tsx — by the time
+  // this renders a session exists; we only read it for the profile menu.
   const [session, setSession] = useState<AdminSession | null>(null);
-  const [checked, setChecked] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    initTheme();
-    const s = getSession();
-    if (!s) {
-      navigate({ to: "/auth/login" });
-    } else {
-      setSession(s);
-    }
-    setChecked(true);
-  }, [navigate]);
+    setSession(getSession());
+  }, []);
 
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
 
-  if (!checked || !session) {
+  if (!session) {
     return <AdminSkeleton />;
   }
+
 
   const handleSignOut = () => {
     signOut();
