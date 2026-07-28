@@ -151,6 +151,57 @@ Root `__root.tsx` sets global meta/OG tags, links Google Fonts, mounts `QueryCli
 
 ---
 
+## 5.1 Launch / countdown system (READ THIS BEFORE TOUCHING THE LANDING PAGE)
+
+The public site automatically transitions **pre-launch -> launch day -> post-launch with no code change**. Everything is driven by one config object.
+
+### Files
+| File | Role |
+|---|---|
+| `src/lib/launch/config.ts` | `LaunchConfiguration` type, `DEFAULT_LAUNCH_CONFIG` placeholder, `resolveLaunchStatus()`, `getTimeRemaining()`, `formatLaunchDate()`, `formatLaunchTime()` |
+| `src/lib/api/launch.ts` | `launchApi.get()` / `launchApi.update(patch)` — **fake**, module-scoped cache. This is the file to swap. |
+| `src/components/launch/launch-state-provider.tsx` | Fetches the config once, holds a 1s clock, exposes `useLaunch()` |
+| `src/components/launch/launch-countdown.tsx` | Pre-launch section (badge, headline, 4 cards, date line, CTAs) |
+| `src/components/launch/countdown-card.tsx` | One animated digit card (tabular nums, fixed width, zero layout shift) |
+| `src/components/launch/launch-banner.tsx` | Post-launch "We're live" banner + store buttons + once-per-session confetti |
+| `src/components/launch/launch-cta.tsx` | `LaunchCTA` + `usePrimaryCta()` — flips nav/hero CTA between "Join the Waitlist" and "Download App" |
+| `src/routes/admin.cms.launch.tsx` | **Admin CMS editor for all of the above** |
+
+### The config shape (`LaunchConfiguration`)
+```ts
+{
+  launchEnabled: boolean;        // master switch — false renders nothing, no empty space
+  countdownEnabled: boolean;     // show the ticking timer
+  waitlistEnabled: boolean;      // false hides the waitlist section + waitlist CTAs
+  launchDateTime: string;        // ISO-8601 WITH an explicit offset, e.g. "2026-11-15T10:00:00+01:00"
+  timezone: string;              // IANA zone for the human-readable date line
+  badge: string; launchTitle: string; launchSubtitle: string;
+  primaryCTA:   { label: string; href: string; hidden?: boolean };
+  secondaryCTA: { label: string; href: string; hidden?: boolean };
+  launchStatus: "auto" | "pre_launch" | "launch_day" | "post_launch";  // "auto" derives from launchDateTime
+  live: {
+    badge: string; title: string; subtitle: string;
+    confetti: boolean;
+    stores: { platform: "android" | "ios"; label: string; sublabel: string; href: string; comingSoon?: boolean }[];
+  }
+}
+```
+
+State math (`resolveLaunchStatus`): `now < launchDateTime` -> `pre_launch`; within 24h after -> `launch_day`; later -> `post_launch`. A non-`auto` `launchStatus` pins the state (used by admins to preview launch day early).
+
+### Admin control panel — `/admin/cms/launch`
+Every field above is editable there: visibility switches, status override, datetime + timezone (with a live "renders on site as" preview), pre-launch copy, both CTAs (label / href / visible), live copy + confetti toggle, and both app-store buttons (label / sublabel / href / coming-soon). The header strip shows the **effective state** and a live remaining-time readout. "Save configuration" calls `launchApi.update(cfg)`.
+
+### What the backend must do
+1. Create a **single-row** `launch_config` table (or a `settings` row keyed `launch`) holding the JSON above. JSONB is fine.
+2. `GET /launch-config` -> `{ data: LaunchConfiguration }` — **public, unauthenticated, cacheable**. The landing page calls this on every load.
+3. `PATCH /launch-config` -> `{ data: LaunchConfiguration }` — **admin only** (`has_role(auth.uid(),'admin')`).
+4. Replace the two bodies in `src/lib/api/launch.ts`. Nothing else changes — the provider, the countdown, the CMS page and every CTA already consume it.
+5. Validate `launchDateTime` server-side: it MUST carry an explicit offset (`+01:00` / `Z`). A bare local string breaks SSR/client agreement and causes hydration mismatch on the digits.
+6. Keep the response shape byte-compatible with `DEFAULT_LAUNCH_CONFIG`; the frontend falls back to that object when the fetch fails.
+
+---
+
 ## 6. Mock data & fake API — the parts to replace
 
 ### 6.1 `src/lib/mock-data.ts` (single file, ~250 lines)
@@ -223,7 +274,8 @@ Tables that must exist to replace the mocks:
 6. `notifications` — user-scoped.
 7. `audit_logs` — insert-only, admin-visible.
 8. `settings` (company, branding, seo, social, smtp, integrations, api_keys, system) — key/value JSONB or one table per group.
-9. `admin_users` (== `auth.users` + `profiles`) and `user_roles` + `app_role` enum (`super_admin`, `admin`, `marketing`, `content_editor`, `analyst`, `support` — see `mock-data.ts` `roles`).
+9. `launch_config` — single row, JSONB, matching `LaunchConfiguration` (§5.1). Public `SELECT` for anon; `UPDATE` admin-only.
+10. `admin_users` (== `auth.users` + `profiles`) and `user_roles` + `app_role` enum (`super_admin`, `admin`, `marketing`, `content_editor`, `analyst`, `support` — see `mock-data.ts` `roles`).
 
 **Grants reminder**: every `CREATE TABLE public.X` MUST be followed by explicit `GRANT` statements in the same migration (PostgREST does not grant by default). Anon gets `INSERT` on `waitlist_users` only; authenticated gets scoped access via RLS + `has_role()`.
 
@@ -277,3 +329,27 @@ Replace `auth-mock.ts` with the generated Supabase client (`@/integrations/supab
 ## 9. TL;DR for the AI builder
 
 > The frontend is done. To ship this, replace `src/lib/mock-data.ts`, `src/lib/api/*`, and `src/lib/auth-mock.ts` with a real backend (Supabase + TanStack server functions recommended). Match the return shape `{ data: T }`. Preserve the `WaitlistUser` type and every consumer keeps working. Start with the waitlist table + signup endpoint, then auth, then analytics, then CMS, then everything else. Do not restructure routes. Do not touch `routeTree.gen.ts`. Keep semantic Tailwind tokens. Every admin route is `noindex`. Public signup must work without auth; every other endpoint must be role-gated via `user_roles` + `has_role()`.
+
+---
+
+## 10. Changelog — frontend hardening pass (what changed since the first handoff)
+
+**Added**
+- `src/lib/types/index.ts` — shared domain types (`WaitlistUser`, `DashboardStats`, `Campaign`, `ApiResponse<T>`, …). Import domain types from here, never from `mock-data.ts`.
+- `src/lib/schemas/waitlist.ts` — zod schema for public signup (honeypot field, consent checkbox, Nigerian city/state enums). Reuse it server-side so client and server validate identically.
+- `src/components/landing/waitlist-form.tsx` — rewritten with `react-hook-form` + zod: inline errors, `aria-invalid`, labels, autocomplete, honeypot, consent, `?ref=` referral capture, success state showing queue position, `sonner` error toasts.
+- `src/components/landing/waitlist-count.tsx` — live counter reading `waitlistApi.list()`.
+- Full launch/countdown system — see §5.1.
+- `src/routes/admin.cms.launch.tsx` — admin CMS page for the launch config, registered as a tab in `src/routes/admin.cms.tsx`.
+- `src/components/admin/admin-auth-gate.tsx` — one auth boundary wrapping the whole `/admin` subtree, mounted in `src/routes/admin.tsx`. **Backend: swap `getSession()` here for a real session check and add a server-side `beforeLoad` redirect — one file, no per-route edits.**
+
+**Changed**
+- `src/routes/index.tsx` went from ~1400 lines to ~70. Every section now lives in `src/components/landing/*`.
+- Hex literals (`#0D7A46`, `#D4A017`, `bg-white`, `#F8FAF8`) swept out of the landing page, admin shell and 40+ admin routes in favour of semantic tokens (`bg-primary`, `text-gold`, `bg-card`, `bg-surface`, `var(--primary)`).
+- `styles.css` gained `@keyframes digit-in` / float animations used by the countdown.
+- `<Toaster />` is mounted in `src/routes/__root.tsx`.
+
+**Deliberately NOT done (left for the backend agent, on purpose)**
+- `useSuspenseQuery` / `queryOptions` conversion of `admin.index.tsx` and `admin.waitlist.tsx`. Designing cache keys and invalidation against an in-memory mock bakes in the wrong ones — do it in the same commit that swaps the data source.
+- Migrating admin routes into a `_authenticated/` directory. The single `AdminAuthGate` is functionally equivalent today; move to `_authenticated/` when real Supabase auth lands so the gate runs in `beforeLoad` server-side.
+- Every admin page other than `/admin/waitlist` and `/admin/cms/launch` still imports straight from `mock-data.ts`. That is the bulk of the remaining work.
