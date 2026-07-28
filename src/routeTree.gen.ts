@@ -57,6 +57,7 @@ import { Route as AdminCmsStatisticsRouteImport } from './routes/admin.cms.stati
 import { Route as AdminCmsSocialRouteImport } from './routes/admin.cms.social'
 import { Route as AdminCmsSeoRouteImport } from './routes/admin.cms.seo'
 import { Route as AdminCmsNavigationRouteImport } from './routes/admin.cms.navigation'
+import { Route as AdminCmsLaunchRouteImport } from './routes/admin.cms.launch'
 import { Route as AdminCmsFooterRouteImport } from './routes/admin.cms.footer'
 import { Route as AdminCmsFeaturesRouteImport } from './routes/admin.cms.features'
 import { Route as AdminCmsFaqsRouteImport } from './routes/admin.cms.faqs'
@@ -304,6 +305,11 @@ const AdminCmsNavigationRoute = AdminCmsNavigationRouteImport.update({
   path: '/navigation',
   getParentRoute: () => AdminCmsRoute,
 } as any)
+const AdminCmsLaunchRoute = AdminCmsLaunchRouteImport.update({
+  id: '/launch',
+  path: '/launch',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
 const AdminCmsFooterRoute = AdminCmsFooterRouteImport.update({
   id: '/footer',
   path: '/footer',
@@ -351,6 +357,7 @@ export interface FileRoutesByFullPath {
   '/admin/cms/faqs': typeof AdminCmsFaqsRoute
   '/admin/cms/features': typeof AdminCmsFeaturesRoute
   '/admin/cms/footer': typeof AdminCmsFooterRoute
+  '/admin/cms/launch': typeof AdminCmsLaunchRoute
   '/admin/cms/navigation': typeof AdminCmsNavigationRoute
   '/admin/cms/seo': typeof AdminCmsSeoRoute
   '/admin/cms/social': typeof AdminCmsSocialRoute
@@ -400,6 +407,7 @@ export interface FileRoutesByTo {
   '/admin/cms/faqs': typeof AdminCmsFaqsRoute
   '/admin/cms/features': typeof AdminCmsFeaturesRoute
   '/admin/cms/footer': typeof AdminCmsFooterRoute
+  '/admin/cms/launch': typeof AdminCmsLaunchRoute
   '/admin/cms/navigation': typeof AdminCmsNavigationRoute
   '/admin/cms/seo': typeof AdminCmsSeoRoute
   '/admin/cms/social': typeof AdminCmsSocialRoute
@@ -455,6 +463,7 @@ export interface FileRoutesById {
   '/admin/cms/faqs': typeof AdminCmsFaqsRoute
   '/admin/cms/features': typeof AdminCmsFeaturesRoute
   '/admin/cms/footer': typeof AdminCmsFooterRoute
+  '/admin/cms/launch': typeof AdminCmsLaunchRoute
   '/admin/cms/navigation': typeof AdminCmsNavigationRoute
   '/admin/cms/seo': typeof AdminCmsSeoRoute
   '/admin/cms/social': typeof AdminCmsSocialRoute
@@ -511,6 +520,7 @@ export interface FileRouteTypes {
     | '/admin/cms/faqs'
     | '/admin/cms/features'
     | '/admin/cms/footer'
+    | '/admin/cms/launch'
     | '/admin/cms/navigation'
     | '/admin/cms/seo'
     | '/admin/cms/social'
@@ -560,6 +570,7 @@ export interface FileRouteTypes {
     | '/admin/cms/faqs'
     | '/admin/cms/features'
     | '/admin/cms/footer'
+    | '/admin/cms/launch'
     | '/admin/cms/navigation'
     | '/admin/cms/seo'
     | '/admin/cms/social'
@@ -614,6 +625,7 @@ export interface FileRouteTypes {
     | '/admin/cms/faqs'
     | '/admin/cms/features'
     | '/admin/cms/footer'
+    | '/admin/cms/launch'
     | '/admin/cms/navigation'
     | '/admin/cms/seo'
     | '/admin/cms/social'
@@ -987,6 +999,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCmsNavigationRouteImport
       parentRoute: typeof AdminCmsRoute
     }
+    '/admin/cms/launch': {
+      id: '/admin/cms/launch'
+      path: '/launch'
+      fullPath: '/admin/cms/launch'
+      preLoaderRoute: typeof AdminCmsLaunchRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
     '/admin/cms/footer': {
       id: '/admin/cms/footer'
       path: '/footer'
@@ -1023,6 +1042,7 @@ interface AdminCmsRouteChildren {
   AdminCmsFaqsRoute: typeof AdminCmsFaqsRoute
   AdminCmsFeaturesRoute: typeof AdminCmsFeaturesRoute
   AdminCmsFooterRoute: typeof AdminCmsFooterRoute
+  AdminCmsLaunchRoute: typeof AdminCmsLaunchRoute
   AdminCmsNavigationRoute: typeof AdminCmsNavigationRoute
   AdminCmsSeoRoute: typeof AdminCmsSeoRoute
   AdminCmsSocialRoute: typeof AdminCmsSocialRoute
@@ -1036,6 +1056,7 @@ const AdminCmsRouteChildren: AdminCmsRouteChildren = {
   AdminCmsFaqsRoute: AdminCmsFaqsRoute,
   AdminCmsFeaturesRoute: AdminCmsFeaturesRoute,
   AdminCmsFooterRoute: AdminCmsFooterRoute,
+  AdminCmsLaunchRoute: AdminCmsLaunchRoute,
   AdminCmsNavigationRoute: AdminCmsNavigationRoute,
   AdminCmsSeoRoute: AdminCmsSeoRoute,
   AdminCmsSocialRoute: AdminCmsSocialRoute,

@@ -12,6 +12,7 @@ export const Route = createFileRoute("/admin/cms")({
 
 const tabs = [
   { to: "/admin/cms", label: "Hero", exact: true },
+  { to: "/admin/cms/launch", label: "Launch" },
   { to: "/admin/cms/features", label: "Features" },
   { to: "/admin/cms/testimonials", label: "Testimonials" },
   { to: "/admin/cms/faqs", label: "FAQs" },
