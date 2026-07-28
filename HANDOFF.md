@@ -4,6 +4,9 @@ This document is a complete engineering handoff for the **MyTijaara** project as
 
 ---
 
+**Last updated:** after the launch-countdown + frontend-hardening pass. §10 "Changelog" lists exactly what changed and where.
+
+
 ## 1. What this project is
 
 - **Product**: MyTijaara — a Nigerian "super-app" concept (food, groceries, pharmacy, artisans, parcels, car rentals, vendor marketplace).
