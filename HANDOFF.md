@@ -29,7 +29,7 @@ The user experience is production-quality; the data layer is a stub waiting to b
 | Router | **@tanstack/react-router** | File-based routing under `src/routes/`. `routeTree.gen.ts` is auto-generated — do not edit. |
 | Styling | **Tailwind CSS v4** | Configured via `src/styles.css` using `@theme`. No `tailwind.config.js`. |
 | UI kit | **shadcn/ui (New York style)** + **Radix UI** primitives | Components live in `src/components/ui/`. Icons: `lucide-react`. |
-| Forms | `react-hook-form` + `zod` + `@hookform/resolvers` | Available but the landing form currently uses plain `useState`. |
+| Forms | `react-hook-form` + `zod` + `@hookform/resolvers` | **In use** by the landing waitlist form. Schema: `src/lib/schemas/waitlist.ts`. |
 | Data fetching | **@tanstack/react-query v5** is installed and wired into the router (`QueryClient` in router context) but **not yet used** — current pages fetch imperatively in `useEffect`. |
 | Charts | **recharts** | Used across admin analytics. |
 | Toasts | **sonner** | Toaster is expected to be mounted (used with `toast.success/error` throughout). |
@@ -47,7 +47,7 @@ The user experience is production-quality; the data layer is a stub waiting to b
 src/
   routes/                     # file-based routes (see §5)
     __root.tsx                # HTML shell, <head>, QueryClientProvider, error/notFound boundaries
-    index.tsx                 # PUBLIC landing + waitlist form (~1400 lines, single file)
+    index.tsx                 # PUBLIC landing page (~70 lines) — composes src/components/landing/* inside <LaunchStateProvider>
     admin.tsx                 # /admin layout — mounts AdminShell (sidebar/topbar) + <Outlet/>
     admin.index.tsx           # /admin dashboard (charts, KPIs)
     admin.waitlist.tsx        # /admin/waitlist table (CRUD, filters, CSV export)
@@ -60,12 +60,24 @@ src/
       admin-skeleton.tsx      # loading skeleton for the shell
       command-palette.tsx     # ⌘K palette (cmdk)
       ui-bits.tsx             # PageHeader, StatCard, SectionCard, EmptyState, confirmDestructive
+      admin-auth-gate.tsx     # SINGLE client auth boundary for the whole /admin subtree
+    landing/                  # every landing section, one file each (nav, hero, trusted-by,
+                              # moments, services, why, how, inside-the-app, built-for-nigerians,
+                              # partners, waitlist-section, waitlist-form, waitlist-count, faq,
+                              # footer, logo, reveal)
+    launch/                   # launch/countdown system (see §5.1)
+      launch-state-provider.tsx | launch-countdown.tsx | countdown-card.tsx
+      launch-banner.tsx | launch-cta.tsx
     ui/                       # shadcn/ui primitives (button, input, dialog, dropdown-menu, etc.)
   lib/
     api/
       client.ts               # apiCall() — fake fetch with setTimeout + optional failRate
       waitlist.ts             # waitlistApi.list/get/create/update/remove/restore (in-memory)
+      launch.ts               # launchApi.get/update — the launch/countdown CMS config
       index.ts                # barrel export
+    launch/config.ts          # LaunchConfiguration type + DEFAULT_LAUNCH_CONFIG + state math
+    types/index.ts            # SHARED domain types — import from here, never from mock-data
+    schemas/waitlist.ts       # zod schema for the public signup (reusable server-side)
     mock-data.ts              # THE single source of mock data (users, stats, campaigns, faqs…)
     auth-mock.ts              # localStorage-backed "session" (key: mytijaara_admin_session)
     theme.ts                  # light/dark theme init
@@ -96,7 +108,7 @@ Defined in `src/styles.css` via Tailwind v4 `@theme`. Semantic tokens (do **not*
 - **Shadows**: `--shadow-elegant`, `--shadow-soft`, `--shadow-glow` (color-mixed from primary/gold).
 - **Dark mode**: `.dark` class variant; toggled by `src/lib/theme.ts` (localStorage key).
 
-The landing page has some inline `#0D7A46` / `#D4A017` literals in older sections — the admin shell also uses raw hex in a few places. When migrating to real backend, feel free to normalize these to tokens.
+A sweep has already replaced the old `#0D7A46` / `#D4A017` literals across the landing page, admin shell and admin routes with `bg-primary` / `text-gold` / `var(--primary)` / `var(--gold)`. Keep it that way — no new hex literals.
 
 ---
 
@@ -105,7 +117,7 @@ The landing page has some inline `#0D7A46` / `#D4A017` literals in older section
 **Public**
 | Path | File | Purpose |
 |---|---|---|
-| `/` | `routes/index.tsx` | Landing page + waitlist signup form. Long single-file page: hero, moments-of-day carousel, feature grid, screenshots, testimonials, FAQ, footer. |
+| `/` | `routes/index.tsx` | Landing page. Thin composition file: renders `<LaunchStateProvider>` around `Nav, Hero, TrustedBy, LaunchCountdown, Moments, Services, Why, How, InsideTheApp, BuiltForNigerians, Partners, WaitlistSection, FAQ, Footer` — each its own file in `src/components/landing/`. |
 
 **Auth** (layout: `routes/auth.tsx`)
 | Path | File |
@@ -123,7 +135,7 @@ The landing page has some inline `#0D7A46` / `#D4A017` literals in older section
 | `/admin/waitlist` | Waitlist table: search, filter by status/source, bulk select, CSV export, view/edit/delete dialogs, undo-toast on delete |
 | `/admin/referrals`, `/admin/referrals/index`, `/admin/referrals/leaderboard`, `/admin/referrals/analytics`, `/admin/referrals/$id` | Referrals module |
 | `/admin/email`, `/admin/email/index`, `/admin/email/drafts`, `/admin/email/scheduled`, `/admin/email/templates`, `/admin/email/builder`, `/admin/email/$id` | Email campaigns |
-| `/admin/cms` + `/cms/announcement`, `/features`, `/testimonials`, `/faqs`, `/footer`, `/navigation`, `/seo`, `/social`, `/statistics`, `/index` | CMS for the landing page |
+| `/admin/cms` + `/cms/launch`, `/announcement`, `/features`, `/testimonials`, `/faqs`, `/footer`, `/navigation`, `/seo`, `/social`, `/statistics`, `/index` | CMS for the landing page. **`/admin/cms/launch` is the launch & countdown control panel** — see §5.1. |
 | `/admin/media` | Media library (grid, folders) |
 | `/admin/users`, `/admin/users/$id` | Admin users |
 | `/admin/roles`, `/admin/roles/$id` | Roles & permissions (groups defined in mock-data) |
@@ -169,7 +181,7 @@ Deterministic seeded generator + hand-written arrays exported for every admin sc
 
 ### 6.4 Consumption pattern (what the backend must match)
 
-**Landing signup form** (`routes/index.tsx` around line 1127):
+**Landing signup form** (`src/components/landing/waitlist-form.tsx`, validated by `src/lib/schemas/waitlist.ts`):
 ```ts
 await waitlistApi.create({
   name, email, phone, city, state,
