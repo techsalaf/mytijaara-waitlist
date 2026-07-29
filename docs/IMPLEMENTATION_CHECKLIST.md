@@ -6,9 +6,12 @@ Status key: `[ ]` not started, `[-]` in progress, `[x]` tested and complete.
 
 - [x] Audit the existing codebase and record verified findings.
 - [x] Select MySQL 8.0+ as the system of record.
-- [ ] Define the versioned public and admin API contracts.
+- [x] Define the versioned public and admin API contracts (see `docs/API_CONTRACT.md`).
 - [ ] Define data-retention, privacy, consent, and deletion requirements before collecting personal data.
 - [ ] Add reproducible local development, CI, gate-test, and browser-test tooling.
+- [x] Frontend: prepare Laravel-ready API client with mock fallback (`src/lib/api/client.ts`).
+- [x] Frontend: add `.env.example` documenting `VITE_API_BASE_URL`.
+- [x] Frontend: update `HANDOFF.md` for Laravel + MySQL backend.
 
 ## Phase 1: Laravel platform foundation
 
