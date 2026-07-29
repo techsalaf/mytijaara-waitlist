@@ -9,17 +9,20 @@ let cache: LaunchConfiguration = { ...DEFAULT_LAUNCH_CONFIG };
 /**
  * Launch / countdown CMS endpoints.
  *
- * Backend contract:
- *   GET   /launch-config  -> { data: LaunchConfiguration }
- *   PATCH /launch-config  -> { data: LaunchConfiguration }
- *
- * Swap the `apiCall` bodies for real fetches; consumers stay untouched.
+ * Backend contract (Laravel):
+ *   GET   /launch-config  -> { data: LaunchConfiguration }          (public)
+ *   PATCH /launch-config  -> { data: LaunchConfiguration }            (admin)
  */
 export const launchApi = {
-  get: () => apiCall("/launch-config", () => cache, { delay: 120 }),
+  get: () =>
+    apiCall("/launch-config", () => cache, { delay: 120, public: true }),
   update: (patch: Partial<LaunchConfiguration>) =>
-    apiCall("/launch-config", () => {
-      cache = { ...cache, ...patch };
-      return cache;
-    }),
+    apiCall(
+      "/launch-config",
+      () => {
+        cache = { ...cache, ...patch };
+        return cache;
+      },
+      { method: "PATCH", body: patch },
+    ),
 };
