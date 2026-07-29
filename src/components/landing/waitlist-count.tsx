@@ -14,12 +14,12 @@ export function WaitlistCount({ fallback = 2400 }: { fallback?: number }) {
   useEffect(() => {
     let cancel = false;
     waitlistApi
-      .list()
+      .count()
       .then((r) => {
         if (cancel) return;
         // Show whichever is higher — the seeded fallback keeps social proof
         // strong even before real signups arrive.
-        setCount(Math.max(fallback, r.data.length));
+        setCount(Math.max(fallback, r.data.total));
       })
       .catch(() => {
         /* fallback is already set */
