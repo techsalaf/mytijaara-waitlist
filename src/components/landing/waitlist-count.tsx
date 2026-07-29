@@ -31,8 +31,8 @@ export function WaitlistCount({ fallback = 2400 }: { fallback?: number }) {
 
   return (
     <>
-      <strong className="text-foreground">{count.toLocaleString("en-US")}+</strong>{" "}
-      Nigerians already on the waitlist
+      <strong className="text-foreground">{count.toLocaleString("en-US")}+</strong> Nigerians
+      already on the waitlist
     </>
   );
 }
