@@ -381,3 +381,39 @@ Campaign send/schedule uses Laravel Mailables + Queue. Store templates in `email
 - `useSuspenseQuery` / `queryOptions` conversion of `admin.index.tsx` and `admin.waitlist.tsx`. Designing cache keys and invalidation against an in-memory mock bakes in the wrong ones — do it in the same commit that swaps the data source.
 - Migrating admin routes into a `_authenticated/` directory. The single `AdminAuthGate` is functionally equivalent today; move to `_authenticated/` when real Supabase auth lands so the gate runs in `beforeLoad` server-side.
 - Every admin page other than `/admin/waitlist` and `/admin/cms/launch` still imports straight from `mock-data.ts`. That is the bulk of the remaining work.
+
+---
+
+## 11. Laravel-specific notes for the backend agent
+
+### Why Laravel is separate
+This repo is a TanStack Start frontend. Do **not** put Laravel inside `src/`, do not add PHP files here, and do not try to serve the React app from Laravel. The two services communicate over HTTP.
+
+### CORS
+Laravel must allow the frontend origin. In `config/cors.php`:
+- `'allowed_origins' => [env('FRONTEND_URL', 'http://localhost:8080')]`
+- `'allowed_headers' => ['Content-Type', 'Authorization', 'X-Requested-With']`
+- `'supports_credentials' => false` (we are using token auth, not cookies)
+
+### Auth flow
+1. `POST /api/v1/auth/login` validates email/password and returns a Sanctum personal access token.
+2. Frontend stores `mytijaara_api_token` in `localStorage` (or move to httpOnly cookie later).
+3. `src/lib/api/client.ts` injects the token as `Authorization: Bearer <token>`.
+4. Laravel `auth:sanctum` middleware protects admin routes.
+5. Use `spatie/laravel-permission` to check roles inside controllers: `$user->hasRole('admin')` etc.
+
+### Response envelope
+Every successful response should be wrapped as `{ data: T, meta?: object }`. Errors return `{ message: string, errors?: Record<string, string[]> }` with the appropriate 4xx/5xx status. The frontend `ApiError` reads `message` and `status`.
+
+### Validation
+Reuse `src/lib/schemas/waitlist.ts` for the public signup. You can port it to a Laravel Form Request or replicate the rules manually. Key rules: name ≥ 2 chars, valid email, Nigerian city/state from the allowed enums, consent checkbox true, honeypot field must be empty.
+
+### Rate limiting
+Apply `throttle` middleware to public signup and login routes by IP. Suggested: 5 attempts per minute for login, 10 signups per hour per IP.
+
+### Public vs private endpoints
+- **Public** (no token): `GET /launch-config`, `POST /waitlist`, `GET /waitlist/count`.
+- **Private** (token + role): everything under `/admin/*` and CMS mutations.
+
+### Keeping the frontend preview alive
+If `VITE_API_BASE_URL` is unset, the frontend continues to use mocks. This lets you develop Laravel endpoints one at a time without breaking the preview.
