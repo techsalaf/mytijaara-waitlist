@@ -1,8 +1,5 @@
 import { apiCall } from "./client";
-import {
-  DEFAULT_LAUNCH_CONFIG,
-  type LaunchConfiguration,
-} from "@/lib/launch/config";
+import { DEFAULT_LAUNCH_CONFIG, type LaunchConfiguration } from "@/lib/launch/config";
 
 let cache: LaunchConfiguration = { ...DEFAULT_LAUNCH_CONFIG };
 
@@ -14,8 +11,7 @@ let cache: LaunchConfiguration = { ...DEFAULT_LAUNCH_CONFIG };
  *   PATCH /launch-config  -> { data: LaunchConfiguration }            (admin)
  */
 export const launchApi = {
-  get: () =>
-    apiCall("/launch-config", () => cache, { delay: 120, public: true }),
+  get: () => apiCall("/launch-config", () => cache, { delay: 120, public: true }),
   update: (patch: Partial<LaunchConfiguration>) =>
     apiCall(
       "/launch-config",

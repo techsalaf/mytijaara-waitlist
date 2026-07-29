@@ -17,13 +17,14 @@ This document is the concrete contract between the **TanStack Start frontend** (
 
 ## 2. Auth
 
-| Frontend | Method | Endpoint | Body | Response |
-|---|---|---|---|---|
+| Frontend                            | Method | Endpoint      | Body                  | Response                                       |
+| ----------------------------------- | ------ | ------------- | --------------------- | ---------------------------------------------- |
 | `auth-mock.signIn(email, password)` | `POST` | `/auth/login` | `{ email, password }` | `{ data: { token: string, user: AdminUser } }` |
-| `auth-mock.signOut()` (client only) | — | — | — | removes token from storage |
-| `GET /auth/me` | `GET` | `/auth/me` | — | `{ data: AdminUser }` |
+| `auth-mock.signOut()` (client only) | —      | —             | —                     | removes token from storage                     |
+| `GET /auth/me`                      | `GET`  | `/auth/me`    | —                     | `{ data: AdminUser }`                          |
 
 Notes:
+
 - Laravel should use Sanctum token-based auth (not cookie SPA mode).
 - Login route should be rate-limited by IP.
 - Token is sent on every admin request by `src/lib/api/client.ts`.
@@ -34,17 +35,18 @@ Notes:
 
 Maps to `src/lib/api/waitlist.ts`.
 
-| Frontend | Method | Endpoint | Body / Params | Response |
-|---|---|---|---|---|
-| `waitlistApi.list()` | `GET` | `/waitlist` | `?search=&status=&source=&page=` | `{ data: WaitlistUser[], meta: { total, current_page, last_page } }` |
-| `waitlistApi.get(id)` | `GET` | `/waitlist/:id` | — | `{ data: WaitlistUser \| null }` |
-| `waitlistApi.create(payload)` | `POST` | `/waitlist` | signup payload (see schema) | `{ data: WaitlistUser }` |
-| `waitlistApi.update(id, patch)` | `PATCH` | `/waitlist/:id` | partial WaitlistUser | `{ data: WaitlistUser }` |
-| `waitlistApi.remove(ids[])` | `POST` | `/waitlist/bulk-delete` | `{ ids: string[] }` | `{ data: { removed: WaitlistUser[] } }` |
-| `waitlistApi.restore(users[])` | `POST` | `/waitlist/restore` | `{ users: WaitlistUser[] }` | `{ data: { restored: number } }` |
-| `waitlistApi.count()` (used by waitlist-count) | `GET` | `/waitlist/count` | — | `{ data: { total: number } }` |
+| Frontend                                       | Method  | Endpoint                | Body / Params                    | Response                                                             |
+| ---------------------------------------------- | ------- | ----------------------- | -------------------------------- | -------------------------------------------------------------------- |
+| `waitlistApi.list()`                           | `GET`   | `/waitlist`             | `?search=&status=&source=&page=` | `{ data: WaitlistUser[], meta: { total, current_page, last_page } }` |
+| `waitlistApi.get(id)`                          | `GET`   | `/waitlist/:id`         | —                                | `{ data: WaitlistUser \| null }`                                     |
+| `waitlistApi.create(payload)`                  | `POST`  | `/waitlist`             | signup payload (see schema)      | `{ data: WaitlistUser }`                                             |
+| `waitlistApi.update(id, patch)`                | `PATCH` | `/waitlist/:id`         | partial WaitlistUser             | `{ data: WaitlistUser }`                                             |
+| `waitlistApi.remove(ids[])`                    | `POST`  | `/waitlist/bulk-delete` | `{ ids: string[] }`              | `{ data: { removed: WaitlistUser[] } }`                              |
+| `waitlistApi.restore(users[])`                 | `POST`  | `/waitlist/restore`     | `{ users: WaitlistUser[] }`      | `{ data: { restored: number } }`                                     |
+| `waitlistApi.count()` (used by waitlist-count) | `GET`   | `/waitlist/count`       | —                                | `{ data: { total: number } }`                                        |
 
 Signup payload shape (matches `src/lib/schemas/waitlist.ts`):
+
 ```json
 {
   "name": "string",
@@ -60,11 +62,12 @@ Signup payload shape (matches `src/lib/schemas/waitlist.ts`):
   "tags": [],
   "referralCode": "string?",
   "consent": true,
-  "website": ""   // honeypot — must be empty
+  "website": "" // honeypot — must be empty
 }
 ```
 
 Notes:
+
 - `POST /waitlist` is **public** (no token).
 - All other waitlist routes are **admin-only**.
 - Duplicate email protection: return `422` with `errors.email`.
@@ -76,9 +79,9 @@ Notes:
 
 Maps to `src/lib/api/launch.ts`.
 
-| Frontend | Method | Endpoint | Body | Response |
-|---|---|---|---|---|
-| `launchApi.get()` | `GET` | `/launch-config` | — | `{ data: LaunchConfiguration }` |
+| Frontend                  | Method  | Endpoint         | Body                          | Response                        |
+| ------------------------- | ------- | ---------------- | ----------------------------- | ------------------------------- |
+| `launchApi.get()`         | `GET`   | `/launch-config` | —                             | `{ data: LaunchConfiguration }` |
 | `launchApi.update(patch)` | `PATCH` | `/launch-config` | partial `LaunchConfiguration` | `{ data: LaunchConfiguration }` |
 
 `GET /launch-config` is **public** and should be cacheable (short TTL). `PATCH /launch-config` is **admin-only**.
@@ -91,15 +94,15 @@ The exact JSON shape is documented in `HANDOFF.md` §5.1 and `src/lib/launch/con
 
 Maps to a new `src/lib/api/analytics.ts` that the backend agent will create.
 
-| Frontend | Method | Endpoint | Response |
-|---|---|---|---|
-| dashboard stats | `GET` | `/analytics/overview` | `{ data: DashboardStats }` |
-| signup trend | `GET` | `/analytics/trends?days=30` | `{ data: SignupTrendPoint[] }` |
-| traffic sources | `GET` | `/analytics/traffic-sources` | `{ data: TrafficSource[] }` |
-| city breakdown | `GET` | `/analytics/cities` | `{ data: CityBreakdown[] }` |
-| device breakdown | `GET` | `/analytics/devices` | `{ data: DeviceBreakdown[] }` |
-| browser breakdown | `GET` | `/analytics/browsers` | `{ data: BrowserBreakdown[] }` |
-| funnel | `GET` | `/analytics/funnel` | `{ data: FunnelStep[] }` |
+| Frontend          | Method | Endpoint                     | Response                       |
+| ----------------- | ------ | ---------------------------- | ------------------------------ |
+| dashboard stats   | `GET`  | `/analytics/overview`        | `{ data: DashboardStats }`     |
+| signup trend      | `GET`  | `/analytics/trends?days=30`  | `{ data: SignupTrendPoint[] }` |
+| traffic sources   | `GET`  | `/analytics/traffic-sources` | `{ data: TrafficSource[] }`    |
+| city breakdown    | `GET`  | `/analytics/cities`          | `{ data: CityBreakdown[] }`    |
+| device breakdown  | `GET`  | `/analytics/devices`         | `{ data: DeviceBreakdown[] }`  |
+| browser breakdown | `GET`  | `/analytics/browsers`        | `{ data: BrowserBreakdown[] }` |
+| funnel            | `GET`  | `/analytics/funnel`          | `{ data: FunnelStep[] }`       |
 
 All analytics routes are **admin-only**. Compute from `waitlist_users` and page-view events if implemented.
 
@@ -109,11 +112,11 @@ All analytics routes are **admin-only**. Compute from `waitlist_users` and page-
 
 Maps to a new `src/lib/api/referrals.ts`.
 
-| Frontend | Method | Endpoint | Response |
-|---|---|---|---|
-| leaderboard | `GET` | `/referrals/leaderboard?limit=25` | `{ data: ReferralLeaderboardEntry[] }` |
-| referral detail | `GET` | `/referrals/:id` | `{ data: WaitlistUser & { referrals: Referral[] } }` |
-| analytics | `GET` | `/referrals/analytics` | `{ data: object }` |
+| Frontend        | Method | Endpoint                          | Response                                             |
+| --------------- | ------ | --------------------------------- | ---------------------------------------------------- |
+| leaderboard     | `GET`  | `/referrals/leaderboard?limit=25` | `{ data: ReferralLeaderboardEntry[] }`               |
+| referral detail | `GET`  | `/referrals/:id`                  | `{ data: WaitlistUser & { referrals: Referral[] } }` |
+| analytics       | `GET`  | `/referrals/analytics`            | `{ data: object }`                                   |
 
 ---
 
@@ -121,18 +124,19 @@ Maps to a new `src/lib/api/referrals.ts`.
 
 Maps to new `src/lib/api/campaigns.ts` and `templates.ts`.
 
-| Frontend | Method | Endpoint | Body | Response |
-|---|---|---|---|---|
-| list campaigns | `GET` | `/campaigns` | — | `{ data: Campaign[] }` |
-| get campaign | `GET` | `/campaigns/:id` | — | `{ data: Campaign }` |
-| create campaign | `POST` | `/campaigns` | campaign fields | `{ data: Campaign }` |
-| update campaign | `PATCH` | `/campaigns/:id` | partial campaign | `{ data: Campaign }` |
-| send/schedule | `POST` | `/campaigns/:id/send` | `{ scheduledAt?: string }` | `{ data: Campaign }` |
-| list templates | `GET` | `/email-templates` | — | `{ data: EmailTemplate[] }` |
-| get template | `GET` | `/email-templates/:id` | — | `{ data: EmailTemplate }` |
-| update template | `PATCH` | `/email-templates/:id` | partial template | `{ data: EmailTemplate }` |
+| Frontend        | Method  | Endpoint               | Body                       | Response                    |
+| --------------- | ------- | ---------------------- | -------------------------- | --------------------------- |
+| list campaigns  | `GET`   | `/campaigns`           | —                          | `{ data: Campaign[] }`      |
+| get campaign    | `GET`   | `/campaigns/:id`       | —                          | `{ data: Campaign }`        |
+| create campaign | `POST`  | `/campaigns`           | campaign fields            | `{ data: Campaign }`        |
+| update campaign | `PATCH` | `/campaigns/:id`       | partial campaign           | `{ data: Campaign }`        |
+| send/schedule   | `POST`  | `/campaigns/:id/send`  | `{ scheduledAt?: string }` | `{ data: Campaign }`        |
+| list templates  | `GET`   | `/email-templates`     | —                          | `{ data: EmailTemplate[] }` |
+| get template    | `GET`   | `/email-templates/:id` | —                          | `{ data: EmailTemplate }`   |
+| update template | `PATCH` | `/email-templates/:id` | partial template           | `{ data: EmailTemplate }`   |
 
 Webhook (public, signature-verified):
+
 - `POST /webhooks/email` — handles open/click/bounce events from the email provider.
 
 ---
@@ -141,12 +145,12 @@ Webhook (public, signature-verified):
 
 Maps to a new `src/lib/api/media.ts`.
 
-| Frontend | Method | Endpoint | Body | Response |
-|---|---|---|---|---|
-| list | `GET` | `/media?folder=&type=` | — | `{ data: MediaFile[] }` |
-| upload | `POST` | `/media` | `multipart/form-data` | `{ data: MediaFile }` |
-| delete | `DELETE` | `/media/:id` | — | `{ data: { deleted: true } }` |
-| update metadata | `PATCH` | `/media/:id` | `{ name, alt, folder }` | `{ data: MediaFile }` |
+| Frontend        | Method   | Endpoint               | Body                    | Response                      |
+| --------------- | -------- | ---------------------- | ----------------------- | ----------------------------- |
+| list            | `GET`    | `/media?folder=&type=` | —                       | `{ data: MediaFile[] }`       |
+| upload          | `POST`   | `/media`               | `multipart/form-data`   | `{ data: MediaFile }`         |
+| delete          | `DELETE` | `/media/:id`           | —                       | `{ data: { deleted: true } }` |
+| update metadata | `PATCH`  | `/media/:id`           | `{ name, alt, folder }` | `{ data: MediaFile }`         |
 
 ---
 
@@ -154,11 +158,11 @@ Maps to a new `src/lib/api/media.ts`.
 
 Maps to a new `src/lib/api/cms.ts`. Each landing section has a key. The admin pages under `/admin/cms/*` edit these.
 
-| Frontend | Method | Endpoint | Body | Response |
-|---|---|---|---|---|
-| get all sections | `GET` | `/cms` | — | `{ data: Record<string, object> }` |
-| get section | `GET` | `/cms/:section` | — | `{ data: object }` |
-| update section | `PATCH` | `/cms/:section` | section JSON | `{ data: object }` |
+| Frontend         | Method  | Endpoint        | Body         | Response                           |
+| ---------------- | ------- | --------------- | ------------ | ---------------------------------- |
+| get all sections | `GET`   | `/cms`          | —            | `{ data: Record<string, object> }` |
+| get section      | `GET`   | `/cms/:section` | —            | `{ data: object }`                 |
+| update section   | `PATCH` | `/cms/:section` | section JSON | `{ data: object }`                 |
 
 Sections: `hero`, `services`, `why`, `how`, `inside_the_app`, `built_for_nigerians`, `partners`, `testimonials`, `faqs`, `footer`, `navigation`, `seo`, `social`, `statistics`, `announcement`.
 
@@ -166,13 +170,13 @@ Sections: `hero`, `services`, `why`, `how`, `inside_the_app`, `built_for_nigeria
 
 ## 10. Admin users & roles
 
-| Frontend | Method | Endpoint | Body | Response |
-|---|---|---|---|---|
-| list users | `GET` | `/admin/users` | — | `{ data: AdminUser[] }` |
-| get user | `GET` | `/admin/users/:id` | — | `{ data: AdminUser }` |
-| update user | `PATCH` | `/admin/users/:id` | partial user | `{ data: AdminUser }` |
-| list roles | `GET` | `/admin/roles` | — | `{ data: Role[] }` |
-| update role | `PATCH` | `/admin/roles/:id` | partial role | `{ data: Role }` |
+| Frontend    | Method  | Endpoint           | Body         | Response                |
+| ----------- | ------- | ------------------ | ------------ | ----------------------- |
+| list users  | `GET`   | `/admin/users`     | —            | `{ data: AdminUser[] }` |
+| get user    | `GET`   | `/admin/users/:id` | —            | `{ data: AdminUser }`   |
+| update user | `PATCH` | `/admin/users/:id` | partial user | `{ data: AdminUser }`   |
+| list roles  | `GET`   | `/admin/roles`     | —            | `{ data: Role[] }`      |
+| update role | `PATCH` | `/admin/roles/:id` | partial role | `{ data: Role }`        |
 
 Use `spatie/laravel-permission` for roles/permissions.
 
@@ -180,19 +184,19 @@ Use `spatie/laravel-permission` for roles/permissions.
 
 ## 11. Notifications & audit logs
 
-| Frontend | Method | Endpoint | Response |
-|---|---|---|---|
-| notifications | `GET` | `/notifications` | `{ data: Notification[] }` |
-| mark read | `POST` | `/notifications/:id/read` | `{ data: Notification }` |
-| audit logs | `GET` | `/audit-logs` | `{ data: ActivityLogEntry[] }` |
+| Frontend      | Method | Endpoint                  | Response                       |
+| ------------- | ------ | ------------------------- | ------------------------------ |
+| notifications | `GET`  | `/notifications`          | `{ data: Notification[] }`     |
+| mark read     | `POST` | `/notifications/:id/read` | `{ data: Notification }`       |
+| audit logs    | `GET`  | `/audit-logs`             | `{ data: ActivityLogEntry[] }` |
 
 ---
 
 ## 12. Settings
 
-| Frontend | Method | Endpoint | Body | Response |
-|---|---|---|---|---|
-| get settings group | `GET` | `/settings/:group` | — | `{ data: object }` |
+| Frontend              | Method  | Endpoint           | Body       | Response           |
+| --------------------- | ------- | ------------------ | ---------- | ------------------ |
+| get settings group    | `GET`   | `/settings/:group` | —          | `{ data: object }` |
 | update settings group | `PATCH` | `/settings/:group` | group JSON | `{ data: object }` |
 
 Groups: `company`, `branding`, `seo`, `social`, `smtp`, `integrations`, `api_keys`, `system`.

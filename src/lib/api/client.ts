@@ -64,10 +64,7 @@ async function mockCall<T>(
   return { data };
 }
 
-async function httpCall<T>(
-  endpoint: string,
-  opts: ApiCallOptions = {},
-): Promise<ApiResponse<T>> {
+async function httpCall<T>(endpoint: string, opts: ApiCallOptions = {}): Promise<ApiResponse<T>> {
   const url = `${API_BASE_URL}${endpoint}`;
   const headers: Record<string, string> = {
     Accept: "application/json",

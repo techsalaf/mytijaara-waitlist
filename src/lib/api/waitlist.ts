@@ -18,8 +18,7 @@ let cache: WaitlistUser[] = [...waitlistUsers];
 export const waitlistApi = {
   list: () => apiCall("/waitlist", () => cache),
   count: () => apiCall("/waitlist/count", () => ({ total: cache.length }), { public: true }),
-  get: (id: string) =>
-    apiCall(`/waitlist/${id}`, () => cache.find((u) => u.id === id) ?? null),
+  get: (id: string) => apiCall(`/waitlist/${id}`, () => cache.find((u) => u.id === id) ?? null),
   create: (payload: Partial<WaitlistUser>) =>
     apiCall(
       "/waitlist",
