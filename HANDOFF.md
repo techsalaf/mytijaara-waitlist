@@ -256,58 +256,86 @@ Everything is `{ data, meta? }` shaped. Preserving that envelope keeps every con
 
 ## 7. What a real backend needs to provide
 
-### 7.1 Recommended stack
-The project template supports **Lovable Cloud** (Supabase under the hood) with zero-config. Use:
-- **Postgres** for data, **Row Level Security** for tenancy/roles.
-- **Supabase Auth** for the admin login (replaces `auth-mock.ts`).
-- **TanStack Start server functions** (`createServerFn` in `*.functions.ts` files) for internal RPC, and **server routes** under `src/routes/api/public/*` for webhooks/cron/public HTTP.
-- **Roles** stored in a **separate `user_roles` table** (never on `profiles`), guarded by a `SECURITY DEFINER has_role()` function. Never trust client-side role checks.
+### 7.1 Recommended stack — Laravel + MySQL
+The frontend is a **TanStack Start** app that runs on Cloudflare Workers. The backend should be a **separate Laravel API service** that the frontend calls over HTTP. This is the architecture already chosen in `docs/AUDIT.md`.
 
-### 7.2 Data model (minimum viable)
-Tables that must exist to replace the mocks:
+| Layer | Choice | Notes |
+|---|---|---|
+| Backend framework | **Laravel 11+** | API-only mode is fine; no Blade views needed. |
+| Database | **MySQL 8.0+** (`utf8mb4`) | The system of record. |
+| Auth | **Laravel Sanctum** (token-based) | Issue personal access tokens on login; frontend sends `Authorization: Bearer <token>`. Cookie-based SPA mode is discouraged here because the frontend and backend are separate origins/services. |
+| Queue | **Laravel Queue** (database/redis) | For campaign sends, referral emails, analytics aggregation. |
+| Mail | **Resend / Postmark / SES** | Configure in Laravel `.env`. |
+| Storage | **Laravel Storage** → S3/MinIO/local | For media library files. |
+| Cache | **Redis** or database cache | For public waitlist count, launch config, rate limits. |
+| Scheduler | **Laravel Scheduler** + cron | For scheduled campaigns, nightly reports. |
 
-1. `waitlist_users` — mirrors the `WaitlistUser` type. Public `INSERT` allowed for landing signups; `SELECT/UPDATE/DELETE` restricted to admins.
-2. `referrals` — join table linking waitlist users to their referrer; leaderboard is a view.
+### 7.2 Service boundary
+- **Frontend (this repo)**: UI, routing, form validation, charts, public landing page, admin dashboard. Reads `VITE_API_BASE_URL` at runtime.
+- **Laravel backend**: validation, persistence, auth, RBAC, mail, queues, analytics SQL, CMS storage, audit logging.
+- **Communication**: JSON over HTTP. CORS must allow the frontend origin. No server-to-server secrets are needed in the browser; only the public API base URL.
+
+### 7.3 Data model (minimum viable)
+Laravel migrations should create these tables. Names map to the mock-data exports in `src/lib/mock-data.ts` and the shared types in `src/lib/types/index.ts`.
+
+1. `waitlist_users` — mirrors `WaitlistUser`. Public signups insert here; admin-only reads/updates.
+2. `referrals` — `referrer_waitlist_id` → `referred_waitlist_id`, conversion tracking, points.
 3. `email_campaigns` + `email_templates` — status enum `draft|scheduled|sent`.
-4. `media_files` — object storage metadata + Supabase Storage bucket.
-5. `cms_hero`, `cms_features`, `cms_testimonials`, `cms_faqs`, `cms_footer`, `cms_navigation`, `cms_seo`, `cms_social`, `cms_statistics`, `cms_announcement` — one row-per-section is fine, JSONB-backed.
-6. `notifications` — user-scoped.
+4. `media_files` — metadata for uploads stored on S3/local disk.
+5. `cms_sections` (or one table per section) — `cms_hero`, `cms_features`, `cms_testimonials`, `cms_faqs`, `cms_footer`, `cms_navigation`, `cms_seo`, `cms_social`, `cms_statistics`, `cms_announcement`. JSON columns are fine.
+6. `notifications` — per-admin-user.
 7. `audit_logs` — insert-only, admin-visible.
-8. `settings` (company, branding, seo, social, smtp, integrations, api_keys, system) — key/value JSONB or one table per group.
-9. `launch_config` — single row, JSONB, matching `LaunchConfiguration` (§5.1). Public `SELECT` for anon; `UPDATE` admin-only.
-10. `admin_users` (== `auth.users` + `profiles`) and `user_roles` + `app_role` enum (`super_admin`, `admin`, `marketing`, `content_editor`, `analyst`, `support` — see `mock-data.ts` `roles`).
-
-**Grants reminder**: every `CREATE TABLE public.X` MUST be followed by explicit `GRANT` statements in the same migration (PostgREST does not grant by default). Anon gets `INSERT` on `waitlist_users` only; authenticated gets scoped access via RLS + `has_role()`.
+8. `settings` groups — `company`, `branding`, `seo`, `social`, `smtp`, `integrations`, `api_keys`, `system`. Key/value JSON or dedicated tables.
+9. `launch_config` — single row, JSON column matching `LaunchConfiguration` (§5.1). Public read; admin write.
+10. `users` (Laravel default), `roles`, `model_has_roles` — use `spatie/laravel-permission` for RBAC. Seed roles: `super_admin`, `admin`, `marketing`, `content_editor`, `analyst`, `support`.
 
 ### 7.3 API surface expected by the frontend
+The frontend already expects every API module to return `Promise<{ data: T }>`. The mock layer in `src/lib/api/` has been refactored so that **setting `VITE_API_BASE_URL` switches it to real HTTP calls**; leaving it unset keeps the mocks alive. See `docs/API_CONTRACT.md` for the exact endpoint mapping.
 
-Replace `src/lib/api/waitlist.ts` (and create sibling files `referrals.ts`, `campaigns.ts`, `templates.ts`, `media.ts`, `cms.ts`, `users.ts`, `roles.ts`, `notifications.ts`, `audit.ts`, `settings.ts`, `analytics.ts`). Each should export an object whose methods return `Promise<{ data: T }>`. Preferred implementation: **TanStack server functions** via `createServerFn` — keeps types end-to-end and runs on the edge.
+Create Laravel API modules that match these frontend modules:
+- `src/lib/api/waitlist.ts` → `WaitlistController`
+- `src/lib/api/launch.ts` → `LaunchConfigController`
+- (new) `src/lib/api/analytics.ts` → `AnalyticsController`
+- (new) `src/lib/api/referrals.ts` → `ReferralController`
+- (new) `src/lib/api/campaigns.ts` + `templates.ts` → `CampaignController`, `EmailTemplateController`
+- (new) `src/lib/api/media.ts` → `MediaController`
+- (new) `src/lib/api/cms.ts` → `CmsSectionController`
+- (new) `src/lib/api/users.ts` + `roles.ts` → `UserController`, `RoleController`
+- (new) `src/lib/api/notifications.ts` → `NotificationController`
+- (new) `src/lib/api/audit.ts` → `AuditLogController`
+- (new) `src/lib/api/settings.ts` → `SettingsController`
 
-Public endpoint for landing signup MUST be reachable without auth. Put it either as an unauthenticated `createServerFn` OR under `src/routes/api/public/waitlist.ts`. Validate with zod, rate-limit, honeypot/turnstile if abuse is a concern.
+Public endpoint for landing signup MUST be reachable without auth (`POST /api/v1/waitlist`). Validate with the same Zod schema (`src/lib/schemas/waitlist.ts`), rate-limit by IP, and respect the honeypot field.
 
 ### 7.4 Analytics endpoints
-The dashboard (`admin.index.tsx`) and `admin.analytics.tsx` read `dashboardStats`, `signupTrend`, `trafficSources`, `cityBreakdown`, `deviceBreakdown`, `browserBreakdown`, `funnel`. These are all derivable from `waitlist_users` + page-view events. Expose either as SQL views or as a single `/api/analytics/overview` server function that returns the same shape.
+The dashboard (`admin.index.tsx`) and `admin.analytics.tsx` read `dashboardStats`, `signupTrend`, `trafficSources`, `cityBreakdown`, `deviceBreakdown`, `browserBreakdown`, `funnel`. Expose `GET /api/v1/analytics/overview` returning the same shape. Compute from `waitlist_users` plus page-view events if you implement them.
 
 ### 7.5 Email
-Campaign send/schedule needs a provider (Resend, Postmark, SES). Wire it in a server function that reads `email_templates`, applies template variables, queues sends, and writes back to `email_campaigns` (sent/opens/clicks — track via webhook to `/api/public/email-webhook` with signature verification).
+Campaign send/schedule uses Laravel Mailables + Queue. Store templates in `email_templates`, track opens/clicks via a signed webhook `POST /api/v1/webhooks/email` (verify signature). Respect unsubscribe records.
 
 ### 7.6 Media
-Use Supabase Storage bucket `media`. Upload from admin via signed URL; store metadata in `media_files`.
+`MediaController` handles upload validation, image optimization, folder metadata, alt text, and ordering. Store files on the configured disk and persist metadata in `media_files`.
 
 ### 7.7 Auth wiring
-Replace `auth-mock.ts` with the generated Supabase client (`@/integrations/supabase/client`). In `AdminShell`, swap `getSession()` for `supabase.auth.getSession()` + `onAuthStateChange`. Protect admin routes with a `_authenticated` layout gate (TanStack pattern). Sign-out flow: `queryClient.cancelQueries()` → `queryClient.clear()` → `supabase.auth.signOut()` → `navigate({ to: "/auth/login", replace: true })`.
+1. Laravel: install Sanctum, publish config, run migrations.
+2. Laravel: `POST /api/v1/auth/login` returns `{ data: { token: string, user: AdminUser } }`.
+3. Frontend: replace `src/lib/auth-mock.ts` so `signIn()` stores the token in `localStorage` under `mytijaara_api_token` and the user object under `mytijaara_admin_session`.
+4. Frontend: `src/lib/api/client.ts` reads `mytijaara_api_token` and sends `Authorization: Bearer <token>` on admin requests.
+5. Frontend: `src/components/admin/admin-auth-gate.tsx` checks the session and redirects to `/auth/login` if absent. Add a server-side `beforeLoad` redirect when real auth lands.
+6. Sign-out flow: `queryClient.cancelQueries()` → `queryClient.clear()` → remove token/session → `navigate({ to: "/auth/login", replace: true })`.
 
 ### 7.8 Suggested migration order
-1. Enable Lovable Cloud, create `waitlist_users` + grants + RLS.
-2. Replace `waitlistApi` with real calls; verify landing form + `/admin/waitlist` still work.
-3. Migrate auth (`auth-mock.ts` → Supabase Auth) + `_authenticated` route gate + `user_roles`.
-4. Migrate analytics reads (dashboard + analytics page).
-5. Migrate CMS tables so the landing page reads its content from DB (currently the landing copy is hard-coded JSX in `routes/index.tsx`).
-6. Migrate referrals, notifications, audit logs, admin users/roles UI.
-7. Wire email provider + templates + campaigns.
-8. Wire media storage.
-9. Wire settings groups.
-10. Add server-side rate-limiting and remove `failRate` test hooks.
+1. Scaffold Laravel API repo, configure MySQL, Sanctum, CORS.
+2. Create `waitlist_users` migration + model + `WaitlistController`.
+3. Set `VITE_API_BASE_URL=http://localhost:8000/api/v1` in this frontend's `.env.local`. Verify landing signup + `/admin/waitlist` still work.
+4. Add auth (`POST /auth/login`, token storage, Bearer injection).
+5. Add `launch_config` table + `LaunchConfigController`; verify `/admin/cms/launch` saves and the landing page reflects changes.
+6. Add analytics endpoint so the dashboard becomes real.
+7. Migrate referrals, notifications, audit logs, admin users/roles UI.
+8. Wire email templates + campaigns.
+9. Wire media storage.
+10. Wire CMS sections and settings groups.
+11. Add server-side rate-limiting and remove `failRate` test hooks.
 
 ---
 
@@ -328,7 +356,7 @@ Replace `auth-mock.ts` with the generated Supabase client (`@/integrations/supab
 
 ## 9. TL;DR for the AI builder
 
-> The frontend is done. To ship this, replace `src/lib/mock-data.ts`, `src/lib/api/*`, and `src/lib/auth-mock.ts` with a real backend (Supabase + TanStack server functions recommended). Match the return shape `{ data: T }`. Preserve the `WaitlistUser` type and every consumer keeps working. Start with the waitlist table + signup endpoint, then auth, then analytics, then CMS, then everything else. Do not restructure routes. Do not touch `routeTree.gen.ts`. Keep semantic Tailwind tokens. Every admin route is `noindex`. Public signup must work without auth; every other endpoint must be role-gated via `user_roles` + `has_role()`.
+> The frontend is done. Build a **separate Laravel + MySQL API** and point the frontend at it with `VITE_API_BASE_URL`. The API client in `src/lib/api/client.ts` already falls back to mocks when the URL is unset and makes real HTTP calls when it is set. Match the return shape `{ data: T }`. Preserve the `WaitlistUser` type and every consumer keeps working. Start with the waitlist table + signup endpoint, then auth, then `launch_config`, then analytics, then CMS, then everything else. Do not restructure routes. Do not touch `routeTree.gen.ts`. Keep semantic Tailwind tokens. Every admin route is `noindex`. Public signup must work without auth; every other endpoint must be role-gated via Sanctum + `spatie/laravel-permission`.
 
 ---
 
