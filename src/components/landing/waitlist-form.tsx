@@ -88,19 +88,22 @@ export function WaitlistForm() {
       const res = await waitlistApi.create({
         name: data.name,
         email: data.email,
-        phone: data.phone ?? "",
+        phone: data.phone || undefined,
         city: data.city,
+        role: data.role,
+        interest: data.interest || undefined,
         source: data.referralCode ? "referral" : "organic",
-        status: "active",
-        tags: [data.role, ...(data.interest ? [data.interest] : [])],
-        referredBy: data.referralCode || undefined,
+        referralCode: data.referralCode || undefined,
+        consent: data.consent,
+        website: data.website,
       });
       setSubmittedCity(data.city);
       setPosition(res.data.position ?? null);
       toast.success("You're on the list! 🎉");
     } catch (err) {
-      toast.error("Something went wrong. Please try again.");
-      // eslint-disable-next-line no-console
+      const message =
+        err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      toast.error(message);
       console.error(err);
     }
   });
@@ -116,9 +119,7 @@ export function WaitlistForm() {
           We'll message you as soon as MyTijaara launches in {submittedCity}.
         </p>
         {position !== null && (
-          <p className="mt-1 text-xs text-primary-foreground/70">
-            You're #{position} in line.
-          </p>
+          <p className="mt-1 text-xs text-primary-foreground/70">You're #{position} in line.</p>
         )}
       </div>
     );
@@ -206,8 +207,7 @@ export function WaitlistForm() {
       {/* Interests */}
       <div>
         <div className="mb-2 text-xs font-semibold text-primary-foreground/80">
-          What would you use it for?{" "}
-          <span className="font-normal opacity-70">(optional)</span>
+          What would you use it for? <span className="font-normal opacity-70">(optional)</span>
         </div>
         <div className="flex flex-wrap gap-2">
           {WAITLIST_INTERESTS.map((it) => (
@@ -249,24 +249,16 @@ export function WaitlistForm() {
           {...register("consent")}
         />
         <span>
-          I agree to receive launch updates from MyTijaara. No spam — you can
-          unsubscribe anytime.
+          I agree to receive launch updates from MyTijaara. No spam — you can unsubscribe anytime.
         </span>
       </label>
-      {errors.consent && (
-        <p className="text-xs text-gold">{errors.consent.message}</p>
-      )}
+      {errors.consent && <p className="text-xs text-gold">{errors.consent.message}</p>}
 
       {/* Honeypot — hidden from users, visible to bots */}
       <div aria-hidden="true" className="hidden">
         <label>
           Leave this field empty
-          <input
-            type="text"
-            tabIndex={-1}
-            autoComplete="off"
-            {...register("website")}
-          />
+          <input type="text" tabIndex={-1} autoComplete="off" {...register("website")} />
         </label>
       </div>
 

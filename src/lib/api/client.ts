@@ -21,6 +21,8 @@ type ApiCallOptions = {
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
   /** JSON body for real backend calls. */
   body?: unknown;
+  /** Multipart body for file uploads. When set, Content-Type is left to the browser. */
+  formData?: FormData;
   /** Skip injecting the auth token (for public endpoints). */
   public?: boolean;
 };
@@ -68,8 +70,11 @@ async function httpCall<T>(endpoint: string, opts: ApiCallOptions = {}): Promise
   const url = `${API_BASE_URL}${endpoint}`;
   const headers: Record<string, string> = {
     Accept: "application/json",
-    "Content-Type": "application/json",
   };
+  // JSON requests set Content-Type; multipart uploads let the browser set the boundary.
+  if (!opts.formData) {
+    headers["Content-Type"] = "application/json";
+  }
 
   if (!opts.public) {
     const token = getAuthToken();
@@ -82,7 +87,13 @@ async function httpCall<T>(endpoint: string, opts: ApiCallOptions = {}): Promise
     credentials: "omit", // token auth, not cookies
   };
 
-  if (opts.body !== undefined && opts.method !== "GET") {
+  if (typeof window !== "undefined") {
+    headers["X-Requested-With"] = "XMLHttpRequest";
+  }
+
+  if (opts.formData !== undefined && opts.method !== "GET") {
+    init.body = opts.formData;
+  } else if (opts.body !== undefined && opts.method !== "GET") {
     init.body = JSON.stringify(opts.body);
   }
 

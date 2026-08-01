@@ -4,6 +4,8 @@ import { ArrowLeft, Loader2, MailCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { authApi } from "@/lib/api";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth/forgot-password")({
   head: () => ({ meta: [{ title: "Forgot password — MyTijaara Admin" }, { name: "robots", content: "noindex" }] }),
@@ -15,10 +17,17 @@ function ForgotPage() {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => { setSent(true); setLoading(false); }, 700);
+    try {
+      await authApi.forgotPassword(email);
+      setSent(true);
+    } catch {
+      toast.error("Could not request a password reset. Try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (sent) {

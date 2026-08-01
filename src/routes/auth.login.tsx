@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { signIn } from "@/lib/auth-mock";
+import { signIn, isMockMode } from "@/lib/auth-mock";
 
 export const Route = createFileRoute("/auth/login")({
   head: () => ({ meta: [{ title: "Sign in — MyTijaara Admin" }, { name: "robots", content: "noindex" }] }),
@@ -20,14 +20,18 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      signIn(email, password);
-      toast.success("Welcome back, Adaeze!");
+    try {
+      const session = await signIn(email, password);
+      toast.success(`Welcome back, ${session.name.split(" ")[0]}!`);
       navigate({ to: "/admin" });
-    }, 700);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Sign in failed. Check your credentials.";
+      toast.error(message);
+      setLoading(false);
+    }
   };
 
   return (
@@ -61,7 +65,10 @@ function LoginPage() {
           {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing in…</> : "Sign in"}
         </Button>
         <div className="rounded-lg border border-dashed border-border/70 bg-muted/30 p-3 text-xs text-muted-foreground">
-          <strong className="text-foreground">Demo mode:</strong> any credentials sign you in as the demo Super Admin.
+          <strong className="text-foreground">{isMockMode() ? "Demo mode:" : "Live mode:"}</strong>{" "}
+          {isMockMode()
+            ? "Any credentials sign you in as the demo Super Admin."
+            : "Use your admin credentials from the Laravel backend."}
         </div>
       </form>
     </div>

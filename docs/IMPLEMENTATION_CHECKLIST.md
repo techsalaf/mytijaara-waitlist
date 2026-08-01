@@ -15,18 +15,18 @@ Status key: `[ ]` not started, `[-]` in progress, `[x]` tested and complete.
 
 ## Phase 1: Laravel platform foundation
 
-- [ ] Create the isolated Laravel API/admin service without changing the approved landing-page design.
-- [ ] Configure untracked environment variables and a MySQL health check.
-- [ ] Create tested MySQL migrations for users, roles, permissions, audit logs, settings, media, sections, waitlist entries, referrals, tags, notes, page events, campaigns, messages, and unsubscribe records.
-- [ ] Configure secure authentication, password reset, session controls, rate limiting, CSRF protection, RBAC, audit logging, queues, caching, and mail.
-- [ ] Add application, migration, integration, and browser-test suites.
+- [-] Create the isolated Laravel API/admin service without changing the approved landing-page design. (`backend/` recovered from Claude's unmerged worktree on 2026-07-29.)
+- [-] Configure untracked environment variables and a MySQL health check. (Template and `/up` exist; local root `.env` remains intentionally uncreated.)
+- [-] Create tested MySQL migrations for users, roles, permissions, audit logs, settings, media, sections, waitlist entries, referrals, tags, notes, page events, campaigns, messages, and unsubscribe records. (Migrations and seeders exist; broader migration coverage still needs tests.)
+- [-] Configure secure authentication, password reset, session controls, rate limiting, CSRF protection, RBAC, audit logging, queues, caching, and mail. (Sanctum/RBAC/rate limits and queue scaffolding exist; password reset and provider delivery still need wiring.)
+- [-] Add application, migration, integration, and browser-test suites. (Only authentication feature coverage exists today.)
 
 ## Phase 2: waitlist and referrals
 
-- [ ] Replace the client-only waitlist submit flow with a validated, rate-limited Laravel API integration.
-- [ ] Capture name, email, optional phone, city, role, referral code/source, consent, timestamp, privacy-safe IP/device metadata, and campaign parameters.
-- [ ] Implement duplicate protection, email verification, referral links, invite and conversion tracking, referral leaderboard, and live public count.
-- [ ] Add tested admin search, filtering, pagination, tagging, notes, bulk actions, and CSV export.
+- [-] Replace the client-only waitlist submit flow with a validated, rate-limited Laravel API integration. (Frontend payload now matches the recovered API; requires `VITE_API_BASE_URL` plus root-service verification.)
+- [-] Capture name, email, optional phone, city, role, referral code/source, consent, timestamp, privacy-safe IP/device metadata, and campaign parameters.
+- [-] Implement duplicate protection, email verification, referral links, invite and conversion tracking, referral leaderboard, and live public count.
+- [-] Add tested admin search, filtering, pagination, tagging, notes, bulk actions, and CSV export.
 
 ## Phase 3: CMS and media
 

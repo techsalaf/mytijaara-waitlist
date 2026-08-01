@@ -9,63 +9,63 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
-import { Route as AuthSessionExpiredRouteImport } from './routes/auth.session-expired'
-import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
-import { Route as AuthLoginRouteImport } from './routes/auth.login'
-import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-password'
-import { Route as AdminWaitlistRouteImport } from './routes/admin.waitlist'
-import { Route as AdminUsersRouteImport } from './routes/admin.users'
-import { Route as AdminSystemHealthRouteImport } from './routes/admin.system-health'
-import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
-import { Route as AdminRolesRouteImport } from './routes/admin.roles'
-import { Route as AdminReferralsRouteImport } from './routes/admin.referrals'
-import { Route as AdminProfileRouteImport } from './routes/admin.profile'
-import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
-import { Route as AdminMediaRouteImport } from './routes/admin.media'
-import { Route as AdminEmailRouteImport } from './routes/admin.email'
-import { Route as AdminCmsRouteImport } from './routes/admin.cms'
-import { Route as AdminAuditLogsRouteImport } from './routes/admin.audit-logs'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
-import { Route as AdminSettingsIndexRouteImport } from './routes/admin.settings.index'
-import { Route as AdminReferralsIndexRouteImport } from './routes/admin.referrals.index'
-import { Route as AdminEmailIndexRouteImport } from './routes/admin.email.index'
+import { Route as AdminAuditLogsRouteImport } from './routes/admin.audit-logs'
+import { Route as AdminCmsRouteImport } from './routes/admin.cms'
+import { Route as AdminEmailRouteImport } from './routes/admin.email'
+import { Route as AdminMediaRouteImport } from './routes/admin.media'
+import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
+import { Route as AdminProfileRouteImport } from './routes/admin.profile'
+import { Route as AdminReferralsRouteImport } from './routes/admin.referrals'
+import { Route as AdminRolesRouteImport } from './routes/admin.roles'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminSystemHealthRouteImport } from './routes/admin.system-health'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminWaitlistRouteImport } from './routes/admin.waitlist'
+import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-password'
+import { Route as AuthLoginRouteImport } from './routes/auth.login'
+import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
+import { Route as AuthSessionExpiredRouteImport } from './routes/auth.session-expired'
 import { Route as AdminCmsIndexRouteImport } from './routes/admin.cms.index'
-import { Route as AdminUsersIdRouteImport } from './routes/admin.users.$id'
-import { Route as AdminSettingsSystemRouteImport } from './routes/admin.settings.system'
-import { Route as AdminSettingsSocialRouteImport } from './routes/admin.settings.social'
-import { Route as AdminSettingsSmtpRouteImport } from './routes/admin.settings.smtp'
-import { Route as AdminSettingsSeoRouteImport } from './routes/admin.settings.seo'
-import { Route as AdminSettingsIntegrationsRouteImport } from './routes/admin.settings.integrations'
-import { Route as AdminSettingsCompanyRouteImport } from './routes/admin.settings.company'
-import { Route as AdminSettingsBrandingRouteImport } from './routes/admin.settings.branding'
-import { Route as AdminSettingsApiKeysRouteImport } from './routes/admin.settings.api-keys'
-import { Route as AdminRolesIdRouteImport } from './routes/admin.roles.$id'
-import { Route as AdminReferralsLeaderboardRouteImport } from './routes/admin.referrals.leaderboard'
-import { Route as AdminReferralsAnalyticsRouteImport } from './routes/admin.referrals.analytics'
-import { Route as AdminReferralsIdRouteImport } from './routes/admin.referrals.$id'
-import { Route as AdminEmailTemplatesRouteImport } from './routes/admin.email.templates'
-import { Route as AdminEmailScheduledRouteImport } from './routes/admin.email.scheduled'
-import { Route as AdminEmailDraftsRouteImport } from './routes/admin.email.drafts'
-import { Route as AdminEmailBuilderRouteImport } from './routes/admin.email.builder'
-import { Route as AdminEmailIdRouteImport } from './routes/admin.email.$id'
-import { Route as AdminCmsTestimonialsRouteImport } from './routes/admin.cms.testimonials'
-import { Route as AdminCmsStatisticsRouteImport } from './routes/admin.cms.statistics'
-import { Route as AdminCmsSocialRouteImport } from './routes/admin.cms.social'
-import { Route as AdminCmsSeoRouteImport } from './routes/admin.cms.seo'
-import { Route as AdminCmsNavigationRouteImport } from './routes/admin.cms.navigation'
-import { Route as AdminCmsLaunchRouteImport } from './routes/admin.cms.launch'
-import { Route as AdminCmsFooterRouteImport } from './routes/admin.cms.footer'
-import { Route as AdminCmsFeaturesRouteImport } from './routes/admin.cms.features'
-import { Route as AdminCmsFaqsRouteImport } from './routes/admin.cms.faqs'
 import { Route as AdminCmsAnnouncementRouteImport } from './routes/admin.cms.announcement'
+import { Route as AdminCmsFaqsRouteImport } from './routes/admin.cms.faqs'
+import { Route as AdminCmsFeaturesRouteImport } from './routes/admin.cms.features'
+import { Route as AdminCmsFooterRouteImport } from './routes/admin.cms.footer'
+import { Route as AdminCmsLaunchRouteImport } from './routes/admin.cms.launch'
+import { Route as AdminCmsNavigationRouteImport } from './routes/admin.cms.navigation'
+import { Route as AdminCmsSeoRouteImport } from './routes/admin.cms.seo'
+import { Route as AdminCmsSocialRouteImport } from './routes/admin.cms.social'
+import { Route as AdminCmsStatisticsRouteImport } from './routes/admin.cms.statistics'
+import { Route as AdminCmsTestimonialsRouteImport } from './routes/admin.cms.testimonials'
+import { Route as AdminEmailIndexRouteImport } from './routes/admin.email.index'
+import { Route as AdminEmailIdRouteImport } from './routes/admin.email.$id'
+import { Route as AdminEmailBuilderRouteImport } from './routes/admin.email.builder'
+import { Route as AdminEmailDraftsRouteImport } from './routes/admin.email.drafts'
+import { Route as AdminEmailScheduledRouteImport } from './routes/admin.email.scheduled'
+import { Route as AdminEmailTemplatesRouteImport } from './routes/admin.email.templates'
+import { Route as AdminReferralsIndexRouteImport } from './routes/admin.referrals.index'
+import { Route as AdminReferralsIdRouteImport } from './routes/admin.referrals.$id'
+import { Route as AdminReferralsAnalyticsRouteImport } from './routes/admin.referrals.analytics'
+import { Route as AdminReferralsLeaderboardRouteImport } from './routes/admin.referrals.leaderboard'
+import { Route as AdminRolesIdRouteImport } from './routes/admin.roles.$id'
+import { Route as AdminSettingsIndexRouteImport } from './routes/admin.settings.index'
+import { Route as AdminSettingsApiKeysRouteImport } from './routes/admin.settings.api-keys'
+import { Route as AdminSettingsBrandingRouteImport } from './routes/admin.settings.branding'
+import { Route as AdminSettingsCompanyRouteImport } from './routes/admin.settings.company'
+import { Route as AdminSettingsIntegrationsRouteImport } from './routes/admin.settings.integrations'
+import { Route as AdminSettingsSeoRouteImport } from './routes/admin.settings.seo'
+import { Route as AdminSettingsSmtpRouteImport } from './routes/admin.settings.smtp'
+import { Route as AdminSettingsSocialRouteImport } from './routes/admin.settings.social'
+import { Route as AdminSettingsSystemRouteImport } from './routes/admin.settings.system'
+import { Route as AdminUsersIdRouteImport } from './routes/admin.users.$id'
 
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -73,9 +73,9 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -83,79 +83,9 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
-const AuthSessionExpiredRoute = AuthSessionExpiredRouteImport.update({
-  id: '/session-expired',
-  path: '/session-expired',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthLoginRoute = AuthLoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
-  id: '/forgot-password',
-  path: '/forgot-password',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AdminWaitlistRoute = AdminWaitlistRouteImport.update({
-  id: '/waitlist',
-  path: '/waitlist',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminUsersRoute = AdminUsersRouteImport.update({
-  id: '/users',
-  path: '/users',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminSystemHealthRoute = AdminSystemHealthRouteImport.update({
-  id: '/system-health',
-  path: '/system-health',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminSettingsRoute = AdminSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminRolesRoute = AdminRolesRouteImport.update({
-  id: '/roles',
-  path: '/roles',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminReferralsRoute = AdminReferralsRouteImport.update({
-  id: '/referrals',
-  path: '/referrals',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminProfileRoute = AdminProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
-  id: '/notifications',
-  path: '/notifications',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminMediaRoute = AdminMediaRouteImport.update({
-  id: '/media',
-  path: '/media',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminEmailRoute = AdminEmailRouteImport.update({
-  id: '/email',
-  path: '/email',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminCmsRoute = AdminCmsRouteImport.update({
-  id: '/cms',
-  path: '/cms',
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminAuditLogsRoute = AdminAuditLogsRouteImport.update({
@@ -163,54 +93,210 @@ const AdminAuditLogsRoute = AdminAuditLogsRouteImport.update({
   path: '/audit-logs',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
-  id: '/analytics',
-  path: '/analytics',
+const AdminCmsRoute = AdminCmsRouteImport.update({
+  id: '/cms',
+  path: '/cms',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminSettingsIndexRoute = AdminSettingsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminSettingsRoute,
+const AdminEmailRoute = AdminEmailRouteImport.update({
+  id: '/email',
+  path: '/email',
+  getParentRoute: () => AdminRoute,
 } as any)
-const AdminReferralsIndexRoute = AdminReferralsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminReferralsRoute,
+const AdminMediaRoute = AdminMediaRouteImport.update({
+  id: '/media',
+  path: '/media',
+  getParentRoute: () => AdminRoute,
 } as any)
-const AdminEmailIndexRoute = AdminEmailIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminEmailRoute,
+const AdminNotificationsRoute = AdminNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProfileRoute = AdminProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminReferralsRoute = AdminReferralsRouteImport.update({
+  id: '/referrals',
+  path: '/referrals',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRolesRoute = AdminRolesRouteImport.update({
+  id: '/roles',
+  path: '/roles',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSystemHealthRoute = AdminSystemHealthRouteImport.update({
+  id: '/system-health',
+  path: '/system-health',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminWaitlistRoute = AdminWaitlistRouteImport.update({
+  id: '/waitlist',
+  path: '/waitlist',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthSessionExpiredRoute = AuthSessionExpiredRouteImport.update({
+  id: '/session-expired',
+  path: '/session-expired',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AdminCmsIndexRoute = AdminCmsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminCmsRoute,
 } as any)
-const AdminUsersIdRoute = AdminUsersIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => AdminUsersRoute,
+const AdminCmsAnnouncementRoute = AdminCmsAnnouncementRouteImport.update({
+  id: '/announcement',
+  path: '/announcement',
+  getParentRoute: () => AdminCmsRoute,
 } as any)
-const AdminSettingsSystemRoute = AdminSettingsSystemRouteImport.update({
-  id: '/system',
-  path: '/system',
-  getParentRoute: () => AdminSettingsRoute,
+const AdminCmsFaqsRoute = AdminCmsFaqsRouteImport.update({
+  id: '/faqs',
+  path: '/faqs',
+  getParentRoute: () => AdminCmsRoute,
 } as any)
-const AdminSettingsSocialRoute = AdminSettingsSocialRouteImport.update({
-  id: '/social',
-  path: '/social',
-  getParentRoute: () => AdminSettingsRoute,
+const AdminCmsFeaturesRoute = AdminCmsFeaturesRouteImport.update({
+  id: '/features',
+  path: '/features',
+  getParentRoute: () => AdminCmsRoute,
 } as any)
-const AdminSettingsSmtpRoute = AdminSettingsSmtpRouteImport.update({
-  id: '/smtp',
-  path: '/smtp',
-  getParentRoute: () => AdminSettingsRoute,
+const AdminCmsFooterRoute = AdminCmsFooterRouteImport.update({
+  id: '/footer',
+  path: '/footer',
+  getParentRoute: () => AdminCmsRoute,
 } as any)
-const AdminSettingsSeoRoute = AdminSettingsSeoRouteImport.update({
+const AdminCmsLaunchRoute = AdminCmsLaunchRouteImport.update({
+  id: '/launch',
+  path: '/launch',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
+const AdminCmsNavigationRoute = AdminCmsNavigationRouteImport.update({
+  id: '/navigation',
+  path: '/navigation',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
+const AdminCmsSeoRoute = AdminCmsSeoRouteImport.update({
   id: '/seo',
   path: '/seo',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
+const AdminCmsSocialRoute = AdminCmsSocialRouteImport.update({
+  id: '/social',
+  path: '/social',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
+const AdminCmsStatisticsRoute = AdminCmsStatisticsRouteImport.update({
+  id: '/statistics',
+  path: '/statistics',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
+const AdminCmsTestimonialsRoute = AdminCmsTestimonialsRouteImport.update({
+  id: '/testimonials',
+  path: '/testimonials',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
+const AdminEmailIndexRoute = AdminEmailIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminEmailRoute,
+} as any)
+const AdminEmailIdRoute = AdminEmailIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminEmailRoute,
+} as any)
+const AdminEmailBuilderRoute = AdminEmailBuilderRouteImport.update({
+  id: '/builder',
+  path: '/builder',
+  getParentRoute: () => AdminEmailRoute,
+} as any)
+const AdminEmailDraftsRoute = AdminEmailDraftsRouteImport.update({
+  id: '/drafts',
+  path: '/drafts',
+  getParentRoute: () => AdminEmailRoute,
+} as any)
+const AdminEmailScheduledRoute = AdminEmailScheduledRouteImport.update({
+  id: '/scheduled',
+  path: '/scheduled',
+  getParentRoute: () => AdminEmailRoute,
+} as any)
+const AdminEmailTemplatesRoute = AdminEmailTemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => AdminEmailRoute,
+} as any)
+const AdminReferralsIndexRoute = AdminReferralsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminReferralsRoute,
+} as any)
+const AdminReferralsIdRoute = AdminReferralsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminReferralsRoute,
+} as any)
+const AdminReferralsAnalyticsRoute = AdminReferralsAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminReferralsRoute,
+} as any)
+const AdminReferralsLeaderboardRoute =
+  AdminReferralsLeaderboardRouteImport.update({
+    id: '/leaderboard',
+    path: '/leaderboard',
+    getParentRoute: () => AdminReferralsRoute,
+  } as any)
+const AdminRolesIdRoute = AdminRolesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminRolesRoute,
+} as any)
+const AdminSettingsIndexRoute = AdminSettingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminSettingsRoute,
+} as any)
+const AdminSettingsApiKeysRoute = AdminSettingsApiKeysRouteImport.update({
+  id: '/api-keys',
+  path: '/api-keys',
+  getParentRoute: () => AdminSettingsRoute,
+} as any)
+const AdminSettingsBrandingRoute = AdminSettingsBrandingRouteImport.update({
+  id: '/branding',
+  path: '/branding',
+  getParentRoute: () => AdminSettingsRoute,
+} as any)
+const AdminSettingsCompanyRoute = AdminSettingsCompanyRouteImport.update({
+  id: '/company',
+  path: '/company',
   getParentRoute: () => AdminSettingsRoute,
 } as any)
 const AdminSettingsIntegrationsRoute =
@@ -219,116 +305,30 @@ const AdminSettingsIntegrationsRoute =
     path: '/integrations',
     getParentRoute: () => AdminSettingsRoute,
   } as any)
-const AdminSettingsCompanyRoute = AdminSettingsCompanyRouteImport.update({
-  id: '/company',
-  path: '/company',
-  getParentRoute: () => AdminSettingsRoute,
-} as any)
-const AdminSettingsBrandingRoute = AdminSettingsBrandingRouteImport.update({
-  id: '/branding',
-  path: '/branding',
-  getParentRoute: () => AdminSettingsRoute,
-} as any)
-const AdminSettingsApiKeysRoute = AdminSettingsApiKeysRouteImport.update({
-  id: '/api-keys',
-  path: '/api-keys',
-  getParentRoute: () => AdminSettingsRoute,
-} as any)
-const AdminRolesIdRoute = AdminRolesIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => AdminRolesRoute,
-} as any)
-const AdminReferralsLeaderboardRoute =
-  AdminReferralsLeaderboardRouteImport.update({
-    id: '/leaderboard',
-    path: '/leaderboard',
-    getParentRoute: () => AdminReferralsRoute,
-  } as any)
-const AdminReferralsAnalyticsRoute = AdminReferralsAnalyticsRouteImport.update({
-  id: '/analytics',
-  path: '/analytics',
-  getParentRoute: () => AdminReferralsRoute,
-} as any)
-const AdminReferralsIdRoute = AdminReferralsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => AdminReferralsRoute,
-} as any)
-const AdminEmailTemplatesRoute = AdminEmailTemplatesRouteImport.update({
-  id: '/templates',
-  path: '/templates',
-  getParentRoute: () => AdminEmailRoute,
-} as any)
-const AdminEmailScheduledRoute = AdminEmailScheduledRouteImport.update({
-  id: '/scheduled',
-  path: '/scheduled',
-  getParentRoute: () => AdminEmailRoute,
-} as any)
-const AdminEmailDraftsRoute = AdminEmailDraftsRouteImport.update({
-  id: '/drafts',
-  path: '/drafts',
-  getParentRoute: () => AdminEmailRoute,
-} as any)
-const AdminEmailBuilderRoute = AdminEmailBuilderRouteImport.update({
-  id: '/builder',
-  path: '/builder',
-  getParentRoute: () => AdminEmailRoute,
-} as any)
-const AdminEmailIdRoute = AdminEmailIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => AdminEmailRoute,
-} as any)
-const AdminCmsTestimonialsRoute = AdminCmsTestimonialsRouteImport.update({
-  id: '/testimonials',
-  path: '/testimonials',
-  getParentRoute: () => AdminCmsRoute,
-} as any)
-const AdminCmsStatisticsRoute = AdminCmsStatisticsRouteImport.update({
-  id: '/statistics',
-  path: '/statistics',
-  getParentRoute: () => AdminCmsRoute,
-} as any)
-const AdminCmsSocialRoute = AdminCmsSocialRouteImport.update({
-  id: '/social',
-  path: '/social',
-  getParentRoute: () => AdminCmsRoute,
-} as any)
-const AdminCmsSeoRoute = AdminCmsSeoRouteImport.update({
+const AdminSettingsSeoRoute = AdminSettingsSeoRouteImport.update({
   id: '/seo',
   path: '/seo',
-  getParentRoute: () => AdminCmsRoute,
+  getParentRoute: () => AdminSettingsRoute,
 } as any)
-const AdminCmsNavigationRoute = AdminCmsNavigationRouteImport.update({
-  id: '/navigation',
-  path: '/navigation',
-  getParentRoute: () => AdminCmsRoute,
+const AdminSettingsSmtpRoute = AdminSettingsSmtpRouteImport.update({
+  id: '/smtp',
+  path: '/smtp',
+  getParentRoute: () => AdminSettingsRoute,
 } as any)
-const AdminCmsLaunchRoute = AdminCmsLaunchRouteImport.update({
-  id: '/launch',
-  path: '/launch',
-  getParentRoute: () => AdminCmsRoute,
+const AdminSettingsSocialRoute = AdminSettingsSocialRouteImport.update({
+  id: '/social',
+  path: '/social',
+  getParentRoute: () => AdminSettingsRoute,
 } as any)
-const AdminCmsFooterRoute = AdminCmsFooterRouteImport.update({
-  id: '/footer',
-  path: '/footer',
-  getParentRoute: () => AdminCmsRoute,
+const AdminSettingsSystemRoute = AdminSettingsSystemRouteImport.update({
+  id: '/system',
+  path: '/system',
+  getParentRoute: () => AdminSettingsRoute,
 } as any)
-const AdminCmsFeaturesRoute = AdminCmsFeaturesRouteImport.update({
-  id: '/features',
-  path: '/features',
-  getParentRoute: () => AdminCmsRoute,
-} as any)
-const AdminCmsFaqsRoute = AdminCmsFaqsRouteImport.update({
-  id: '/faqs',
-  path: '/faqs',
-  getParentRoute: () => AdminCmsRoute,
-} as any)
-const AdminCmsAnnouncementRoute = AdminCmsAnnouncementRouteImport.update({
-  id: '/announcement',
-  path: '/announcement',
-  getParentRoute: () => AdminCmsRoute,
+const AdminUsersIdRoute = AdminUsersIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminUsersRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -663,11 +663,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -677,11 +677,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -691,109 +691,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/auth/session-expired': {
-      id: '/auth/session-expired'
-      path: '/session-expired'
-      fullPath: '/auth/session-expired'
-      preLoaderRoute: typeof AuthSessionExpiredRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/auth/reset-password': {
-      id: '/auth/reset-password'
-      path: '/reset-password'
-      fullPath: '/auth/reset-password'
-      preLoaderRoute: typeof AuthResetPasswordRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/auth/login': {
-      id: '/auth/login'
-      path: '/login'
-      fullPath: '/auth/login'
-      preLoaderRoute: typeof AuthLoginRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/auth/forgot-password': {
-      id: '/auth/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/auth/forgot-password'
-      preLoaderRoute: typeof AuthForgotPasswordRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/admin/waitlist': {
-      id: '/admin/waitlist'
-      path: '/waitlist'
-      fullPath: '/admin/waitlist'
-      preLoaderRoute: typeof AdminWaitlistRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/users': {
-      id: '/admin/users'
-      path: '/users'
-      fullPath: '/admin/users'
-      preLoaderRoute: typeof AdminUsersRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/system-health': {
-      id: '/admin/system-health'
-      path: '/system-health'
-      fullPath: '/admin/system-health'
-      preLoaderRoute: typeof AdminSystemHealthRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/settings': {
-      id: '/admin/settings'
-      path: '/settings'
-      fullPath: '/admin/settings'
-      preLoaderRoute: typeof AdminSettingsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/roles': {
-      id: '/admin/roles'
-      path: '/roles'
-      fullPath: '/admin/roles'
-      preLoaderRoute: typeof AdminRolesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/referrals': {
-      id: '/admin/referrals'
-      path: '/referrals'
-      fullPath: '/admin/referrals'
-      preLoaderRoute: typeof AdminReferralsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/profile': {
-      id: '/admin/profile'
-      path: '/profile'
-      fullPath: '/admin/profile'
-      preLoaderRoute: typeof AdminProfileRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/notifications': {
-      id: '/admin/notifications'
-      path: '/notifications'
-      fullPath: '/admin/notifications'
-      preLoaderRoute: typeof AdminNotificationsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/media': {
-      id: '/admin/media'
-      path: '/media'
-      fullPath: '/admin/media'
-      preLoaderRoute: typeof AdminMediaRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/email': {
-      id: '/admin/email'
-      path: '/email'
-      fullPath: '/admin/email'
-      preLoaderRoute: typeof AdminEmailRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/cms': {
-      id: '/admin/cms'
-      path: '/cms'
-      fullPath: '/admin/cms'
-      preLoaderRoute: typeof AdminCmsRouteImport
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/audit-logs': {
@@ -803,33 +705,110 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuditLogsRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/analytics': {
-      id: '/admin/analytics'
-      path: '/analytics'
-      fullPath: '/admin/analytics'
-      preLoaderRoute: typeof AdminAnalyticsRouteImport
+    '/admin/cms': {
+      id: '/admin/cms'
+      path: '/cms'
+      fullPath: '/admin/cms'
+      preLoaderRoute: typeof AdminCmsRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/settings/': {
-      id: '/admin/settings/'
-      path: '/'
-      fullPath: '/admin/settings/'
-      preLoaderRoute: typeof AdminSettingsIndexRouteImport
-      parentRoute: typeof AdminSettingsRoute
+    '/admin/email': {
+      id: '/admin/email'
+      path: '/email'
+      fullPath: '/admin/email'
+      preLoaderRoute: typeof AdminEmailRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/admin/referrals/': {
-      id: '/admin/referrals/'
-      path: '/'
-      fullPath: '/admin/referrals/'
-      preLoaderRoute: typeof AdminReferralsIndexRouteImport
-      parentRoute: typeof AdminReferralsRoute
+    '/admin/media': {
+      id: '/admin/media'
+      path: '/media'
+      fullPath: '/admin/media'
+      preLoaderRoute: typeof AdminMediaRouteImport
+      parentRoute: typeof AdminRoute
     }
-    '/admin/email/': {
-      id: '/admin/email/'
-      path: '/'
-      fullPath: '/admin/email/'
-      preLoaderRoute: typeof AdminEmailIndexRouteImport
-      parentRoute: typeof AdminEmailRoute
+    '/admin/notifications': {
+      id: '/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AdminNotificationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/profile': {
+      id: '/admin/profile'
+      path: '/profile'
+      fullPath: '/admin/profile'
+      preLoaderRoute: typeof AdminProfileRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/referrals': {
+      id: '/admin/referrals'
+      path: '/referrals'
+      fullPath: '/admin/referrals'
+      preLoaderRoute: typeof AdminReferralsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/roles': {
+      id: '/admin/roles'
+      path: '/roles'
+      fullPath: '/admin/roles'
+      preLoaderRoute: typeof AdminRolesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/system-health': {
+      id: '/admin/system-health'
+      path: '/system-health'
+      fullPath: '/admin/system-health'
+      preLoaderRoute: typeof AdminSystemHealthRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/waitlist': {
+      id: '/admin/waitlist'
+      path: '/waitlist'
+      fullPath: '/admin/waitlist'
+      preLoaderRoute: typeof AdminWaitlistRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/auth/forgot-password': {
+      id: '/auth/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/auth/forgot-password'
+      preLoaderRoute: typeof AuthForgotPasswordRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/reset-password': {
+      id: '/auth/reset-password'
+      path: '/reset-password'
+      fullPath: '/auth/reset-password'
+      preLoaderRoute: typeof AuthResetPasswordRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/session-expired': {
+      id: '/auth/session-expired'
+      path: '/session-expired'
+      fullPath: '/auth/session-expired'
+      preLoaderRoute: typeof AuthSessionExpiredRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/admin/cms/': {
       id: '/admin/cms/'
@@ -838,186 +817,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCmsIndexRouteImport
       parentRoute: typeof AdminCmsRoute
     }
-    '/admin/users/$id': {
-      id: '/admin/users/$id'
-      path: '/$id'
-      fullPath: '/admin/users/$id'
-      preLoaderRoute: typeof AdminUsersIdRouteImport
-      parentRoute: typeof AdminUsersRoute
-    }
-    '/admin/settings/system': {
-      id: '/admin/settings/system'
-      path: '/system'
-      fullPath: '/admin/settings/system'
-      preLoaderRoute: typeof AdminSettingsSystemRouteImport
-      parentRoute: typeof AdminSettingsRoute
-    }
-    '/admin/settings/social': {
-      id: '/admin/settings/social'
-      path: '/social'
-      fullPath: '/admin/settings/social'
-      preLoaderRoute: typeof AdminSettingsSocialRouteImport
-      parentRoute: typeof AdminSettingsRoute
-    }
-    '/admin/settings/smtp': {
-      id: '/admin/settings/smtp'
-      path: '/smtp'
-      fullPath: '/admin/settings/smtp'
-      preLoaderRoute: typeof AdminSettingsSmtpRouteImport
-      parentRoute: typeof AdminSettingsRoute
-    }
-    '/admin/settings/seo': {
-      id: '/admin/settings/seo'
-      path: '/seo'
-      fullPath: '/admin/settings/seo'
-      preLoaderRoute: typeof AdminSettingsSeoRouteImport
-      parentRoute: typeof AdminSettingsRoute
-    }
-    '/admin/settings/integrations': {
-      id: '/admin/settings/integrations'
-      path: '/integrations'
-      fullPath: '/admin/settings/integrations'
-      preLoaderRoute: typeof AdminSettingsIntegrationsRouteImport
-      parentRoute: typeof AdminSettingsRoute
-    }
-    '/admin/settings/company': {
-      id: '/admin/settings/company'
-      path: '/company'
-      fullPath: '/admin/settings/company'
-      preLoaderRoute: typeof AdminSettingsCompanyRouteImport
-      parentRoute: typeof AdminSettingsRoute
-    }
-    '/admin/settings/branding': {
-      id: '/admin/settings/branding'
-      path: '/branding'
-      fullPath: '/admin/settings/branding'
-      preLoaderRoute: typeof AdminSettingsBrandingRouteImport
-      parentRoute: typeof AdminSettingsRoute
-    }
-    '/admin/settings/api-keys': {
-      id: '/admin/settings/api-keys'
-      path: '/api-keys'
-      fullPath: '/admin/settings/api-keys'
-      preLoaderRoute: typeof AdminSettingsApiKeysRouteImport
-      parentRoute: typeof AdminSettingsRoute
-    }
-    '/admin/roles/$id': {
-      id: '/admin/roles/$id'
-      path: '/$id'
-      fullPath: '/admin/roles/$id'
-      preLoaderRoute: typeof AdminRolesIdRouteImport
-      parentRoute: typeof AdminRolesRoute
-    }
-    '/admin/referrals/leaderboard': {
-      id: '/admin/referrals/leaderboard'
-      path: '/leaderboard'
-      fullPath: '/admin/referrals/leaderboard'
-      preLoaderRoute: typeof AdminReferralsLeaderboardRouteImport
-      parentRoute: typeof AdminReferralsRoute
-    }
-    '/admin/referrals/analytics': {
-      id: '/admin/referrals/analytics'
-      path: '/analytics'
-      fullPath: '/admin/referrals/analytics'
-      preLoaderRoute: typeof AdminReferralsAnalyticsRouteImport
-      parentRoute: typeof AdminReferralsRoute
-    }
-    '/admin/referrals/$id': {
-      id: '/admin/referrals/$id'
-      path: '/$id'
-      fullPath: '/admin/referrals/$id'
-      preLoaderRoute: typeof AdminReferralsIdRouteImport
-      parentRoute: typeof AdminReferralsRoute
-    }
-    '/admin/email/templates': {
-      id: '/admin/email/templates'
-      path: '/templates'
-      fullPath: '/admin/email/templates'
-      preLoaderRoute: typeof AdminEmailTemplatesRouteImport
-      parentRoute: typeof AdminEmailRoute
-    }
-    '/admin/email/scheduled': {
-      id: '/admin/email/scheduled'
-      path: '/scheduled'
-      fullPath: '/admin/email/scheduled'
-      preLoaderRoute: typeof AdminEmailScheduledRouteImport
-      parentRoute: typeof AdminEmailRoute
-    }
-    '/admin/email/drafts': {
-      id: '/admin/email/drafts'
-      path: '/drafts'
-      fullPath: '/admin/email/drafts'
-      preLoaderRoute: typeof AdminEmailDraftsRouteImport
-      parentRoute: typeof AdminEmailRoute
-    }
-    '/admin/email/builder': {
-      id: '/admin/email/builder'
-      path: '/builder'
-      fullPath: '/admin/email/builder'
-      preLoaderRoute: typeof AdminEmailBuilderRouteImport
-      parentRoute: typeof AdminEmailRoute
-    }
-    '/admin/email/$id': {
-      id: '/admin/email/$id'
-      path: '/$id'
-      fullPath: '/admin/email/$id'
-      preLoaderRoute: typeof AdminEmailIdRouteImport
-      parentRoute: typeof AdminEmailRoute
-    }
-    '/admin/cms/testimonials': {
-      id: '/admin/cms/testimonials'
-      path: '/testimonials'
-      fullPath: '/admin/cms/testimonials'
-      preLoaderRoute: typeof AdminCmsTestimonialsRouteImport
-      parentRoute: typeof AdminCmsRoute
-    }
-    '/admin/cms/statistics': {
-      id: '/admin/cms/statistics'
-      path: '/statistics'
-      fullPath: '/admin/cms/statistics'
-      preLoaderRoute: typeof AdminCmsStatisticsRouteImport
-      parentRoute: typeof AdminCmsRoute
-    }
-    '/admin/cms/social': {
-      id: '/admin/cms/social'
-      path: '/social'
-      fullPath: '/admin/cms/social'
-      preLoaderRoute: typeof AdminCmsSocialRouteImport
-      parentRoute: typeof AdminCmsRoute
-    }
-    '/admin/cms/seo': {
-      id: '/admin/cms/seo'
-      path: '/seo'
-      fullPath: '/admin/cms/seo'
-      preLoaderRoute: typeof AdminCmsSeoRouteImport
-      parentRoute: typeof AdminCmsRoute
-    }
-    '/admin/cms/navigation': {
-      id: '/admin/cms/navigation'
-      path: '/navigation'
-      fullPath: '/admin/cms/navigation'
-      preLoaderRoute: typeof AdminCmsNavigationRouteImport
-      parentRoute: typeof AdminCmsRoute
-    }
-    '/admin/cms/launch': {
-      id: '/admin/cms/launch'
-      path: '/launch'
-      fullPath: '/admin/cms/launch'
-      preLoaderRoute: typeof AdminCmsLaunchRouteImport
-      parentRoute: typeof AdminCmsRoute
-    }
-    '/admin/cms/footer': {
-      id: '/admin/cms/footer'
-      path: '/footer'
-      fullPath: '/admin/cms/footer'
-      preLoaderRoute: typeof AdminCmsFooterRouteImport
-      parentRoute: typeof AdminCmsRoute
-    }
-    '/admin/cms/features': {
-      id: '/admin/cms/features'
-      path: '/features'
-      fullPath: '/admin/cms/features'
-      preLoaderRoute: typeof AdminCmsFeaturesRouteImport
+    '/admin/cms/announcement': {
+      id: '/admin/cms/announcement'
+      path: '/announcement'
+      fullPath: '/admin/cms/announcement'
+      preLoaderRoute: typeof AdminCmsAnnouncementRouteImport
       parentRoute: typeof AdminCmsRoute
     }
     '/admin/cms/faqs': {
@@ -1027,12 +831,208 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCmsFaqsRouteImport
       parentRoute: typeof AdminCmsRoute
     }
-    '/admin/cms/announcement': {
-      id: '/admin/cms/announcement'
-      path: '/announcement'
-      fullPath: '/admin/cms/announcement'
-      preLoaderRoute: typeof AdminCmsAnnouncementRouteImport
+    '/admin/cms/features': {
+      id: '/admin/cms/features'
+      path: '/features'
+      fullPath: '/admin/cms/features'
+      preLoaderRoute: typeof AdminCmsFeaturesRouteImport
       parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/cms/footer': {
+      id: '/admin/cms/footer'
+      path: '/footer'
+      fullPath: '/admin/cms/footer'
+      preLoaderRoute: typeof AdminCmsFooterRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/cms/launch': {
+      id: '/admin/cms/launch'
+      path: '/launch'
+      fullPath: '/admin/cms/launch'
+      preLoaderRoute: typeof AdminCmsLaunchRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/cms/navigation': {
+      id: '/admin/cms/navigation'
+      path: '/navigation'
+      fullPath: '/admin/cms/navigation'
+      preLoaderRoute: typeof AdminCmsNavigationRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/cms/seo': {
+      id: '/admin/cms/seo'
+      path: '/seo'
+      fullPath: '/admin/cms/seo'
+      preLoaderRoute: typeof AdminCmsSeoRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/cms/social': {
+      id: '/admin/cms/social'
+      path: '/social'
+      fullPath: '/admin/cms/social'
+      preLoaderRoute: typeof AdminCmsSocialRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/cms/statistics': {
+      id: '/admin/cms/statistics'
+      path: '/statistics'
+      fullPath: '/admin/cms/statistics'
+      preLoaderRoute: typeof AdminCmsStatisticsRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/cms/testimonials': {
+      id: '/admin/cms/testimonials'
+      path: '/testimonials'
+      fullPath: '/admin/cms/testimonials'
+      preLoaderRoute: typeof AdminCmsTestimonialsRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/email/': {
+      id: '/admin/email/'
+      path: '/'
+      fullPath: '/admin/email/'
+      preLoaderRoute: typeof AdminEmailIndexRouteImport
+      parentRoute: typeof AdminEmailRoute
+    }
+    '/admin/email/$id': {
+      id: '/admin/email/$id'
+      path: '/$id'
+      fullPath: '/admin/email/$id'
+      preLoaderRoute: typeof AdminEmailIdRouteImport
+      parentRoute: typeof AdminEmailRoute
+    }
+    '/admin/email/builder': {
+      id: '/admin/email/builder'
+      path: '/builder'
+      fullPath: '/admin/email/builder'
+      preLoaderRoute: typeof AdminEmailBuilderRouteImport
+      parentRoute: typeof AdminEmailRoute
+    }
+    '/admin/email/drafts': {
+      id: '/admin/email/drafts'
+      path: '/drafts'
+      fullPath: '/admin/email/drafts'
+      preLoaderRoute: typeof AdminEmailDraftsRouteImport
+      parentRoute: typeof AdminEmailRoute
+    }
+    '/admin/email/scheduled': {
+      id: '/admin/email/scheduled'
+      path: '/scheduled'
+      fullPath: '/admin/email/scheduled'
+      preLoaderRoute: typeof AdminEmailScheduledRouteImport
+      parentRoute: typeof AdminEmailRoute
+    }
+    '/admin/email/templates': {
+      id: '/admin/email/templates'
+      path: '/templates'
+      fullPath: '/admin/email/templates'
+      preLoaderRoute: typeof AdminEmailTemplatesRouteImport
+      parentRoute: typeof AdminEmailRoute
+    }
+    '/admin/referrals/': {
+      id: '/admin/referrals/'
+      path: '/'
+      fullPath: '/admin/referrals/'
+      preLoaderRoute: typeof AdminReferralsIndexRouteImport
+      parentRoute: typeof AdminReferralsRoute
+    }
+    '/admin/referrals/$id': {
+      id: '/admin/referrals/$id'
+      path: '/$id'
+      fullPath: '/admin/referrals/$id'
+      preLoaderRoute: typeof AdminReferralsIdRouteImport
+      parentRoute: typeof AdminReferralsRoute
+    }
+    '/admin/referrals/analytics': {
+      id: '/admin/referrals/analytics'
+      path: '/analytics'
+      fullPath: '/admin/referrals/analytics'
+      preLoaderRoute: typeof AdminReferralsAnalyticsRouteImport
+      parentRoute: typeof AdminReferralsRoute
+    }
+    '/admin/referrals/leaderboard': {
+      id: '/admin/referrals/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/admin/referrals/leaderboard'
+      preLoaderRoute: typeof AdminReferralsLeaderboardRouteImport
+      parentRoute: typeof AdminReferralsRoute
+    }
+    '/admin/roles/$id': {
+      id: '/admin/roles/$id'
+      path: '/$id'
+      fullPath: '/admin/roles/$id'
+      preLoaderRoute: typeof AdminRolesIdRouteImport
+      parentRoute: typeof AdminRolesRoute
+    }
+    '/admin/settings/': {
+      id: '/admin/settings/'
+      path: '/'
+      fullPath: '/admin/settings/'
+      preLoaderRoute: typeof AdminSettingsIndexRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
+    '/admin/settings/api-keys': {
+      id: '/admin/settings/api-keys'
+      path: '/api-keys'
+      fullPath: '/admin/settings/api-keys'
+      preLoaderRoute: typeof AdminSettingsApiKeysRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
+    '/admin/settings/branding': {
+      id: '/admin/settings/branding'
+      path: '/branding'
+      fullPath: '/admin/settings/branding'
+      preLoaderRoute: typeof AdminSettingsBrandingRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
+    '/admin/settings/company': {
+      id: '/admin/settings/company'
+      path: '/company'
+      fullPath: '/admin/settings/company'
+      preLoaderRoute: typeof AdminSettingsCompanyRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
+    '/admin/settings/integrations': {
+      id: '/admin/settings/integrations'
+      path: '/integrations'
+      fullPath: '/admin/settings/integrations'
+      preLoaderRoute: typeof AdminSettingsIntegrationsRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
+    '/admin/settings/seo': {
+      id: '/admin/settings/seo'
+      path: '/seo'
+      fullPath: '/admin/settings/seo'
+      preLoaderRoute: typeof AdminSettingsSeoRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
+    '/admin/settings/smtp': {
+      id: '/admin/settings/smtp'
+      path: '/smtp'
+      fullPath: '/admin/settings/smtp'
+      preLoaderRoute: typeof AdminSettingsSmtpRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
+    '/admin/settings/social': {
+      id: '/admin/settings/social'
+      path: '/social'
+      fullPath: '/admin/settings/social'
+      preLoaderRoute: typeof AdminSettingsSocialRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
+    '/admin/settings/system': {
+      id: '/admin/settings/system'
+      path: '/system'
+      fullPath: '/admin/settings/system'
+      preLoaderRoute: typeof AdminSettingsSystemRouteImport
+      parentRoute: typeof AdminSettingsRoute
+    }
+    '/admin/users/$id': {
+      id: '/admin/users/$id'
+      path: '/$id'
+      fullPath: '/admin/users/$id'
+      preLoaderRoute: typeof AdminUsersIdRouteImport
+      parentRoute: typeof AdminUsersRoute
     }
   }
 }
@@ -1221,3 +1221,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

@@ -1,0 +1,164 @@
+<?php
+
+use App\Http\Controllers\Api\AnalyticsController;
+use App\Http\Controllers\Api\AuditController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CampaignController;
+use App\Http\Controllers\Api\CmsController;
+use App\Http\Controllers\Api\ContentController;
+use App\Http\Controllers\Api\EmailTrackingController;
+use App\Http\Controllers\Api\EventController;
+use App\Http\Controllers\Api\LaunchConfigController;
+use App\Http\Controllers\Api\MediaController;
+use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\ReferralController;
+use App\Http\Controllers\Api\RoleController;
+use App\Http\Controllers\Api\SettingsController;
+use App\Http\Controllers\Api\TemplateController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\WaitlistController;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| API v1
+|--------------------------------------------------------------------------
+| Prefix `api/v1` is applied globally in bootstrap/app.php. Public routes are
+| hit by the landing site, mail clients, and the ESP. Everything else sits
+| behind Sanctum + a spatie `permission:` gate that mirrors RoleSeeder.
+*/
+
+// ---------------------------------------------------------------------------
+// Public — no auth. Landing page, tracking pixels, webhooks, unsubscribe.
+// ---------------------------------------------------------------------------
+Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
+
+Route::post('/waitlist', [WaitlistController::class, 'store']);
+Route::get('/waitlist/count', [WaitlistController::class, 'count']);
+Route::get('/waitlist/verify/{token}', [WaitlistController::class, 'verify']);
+
+Route::get('/launch-config', [LaunchConfigController::class, 'show']);
+
+Route::post('/events', [EventController::class, 'store']);
+
+Route::post('/referrals/visit', [ReferralController::class, 'visit']);
+
+Route::get('/track/open/{campaign}', [EmailTrackingController::class, 'open']);
+Route::get('/track/click/{campaign}', [EmailTrackingController::class, 'click']);
+Route::post('/webhooks/email', [EmailTrackingController::class, 'webhook']);
+Route::post('/unsubscribe', [EmailTrackingController::class, 'unsubscribe']);
+
+// Public read of published CMS content for the landing page.
+Route::get('/cms', [CmsController::class, 'index']);
+Route::get('/cms/{section}', [CmsController::class, 'show']);
+Route::get('/content/faqs', [ContentController::class, 'faqs']);
+Route::get('/content/testimonials', [ContentController::class, 'testimonials']);
+
+// ---------------------------------------------------------------------------
+// Authenticated admin panel.
+// ---------------------------------------------------------------------------
+Route::middleware('auth:sanctum')->group(function () {
+    // Session
+    Route::get('/auth/me', [AuthController::class, 'me']);
+    Route::post('/auth/logout', [AuthController::class, 'logout']);
+
+    // Notifications — any authenticated admin sees their own.
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markRead']);
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead']);
+
+    // Dashboard analytics
+    Route::middleware('permission:analytics.view')->group(function () {
+        Route::get('/analytics/overview', [AnalyticsController::class, 'overview']);
+        Route::get('/analytics/trends', [AnalyticsController::class, 'trends']);
+        Route::get('/analytics/traffic-sources', [AnalyticsController::class, 'trafficSources']);
+        Route::get('/analytics/cities', [AnalyticsController::class, 'cities']);
+        Route::get('/analytics/devices', [AnalyticsController::class, 'devices']);
+        Route::get('/analytics/browsers', [AnalyticsController::class, 'browsers']);
+        Route::get('/analytics/funnel', [AnalyticsController::class, 'funnel']);
+    });
+
+    // Waitlist
+    Route::get('/waitlist', [WaitlistController::class, 'index'])->middleware('permission:waitlist.view');
+    Route::get('/waitlist/export', [WaitlistController::class, 'export'])->middleware('permission:waitlist.export');
+    Route::get('/waitlist/{id}', [WaitlistController::class, 'show'])->middleware('permission:waitlist.view');
+    Route::patch('/waitlist/{id}', [WaitlistController::class, 'update'])->middleware('permission:waitlist.edit');
+    Route::post('/waitlist/bulk-delete', [WaitlistController::class, 'bulkDelete'])->middleware('permission:waitlist.bulk-actions');
+    Route::post('/waitlist/restore', [WaitlistController::class, 'restore'])->middleware('permission:waitlist.bulk-actions');
+
+    // Referrals
+    Route::middleware('permission:referrals.view')->group(function () {
+        Route::get('/referrals/leaderboard', [ReferralController::class, 'leaderboard']);
+        Route::get('/referrals/analytics', [ReferralController::class, 'analytics']);
+        Route::get('/referrals/{id}', [ReferralController::class, 'show']);
+    });
+
+    // CMS authoring
+    Route::patch('/cms/{section}', [CmsController::class, 'update'])->middleware('permission:cms.edit-hero');
+
+    // FAQs
+    Route::middleware('permission:cms.edit-faqs')->group(function () {
+        Route::post('/content/faqs', [ContentController::class, 'storeFaq']);
+        Route::patch('/content/faqs/{id}', [ContentController::class, 'updateFaq']);
+        Route::delete('/content/faqs/{id}', [ContentController::class, 'destroyFaq']);
+        Route::post('/content/faqs/reorder', [ContentController::class, 'reorderFaqs']);
+    });
+
+    // Testimonials
+    Route::middleware('permission:cms.edit-testimonials')->group(function () {
+        Route::post('/content/testimonials', [ContentController::class, 'storeTestimonial']);
+        Route::patch('/content/testimonials/{id}', [ContentController::class, 'updateTestimonial']);
+        Route::delete('/content/testimonials/{id}', [ContentController::class, 'destroyTestimonial']);
+    });
+
+    // Launch config
+    Route::patch('/launch-config', [LaunchConfigController::class, 'update'])->middleware('permission:cms.edit-hero');
+
+    // Media library
+    Route::get('/media', [MediaController::class, 'index'])->middleware('permission:media.view');
+    Route::get('/media/folders', [MediaController::class, 'folders'])->middleware('permission:media.view');
+    Route::post('/media', [MediaController::class, 'store'])->middleware('permission:media.upload');
+    Route::post('/media/folders', [MediaController::class, 'createFolder'])->middleware('permission:media.manage-folders');
+    Route::patch('/media/{id}', [MediaController::class, 'update'])->middleware('permission:media.upload');
+    Route::delete('/media/{id}', [MediaController::class, 'destroy'])->middleware('permission:media.delete');
+
+    // Email — templates
+    Route::get('/templates', [TemplateController::class, 'index'])->middleware('permission:email.view');
+    Route::get('/templates/{id}', [TemplateController::class, 'show'])->middleware('permission:email.view');
+    Route::post('/templates', [TemplateController::class, 'store'])->middleware('permission:email.manage-templates');
+    Route::patch('/templates/{id}', [TemplateController::class, 'update'])->middleware('permission:email.manage-templates');
+    Route::delete('/templates/{id}', [TemplateController::class, 'destroy'])->middleware('permission:email.manage-templates');
+
+    // Email — campaigns
+    Route::get('/campaigns', [CampaignController::class, 'index'])->middleware('permission:email.view');
+    Route::get('/campaigns/{id}', [CampaignController::class, 'show'])->middleware('permission:email.view');
+    Route::get('/campaigns/{id}/stats', [CampaignController::class, 'stats'])->middleware('permission:email.view');
+    Route::post('/campaigns', [CampaignController::class, 'store'])->middleware('permission:email.create');
+    Route::patch('/campaigns/{id}', [CampaignController::class, 'update'])->middleware('permission:email.create');
+    Route::delete('/campaigns/{id}', [CampaignController::class, 'destroy'])->middleware('permission:email.delete');
+    Route::post('/campaigns/{id}/send', [CampaignController::class, 'send'])->middleware('permission:email.send');
+
+    // Users
+    Route::get('/users', [UserController::class, 'index'])->middleware('permission:users.view');
+    Route::get('/users/{id}', [UserController::class, 'show'])->middleware('permission:users.view');
+    Route::post('/users', [UserController::class, 'store'])->middleware('permission:users.invite');
+    Route::patch('/users/{id}', [UserController::class, 'update'])->middleware('permission:users.edit');
+    Route::delete('/users/{id}', [UserController::class, 'destroy'])->middleware('permission:users.delete');
+
+    // Roles + permissions
+    Route::get('/permissions', [RoleController::class, 'permissionGroups'])->middleware('permission:roles.view');
+    Route::get('/roles', [RoleController::class, 'index'])->middleware('permission:roles.view');
+    Route::get('/roles/{id}', [RoleController::class, 'show'])->middleware('permission:roles.view');
+    Route::post('/roles', [RoleController::class, 'store'])->middleware('permission:roles.create');
+    Route::patch('/roles/{id}', [RoleController::class, 'update'])->middleware('permission:roles.edit');
+    Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->middleware('permission:roles.delete');
+
+    // Audit log
+    Route::get('/audit-logs', [AuditController::class, 'index'])->middleware('permission:users.view');
+
+    // Settings — read is broad, writes are gated per group.
+    Route::get('/settings/{group}', [SettingsController::class, 'show'])->middleware('permission:settings.view');
+    Route::patch('/settings/{group}', [SettingsController::class, 'update'])->middleware('permission:settings.edit-general');
+});

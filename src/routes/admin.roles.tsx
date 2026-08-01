@@ -1,31 +1,57 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { PageHeader, SectionCard } from "@/components/admin/ui-bits";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Users, Shield } from "lucide-react";
-import { roles } from "@/lib/mock-data";
+import { rolesApi, type Role } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/roles")({
-  head: () => ({ meta: [{ title: "Roles & Permissions — MyTijaara Admin" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [
+      { title: "Roles & Permissions — MyTijaara Admin" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: RolesPage,
 });
 
 function RolesPage() {
+  const [roles, setRoles] = useState<Role[]>([]);
+  useEffect(() => {
+    void rolesApi.list().then((response) => setRoles(response.data));
+  }, []);
   return (
     <div className="space-y-6">
       <PageHeader
         title="Roles & Permissions"
         description="Control what each team member can access and do."
-        actions={<Button asChild size="sm" className="bg-primary hover:bg-primary/90"><Link to="/admin/roles/$id" params={{ id: "new" }}><Plus className="mr-2 h-4 w-4" /> Create role</Link></Button>}
+        actions={
+          <Button asChild size="sm" className="bg-primary hover:bg-primary/90">
+            <Link to="/admin/roles/$id" params={{ id: "new" }}>
+              <Plus className="mr-2 h-4 w-4" /> Create role
+            </Link>
+          </Button>
+        }
       />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {roles.map((r) => (
-          <Link key={r.id} to="/admin/roles/$id" params={{ id: r.id }} className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
+          <Link
+            key={r.id}
+            to="/admin/roles/$id"
+            params={{ id: r.id }}
+            className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm transition-shadow hover:shadow-md"
+          >
             <div className="flex items-start justify-between">
-              <div className="grid h-10 w-10 place-items-center rounded-xl text-primary-foreground" style={{ background: r.color }}>
+              <div
+                className="grid h-10 w-10 place-items-center rounded-xl text-primary-foreground"
+                style={{ background: r.color }}
+              >
                 <Shield className="h-5 w-5" />
               </div>
-              <Badge variant="secondary" className="text-xs"><Users className="mr-1 h-3 w-3" /> {r.users}</Badge>
+              <Badge variant="secondary" className="text-xs">
+                <Users className="mr-1 h-3 w-3" /> {r.users}
+              </Badge>
             </div>
             <div className="mt-3 text-base font-semibold">{r.name}</div>
             <div className="mt-1 text-xs text-muted-foreground">{r.description}</div>

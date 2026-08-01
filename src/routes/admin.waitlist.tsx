@@ -1,8 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
-  Search, Filter, Download, Plus, MoreHorizontal, CheckCircle2, XCircle,
-  Eye, Pencil, Trash2, ChevronLeft, ChevronRight, Tag, UsersRound,
+  Search,
+  Filter,
+  Download,
+  Plus,
+  MoreHorizontal,
+  CheckCircle2,
+  XCircle,
+  Eye,
+  Pencil,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  Tag,
+  UsersRound,
 } from "lucide-react";
 import { PageHeader, StatCard, EmptyState, confirmDestructive } from "@/components/admin/ui-bits";
 import { Button } from "@/components/ui/button";
@@ -10,22 +22,40 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import {
-  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuLabel,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { type WaitlistUser } from "@/lib/mock-data";
+import { type WaitlistUser } from "@/lib/types";
 import { Users, UserCheck, Percent, Award } from "lucide-react";
 import { toast } from "sonner";
 import { waitlistApi } from "@/lib/api";
 import { toCsv, downloadCsv } from "@/lib/csv";
 
 export const Route = createFileRoute("/admin/waitlist")({
-  head: () => ({ meta: [{ title: "Waitlist — MyTijaara Admin" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({
+    meta: [{ title: "Waitlist — MyTijaara Admin" }, { name: "robots", content: "noindex" }],
+  }),
   component: WaitlistPage,
 });
 
@@ -43,8 +73,15 @@ function WaitlistPage() {
 
   useEffect(() => {
     let cancel = false;
-    waitlistApi.list().then((r) => { if (!cancel) { setUsers(r.data); setLoading(false); } });
-    return () => { cancel = true; };
+    waitlistApi.list().then((r) => {
+      if (!cancel) {
+        setUsers(r.data);
+        setLoading(false);
+      }
+    });
+    return () => {
+      cancel = true;
+    };
   }, []);
 
   const filtered = useMemo(() => {
@@ -53,7 +90,11 @@ function WaitlistPage() {
       if (source !== "all" && u.source !== source) return false;
       if (q) {
         const s = q.toLowerCase();
-        if (!u.name.toLowerCase().includes(s) && !u.email.toLowerCase().includes(s) && !u.city.toLowerCase().includes(s))
+        if (
+          !u.name.toLowerCase().includes(s) &&
+          !u.email.toLowerCase().includes(s) &&
+          !u.city.toLowerCase().includes(s)
+        )
           return false;
       }
       return true;
@@ -97,8 +138,18 @@ function WaitlistPage() {
     });
   };
 
-  const bulkAction = (label: string) => {
-    if (label === "Delete") { deleteUsers(Array.from(selected)); return; }
+  const bulkAction = async (label: string) => {
+    if (label === "Delete") {
+      deleteUsers(Array.from(selected));
+      return;
+    }
+    if (label === "Verify") {
+      const ids = Array.from(selected);
+      await Promise.all(ids.map((id) => waitlistApi.update(id, { verified: true })));
+      setUsers((current) =>
+        current.map((user) => (ids.includes(user.id) ? { ...user, verified: true } : user)),
+      );
+    }
     toast.success(`${label} applied to ${selected.size} users`);
     setSelected(new Set());
   };
@@ -144,8 +195,22 @@ function WaitlistPage() {
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard label="Total signups" value={users.length} delta={18.4} icon={Users} />
-        <StatCard label="Verified" value={verified} delta={12.1} icon={UserCheck} hint={`${Math.round((verified/total)*100)}% verified`} />
-        <StatCard label="Avg referrals" value={users.length ? (users.reduce((s, u) => s + u.referrals, 0) / users.length).toFixed(1) : "0"} icon={Award} />
+        <StatCard
+          label="Verified"
+          value={verified}
+          delta={12.1}
+          icon={UserCheck}
+          hint={`${Math.round((verified / total) * 100)}% verified`}
+        />
+        <StatCard
+          label="Avg referrals"
+          value={
+            users.length
+              ? (users.reduce((s, u) => s + u.referrals, 0) / users.length).toFixed(1)
+              : "0"
+          }
+          icon={Award}
+        />
         <StatCard label="Conversion" value="4.7%" delta={0.4} icon={Percent} />
       </div>
 
@@ -153,10 +218,26 @@ function WaitlistPage() {
         <div className="flex flex-wrap items-center gap-2 border-b border-border/60 p-4">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Search name, email, city…" value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} className="pl-9" />
+            <Input
+              placeholder="Search name, email, city…"
+              value={q}
+              onChange={(e) => {
+                setQ(e.target.value);
+                setPage(1);
+              }}
+              className="pl-9"
+            />
           </div>
-          <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
-            <SelectTrigger className="w-[140px]"><SelectValue placeholder="Status" /></SelectTrigger>
+          <Select
+            value={status}
+            onValueChange={(v) => {
+              setStatus(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All statuses</SelectItem>
               <SelectItem value="active">Active</SelectItem>
@@ -165,8 +246,16 @@ function WaitlistPage() {
               <SelectItem value="unsubscribed">Unsubscribed</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={source} onValueChange={(v) => { setSource(v); setPage(1); }}>
-            <SelectTrigger className="w-[140px]"><SelectValue placeholder="Source" /></SelectTrigger>
+          <Select
+            value={source}
+            onValueChange={(v) => {
+              setSource(v);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Source" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All sources</SelectItem>
               <SelectItem value="organic">Organic</SelectItem>
@@ -178,17 +267,32 @@ function WaitlistPage() {
               <SelectItem value="google">Google</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" size="sm" className="hidden sm:inline-flex"><Filter className="mr-2 h-4 w-4" /> More filters</Button>
+          <Button variant="outline" size="sm" className="hidden sm:inline-flex">
+            <Filter className="mr-2 h-4 w-4" /> More filters
+          </Button>
         </div>
 
         {selected.size > 0 && (
           <div className="flex flex-wrap items-center gap-2 border-b border-border/60 bg-primary/5 px-4 py-2 text-sm">
             <span className="font-medium">{selected.size} selected</span>
             <div className="ml-auto flex flex-wrap gap-2">
-              <Button size="sm" variant="outline" onClick={() => bulkAction("Verify")}><CheckCircle2 className="mr-1 h-3 w-3" /> Verify</Button>
-              <Button size="sm" variant="outline" onClick={() => bulkAction("Tag")}><Tag className="mr-1 h-3 w-3" /> Tag</Button>
-              <Button size="sm" variant="outline" onClick={() => bulkAction("Email")}>Email</Button>
-              <Button size="sm" variant="outline" className="text-red-600" onClick={() => bulkAction("Delete")}>Delete</Button>
+              <Button size="sm" variant="outline" onClick={() => bulkAction("Verify")}>
+                <CheckCircle2 className="mr-1 h-3 w-3" /> Verify
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => bulkAction("Tag")}>
+                <Tag className="mr-1 h-3 w-3" /> Tag
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => bulkAction("Email")}>
+                Email
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-red-600"
+                onClick={() => bulkAction("Delete")}
+              >
+                Delete
+              </Button>
             </div>
           </div>
         )}
@@ -198,7 +302,12 @@ function WaitlistPage() {
           <table className="w-full text-sm">
             <thead className="bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
-                <th className="p-3 w-10"><Checkbox checked={rows.length > 0 && rows.every((r) => selected.has(r.id))} onCheckedChange={toggleAll} /></th>
+                <th className="p-3 w-10">
+                  <Checkbox
+                    checked={rows.length > 0 && rows.every((r) => selected.has(r.id))}
+                    onCheckedChange={toggleAll}
+                  />
+                </th>
                 <th className="p-3 font-medium">User</th>
                 <th className="p-3 font-medium">City</th>
                 <th className="p-3 font-medium">Status</th>
@@ -210,47 +319,85 @@ function WaitlistPage() {
               </tr>
             </thead>
             <tbody>
-              {loading && Array.from({ length: 6 }).map((_, i) => (
-                <tr key={i} className="border-t border-border/40">
-                  <td colSpan={9} className="p-3"><div className="h-8 animate-pulse rounded bg-muted/60" /></td>
-                </tr>
-              ))}
-              {!loading && rows.map((u) => (
-                <tr key={u.id} className="border-t border-border/40 hover:bg-muted/20">
-                  <td className="p-3"><Checkbox checked={selected.has(u.id)} onCheckedChange={() => toggle(u.id)} /></td>
-                  <td className="p-3">
-                    <div className="flex items-center gap-2">
-                      <div className="grid h-8 w-8 place-items-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
-                        {u.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
+              {loading &&
+                Array.from({ length: 6 }).map((_, i) => (
+                  <tr key={i} className="border-t border-border/40">
+                    <td colSpan={9} className="p-3">
+                      <div className="h-8 animate-pulse rounded bg-muted/60" />
+                    </td>
+                  </tr>
+                ))}
+              {!loading &&
+                rows.map((u) => (
+                  <tr key={u.id} className="border-t border-border/40 hover:bg-muted/20">
+                    <td className="p-3">
+                      <Checkbox checked={selected.has(u.id)} onCheckedChange={() => toggle(u.id)} />
+                    </td>
+                    <td className="p-3">
+                      <div className="flex items-center gap-2">
+                        <div className="grid h-8 w-8 place-items-center rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
+                          {u.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .slice(0, 2)
+                            .join("")}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-medium truncate max-w-[200px]">{u.name}</div>
+                          <div className="text-xs text-muted-foreground truncate max-w-[200px]">
+                            {u.email}
+                          </div>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <div className="font-medium truncate max-w-[200px]">{u.name}</div>
-                        <div className="text-xs text-muted-foreground truncate max-w-[200px]">{u.email}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-3 text-muted-foreground">{u.city}</td>
-                  <td className="p-3"><StatusBadge status={u.status} /></td>
-                  <td className="p-3">
-                    {u.verified ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : <XCircle className="h-4 w-4 text-muted-foreground" />}
-                  </td>
-                  <td className="p-3"><Badge variant="secondary" className="capitalize">{u.source}</Badge></td>
-                  <td className="p-3 text-right font-semibold">{u.referrals}</td>
-                  <td className="p-3 text-muted-foreground text-xs">{new Date(u.joinedAt).toLocaleDateString()}</td>
-                  <td className="p-3">
-                    <RowMenu user={u} onView={setView} onDelete={(id) => deleteUsers([id])} />
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="p-3 text-muted-foreground">{u.city}</td>
+                    <td className="p-3">
+                      <StatusBadge status={u.status} />
+                    </td>
+                    <td className="p-3">
+                      {u.verified ? (
+                        <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </td>
+                    <td className="p-3">
+                      <Badge variant="secondary" className="capitalize">
+                        {u.source}
+                      </Badge>
+                    </td>
+                    <td className="p-3 text-right font-semibold">{u.referrals}</td>
+                    <td className="p-3 text-muted-foreground text-xs">
+                      {new Date(u.joinedAt).toLocaleDateString()}
+                    </td>
+                    <td className="p-3">
+                      <RowMenu user={u} onView={setView} onDelete={(id) => deleteUsers([id])} />
+                    </td>
+                  </tr>
+                ))}
               {!loading && rows.length === 0 && (
-                <tr><td colSpan={9} className="p-6">
-                  <EmptyState
-                    illustration="search"
-                    title="No users match your filters"
-                    description="Try clearing the search or picking a different status."
-                    action={<Button size="sm" variant="outline" onClick={() => { setQ(""); setStatus("all"); setSource("all"); }}>Clear filters</Button>}
-                  />
-                </td></tr>
+                <tr>
+                  <td colSpan={9} className="p-6">
+                    <EmptyState
+                      illustration="search"
+                      title="No users match your filters"
+                      description="Try clearing the search or picking a different status."
+                      action={
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setQ("");
+                            setStatus("all");
+                            setSource("all");
+                          }}
+                        >
+                          Clear filters
+                        </Button>
+                      }
+                    />
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>
@@ -258,30 +405,48 @@ function WaitlistPage() {
 
         {/* Mobile cards */}
         <div className="md:hidden divide-y divide-border/40">
-          {loading && Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="p-4"><div className="h-16 animate-pulse rounded bg-muted/60" /></div>
-          ))}
-          {!loading && rows.map((u) => (
-            <div key={u.id} className="flex items-start gap-3 p-4">
-              <Checkbox checked={selected.has(u.id)} onCheckedChange={() => toggle(u.id)} className="mt-1" />
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                {u.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
+          {loading &&
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="p-4">
+                <div className="h-16 animate-pulse rounded bg-muted/60" />
               </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <div className="truncate font-medium">{u.name}</div>
-                  {u.verified && <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-600" />}
+            ))}
+          {!loading &&
+            rows.map((u) => (
+              <div key={u.id} className="flex items-start gap-3 p-4">
+                <Checkbox
+                  checked={selected.has(u.id)}
+                  onCheckedChange={() => toggle(u.id)}
+                  className="mt-1"
+                />
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                  {u.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .slice(0, 2)
+                    .join("")}
                 </div>
-                <div className="truncate text-xs text-muted-foreground">{u.email}</div>
-                <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                  <StatusBadge status={u.status} />
-                  <Badge variant="secondary" className="text-[10px] capitalize">{u.source}</Badge>
-                  <span className="text-[11px] text-muted-foreground">{u.city} · {u.referrals} refs</span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <div className="truncate font-medium">{u.name}</div>
+                    {u.verified && (
+                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                    )}
+                  </div>
+                  <div className="truncate text-xs text-muted-foreground">{u.email}</div>
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    <StatusBadge status={u.status} />
+                    <Badge variant="secondary" className="text-[10px] capitalize">
+                      {u.source}
+                    </Badge>
+                    <span className="text-[11px] text-muted-foreground">
+                      {u.city} · {u.referrals} refs
+                    </span>
+                  </div>
                 </div>
+                <RowMenu user={u} onView={setView} onDelete={(id) => deleteUsers([id])} />
               </div>
-              <RowMenu user={u} onView={setView} onDelete={(id) => deleteUsers([id])} />
-            </div>
-          ))}
+            ))}
           {!loading && rows.length === 0 && (
             <div className="p-6">
               <EmptyState
@@ -296,16 +461,28 @@ function WaitlistPage() {
 
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/60 px-4 py-3 text-sm">
           <div className="text-muted-foreground text-xs">
-            Showing <strong>{filtered.length ? (p - 1) * PAGE_SIZE + 1 : 0}</strong>–<strong>{Math.min(p * PAGE_SIZE, filtered.length)}</strong> of <strong>{filtered.length}</strong>
+            Showing <strong>{filtered.length ? (p - 1) * PAGE_SIZE + 1 : 0}</strong>–
+            <strong>{Math.min(p * PAGE_SIZE, filtered.length)}</strong> of{" "}
+            <strong>{filtered.length}</strong>
           </div>
           <div className="flex items-center gap-1">
-            <Button variant="outline" size="sm" disabled={p === 1} onClick={() => setPage(p - 1)}><ChevronLeft className="h-4 w-4" /></Button>
-            <div className="px-2 text-xs">Page {p} / {totalPages}</div>
-            <Button variant="outline" size="sm" disabled={p === totalPages} onClick={() => setPage(p + 1)}><ChevronRight className="h-4 w-4" /></Button>
+            <Button variant="outline" size="sm" disabled={p === 1} onClick={() => setPage(p - 1)}>
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <div className="px-2 text-xs">
+              Page {p} / {totalPages}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={p === totalPages}
+              onClick={() => setPage(p + 1)}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </div>
-
 
       <Dialog open={!!view} onOpenChange={(o) => !o && setView(null)}>
         <DialogContent className="max-w-lg">
@@ -314,17 +491,29 @@ function WaitlistPage() {
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-3">
                   <div className="grid h-10 w-10 place-items-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-                    {view.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
+                    {view.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .slice(0, 2)
+                      .join("")}
                   </div>
                   {view.name}
                 </DialogTitle>
-                <DialogDescription>{view.email} · {view.phone}</DialogDescription>
+                <DialogDescription>
+                  {view.email} · {view.phone}
+                </DialogDescription>
               </DialogHeader>
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <Field label="Status"><StatusBadge status={view.status} /></Field>
+                <Field label="Status">
+                  <StatusBadge status={view.status} />
+                </Field>
                 <Field label="Verified">{view.verified ? "Yes" : "No"}</Field>
-                <Field label="City">{view.city}, {view.state}</Field>
-                <Field label="Source" className="capitalize">{view.source}</Field>
+                <Field label="City">
+                  {view.city}, {view.state}
+                </Field>
+                <Field label="Source" className="capitalize">
+                  {view.source}
+                </Field>
                 <Field label="Device">{view.device}</Field>
                 <Field label="Referrals">{view.referrals}</Field>
                 <Field label="Position">#{view.position}</Field>
@@ -333,16 +522,41 @@ function WaitlistPage() {
               <div>
                 <Label className="text-xs">Tags</Label>
                 <div className="mt-1.5 flex flex-wrap gap-1">
-                  {view.tags.length ? view.tags.map((t) => <Badge key={t} variant="secondary">{t}</Badge>) : <span className="text-xs text-muted-foreground">No tags</span>}
+                  {view.tags.length ? (
+                    view.tags.map((t) => (
+                      <Badge key={t} variant="secondary">
+                        {t}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-xs text-muted-foreground">No tags</span>
+                  )}
                 </div>
               </div>
               <div>
-                <Label htmlFor="notes" className="text-xs">Notes</Label>
-                <Textarea id="notes" defaultValue={view.notes ?? ""} placeholder="Add a note about this user…" className="mt-1.5" />
+                <Label htmlFor="notes" className="text-xs">
+                  Notes
+                </Label>
+                <Textarea
+                  id="notes"
+                  defaultValue={view.notes ?? ""}
+                  placeholder="Add a note about this user…"
+                  className="mt-1.5"
+                />
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setView(null)}>Close</Button>
-                <Button className="bg-primary hover:bg-primary/90" onClick={() => { toast.success("Saved"); setView(null); }}>Save changes</Button>
+                <Button variant="outline" onClick={() => setView(null)}>
+                  Close
+                </Button>
+                <Button
+                  className="bg-primary hover:bg-primary/90"
+                  onClick={() => {
+                    toast.success("Saved");
+                    setView(null);
+                  }}
+                >
+                  Save changes
+                </Button>
               </DialogFooter>
             </>
           )}
@@ -352,7 +566,15 @@ function WaitlistPage() {
   );
 }
 
-function Field({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
+function Field({
+  label,
+  children,
+  className,
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <div>
       <div className="text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
@@ -368,20 +590,44 @@ function StatusBadge({ status }: { status: WaitlistUser["status"] }) {
     onboarded: "bg-primary/10 text-primary",
     unsubscribed: "bg-muted text-muted-foreground",
   };
-  return <span className={"inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize " + map[status]}>{status}</span>;
+  return (
+    <span
+      className={
+        "inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold capitalize " + map[status]
+      }
+    >
+      {status}
+    </span>
+  );
 }
 
-function RowMenu({ user, onView, onDelete }: { user: WaitlistUser; onView: (u: WaitlistUser) => void; onDelete: (id: string) => void }) {
+function RowMenu({
+  user,
+  onView,
+  onDelete,
+}: {
+  user: WaitlistUser;
+  onView: (u: WaitlistUser) => void;
+  onDelete: (id: string) => void;
+}) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-7 w-7"><MoreHorizontal className="h-4 w-4" /></Button>
+        <Button variant="ghost" size="icon" className="h-7 w-7">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuItem onClick={() => onView(user)}><Eye className="mr-2 h-3.5 w-3.5" /> View</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => toast.success("Edit dialog would open")}><Pencil className="mr-2 h-3.5 w-3.5" /> Edit</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => toast.success(`Emailed ${user.email}`)}>Email user</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onView(user)}>
+          <Eye className="mr-2 h-3.5 w-3.5" /> View
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => toast.success("Edit dialog would open")}>
+          <Pencil className="mr-2 h-3.5 w-3.5" /> Edit
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => toast.success(`Emailed ${user.email}`)}>
+          Email user
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="text-red-600" onClick={() => onDelete(user.id)}>
           <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete

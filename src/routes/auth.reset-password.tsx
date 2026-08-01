@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { authApi } from "@/lib/api";
 
 export const Route = createFileRoute("/auth/reset-password")({
   head: () => ({ meta: [{ title: "Reset password — MyTijaara Admin" }, { name: "robots", content: "noindex" }] }),
@@ -28,14 +29,24 @@ function ResetPage() {
   const reqs = requirements(pw);
   const valid = reqs.every((r) => r.ok) && pw === pw2;
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!valid) return;
     setLoading(true);
-    setTimeout(() => {
+    const params = new URLSearchParams(window.location.search);
+    try {
+      await authApi.resetPassword({
+        email: params.get("email") ?? "",
+        token: params.get("token") ?? "",
+        password: pw,
+        password_confirmation: pw2,
+      });
       toast.success("Password updated. Please sign in.");
       navigate({ to: "/auth/login" });
-    }, 700);
+    } catch {
+      toast.error("This reset link is invalid or expired.");
+      setLoading(false);
+    }
   };
 
   return (

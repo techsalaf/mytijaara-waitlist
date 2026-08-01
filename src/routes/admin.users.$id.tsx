@@ -6,15 +6,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Circle } from "lucide-react";
-import { adminUsers } from "@/lib/mock-data";
+import { usersApi } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/users/$id")({
-  loader: ({ params }) => {
-    const u = adminUsers.find((x) => x.id === params.id);
-    if (!u) throw notFound();
-    return u;
+  loader: async ({ params }) => {
+    const response = await usersApi.get(params.id);
+    if (!response.data) throw notFound();
+    return response.data;
   },
-  notFoundComponent: () => <div className="text-center p-10">User not found. <Link to="/admin/users" className="text-primary">Go back</Link></div>,
+  notFoundComponent: () => (
+    <div className="text-center p-10">
+      User not found.{" "}
+      <Link to="/admin/users" className="text-primary">
+        Go back
+      </Link>
+    </div>
+  ),
   component: UserDetail,
 });
 
@@ -33,11 +40,15 @@ function UserDetail() {
   return (
     <div className="space-y-6">
       <Button asChild variant="ghost" size="sm" className="-ml-2">
-        <Link to="/admin/users"><ArrowLeft className="mr-1 h-3 w-3" /> Back to users</Link>
+        <Link to="/admin/users">
+          <ArrowLeft className="mr-1 h-3 w-3" /> Back to users
+        </Link>
       </Button>
 
       <div className="flex flex-wrap items-center gap-4">
-        <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary text-lg font-bold text-primary-foreground">{u.avatar}</div>
+        <div className="grid h-16 w-16 place-items-center rounded-2xl bg-primary text-lg font-bold text-primary-foreground">
+          {u.avatar}
+        </div>
         <div>
           <h1 className="text-2xl font-bold">{u.name}</h1>
           <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
@@ -50,20 +61,47 @@ function UserDetail() {
       <div className="grid gap-4 lg:grid-cols-3">
         <SectionCard title="Profile" className="lg:col-span-2">
           <div className="grid gap-4 sm:grid-cols-2">
-            <div><Label>Full name</Label><Input defaultValue={u.name} className="mt-1.5" /></div>
-            <div><Label>Email</Label><Input defaultValue={u.email} className="mt-1.5" /></div>
-            <div><Label>Phone</Label><Input defaultValue="+234 803 555 0198" className="mt-1.5" /></div>
-            <div><Label>Location</Label><Input defaultValue="Lagos, Nigeria" className="mt-1.5" /></div>
+            <div>
+              <Label>Full name</Label>
+              <Input defaultValue={u.name} className="mt-1.5" />
+            </div>
+            <div>
+              <Label>Email</Label>
+              <Input defaultValue={u.email} className="mt-1.5" />
+            </div>
+            <div>
+              <Label>Phone</Label>
+              <Input defaultValue="+234 803 555 0198" className="mt-1.5" />
+            </div>
+            <div>
+              <Label>Location</Label>
+              <Input defaultValue="Lagos, Nigeria" className="mt-1.5" />
+            </div>
           </div>
-          <div className="mt-4"><Label>Notes</Label><Textarea placeholder="Internal notes about this admin…" rows={3} className="mt-1.5" /></div>
+          <div className="mt-4">
+            <Label>Notes</Label>
+            <Textarea placeholder="Internal notes about this admin…" rows={3} className="mt-1.5" />
+          </div>
         </SectionCard>
 
         <SectionCard title="Access">
           <div className="space-y-2 text-sm">
-            <div className="flex justify-between rounded-lg bg-muted/40 p-2"><span className="text-muted-foreground">Role</span><span className="font-semibold">{u.role}</span></div>
-            <div className="flex justify-between rounded-lg bg-muted/40 p-2"><span className="text-muted-foreground">Permissions</span><span className="font-semibold">42</span></div>
-            <div className="flex justify-between rounded-lg bg-muted/40 p-2"><span className="text-muted-foreground">2FA</span><span className="font-semibold text-emerald-600">Enabled</span></div>
-            <div className="flex justify-between rounded-lg bg-muted/40 p-2"><span className="text-muted-foreground">Sessions</span><span className="font-semibold">2 active</span></div>
+            <div className="flex justify-between rounded-lg bg-muted/40 p-2">
+              <span className="text-muted-foreground">Role</span>
+              <span className="font-semibold">{u.role}</span>
+            </div>
+            <div className="flex justify-between rounded-lg bg-muted/40 p-2">
+              <span className="text-muted-foreground">Permissions</span>
+              <span className="font-semibold">42</span>
+            </div>
+            <div className="flex justify-between rounded-lg bg-muted/40 p-2">
+              <span className="text-muted-foreground">2FA</span>
+              <span className="font-semibold text-emerald-600">Enabled</span>
+            </div>
+            <div className="flex justify-between rounded-lg bg-muted/40 p-2">
+              <span className="text-muted-foreground">Sessions</span>
+              <span className="font-semibold">2 active</span>
+            </div>
           </div>
         </SectionCard>
       </div>

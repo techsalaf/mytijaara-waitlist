@@ -1,17 +1,36 @@
 import { Link, Outlet, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  LayoutDashboard, Users, Award, FileText, Image as ImageIcon, Mail, BarChart3,
-  Shield, Settings, Bell, ScrollText, HeartPulse, UserCircle2, ChevronDown,
-  Search, LogOut, Menu, Sparkles,
+  LayoutDashboard,
+  Users,
+  Award,
+  FileText,
+  Image as ImageIcon,
+  Mail,
+  BarChart3,
+  Shield,
+  Settings,
+  Bell,
+  ScrollText,
+  HeartPulse,
+  UserCircle2,
+  ChevronDown,
+  Search,
+  LogOut,
+  Menu,
+  Sparkles,
 } from "lucide-react";
 import { getSession, signOut, type AdminSession } from "@/lib/auth-mock";
-import { notifications } from "@/lib/mock-data";
+import { notificationsApi, type Notification } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
-  DropdownMenuSeparator, DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { CommandPalette } from "./command-palette";
@@ -19,7 +38,12 @@ import { AdminSkeleton } from "./admin-skeleton";
 
 import { cn } from "@/lib/utils";
 
-type NavItem = { label: string; to: string; icon: React.ComponentType<{ className?: string }>; badge?: string };
+type NavItem = {
+  label: string;
+  to: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: string;
+};
 type NavGroup = { label: string; items: NavItem[] };
 
 const nav: NavGroup[] = [
@@ -64,11 +88,13 @@ export function AdminShell() {
   const [session, setSession] = useState<AdminSession | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
     setSession(getSession());
+    void notificationsApi.list().then((response) => setNotifications(response.data));
   }, []);
 
   useEffect(() => {
@@ -78,7 +104,6 @@ export function AdminShell() {
   if (!session) {
     return <AdminSkeleton />;
   }
-
 
   const handleSignOut = () => {
     signOut();
@@ -105,7 +130,12 @@ export function AdminShell() {
       <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
         {/* Topbar */}
         <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border/60 bg-card/80 px-4 backdrop-blur-md lg:px-6 ">
-          <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setMobileOpen(true)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden"
+            onClick={() => setMobileOpen(true)}
+          >
             <Menu className="h-5 w-5" />
           </Button>
 
@@ -117,7 +147,8 @@ export function AdminShell() {
             <span className="hidden sm:inline">Search or jump to…</span>
             <span className="inline sm:hidden">Search</span>
             <kbd className="ml-auto hidden items-center gap-0.5 rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground shadow-sm sm:inline-flex">
-              {isMac ? "⌘" : "Ctrl"}<span>K</span>
+              {isMac ? "⌘" : "Ctrl"}
+              <span>K</span>
             </kbd>
           </button>
 
@@ -134,7 +165,10 @@ export function AdminShell() {
               <DropdownMenuContent align="end" className="w-80">
                 <DropdownMenuLabel className="flex items-center justify-between">
                   <span>Notifications</span>
-                  <Link to="/admin/notifications" className="text-xs font-normal text-primary hover:underline">
+                  <Link
+                    to="/admin/notifications"
+                    className="text-xs font-normal text-primary hover:underline"
+                  >
                     View all
                   </Link>
                 </DropdownMenuLabel>
@@ -158,7 +192,9 @@ export function AdminShell() {
                   <div className="grid h-8 w-8 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                     {session.avatar}
                   </div>
-                  <span className="hidden text-sm font-medium sm:inline">{session.name.split(" ")[0]}</span>
+                  <span className="hidden text-sm font-medium sm:inline">
+                    {session.name.split(" ")[0]}
+                  </span>
                   <ChevronDown className="h-4 w-4 text-muted-foreground" />
                 </button>
               </DropdownMenuTrigger>
@@ -172,16 +208,25 @@ export function AdminShell() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setPaletteOpen(true)}>
                   <Search className="mr-2 h-4 w-4" /> Command palette
-                  <span className="ml-auto text-[10px] text-muted-foreground">{isMac ? "⌘K" : "Ctrl K"}</span>
+                  <span className="ml-auto text-[10px] text-muted-foreground">
+                    {isMac ? "⌘K" : "Ctrl K"}
+                  </span>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/admin/profile"><UserCircle2 className="mr-2 h-4 w-4" /> Profile</Link>
+                  <Link to="/admin/profile">
+                    <UserCircle2 className="mr-2 h-4 w-4" /> Profile
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/admin/settings"><Settings className="mr-2 h-4 w-4" /> Settings</Link>
+                  <Link to="/admin/settings">
+                    <Settings className="mr-2 h-4 w-4" /> Settings
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive">
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  className="text-destructive focus:text-destructive"
+                >
                   <LogOut className="mr-2 h-4 w-4" /> Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -236,14 +281,21 @@ function SidebarContent({ pathname }: { pathname: string }) {
                         : "text-foreground/70 hover:bg-muted hover:text-foreground",
                     )}
                   >
-                    <Icon className={cn("h-4 w-4 shrink-0", active ? "text-primary-foreground" : "text-muted-foreground")} />
+                    <Icon
+                      className={cn(
+                        "h-4 w-4 shrink-0",
+                        active ? "text-primary-foreground" : "text-muted-foreground",
+                      )}
+                    />
                     <span className="flex-1 truncate">{item.label}</span>
                     {item.badge && (
                       <Badge
                         variant="secondary"
                         className={cn(
                           "h-5 px-1.5 text-[10px] font-semibold",
-                          active ? "bg-primary-foreground/20 text-primary-foreground" : "bg-primary/10 text-primary",
+                          active
+                            ? "bg-primary-foreground/20 text-primary-foreground"
+                            : "bg-primary/10 text-primary",
                         )}
                       >
                         {item.badge}
@@ -259,8 +311,13 @@ function SidebarContent({ pathname }: { pathname: string }) {
 
       <div className="border-t border-border/60 p-4">
         <div className="rounded-xl bg-gradient-to-br from-primary to-[color-mix(in_oklab,var(--primary)_75%,black)] p-4 text-primary-foreground">
-          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-gold">Pro tip</div>
-          <div className="text-sm font-medium leading-snug">Press <kbd className="rounded bg-primary-foreground/20 px-1 font-mono">⌘K</kbd> anywhere to jump.</div>
+          <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-gold">
+            Pro tip
+          </div>
+          <div className="text-sm font-medium leading-snug">
+            Press <kbd className="rounded bg-primary-foreground/20 px-1 font-mono">⌘K</kbd> anywhere
+            to jump.
+          </div>
         </div>
       </div>
     </div>

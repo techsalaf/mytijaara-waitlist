@@ -1,3 +1,16 @@
 export * from "./client";
 export { waitlistApi } from "./waitlist";
 export { launchApi } from "./launch";
+export { authApi } from "./auth";
+export { analyticsApi } from "./analytics";
+export { dashboardApi } from "./dashboard";
+export { referralsApi } from "./referrals";
+export { campaignsApi } from "./campaigns";
+export { templatesApi } from "./templates";
+export { cmsApi } from "./cms";
+export { mediaApi } from "./media";
+export { usersApi } from "./users";
+export { rolesApi } from "./roles";
+export { notificationsApi } from "./notifications";
+export { auditApi } from "./audit";
+export { settingsApi } from "./settings";

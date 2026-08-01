@@ -1,5 +1,19 @@
 import { apiCall } from "./client";
-import { waitlistUsers, type WaitlistUser } from "@/lib/mock-data";
+import { waitlistUsers } from "@/lib/mock-data";
+import type { WaitlistRole, WaitlistUser } from "@/lib/types";
+
+export type WaitlistSignupPayload = {
+  name: string;
+  email: string;
+  phone?: string;
+  city: string;
+  role: WaitlistRole;
+  interest?: string;
+  source: "organic" | "referral";
+  referralCode?: string;
+  consent: true;
+  website?: string;
+};
 
 let cache: WaitlistUser[] = [...waitlistUsers];
 
@@ -19,13 +33,19 @@ export const waitlistApi = {
   list: () => apiCall("/waitlist", () => cache),
   count: () => apiCall("/waitlist/count", () => ({ total: cache.length }), { public: true }),
   get: (id: string) => apiCall(`/waitlist/${id}`, () => cache.find((u) => u.id === id) ?? null),
-  create: (payload: Partial<WaitlistUser>) =>
+  create: (payload: WaitlistSignupPayload) =>
     apiCall(
       "/waitlist",
       () => {
         const user = {
           ...cache[0],
-          ...payload,
+          name: payload.name,
+          email: payload.email,
+          phone: payload.phone ?? "",
+          city: payload.city,
+          source: payload.source,
+          tags: [payload.role, ...(payload.interest ? [payload.interest] : [])],
+          referredBy: payload.referralCode || undefined,
           id: `wl_${Date.now()}`,
           joinedAt: new Date().toISOString(),
         } as WaitlistUser;

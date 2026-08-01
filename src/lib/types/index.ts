@@ -7,13 +7,7 @@
 
 export type WaitlistStatus = "active" | "invited" | "onboarded" | "unsubscribed";
 export type WaitlistSource =
-  | "organic"
-  | "referral"
-  | "instagram"
-  | "twitter"
-  | "facebook"
-  | "tiktok"
-  | "google";
+  "organic" | "referral" | "instagram" | "twitter" | "facebook" | "tiktok" | "google";
 export type WaitlistDevice = "iOS" | "Android" | "Web";
 export type WaitlistRole = "customer" | "vendor" | "rider" | "artisan";
 
@@ -42,7 +36,26 @@ export type ReferralLeaderboardEntry = WaitlistUser & {
   points: number;
 };
 
+export type ReferralTrendPoint = {
+  date: string;
+  label: string;
+  visits: number;
+  conversions: number;
+  signups: number;
+};
+
+export type ReferralAnalytics = {
+  totalVisits: number;
+  conversions: number;
+  conversionRate: number;
+  totalReferred: number;
+  activeReferrers: number;
+  trend: ReferralTrendPoint[];
+  sources: { name: string; value: number }[];
+};
+
 export type DashboardStats = {
+  visitors: number;
   totalWaitlist: number;
   todaySignups: number;
   weeklyGrowth: number;
