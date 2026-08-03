@@ -15,7 +15,7 @@ import {
   Shield, Settings, Bell, ScrollText, HeartPulse, UserCircle2, LogOut, Sun, Moon,
   Plus, Download,
 } from "lucide-react";
-import { signOut } from "@/lib/auth-mock";
+import { signOut } from "@/lib/auth";
 import { setTheme, getStoredTheme } from "@/lib/theme";
 import { toast } from "sonner";
 

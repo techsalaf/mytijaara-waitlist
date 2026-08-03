@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { signIn, isMockMode } from "@/lib/auth-mock";
+import { signIn, isMockMode } from "@/lib/auth";
 
 export const Route = createFileRoute("/auth/login")({
   head: () => ({ meta: [{ title: "Sign in — MyTijaara Admin" }, { name: "robots", content: "noindex" }] }),

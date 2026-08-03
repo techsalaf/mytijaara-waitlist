@@ -20,8 +20,8 @@ import {
   Menu,
   Sparkles,
 } from "lucide-react";
-import { getSession, signOut, type AdminSession } from "@/lib/auth-mock";
-import { notificationsApi, type Notification } from "@/lib/api";
+import { getSession, signOut, type AdminSession } from "@/lib/auth";
+import { notificationsApi, type Notification, waitlistApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -89,12 +89,22 @@ export function AdminShell() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
     setSession(getSession());
     void notificationsApi.list().then((response) => setNotifications(response.data));
+    void waitlistApi.count().then((r) => setWaitlistCount(r.data.total ?? 0)).catch(() => setWaitlistCount(null));
+  }, []);
+
+  useEffect(() => {
+    const handler = () => {
+      void waitlistApi.count().then((r) => setWaitlistCount(r.data.total ?? 0)).catch(() => setWaitlistCount(null));
+    };
+    window.addEventListener("waitlist:changed", handler as EventListener);
+    return () => window.removeEventListener("waitlist:changed", handler as EventListener);
   }, []);
 
   useEffect(() => {
@@ -117,13 +127,13 @@ export function AdminShell() {
     <div className="flex min-h-screen bg-surface">
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 lg:z-30 border-r border-border/60 bg-card">
-        <SidebarContent pathname={pathname} />
+        <SidebarContent pathname={pathname} waitlistCount={waitlistCount} />
       </aside>
 
       {/* Mobile sidebar */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent side="left" className="w-72 p-0">
-          <SidebarContent pathname={pathname} />
+          <SidebarContent pathname={pathname} waitlistCount={waitlistCount} />
         </SheetContent>
       </Sheet>
 
@@ -244,7 +254,8 @@ export function AdminShell() {
   );
 }
 
-function SidebarContent({ pathname }: { pathname: string }) {
+function SidebarContent({ pathname, waitlistCount }: { pathname: string; waitlistCount?: number | null }) {
+  const formattedWaitlist = typeof waitlistCount === "number" ? waitlistCount.toLocaleString() : undefined;
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-16 items-center gap-2 border-b border-border/60 px-5">
@@ -288,7 +299,7 @@ function SidebarContent({ pathname }: { pathname: string }) {
                       )}
                     />
                     <span className="flex-1 truncate">{item.label}</span>
-                    {item.badge && (
+                    {(item.to === "/admin/waitlist" ? formattedWaitlist : item.badge) && (
                       <Badge
                         variant="secondary"
                         className={cn(
@@ -298,7 +309,7 @@ function SidebarContent({ pathname }: { pathname: string }) {
                             : "bg-primary/10 text-primary",
                         )}
                       >
-                        {item.badge}
+                        {item.to === "/admin/waitlist" ? formattedWaitlist : item.badge}
                       </Badge>
                     )}
                   </Link>

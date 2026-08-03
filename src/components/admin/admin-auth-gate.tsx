@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 
-import { getSession, signOut } from "@/lib/auth-mock";
+import { getSession, getToken, restoreSession, signOut } from "@/lib/auth";
 import { authApi } from "@/lib/api";
 import { AdminSkeleton } from "./admin-skeleton";
 import { initTheme } from "@/lib/theme";
@@ -21,18 +21,22 @@ export function AdminAuthGate({ children }: { children: ReactNode }) {
     let active = true;
 
     const verifySession = async () => {
-      if (!getSession()) {
+      const sessionExists = Boolean(getSession());
+      const tokenExists = Boolean(getToken());
+      if (!sessionExists && !tokenExists) {
         navigate({ to: "/auth/login" });
         return;
       }
 
       try {
-        // In live mode this validates the persisted Sanctum token. In mock
-        // mode it resolves to the local demo user, preserving preview UX.
-        await authApi.me();
+        if (!sessionExists && tokenExists) {
+          await restoreSession();
+        } else {
+          await authApi.me();
+        }
         if (active) setState("authed");
       } catch {
-        signOut();
+        await signOut();
         if (active) navigate({ to: "/auth/session-expired", replace: true });
       }
     };
