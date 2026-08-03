@@ -12,4 +12,22 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Development helpers: proxy API requests to the local Laravel backend to avoid CORS
+  // and enable tsconfig path resolution natively in Vite.
+  vite: {
+    server: {
+      proxy: {
+        // Proxy any /api requests to the backend (adjust host/port if your backend differs)
+        // Requests like `/api/v1/auth/login` will be forwarded to http://127.0.0.1:8000/api/v1/auth/login
+        "/api": {
+          target: "http://127.0.0.1:8000",
+          changeOrigin: true,
+          secure: false,
+        },
+      },
+    },
+    resolve: {
+      tsconfigPaths: true,
+    },
+  },
 });
