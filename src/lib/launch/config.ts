@@ -2,11 +2,14 @@
  * Launch configuration — the single source of truth for the pre-launch /
  * launch-day / post-launch behaviour of the marketing site.
  *
- * TODAY: `DEFAULT_LAUNCH_CONFIG` below is a placeholder object.
- * LATER:  the backend serves the exact same shape from `GET /launch-config`
- *         (see `src/lib/api/launch.ts`). Nothing else in the app needs to
- *         change — every consumer reads the config through
- *         `useLaunch()` in `src/components/launch/launch-state-provider.tsx`.
+ * The backend serves this exact shape from `GET /launch-config` and the `/`
+ * route loads it in its SSR loader, so the real admin-configured date is in
+ * the first painted HTML. `DEFAULT_LAUNCH_CONFIG` is only the last-resort
+ * shape used when that request fails; it must stay byte-identical to
+ * `backend/database/seeders/LaunchConfigSeeder.php`.
+ *
+ * Every consumer reads the config through `useLaunch()` in
+ * `src/components/launch/launch-state-provider.tsx`.
  */
 
 export type LaunchStatus = "pre_launch" | "launch_day" | "post_launch";
@@ -32,6 +35,22 @@ export type AppStoreLink = {
   comingSoon?: boolean;
 };
 
+/**
+ * The thin marquee strip above the nav. Pre-launch it counts down; on launch
+ * day it switches to `liveText` and fires confetti for first-time visitors.
+ */
+export type LaunchTicker = {
+  enabled: boolean;
+  /** `{days}` is replaced with the whole days remaining. */
+  text: string;
+  /** Shown for the whole celebration window instead of `text`. */
+  liveText: string;
+  /** Where the strip links to. Empty string renders a non-clickable strip. */
+  href: string;
+  /** Fire confetti from the ribbon on a first-time visitor's launch-day load. */
+  confetti: boolean;
+};
+
 export type LaunchConfiguration = {
   /** Master switch for the whole launch section. */
   launchEnabled: boolean;
@@ -45,6 +64,13 @@ export type LaunchConfiguration = {
   /** IANA zone used for the human-readable date line. */
   timezone: string;
 
+  /**
+   * How long the celebration lasts. After `launchDateTime +
+   * launchCelebrationDays` the site drops to `post_launch`: no banner, no
+   * confetti, no ribbon, no countdown, no waitlist — the plain homepage.
+   */
+  launchCelebrationDays: number;
+
   badge: string;
   launchTitle: string;
   launchSubtitle: string;
@@ -54,6 +80,9 @@ export type LaunchConfiguration = {
 
   /** `auto` unless an admin pins a state from the CMS. */
   launchStatus: LaunchStatusSetting;
+
+  /** Thin animated strip pinned above the nav. */
+  ticker: LaunchTicker;
 
   /** Copy + CTAs used once the app is live. */
   live: {
@@ -67,16 +96,19 @@ export type LaunchConfiguration = {
 };
 
 /**
- * Placeholder configuration. Replace the *source* (see `launchApi`), not the
- * shape. Africa/Lagos is UTC+1 year-round, hence the `+01:00` offset.
+ * Last-resort shape used only when `GET /launch-config` fails. Keep in sync
+ * with `backend/database/seeders/LaunchConfigSeeder.php`; the gate test
+ * `tests/launch-config.test.mjs` fails the build if they drift.
+ * Africa/Lagos is UTC+1 year-round, hence the `+01:00` offset.
  */
 export const DEFAULT_LAUNCH_CONFIG: LaunchConfiguration = {
   launchEnabled: true,
   countdownEnabled: true,
   waitlistEnabled: true,
 
-  launchDateTime: "2026-11-15T10:00:00+01:00",
+  launchDateTime: "2026-10-02T10:00:00+01:00",
   timezone: "Africa/Lagos",
+  launchCelebrationDays: 3,
 
   badge: "🚀 Launching soon",
   launchTitle: "MyTijaara launches in…",
@@ -87,6 +119,14 @@ export const DEFAULT_LAUNCH_CONFIG: LaunchConfiguration = {
   secondaryCTA: { label: "Learn More", href: "#services" },
 
   launchStatus: "auto",
+
+  ticker: {
+    enabled: true,
+    text: "{days} to go until MyTijaara opens across Nigeria",
+    liveText: "MyTijaara is live — download the app and place your first order",
+    href: "#waitlist",
+    confetti: true,
+  },
 
   live: {
     badge: "🎉 We're live",
@@ -112,10 +152,23 @@ export const DEFAULT_LAUNCH_CONFIG: LaunchConfiguration = {
   },
 };
 
-/** Milliseconds in a day — launch day lasts 24h from the launch moment. */
+/** Milliseconds in a day. */
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/** Derive the effective status. Honours an admin-pinned `launchStatus`. */
+/** Celebration window length in ms, clamped to 0..30 days. */
+export function celebrationWindowMs(config: LaunchConfiguration): number {
+  const days = Number(config.launchCelebrationDays);
+  if (!Number.isFinite(days)) return 3 * DAY_MS;
+  return Math.min(30, Math.max(0, days)) * DAY_MS;
+}
+
+/**
+ * Derive the effective status. Honours an admin-pinned `launchStatus`.
+ *
+ * pre_launch  : now < launchDateTime
+ * launch_day  : launchDateTime <= now < launchDateTime + celebration window
+ * post_launch : after that — the site becomes the plain production homepage
+ */
 export function resolveLaunchStatus(
   config: LaunchConfiguration,
   now: number,
@@ -124,7 +177,7 @@ export function resolveLaunchStatus(
   const target = new Date(config.launchDateTime).getTime();
   if (Number.isNaN(target)) return "pre_launch";
   if (now < target) return "pre_launch";
-  if (now < target + DAY_MS) return "launch_day";
+  if (now < target + celebrationWindowMs(config)) return "launch_day";
   return "post_launch";
 }
 
@@ -179,4 +232,60 @@ export function formatLaunchTime(config: LaunchConfiguration): string {
   } catch {
     return "";
   }
+}
+
+/**
+ * Coerce whatever `GET /launch-config` returned into a complete
+ * `LaunchConfiguration`. The backend deep-merges PATCH bodies, so an admin who
+ * has only ever saved `{launchDateTime}` gets a row missing every other key —
+ * without this the countdown would render `undefined`. Nested objects are
+ * merged key-by-key rather than replaced wholesale.
+ */
+export function normalizeLaunchConfig(raw: unknown): LaunchConfiguration {
+  const base = DEFAULT_LAUNCH_CONFIG;
+  if (!raw || typeof raw !== "object") return { ...base };
+  const input = raw as Partial<LaunchConfiguration>;
+
+  const stores = Array.isArray(input.live?.stores) && input.live.stores.length > 0
+    ? input.live.stores
+    : base.live.stores;
+
+  return {
+    ...base,
+    ...input,
+    launchDateTime:
+      typeof input.launchDateTime === "string" &&
+      !Number.isNaN(new Date(input.launchDateTime).getTime())
+        ? input.launchDateTime
+        : base.launchDateTime,
+    launchCelebrationDays: Number.isFinite(Number(input.launchCelebrationDays))
+      ? Math.min(30, Math.max(0, Number(input.launchCelebrationDays)))
+      : base.launchCelebrationDays,
+    primaryCTA: { ...base.primaryCTA, ...input.primaryCTA },
+    secondaryCTA: { ...base.secondaryCTA, ...input.secondaryCTA },
+    ticker: { ...base.ticker, ...input.ticker },
+    live: { ...base.live, ...input.live, stores },
+  };
+}
+
+/** "4 days" / "1 day" / "12 hours" / "48 minutes" — never a bare "0". */
+export function humanizeRemaining(remaining: TimeRemaining): string {
+  if (remaining.days >= 1) {
+    return `${remaining.days} ${remaining.days === 1 ? "day" : "days"}`;
+  }
+  if (remaining.hours >= 1) {
+    return `${remaining.hours} ${remaining.hours === 1 ? "hour" : "hours"}`;
+  }
+  if (remaining.minutes >= 1) {
+    return `${remaining.minutes} ${remaining.minutes === 1 ? "minute" : "minutes"}`;
+  }
+  return `${remaining.seconds} ${remaining.seconds === 1 ? "second" : "seconds"}`;
+}
+
+/** Fill `{days}` in the ticker template with the humanized time remaining. */
+export function tickerText(
+  config: LaunchConfiguration,
+  remaining: TimeRemaining,
+): string {
+  return config.ticker.text.replace(/\{days\}/g, humanizeRemaining(remaining));
 }

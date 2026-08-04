@@ -68,6 +68,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markRead']);
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead']);
+    Route::post('/notifications/clear', [NotificationController::class, 'clear']);
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
 
     // Dashboard analytics
     Route::middleware('permission:analytics.view')->group(function () {
@@ -86,6 +88,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/waitlist/{id}', [WaitlistController::class, 'show'])->middleware('permission:waitlist.view');
     Route::patch('/waitlist/{id}', [WaitlistController::class, 'update'])->middleware('permission:waitlist.edit');
     Route::post('/waitlist/bulk-delete', [WaitlistController::class, 'bulkDelete'])->middleware('permission:waitlist.bulk-actions');
+    Route::post('/waitlist/bulk-update', [WaitlistController::class, 'bulkUpdate'])->middleware('permission:waitlist.bulk-actions');
     Route::post('/waitlist/restore', [WaitlistController::class, 'restore'])->middleware('permission:waitlist.bulk-actions');
 
     // Referrals
@@ -113,6 +116,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/content/testimonials', [ContentController::class, 'storeTestimonial']);
         Route::patch('/content/testimonials/{id}', [ContentController::class, 'updateTestimonial']);
         Route::delete('/content/testimonials/{id}', [ContentController::class, 'destroyTestimonial']);
+        Route::post('/content/testimonials/reorder', [ContentController::class, 'reorderTestimonials']);
     });
 
     // Launch config
@@ -146,6 +150,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users', [UserController::class, 'index'])->middleware('permission:users.view');
     Route::get('/users/{id}', [UserController::class, 'show'])->middleware('permission:users.view');
     Route::post('/users', [UserController::class, 'store'])->middleware('permission:users.invite');
+    Route::post('/users/{id}/invite', [UserController::class, 'invite'])->middleware('permission:users.invite');
     Route::patch('/users/{id}', [UserController::class, 'update'])->middleware('permission:users.edit');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->middleware('permission:users.delete');
 
@@ -158,9 +163,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->middleware('permission:roles.delete');
 
     // Audit log
+    Route::get('/audit-logs/actions', [AuditController::class, 'actions'])->middleware('permission:users.view');
+    Route::get('/audit-logs/actors', [AuditController::class, 'actors'])->middleware('permission:users.view');
     Route::get('/audit-logs', [AuditController::class, 'index'])->middleware('permission:users.view');
 
     // Settings — read is broad, writes are gated per group.
+    // Fixed segments come first so `api-keys` is never captured as `{group}`.
+    Route::get('/settings/api-keys', [SettingsController::class, 'listApiKeys'])->middleware('permission:settings.view');
+    Route::post('/settings/api-keys', [SettingsController::class, 'generateApiKey'])->middleware('permission:settings.edit-general');
+    Route::delete('/settings/api-keys/{id}', [SettingsController::class, 'revokeApiKey'])->middleware('permission:settings.edit-general');
+    Route::post('/settings/smtp/test', [SettingsController::class, 'testSmtp'])->middleware('permission:settings.edit-general');
     Route::get('/settings/{group}', [SettingsController::class, 'show'])->middleware('permission:settings.view');
     Route::patch('/settings/{group}', [SettingsController::class, 'update'])->middleware('permission:settings.edit-general');
 });

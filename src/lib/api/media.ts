@@ -1,56 +1,41 @@
 import { apiCall } from "./client";
+import { toQuery } from "./waitlist";
+import type { MediaFile } from "@/lib/types";
 
-export type MediaFile = {
-  id: string;
-  name: string;
-  type: "image" | "video" | "document";
-  size: number;
-  folder: string;
-  uploadedAt: string;
-  dimensions: string;
-  url: string;
+export type { MediaFile };
+
+export type MediaListParams = {
+  type?: "all" | "image" | "video" | "document";
+  folder?: string;
+  search?: string;
 };
 
 /**
- * Media library API.
- *
- *   GET    /media          -> { data: MediaFile[], meta: { folders } }
- *   GET    /media/folders  -> { data: string[] }
- *   POST   /media          -> { data: MediaFile }   (multipart upload)
- *   POST   /media/folders  -> { data: { folder } }
- *   PATCH  /media/:id       -> { data: MediaFile }
- *   DELETE /media/:id       -> { data: { deleted } }
+ * Media library API. Files live on the `public` disk and are recorded in
+ * `media_files`; `list` also returns `meta.folders` so the folder filter never
+ * needs a second request.
  */
 export const mediaApi = {
-  list: (params?: { type?: string; folder?: string; search?: string }) => {
-    const q = new URLSearchParams();
-    if (params?.type && params.type !== "all") q.set("type", params.type);
-    if (params?.folder && params.folder !== "all") q.set("folder", params.folder);
-    if (params?.search) q.set("search", params.search);
-    const qs = q.toString();
-    return apiCall(`/media${qs ? `?${qs}` : ""}`, () => [] as MediaFile[]);
-  },
-  folders: () => apiCall("/media/folders", () => [] as string[]),
-  upload: (file: File, folder = "Uncategorized") => {
+  list: (params?: MediaListParams) =>
+    apiCall<MediaFile[]>(`/media${toQuery(params as Record<string, unknown>)}`),
+  folders: () => apiCall<string[]>("/media/folders"),
+
+  upload: (file: File, folder = "Uncategorized", alt?: string) => {
     const fd = new FormData();
     fd.append("file", file);
     fd.append("folder", folder);
-    return apiCall("/media", () => ({
-      id: `media_${Date.now()}`,
-      name: file.name,
-      type: file.type.startsWith("image/") ? "image" : "document",
-      size: Math.round(file.size / 1024),
-      folder,
-      uploadedAt: new Date().toISOString(),
-      dimensions: "",
-      url: "",
-    }) as MediaFile, { method: "POST", formData: fd });
+    if (alt) fd.append("alt", alt);
+    return apiCall<MediaFile>("/media", {
+      method: "POST",
+      formData: fd,
+      timeoutMs: 120000, // a 20MB upload on a slow line
+    });
   },
-  update: (id: string, patch: Partial<MediaFile>) =>
-    apiCall(`/media/${id}`, () => ({ id, ...patch } as MediaFile), {
-      method: "PATCH",
-      body: patch,
-    }),
-  remove: (id: string) => apiCall(`/media/${id}`, () => ({ deleted: true }), { method: "DELETE" }),
-  createFolder: (name: string) => apiCall("/media/folders", () => ({ folder: name }), { method: "POST", body: { name } }),
+
+  update: (id: string, patch: { name?: string; folder?: string; alt?: string | null }) =>
+    apiCall<MediaFile>(`/media/${id}`, { method: "PATCH", body: patch }),
+  remove: (id: string) =>
+    apiCall<{ deleted: boolean }>(`/media/${id}`, { method: "DELETE" }),
+  createFolder: (name: string) =>
+    apiCall<{ folders: string[] }>("/media/folders", { method: "POST", body: { name } }),
 };

@@ -1,10 +1,10 @@
 /**
- * API client. When `VITE_API_BASE_URL` is set, this makes real HTTP calls to
- * the Laravel backend. When it is unset, it falls back to the in-memory mock
- * factory so the preview and local development keep working without a backend.
+ * API client. Every call goes to the Laravel backend at `VITE_API_BASE_URL`.
+ * There is no mock fallback: when the base URL is unset the call throws a 503
+ * so a misconfigured deploy surfaces loudly instead of showing invented data.
  *
- * Backend agent: replace the mock behavior by setting VITE_API_BASE_URL.
- * Every consumer of `apiCall` keeps working unchanged.
+ * SSR route loaders use `serverGet` from `./base-url` instead, because a
+ * relative base has no origin inside the server handler.
  */
 
 export type ApiResponse<T> = {
@@ -12,19 +12,17 @@ export type ApiResponse<T> = {
   meta?: Record<string, unknown>;
 };
 
-type ApiCallOptions = {
-  /** Simulated latency in ms (default 300–600) — only used in mock mode. */
-  delay?: number;
-  /** Simulate a failure ratio 0..1 for testing error states — only used in mock mode. */
-  failRate?: number;
-  /** HTTP method for real backend calls. */
+export type ApiCallOptions = {
+  /** HTTP method. Defaults to GET. */
   method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
-  /** JSON body for real backend calls. */
+  /** JSON body. */
   body?: unknown;
   /** Multipart body for file uploads. When set, Content-Type is left to the browser. */
   formData?: FormData;
   /** Skip injecting the auth token (for public endpoints). */
   public?: boolean;
+  /** Abort the request after this many ms. 0 disables the timeout. */
+  timeoutMs?: number;
 };
 
 export class ApiError extends Error {
@@ -35,12 +33,21 @@ export class ApiError extends Error {
     this.status = status;
     this.errors = errors;
   }
+
+  /** First field-level message, falling back to the top-level message. */
+  get firstError(): string {
+    const first = this.errors ? Object.values(this.errors)[0]?.[0] : undefined;
+    return first ?? this.message;
+  }
 }
 
-const API_BASE_URL =
-  typeof import.meta !== "undefined" && import.meta.env
-    ? (import.meta.env.VITE_API_BASE_URL as string | undefined)
-    : undefined;
+import { API_BASE_URL, serverApiBaseUrl } from "./base-url";
+
+/** Absolute in the SSR handler, possibly relative in the browser. */
+function resolveBaseUrl(): string | undefined {
+  if (typeof window === "undefined") return serverApiBaseUrl();
+  return API_BASE_URL;
+}
 
 function getAuthToken(): string | null {
   if (typeof window === "undefined") return null;
@@ -52,10 +59,11 @@ function getAuthToken(): string | null {
 }
 
 async function httpCall<T>(endpoint: string, opts: ApiCallOptions = {}): Promise<ApiResponse<T>> {
-  if (!API_BASE_URL) {
+  const baseUrl = resolveBaseUrl();
+  if (!baseUrl) {
     throw new ApiError("The API is not configured. Set VITE_API_BASE_URL.", 503);
   }
-  const url = `${API_BASE_URL}${endpoint}`;
+  const url = `${baseUrl}${endpoint}`;
   const headers: Record<string, string> = {
     Accept: "application/json",
   };
@@ -85,7 +93,27 @@ async function httpCall<T>(endpoint: string, opts: ApiCallOptions = {}): Promise
     init.body = JSON.stringify(opts.body);
   }
 
-  const response = await fetch(url, init);
+  // A hung request would otherwise leave a spinner up forever.
+  const timeoutMs = opts.timeoutMs ?? 20000;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  if (timeoutMs > 0) {
+    const controller = new AbortController();
+    timer = setTimeout(() => controller.abort(), timeoutMs);
+    init.signal = controller.signal;
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(url, init);
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new ApiError("The request timed out. Check your connection and try again.", 408);
+    }
+    throw new ApiError("Could not reach the server. Check your connection and try again.", 0);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+
   let payload: unknown;
   try {
     payload = await response.json();
@@ -108,9 +136,9 @@ async function httpCall<T>(endpoint: string, opts: ApiCallOptions = {}): Promise
   return payload as ApiResponse<T>;
 }
 
+/** Call a backend endpoint and return the parsed `{ data, meta }` envelope. */
 export async function apiCall<T>(
   endpoint: string,
-  _fallback: () => T | Promise<T>,
   opts: ApiCallOptions = {},
 ): Promise<ApiResponse<T>> {
   return httpCall<T>(endpoint, opts);

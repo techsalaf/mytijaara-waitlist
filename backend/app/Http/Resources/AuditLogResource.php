@@ -16,8 +16,10 @@ class AuditLogResource extends JsonResource
             'action' => $this->action,
             'target' => (string) ($this->target ?? ''),
             'time' => optional($this->created_at)->diffForHumans() ?? '',
+            'createdAt' => optional($this->created_at)->toIso8601String(),
             'ip' => (string) ($this->ip ?? '—'),
             'device' => (string) ($this->device ?? '—'),
+            'changes' => $this->changes ?: null,
         ];
     }
 }

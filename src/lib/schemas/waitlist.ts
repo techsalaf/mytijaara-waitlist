@@ -7,28 +7,23 @@ import { z } from "zod";
  * `@/lib/schemas/waitlist`) so validation stays in one place.
  */
 
+/**
+ * Launch-city order is deliberate: Ibadan first (pilot city), then the rest in
+ * rollout order. Only these cities plus "Other" are offered.
+ */
 export const NIGERIAN_CITIES = [
-  "Lagos",
-  "Abuja",
-  "Port Harcourt",
   "Ibadan",
-  "Kano",
-  "Benin City",
-  "Enugu",
+  "Lagos",
+  "Ogun",
+  "Osun",
+  "Abuja",
   "Kaduna",
+  "Kano",
+  "Enugu",
   "Other",
 ] as const;
 
 export const WAITLIST_ROLES = ["customer", "vendor", "rider", "artisan"] as const;
-
-export const WAITLIST_INTERESTS = [
-  "food",
-  "groceries",
-  "pharmacy",
-  "artisans",
-  "rentals",
-  "parcel",
-] as const;
 
 export const waitlistSignupSchema = z.object({
   name: z
@@ -50,7 +45,6 @@ export const waitlistSignupSchema = z.object({
     .or(z.literal("")),
   city: z.enum(NIGERIAN_CITIES, { message: "Pick your city" }),
   role: z.enum(WAITLIST_ROLES).default("customer"),
-  interest: z.enum(WAITLIST_INTERESTS).optional().or(z.literal("")),
   referralCode: z
     .string()
     .trim()
