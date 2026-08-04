@@ -11,14 +11,18 @@ import { formatLaunchDate, formatLaunchTime } from "@/lib/launch/config";
  * "A day with MyTijaara".
  *
  * PRE-LAUNCH  -> badge + headline + live countdown + launch date + CTAs
- * LAUNCH DAY / POST-LAUNCH -> <LaunchBanner /> (download the app)
+ * LAUNCH DAY  -> <LaunchBanner /> (download the app)
+ * POST-LAUNCH -> nothing at all. Once the celebration window closes the page
+ *                has to read as the normal homepage, so this returns null
+ *                rather than an empty section that would leave a gap.
  * launchEnabled = false -> renders nothing at all, no empty space.
  */
 export function LaunchCountdown() {
-  const { config, remaining, isLaunched, showCountdown } = useLaunch();
+  const { config, remaining, status, showCountdown } = useLaunch();
 
   if (!config.launchEnabled) return null;
-  if (isLaunched) return <LaunchBanner />;
+  if (status === "post_launch") return null;
+  if (status === "launch_day") return <LaunchBanner />;
   if (!showCountdown) return null;
 
   const units = [

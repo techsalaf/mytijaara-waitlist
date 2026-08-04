@@ -16,7 +16,10 @@ class NotificationResource extends JsonResource
             'body' => (string) ($this->body ?? ''),
             'type' => $this->type ?? 'info',
             'time' => optional($this->created_at)->diffForHumans() ?? '',
+            'createdAt' => optional($this->created_at)->toIso8601String(),
             'unread' => ! (bool) $this->read,
+            'link' => $this->link,
+            'meta' => $this->meta ?: null,
         ];
     }
 }

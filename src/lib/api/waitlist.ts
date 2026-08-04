@@ -7,58 +7,67 @@ export type WaitlistSignupPayload = {
   phone?: string;
   city: string;
   role: WaitlistRole;
-  interest?: string;
   source: "organic" | "referral";
   referralCode?: string;
   consent: true;
+  /** Honeypot. Always empty for a real person. */
   website?: string;
 };
 
+export type WaitlistListParams = {
+  page?: number;
+  per_page?: number;
+  search?: string;
+  status?: string;
+  source?: string;
+  city?: string;
+  role?: string;
+  verified?: "verified" | "unverified";
+  from?: string;
+  to?: string;
+  sort?: string;
+  direction?: "asc" | "desc";
+};
+
+/** Build a query string, dropping empty values and `all` sentinels. */
+export function toQuery(params: Record<string, unknown> | undefined): string {
+  if (!params) return "";
+  const q = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null || value === "" || value === "all") continue;
+    q.set(key, String(value));
+  }
+  const qs = q.toString();
+  return qs ? `?${qs}` : "";
+}
+
 /**
- * Waitlist API — forward calls to the backend endpoints.
- * Factories return minimal defaults so the UI degrades cleanly when no
- * backend is configured (mock mode will still receive these minimal values).
+ * Waitlist API. `POST /waitlist` and `GET /waitlist/count` are public
+ * (see `backend/routes/api.php`); everything else needs an admin token.
  */
 export const waitlistApi = {
-  list: (params?: { page?: number; per_page?: number; search?: string; status?: string; source?: string; sort?: string; direction?: string }) => {
-    const q = new URLSearchParams();
-    if (params?.page) q.set("page", String(params.page));
-    if (params?.per_page) q.set("per_page", String(params.per_page));
-    if (params?.search) q.set("search", params.search ?? "");
-    if (params?.status) q.set("status", params.status);
-    if (params?.source) q.set("source", params.source);
-    if (params?.sort) q.set("sort", params.sort);
-    if (params?.direction) q.set("direction", params.direction);
-    const qs = q.toString();
-    return apiCall(`/waitlist${qs ? `?${qs}` : ""}`, () => [] as WaitlistUser[]);
-  },
-  count: () => apiCall("/waitlist/count", () => ({ total: 0 }), { public: true }),
-  get: (id: string) => apiCall(`/waitlist/${id}`, () => null as WaitlistUser | null),
+  list: (params?: WaitlistListParams) =>
+    apiCall<WaitlistUser[]>(`/waitlist${toQuery(params)}`),
+  count: () => apiCall<{ total: number }>("/waitlist/count", { public: true }),
+  get: (id: string) => apiCall<WaitlistUser | null>(`/waitlist/${id}`),
   create: (payload: WaitlistSignupPayload) =>
-    apiCall("/waitlist",
-      () => ({
-        id: `temp-${Date.now()}`,
-        name: payload.name,
-        email: payload.email,
-        phone: payload.phone || "",
-        city: payload.city,
-        state: "",
-        role: payload.role,
-        interest: payload.interest || "",
-        source: payload.source,
-        referralCode: payload.referralCode || "",
-        status: "active",
-        verified: false,
-        device: "unknown",
-        position: Math.floor(Math.random() * 500) + 100,
-        referrals: 0,
-        tags: [],
-        notes: null,
-        joinedAt: new Date().toISOString(),
-      } as WaitlistUser),
-      { method: "POST", body: payload, public: true }
-    ),
-  update: (id: string, patch: Partial<WaitlistUser>) => apiCall(`/waitlist/${id}`, () => ({} as WaitlistUser), { method: "PATCH", body: patch }),
-  remove: (ids: string[]) => apiCall("/waitlist/bulk-delete", () => ({ removed: [] as WaitlistUser[] }), { method: "POST", body: { ids } }),
-  restore: (users: WaitlistUser[]) => apiCall("/waitlist/restore", () => ({ restored: 0 }), { method: "POST", body: { users } }),
+    apiCall<WaitlistUser>("/waitlist", { method: "POST", body: payload, public: true }),
+  update: (id: string, patch: Partial<WaitlistUser>) =>
+    apiCall<WaitlistUser>(`/waitlist/${id}`, { method: "PATCH", body: patch }),
+  remove: (ids: string[]) =>
+    apiCall<{ removed: WaitlistUser[] }>("/waitlist/bulk-delete", {
+      method: "POST",
+      body: { ids },
+    }),
+  restore: (users: WaitlistUser[]) =>
+    apiCall<{ restored: number }>("/waitlist/restore", { method: "POST", body: { users } }),
+  /** Bulk status / verification / tag change from the admin table. */
+  bulkUpdate: (
+    ids: string[],
+    patch: { status?: string; verified?: boolean; tags?: string[] },
+  ) =>
+    apiCall<{ updated: number }>("/waitlist/bulk-update", {
+      method: "POST",
+      body: { ids, ...patch },
+    }),
 };

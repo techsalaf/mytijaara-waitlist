@@ -1,63 +1,39 @@
 import { apiCall } from "./client";
 import type { Role } from "@/lib/types";
 
+export type PermissionItem = { key: string; label: string };
+
 export type PermissionGroup = {
   group: string;
-  label?: string;
-  permissions?: { key: string; label: string }[];
-  items?: string[];
+  label: string;
+  permissions: PermissionItem[];
+};
+
+export type RoleDetail = Role & {
+  slug: string;
+  grantedPermissions: string[];
+  builtIn: boolean;
+};
+
+export type RoleInput = {
+  name: string;
+  description?: string;
+  color?: string;
+  permissions?: string[];
 };
 
 /**
- * Roles + permissions API.
- *
- *   GET    /roles          -> { data: Role[] }
- *   GET    /roles/:id      -> { data: Role & { grantedPermissions: string[] } }
- *   POST   /roles          -> { data: Role }
- *   PATCH  /roles/:id      -> { data: Role }
- *   DELETE /roles/:id      -> { data: { deleted } }
- *   GET    /permissions    -> { data: PermissionGroup[] }
+ * Roles + permissions API. Roles are spatie roles; the permission catalogue in
+ * `/permissions` is generated from `RoleSeeder::GROUPS`, which is the same list
+ * the `permission:` route middleware enforces.
  */
 export const rolesApi = {
-  list: () => apiCall<Role[]>("/roles", () => []),
-  get: (id: string) =>
-    apiCall<Role & { grantedPermissions: string[] }>(`/roles/${id}`, () => ({
-      id,
-      name: "Role",
-      description: "",
-      users: 0,
-      permissions: 0,
-      color: "#0D7A46",
-      grantedPermissions: [],
-    })),
-  create: (payload: { name: string; permissions?: string[] }) =>
-    apiCall(
-      "/roles",
-      () => ({
-        id: `r_${Date.now()}`,
-        name: payload.name,
-        description: "",
-        users: 0,
-        permissions: payload.permissions?.length ?? 0,
-        color: "#0D7A46",
-      }) as Role,
-      {
-        method: "POST",
-        body: payload,
-      },
-    ),
-  update: (id: string, patch: { name?: string; permissions?: string[] }) =>
-    apiCall<Role>(`/roles/${id}`, () => ({
-      id,
-      name: patch.name ?? "Role",
-      description: "",
-      users: 0,
-      permissions: patch.permissions?.length ?? 0,
-      color: "#0D7A46",
-    }) as Role, {
-      method: "PATCH",
-      body: patch,
-    }),
-  remove: (id: string) => apiCall(`/roles/${id}`, () => ({ deleted: true }), { method: "DELETE" }),
-  permissions: () => apiCall<PermissionGroup[]>("/permissions", () => []),
+  list: () => apiCall<Role[]>("/roles"),
+  get: (id: string) => apiCall<RoleDetail>(`/roles/${id}`),
+  create: (payload: RoleInput) => apiCall<RoleDetail>("/roles", { method: "POST", body: payload }),
+  update: (id: string, patch: Partial<RoleInput>) =>
+    apiCall<RoleDetail>(`/roles/${id}`, { method: "PATCH", body: patch }),
+  /** Built-in seeded roles are refused with a 422 rather than silently kept. */
+  remove: (id: string) => apiCall<{ deleted: boolean }>(`/roles/${id}`, { method: "DELETE" }),
+  permissions: () => apiCall<PermissionGroup[]>("/permissions"),
 };
