@@ -1,7 +1,5 @@
 import { apiCall } from "./client";
-import { adminUsers } from "@/lib/mock-data";
-
-export type AdminUserRow = (typeof adminUsers)[number];
+import type { AdminUser } from "@/lib/types";
 
 /**
  * Admin users API.
@@ -13,8 +11,8 @@ export type AdminUserRow = (typeof adminUsers)[number];
  *   DELETE /users/:id  -> { data: { deleted } }
  */
 export const usersApi = {
-  list: () => apiCall("/users", () => adminUsers),
-  get: (id: string) => apiCall(`/users/${id}`, () => adminUsers.find((u) => u.id === id) ?? null),
+  list: () => apiCall<AdminUser[]>("/users", () => []),
+  get: (id: string) => apiCall<AdminUser | null>(`/users/${id}`, () => null),
   create: (payload: { name: string; email: string; role: string; status?: string; password?: string }) =>
     apiCall(
       "/users",
@@ -26,12 +24,16 @@ export const usersApi = {
           role: payload.role,
           status: payload.status ?? "invited",
           lastActive: "—",
-          avatar: payload.name.split(" ").map((n) => n[0]).slice(0, 2).join(""),
-        }) as AdminUserRow,
+          avatar: payload.name
+            .split(" ")
+            .map((n) => n[0])
+            .slice(0, 2)
+            .join(""),
+        }) as AdminUser,
       { method: "POST", body: payload },
     ),
-  update: (id: string, patch: Partial<AdminUserRow> & { password?: string }) =>
-    apiCall(`/users/${id}`, () => ({ ...adminUsers.find((u) => u.id === id)!, ...patch }), {
+  update: (id: string, patch: Partial<AdminUser> & { password?: string }) =>
+    apiCall<AdminUser>(`/users/${id}`, () => ({ id, ...patch } as AdminUser), {
       method: "PATCH",
       body: patch,
     }),

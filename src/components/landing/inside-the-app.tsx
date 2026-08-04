@@ -2,28 +2,19 @@ import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 
 import { Reveal } from "./reveal";
-import screenHome from "@/assets/screens/screen-customer-1.png.asset.json";
-import screenLocation from "@/assets/screens/screen-customer-2.png.asset.json";
-import screenWallet from "@/assets/screens/screen-customer-3.png.asset.json";
-import screenGroceries from "@/assets/screens/screen-customer-4-groceries.png.asset.json";
-import screenFood from "@/assets/screens/screen-customer-5-food.png.asset.json";
-import screenParcel from "@/assets/screens/screen-customer-6-parcel.png.asset.json";
-import screenPharmacy from "@/assets/screens/screen-customer-7-pharmacy.png.asset.json";
-import screenRentals from "@/assets/screens/screen-customer-9-rentals.png.asset.json";
-import screenData from "@/assets/screens/screen-customer-10-data.png.asset.json";
 
 type Screen = { src: string; caption: string; tag: string };
 
 const INSIDE_SCREENS: Screen[] = [
-  { src: screenFood.url, caption: "Craving jollof? Order in taps", tag: "Food" },
-  { src: screenWallet.url, caption: "One wallet for every payment", tag: "Wallet" },
-  { src: screenRentals.url, caption: "Rent a car for the weekend", tag: "Car Rental" },
-  { src: screenHome.url, caption: "Everything on one home screen", tag: "Home" },
-  { src: screenParcel.url, caption: "Send parcels across Nigeria", tag: "Parcels" },
-  { src: screenPharmacy.url, caption: "Genuine meds, delivered fast", tag: "Pharmacy" },
-  { src: screenData.url, caption: "Buy data & airtime instantly", tag: "Data & Airtime" },
-  { src: screenLocation.url, caption: "Deliver to anywhere in Lagos", tag: "Locations" },
-  { src: screenGroceries.url, caption: "Fresh groceries, same day", tag: "Groceries" },
+  { src: "/placeholder-phone.svg", caption: "Craving jollof? Order in taps", tag: "Food" },
+  { src: "/placeholder-phone.svg", caption: "One wallet for every payment", tag: "Wallet" },
+  { src: "/placeholder-phone.svg", caption: "Rent a car for the weekend", tag: "Car Rental" },
+  { src: "/placeholder-phone.svg", caption: "Everything on one home screen", tag: "Home" },
+  { src: "/placeholder-phone.svg", caption: "Send parcels across Nigeria", tag: "Parcels" },
+  { src: "/placeholder-phone.svg", caption: "Genuine meds, delivered fast", tag: "Pharmacy" },
+  { src: "/placeholder-phone.svg", caption: "Buy data & airtime instantly", tag: "Data & Airtime" },
+  { src: "/placeholder-phone.svg", caption: "Deliver to anywhere in Lagos", tag: "Locations" },
+  { src: "/placeholder-phone.svg", caption: "Fresh groceries, same day", tag: "Groceries" },
 ];
 
 function ScreenCard({ src, caption, tag, onOpen }: Screen & { onOpen: () => void }) {

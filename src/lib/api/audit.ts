@@ -1,7 +1,14 @@
 import { apiCall } from "./client";
-import { activityLog } from "@/lib/mock-data";
 
-export type AuditEntry = (typeof activityLog)[number];
+export type AuditEntry = {
+  id: number;
+  user: string;
+  action: string;
+  target: string;
+  time: string;
+  ip: string;
+  device: string;
+};
 
 /**
  * Audit log API.
@@ -16,6 +23,6 @@ export const auditApi = {
     if (params?.page) q.set("page", String(params.page));
     if (params?.per_page) q.set("per_page", String(params.per_page));
     const qs = q.toString();
-    return apiCall(`/audit-logs${qs ? `?${qs}` : ""}`, () => activityLog);
+    return apiCall(`/audit-logs${qs ? `?${qs}` : ""}`, () => []);
   },
 };

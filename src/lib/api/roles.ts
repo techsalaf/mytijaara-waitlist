@@ -1,7 +1,6 @@
 import { apiCall } from "./client";
-import { roles, permissionGroups } from "@/lib/mock-data";
+import type { Role } from "@/lib/types";
 
-export type Role = (typeof roles)[number];
 export type PermissionGroup = {
   group: string;
   label?: string;
@@ -20,22 +19,45 @@ export type PermissionGroup = {
  *   GET    /permissions    -> { data: PermissionGroup[] }
  */
 export const rolesApi = {
-  list: () => apiCall("/roles", () => roles),
+  list: () => apiCall<Role[]>("/roles", () => []),
   get: (id: string) =>
-    apiCall(`/roles/${id}`, () => ({
-      ...(roles.find((r) => r.id === id) ?? roles[0]),
-      grantedPermissions: [] as string[],
+    apiCall<Role & { grantedPermissions: string[] }>(`/roles/${id}`, () => ({
+      id,
+      name: "Role",
+      description: "",
+      users: 0,
+      permissions: 0,
+      color: "#0D7A46",
+      grantedPermissions: [],
     })),
   create: (payload: { name: string; permissions?: string[] }) =>
-    apiCall("/roles", () => ({ ...roles[0], ...payload, id: `r_${Date.now()}` }) as Role, {
-      method: "POST",
-      body: payload,
-    }),
+    apiCall(
+      "/roles",
+      () => ({
+        id: `r_${Date.now()}`,
+        name: payload.name,
+        description: "",
+        users: 0,
+        permissions: payload.permissions?.length ?? 0,
+        color: "#0D7A46",
+      }) as Role,
+      {
+        method: "POST",
+        body: payload,
+      },
+    ),
   update: (id: string, patch: { name?: string; permissions?: string[] }) =>
-    apiCall(`/roles/${id}`, () => ({ ...roles.find((r) => r.id === id)!, ...patch }), {
+    apiCall<Role>(`/roles/${id}`, () => ({
+      id,
+      name: patch.name ?? "Role",
+      description: "",
+      users: 0,
+      permissions: patch.permissions?.length ?? 0,
+      color: "#0D7A46",
+    }) as Role, {
       method: "PATCH",
       body: patch,
     }),
   remove: (id: string) => apiCall(`/roles/${id}`, () => ({ deleted: true }), { method: "DELETE" }),
-  permissions: () => apiCall("/permissions", () => permissionGroups),
+  permissions: () => apiCall<PermissionGroup[]>("/permissions", () => []),
 };

@@ -1,7 +1,13 @@
 import { apiCall } from "./client";
-import { notifications } from "@/lib/mock-data";
 
-export type Notification = (typeof notifications)[number];
+export type Notification = {
+  id: number;
+  title: string;
+  body: string;
+  type: "success" | "info" | "warning" | "error";
+  time: string;
+  unread: boolean;
+};
 
 /**
  * Admin notifications API.
@@ -11,9 +17,16 @@ export type Notification = (typeof notifications)[number];
  *   POST  /notifications/read-all   -> { data: { ok } }
  */
 export const notificationsApi = {
-  list: () => apiCall("/notifications", () => notifications),
+  list: () => apiCall<Notification[]>("/notifications", () => []),
   markRead: (id: number) =>
-    apiCall(`/notifications/${id}/read`, () => ({ ...notifications.find((n) => n.id === id)!, unread: false }), {
+    apiCall<Notification>(`/notifications/${id}/read`, () => ({
+      id,
+      title: "Notification",
+      body: "",
+      type: "info",
+      time: new Date().toISOString(),
+      unread: false,
+    }), {
       method: "PATCH",
     }),
   markAllRead: () =>

@@ -60,12 +60,13 @@ function DashboardPage() {
   const [devices, setDevices] = useState<DeviceBreakdown[]>([]);
   const [leaderboard, setLeaderboard] = useState<ReferralLeaderboardEntry[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [days, setDays] = useState<number>(30);
 
   useEffect(() => {
     let active = true;
     void Promise.all([
       dashboardApi.stats(),
-      dashboardApi.trend(),
+      dashboardApi.trend(days),
       dashboardApi.sources(),
       analyticsApi.cities(),
       analyticsApi.devices(),
@@ -84,7 +85,7 @@ function DashboardPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [days]);
 
   const formatNumber = (value: number) => new Intl.NumberFormat("en-NG").format(value);
   const maxCityUsers = Math.max(...cities.map((city) => city.users), 1);
@@ -113,10 +114,24 @@ function DashboardPage() {
         description="Here's what's happening with your waitlist today."
         actions={
           <>
-            <Button variant="outline" size="sm">
-              <Calendar className="mr-2 h-4 w-4" /> Last 30 days
+            <Button variant="outline" size="sm" onClick={() => setDays((d) => (d === 30 ? 7 : 30))}>
+              <Calendar className="mr-2 h-4 w-4" /> Last {days} days
             </Button>
-            <Button size="sm" className="bg-primary hover:bg-primary/90">
+            <Button
+              size="sm"
+              className="bg-primary hover:bg-primary/90"
+              onClick={async () => {
+                try {
+                  const name = `Weekly Digest — ${new Date().toISOString().slice(0, 10)}`;
+                  await campaignsApi.create({ name, subject: name, html: "", status: "draft" });
+                  // eslint-disable-next-line no-console
+                  console.info("Weekly digest draft created");
+                } catch (err) {
+                  // eslint-disable-next-line no-console
+                  console.error(err);
+                }
+              }}
+            >
               <Sparkles className="mr-2 h-4 w-4" /> Weekly digest
             </Button>
           </>

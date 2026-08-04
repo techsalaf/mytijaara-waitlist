@@ -12,6 +12,7 @@ import {
 
 import { Reveal } from "./reveal";
 import { WaitlistCount } from "./waitlist-count";
+import { AvatarCluster } from "./avatar-cluster";
 import { usePrimaryCta } from "@/components/launch/launch-cta";
 import { useLaunch } from "@/components/launch/launch-state-provider";
 import heroImg from "@/assets/hero-illustration.png";
@@ -23,14 +24,6 @@ const HERO_SERVICES = [
   { icon: Package, label: "Parcels" },
   { icon: Car, label: "Cars" },
   { icon: Wrench, label: "Artisans" },
-];
-
-/** Avatar cluster — design tokens only, no hex literals. */
-const AVATAR_TINTS = [
-  "bg-primary",
-  "bg-gold",
-  "bg-[color-mix(in_oklab,var(--primary)_70%,var(--gold))]",
-  "bg-[color-mix(in_oklab,var(--gold)_60%,var(--primary))]",
 ];
 
 export function Hero() {
@@ -107,15 +100,7 @@ export function Hero() {
           </Reveal>
           <Reveal delay={400}>
             <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-muted-foreground">
-              <div className="flex -space-x-2">
-                {AVATAR_TINTS.map((c, i) => (
-                  <div
-                    key={i}
-                    className={`h-8 w-8 rounded-full ring-2 ring-background ${c}`}
-                    aria-hidden
-                  />
-                ))}
-              </div>
+              <AvatarCluster />
               <span>
                 {showWaitlist ? (
                   <WaitlistCount />

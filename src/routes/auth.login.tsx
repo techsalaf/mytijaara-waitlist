@@ -28,8 +28,12 @@ function LoginPage() {
       toast.success(`Welcome back, ${session.name.split(" ")[0]}!`);
       navigate({ to: "/admin" });
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Sign in failed. Check your credentials.";
+      let message = err instanceof Error ? err.message : "Sign in failed. Check your credentials.";
+      if (message === "Failed to fetch") {
+        message = "Unable to reach the backend. Confirm the Laravel server is running and refresh the page.";
+      }
       toast.error(message);
+    } finally {
       setLoading(false);
     }
   };

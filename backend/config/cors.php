@@ -5,9 +5,10 @@ return [
 
     'allowed_methods' => ['*'],
 
-    // Allow both the Vite dev server and the local workspace preview origins.
     'allowed_origins' => array_values(array_filter([
         env('FRONTEND_URL', 'http://localhost:3000'),
+        'https://mytijaara.com',
+        'https://www.mytijaara.com',
         'http://localhost:3000',
         'http://127.0.0.1:3000',
         'http://localhost:8080',

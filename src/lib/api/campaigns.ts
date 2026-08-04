@@ -1,7 +1,6 @@
 import { apiCall } from "./client";
-import { campaigns } from "@/lib/mock-data";
 
-export type Campaign = (typeof campaigns)[number];
+export type Campaign = Record<string, any>;
 export type CampaignInput = {
   name: string;
   subject: string;
@@ -39,24 +38,22 @@ export const campaignsApi = {
     if (params?.status && params.status !== "all") q.set("status", params.status);
     if (params?.search) q.set("search", params.search);
     const qs = q.toString();
-    return apiCall(`/campaigns${qs ? `?${qs}` : ""}`, () =>
-      campaigns.filter(
-        (c) =>
-          (!params?.status || params.status === "all" || c.status === params.status) &&
-          (!params?.search || c.name.toLowerCase().includes(params.search.toLowerCase())),
-      ),
-    );
+    return apiCall(`/campaigns${qs ? `?${qs}` : ""}`, () => [
+      { id: "cmp_1", name: "Welcome Email", subject: "Welcome to MyTijaara!", status: "sent", created_at: new Date(Date.now() - 15*24*60*60*1000).toISOString(), sent_at: new Date(Date.now() - 14*24*60*60*1000).toISOString(), stats: { sent: 248, opens: 89, clicks: 24, bounces: 2, openRate: 35.9, clickRate: 9.7 } },
+      { id: "cmp_2", name: "Feature Announcement", subject: "Check out new features", status: "sent", created_at: new Date(Date.now() - 8*24*60*60*1000).toISOString(), sent_at: new Date(Date.now() - 7*24*60*60*1000).toISOString(), stats: { sent: 248, opens: 124, clicks: 34, bounces: 1, openRate: 50.0, clickRate: 13.7 } },
+      { id: "cmp_3", name: "Weekly Digest", subject: "Your weekly update", status: "draft", created_at: new Date(Date.now() - 2*24*60*60*1000).toISOString(), sent_at: null, stats: { sent: 0, opens: 0, clicks: 0, bounces: 0, openRate: 0, clickRate: 0 } },
+    ]);
   },
   get: (id: string) =>
-    apiCall(`/campaigns/${id}`, () => campaigns.find((c) => c.id === id) ?? null),
+    apiCall(`/campaigns/${id}`, () => null),
   create: (payload: CampaignInput) =>
     apiCall(
       "/campaigns",
-      () => ({ ...campaigns[0], ...payload, id: `cmp_${Date.now()}` }) as Campaign,
+      () => ({ ...payload, id: `cmp_${Date.now()}` }) as Campaign,
       { method: "POST", body: payload },
     ),
   update: (id: string, patch: Partial<CampaignInput>) =>
-    apiCall(`/campaigns/${id}`, () => ({ ...campaigns.find((c) => c.id === id)!, ...patch }), {
+    apiCall(`/campaigns/${id}`, () => ({ ...patch } as Campaign), {
       method: "PATCH",
       body: patch,
     }),
@@ -66,14 +63,13 @@ export const campaignsApi = {
     apiCall(`/campaigns/${id}/send`, () => ({ status: "sending" }), { method: "POST" }),
   stats: (id: string) =>
     apiCall<CampaignStats>(`/campaigns/${id}/stats`, () => {
-      const c = campaigns.find((x) => x.id === id);
       return {
-        sent: c?.sent ?? 0,
-        opens: c?.opens ?? 0,
-        clicks: c?.clicks ?? 0,
+        sent: 0,
+        opens: 0,
+        clicks: 0,
         bounces: 0,
-        openRate: c?.sent ? Math.round(((c.opens ?? 0) / c.sent) * 100) : 0,
-        clickRate: c?.sent ? Math.round(((c.clicks ?? 0) / c.sent) * 100) : 0,
+        openRate: 0,
+        clickRate: 0,
       };
     }),
 };

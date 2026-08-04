@@ -30,16 +30,11 @@ function CmsLayout() {
     <div className="space-y-6">
       <PageHeader
         title="Content Management"
-        description="Edit every section of your landing page and marketing site."
+        description="Edit every section of your landing page and marketing site. Save content in each section individually."
         actions={
-          <>
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/" target="_blank"><Eye className="mr-2 h-4 w-4" /> Preview site</Link>
-            </Button>
-            <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => toast.success("Published to production")}>
-              <Save className="mr-2 h-4 w-4" /> Publish changes
-            </Button>
-          </>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/" target="_blank"><Eye className="mr-2 h-4 w-4" /> Preview site</Link>
+          </Button>
         }
       />
       <div className="flex flex-wrap gap-1 border-b border-border/60">

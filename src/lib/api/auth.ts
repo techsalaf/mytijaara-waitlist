@@ -25,11 +25,11 @@ const TOKEN_KEY = "mytijaara_api_token";
 
 const DEMO_USER: AdminUser = {
   id: "u_1",
-  name: "Adaeze Okafor",
-  email: "adaeze@mytijaara.com",
+  name: "Admin User",
+  email: "admin@example.com",
   role: "Super Admin",
   status: "active",
-  avatar: "AO",
+  avatar: "AU",
 };
 
 export function setToken(token: string) {
@@ -52,7 +52,7 @@ export const authApi = {
   login: async (email: string, password: string) => {
     const res = await apiCall<{ token: string; user: AdminUser }>(
       "/auth/login",
-      () => ({ token: `mock_${Date.now()}`, user: DEMO_USER }),
+      () => ({ token: `mock_${Date.now()}`, user: { ...DEMO_USER, email } }),
       { method: "POST", body: { email, password }, public: true },
     );
     if (res.data?.token) setToken(res.data.token);
@@ -68,10 +68,14 @@ export const authApi = {
   },
   forgotPassword: (email: string) =>
     apiCall("/auth/forgot-password", () => ({ success: true }), {
-      method: "POST", body: { email }, public: true,
+      method: "POST",
+      body: { email },
+      public: true,
     }),
   resetPassword: (payload: { email: string; token: string; password: string; password_confirmation: string }) =>
     apiCall("/auth/reset-password", () => ({ success: true }), {
-      method: "POST", body: payload, public: true,
+      method: "POST",
+      body: payload,
+      public: true,
     }),
 };

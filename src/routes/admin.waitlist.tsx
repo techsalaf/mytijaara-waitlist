@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Search,
   Filter,
@@ -59,54 +59,68 @@ export const Route = createFileRoute("/admin/waitlist")({
   component: WaitlistPage,
 });
 
-const PAGE_SIZE = 12;
+const PAGE_SIZES = [25, 50, 100];
+const DEFAULT_PAGE_SIZE = 25;
 
 function WaitlistPage() {
-  const [users, setUsers] = useState<WaitlistUser[]>([]);
+  const [rows, setRows] = useState<WaitlistUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("all");
   const [source, setSource] = useState("all");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [totalCount, setTotalCount] = useState(0);
   const [view, setView] = useState<WaitlistUser | null>(null);
 
+  // Fetch data from server with current filters and pagination
+  const loadUsers = async (currentPage: number, currentPageSize: number) => {
+    setLoading(true);
+    try {
+      const response = await waitlistApi.list({
+        page: currentPage,
+        per_page: currentPageSize,
+        search: q || undefined,
+        status: status !== "all" ? status : undefined,
+        source: source !== "all" ? source : undefined,
+      });
+      setRows(response.data);
+      // If the API returns metadata, use it; otherwise assume the count from response
+      setTotalCount(response.meta?.total ?? response.data.length);
+    } catch (error) {
+      console.error("Failed to load waitlist:", error);
+      setRows([]);
+      setTotalCount(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load data on mount and when filters change
   useEffect(() => {
-    let cancel = false;
-    waitlistApi.list().then((r) => {
-      if (!cancel) {
-        setUsers(r.data);
-        setLoading(false);
-      }
-    });
-    return () => {
-      cancel = true;
+    setPage(1); // Reset to page 1 when filters change
+    loadUsers(1, pageSize);
+  }, [q, status, source, pageSize]);
+
+  // Load data when page changes
+  useEffect(() => {
+    loadUsers(page, pageSize);
+  }, [page]);
+
+  // Listen for data changes (add, delete, restore) and refresh
+  useEffect(() => {
+    const handleDataChange = () => {
+      loadUsers(page, pageSize);
     };
-  }, []);
+    window.addEventListener("waitlist:changed", handleDataChange as EventListener);
+    return () => window.removeEventListener("waitlist:changed", handleDataChange as EventListener);
+  }, [page, pageSize]);
 
-  const filtered = useMemo(() => {
-    return users.filter((u) => {
-      if (status !== "all" && u.status !== status) return false;
-      if (source !== "all" && u.source !== source) return false;
-      if (q) {
-        const s = q.toLowerCase();
-        if (
-          !u.name.toLowerCase().includes(s) &&
-          !u.email.toLowerCase().includes(s) &&
-          !u.city.toLowerCase().includes(s)
-        )
-          return false;
-      }
-      return true;
-    });
-  }, [users, q, status, source]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const p = Math.min(page, totalPages);
-  const rows = filtered.slice((p - 1) * PAGE_SIZE, p * PAGE_SIZE);
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
   const toggleAll = () => {
-    if (rows.every((r) => selected.has(r.id))) {
+    if (rows.length > 0 && rows.every((r) => selected.has(r.id))) {
       const s = new Set(selected);
       rows.forEach((r) => s.delete(r.id));
       setSelected(s);
@@ -122,18 +136,24 @@ function WaitlistPage() {
   };
 
   const deleteUsers = (ids: string[]) => {
-    const snapshot = users.filter((u) => ids.includes(u.id));
+    const snapshot = rows.filter((u) => ids.includes(u.id));
     confirmDestructive({
       message: `${ids.length} user${ids.length > 1 ? "s" : ""} deleted`,
       description: "You can undo this action.",
-      perform: () => {
-        setUsers((prev) => prev.filter((u) => !ids.includes(u.id)));
+      perform: async () => {
         setSelected(new Set());
-        waitlistApi.remove(ids);
+        // Remove from UI optimistically
+        setRows((prev) => prev.filter((u) => !ids.includes(u.id)));
+        setTotalCount((prev) => Math.max(0, prev - ids.length));
+        
+        // Call API and refresh on completion
+        await waitlistApi.remove(ids);
+        window.dispatchEvent(new CustomEvent("waitlist:changed"));
       },
-      undo: () => {
-        setUsers((prev) => [...snapshot, ...prev]);
-        waitlistApi.restore(snapshot);
+      undo: async () => {
+        // Restore on undo
+        await waitlistApi.restore(snapshot);
+        window.dispatchEvent(new CustomEvent("waitlist:changed"));
       },
     });
   };
@@ -146,7 +166,8 @@ function WaitlistPage() {
     if (label === "Verify") {
       const ids = Array.from(selected);
       await Promise.all(ids.map((id) => waitlistApi.update(id, { verified: true })));
-      setUsers((current) =>
+      window.dispatchEvent(new CustomEvent("waitlist:changed"));
+      setRows((current) =>
         current.map((user) => (ids.includes(user.id) ? { ...user, verified: true } : user)),
       );
     }
@@ -155,7 +176,7 @@ function WaitlistPage() {
   };
 
   const exportCsv = () => {
-    const csv = toCsv(filtered, [
+    const csv = toCsv(rows, [
       { key: "name", label: "Name" },
       { key: "email", label: "Email" },
       { key: "phone", label: "Phone" },
@@ -170,11 +191,11 @@ function WaitlistPage() {
       { key: "joinedAt", label: "Joined" },
     ]);
     downloadCsv(`mytijaara-waitlist-${new Date().toISOString().slice(0, 10)}.csv`, csv);
-    toast.success(`Exported ${filtered.length} rows`);
+    toast.success(`Exported ${rows.length} rows`);
   };
 
-  const total = users.length || 1;
-  const verified = users.filter((u) => u.verified).length;
+  const total = totalCount || 1;
+  const verified = rows.filter((u) => u.verified).length;
 
   return (
     <div className="space-y-6">
@@ -194,24 +215,24 @@ function WaitlistPage() {
       />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Total signups" value={users.length} delta={18.4} icon={Users} />
+        <StatCard label="Total signups" value={totalCount} delta={0} icon={Users} />
         <StatCard
           label="Verified"
           value={verified}
-          delta={12.1}
+          delta={0}
           icon={UserCheck}
-          hint={`${Math.round((verified / total) * 100)}% verified`}
+          hint={`${totalCount > 0 ? Math.round((verified / totalCount) * 100) : 0}% verified`}
         />
         <StatCard
           label="Avg referrals"
           value={
-            users.length
-              ? (users.reduce((s, u) => s + u.referrals, 0) / users.length).toFixed(1)
+            rows.length
+              ? (rows.reduce((s, u) => s + u.referrals, 0) / rows.length).toFixed(1)
               : "0"
           }
           icon={Award}
         />
-        <StatCard label="Conversion" value="4.7%" delta={0.4} icon={Percent} />
+        <StatCard label="Conversion" value="–" delta={0} icon={Percent} />
       </div>
 
       <div className="rounded-2xl border border-border/60 bg-card shadow-sm">
@@ -460,23 +481,38 @@ function WaitlistPage() {
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/60 px-4 py-3 text-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground text-xs">Per page:</span>
+            <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
+              <SelectTrigger className="w-[80px]">
+                <SelectValue placeholder="Size" />
+              </SelectTrigger>
+              <SelectContent>
+                {PAGE_SIZES.map((size) => (
+                  <SelectItem key={size} value={String(size)}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="text-muted-foreground text-xs">
-            Showing <strong>{filtered.length ? (p - 1) * PAGE_SIZE + 1 : 0}</strong>–
-            <strong>{Math.min(p * PAGE_SIZE, filtered.length)}</strong> of{" "}
-            <strong>{filtered.length}</strong>
+            Showing <strong>{rows.length ? (page - 1) * pageSize + 1 : 0}</strong>–
+            <strong>{Math.min(page * pageSize, totalCount)}</strong> of{" "}
+            <strong>{totalCount}</strong>
           </div>
           <div className="flex items-center gap-1">
-            <Button variant="outline" size="sm" disabled={p === 1} onClick={() => setPage(p - 1)}>
+            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <div className="px-2 text-xs">
-              Page {p} / {totalPages}
+              Page {page} / {totalPages}
             </div>
             <Button
               variant="outline"
               size="sm"
-              disabled={p === totalPages}
-              onClick={() => setPage(p + 1)}
+              disabled={page === totalPages}
+              onClick={() => setPage(page + 1)}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
