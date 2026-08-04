@@ -128,6 +128,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/media/folders', [MediaController::class, 'folders'])->middleware('permission:media.view');
     Route::post('/media', [MediaController::class, 'store'])->middleware('permission:media.upload');
     Route::post('/media/folders', [MediaController::class, 'createFolder'])->middleware('permission:media.manage-folders');
+    Route::post('/media/{id}/replace', [MediaController::class, 'replace'])->middleware('permission:media.upload');
     Route::patch('/media/{id}', [MediaController::class, 'update'])->middleware('permission:media.upload');
     Route::delete('/media/{id}', [MediaController::class, 'destroy'])->middleware('permission:media.delete');
 

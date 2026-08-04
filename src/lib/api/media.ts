@@ -8,6 +8,7 @@ export type MediaListParams = {
   type?: "all" | "image" | "video" | "document";
   folder?: string;
   search?: string;
+  sort?: "recent" | "name" | "size";
 };
 
 /**
@@ -34,8 +35,22 @@ export const mediaApi = {
 
   update: (id: string, patch: { name?: string; folder?: string; alt?: string | null }) =>
     apiCall<MediaFile>(`/media/${id}`, { method: "PATCH", body: patch }),
-  remove: (id: string) =>
-    apiCall<{ deleted: boolean }>(`/media/${id}`, { method: "DELETE" }),
+
+  /**
+   * Swap the bytes behind an existing record. The public id and URL are
+   * preserved, so anything already referencing the file keeps working.
+   */
+  replace: (id: string, file: File) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    return apiCall<MediaFile>(`/media/${id}/replace`, {
+      method: "POST",
+      formData: fd,
+      timeoutMs: 120000,
+    });
+  },
+
+  remove: (id: string) => apiCall<{ deleted: boolean }>(`/media/${id}`, { method: "DELETE" }),
   createFolder: (name: string) =>
     apiCall<{ folders: string[] }>("/media/folders", { method: "POST", body: { name } }),
 };
