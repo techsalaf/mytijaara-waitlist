@@ -32,8 +32,8 @@ export type Testimonial = {
  *   GET/POST/PATCH/DELETE /content/testimonials
  */
 export const cmsApi = {
-  sections: () => apiCall("/cms", () => ({}), { public: true }),
-  section: (slug: string) => apiCall(`/cms/${slug}`, () => ({}), { public: true }),
+  sections: () => apiCall("/cms-admin", () => ({})),
+  section: (slug: string) => apiCall(`/cms-admin/${slug}`, () => ({})),
   updateSection: (slug: string, patch: Record<string, unknown>) =>
     apiCall(`/cms/${slug}`, () => patch, { method: "PATCH", body: patch }),
 

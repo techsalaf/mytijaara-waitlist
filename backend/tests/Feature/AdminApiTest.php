@@ -41,6 +41,23 @@ class AdminApiTest extends TestCase
         $this->deleteJson("{$this->api}/content/faqs/{$faq['id']}")->assertOk();
     }
 
+    public function test_public_cms_excludes_unpublished_sections_while_admin_can_edit_them(): void
+    {
+        CmsSection::create(['section' => 'hero', 'title' => 'Hero', 'data' => [], 'enabled' => true, 'published' => true, 'order' => 1]);
+        CmsSection::create(['section' => 'announcement', 'title' => 'Draft', 'data' => [], 'enabled' => false, 'published' => false, 'order' => 2]);
+
+        $this->getJson("{$this->api}/cms")
+            ->assertOk()
+            ->assertJsonPath('data.hero.section', 'hero')
+            ->assertJsonMissingPath('data.announcement');
+
+        $this->actingAsRole('super_admin');
+        $this->getJson("{$this->api}/cms-admin/announcement")
+            ->assertOk()
+            ->assertJsonPath('data.section', 'announcement')
+            ->assertJsonPath('data.published', false);
+    }
+
     public function test_users_and_roles_are_rbac_protected(): void
     {
         $this->actingAsPermissionless();

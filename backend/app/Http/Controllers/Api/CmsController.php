@@ -14,7 +14,7 @@ class CmsController extends Controller
     public function index(): JsonResponse
     {
         $data = Cache::remember('cms_all', now()->addMinutes(5), function () {
-            return CmsSection::query()->orderBy('order')->get()
+            return CmsSection::query()->where('published', true)->where('enabled', true)->orderBy('order')->get()
                 ->mapWithKeys(fn ($s) => [$s->section => $this->present($s)])
                 ->all();
         });
@@ -25,12 +25,27 @@ class CmsController extends Controller
     /** GET /cms/:section */
     public function show(string $section): JsonResponse
     {
-        $row = CmsSection::where('section', $section)->firstOrFail();
+        $row = CmsSection::where('section', $section)->where('published', true)->where('enabled', true)->firstOrFail();
 
         return response()->json(['data' => $this->present($row)]);
     }
 
     /** PATCH /cms/:section — update content, enabled/order flags, draft, publish. */
+    public function adminIndex(): JsonResponse
+    {
+        return response()->json(['data' => CmsSection::query()->orderBy('order')->get()
+            ->mapWithKeys(fn ($section) => [$section->section => $this->present($section, true)])
+            ->all()]);
+    }
+
+    public function adminShow(string $section): JsonResponse
+    {
+        return response()->json(['data' => $this->present(
+            CmsSection::where('section', $section)->firstOrFail(),
+            true,
+        )]);
+    }
+
     public function update(Request $request, string $section): JsonResponse
     {
         $row = CmsSection::where('section', $section)->firstOrFail();
@@ -65,13 +80,13 @@ class CmsController extends Controller
         return response()->json(['data' => $this->present($row->fresh())]);
     }
 
-    private function present(CmsSection $s): array
+    private function present(CmsSection $s, bool $includeDraft = false): array
     {
         return [
             'section' => $s->section,
             'title' => $s->title,
             'data' => $s->data ?? [],
-            'draft' => $s->draft,
+            'draft' => $includeDraft ? $s->draft : null,
             'enabled' => (bool) $s->enabled,
             'published' => (bool) $s->published,
             'order' => (int) $s->order,

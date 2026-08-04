@@ -96,6 +96,8 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // CMS authoring
+    Route::get('/cms-admin', [CmsController::class, 'adminIndex'])->middleware('permission:cms.view');
+    Route::get('/cms-admin/{section}', [CmsController::class, 'adminShow'])->middleware('permission:cms.view');
     Route::patch('/cms/{section}', [CmsController::class, 'update'])->middleware('permission:cms.edit-hero');
 
     // FAQs
