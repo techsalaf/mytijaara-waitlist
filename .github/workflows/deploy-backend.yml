@@ -11,35 +11,6 @@ jobs:
   deploy:
     name: Deploy via SSH
     runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Deploy to Namecheap via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.NAMECHEAP_SSH_HOST }}
-          username: ${{ secrets.NAMECHEAP_SSH_USER }}
-          port: ${{ secrets.NAMECHEAP_SSH_PORT }}
-          key: ${{ secrets.NAMECHEAP_SSH_KEY }}
-          script: |
-            set -e
-
-            name: Deploy Laravel Backend to Namecheap
-
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'backend/**'
-
-jobs:
-  deploy:
-    name: Deploy via SSH
-    runs-on: ubuntu-latest
-
     steps:
       - name: Deploy to Namecheap via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -50,36 +21,21 @@ jobs:
           key: ${{ secrets.NAMECHEAP_SSH_KEY }}
           script: |
             set -e
-
             echo "==> Pulling latest code..."
             cd /home/mytijaaracp/api
             git pull origin main
-
             echo "==> Syncing backend contents to api root..."
-            rsync -av \
-              --exclude='.env' \
-              --exclude='storage/' \
-              --exclude='vendor/' \
-              --exclude='.git/' \
-              --exclude='vendor-from-claude/' \
-              /home/mytijaaracp/api/backend/ \
-              /home/mytijaaracp/api/
-
+            rsync -av --exclude='.env' --exclude='storage/' --exclude='vendor/' --exclude='.git/' --exclude='vendor-from-claude/' /home/mytijaaracp/api/backend/ /home/mytijaaracp/api/
             echo "==> Removing backend folder from api root..."
             rm -rf /home/mytijaaracp/api/backend/
-
             echo "==> Installing dependencies..."
             composer install --no-dev --optimize-autoloader --no-interaction
-
             echo "==> Caching..."
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
-
             echo "==> Running migrations..."
             php artisan migrate --force
-
             echo "==> Fixing permissions..."
             chmod -R 775 storage bootstrap/cache
-
             echo "==> Backend deployed successfully!"
