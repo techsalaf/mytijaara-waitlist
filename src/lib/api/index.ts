@@ -57,4 +57,4 @@ export { settingsApi } from "./settings";
 export type { SettingsGroup, SmtpSettings, ApiKeyRecord } from "./settings";
 
 export { healthApi } from "./health";
-export type { SystemHealth, HealthCheck } from "./health";
+export type { SystemHealth, HealthCheck, HealthSample } from "./health";

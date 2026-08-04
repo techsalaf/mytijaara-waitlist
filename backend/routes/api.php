@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\CmsController;
 use App\Http\Controllers\Api\ContentController;
 use App\Http\Controllers\Api\EmailTrackingController;
 use App\Http\Controllers\Api\EventController;
+use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\LaunchConfigController;
 use App\Http\Controllers\Api\MediaController;
 use App\Http\Controllers\Api\NotificationController;
@@ -166,6 +167,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/audit-logs/actions', [AuditController::class, 'actions'])->middleware('permission:users.view');
     Route::get('/audit-logs/actors', [AuditController::class, 'actors'])->middleware('permission:users.view');
     Route::get('/audit-logs', [AuditController::class, 'index'])->middleware('permission:users.view');
+
+    // System health — live probes, gated behind settings read.
+    Route::get('/system/health/history', [HealthController::class, 'history'])->middleware('permission:settings.view');
+    Route::get('/system/health', [HealthController::class, 'show'])->middleware('permission:settings.view');
 
     // Settings — read is broad, writes are gated per group.
     // Fixed segments come first so `api-keys` is never captured as `{group}`.
