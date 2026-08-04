@@ -1,7 +1,5 @@
 import { apiCall } from "./client";
-import { DEFAULT_LAUNCH_CONFIG, type LaunchConfiguration } from "@/lib/launch/config";
-
-let cache: LaunchConfiguration = { ...DEFAULT_LAUNCH_CONFIG };
+import { normalizeLaunchConfig, type LaunchConfiguration } from "@/lib/launch/config";
 
 /**
  * Launch / countdown CMS endpoints.
@@ -9,16 +7,18 @@ let cache: LaunchConfiguration = { ...DEFAULT_LAUNCH_CONFIG };
  * Backend contract (Laravel):
  *   GET   /launch-config  -> { data: LaunchConfiguration }          (public)
  *   PATCH /launch-config  -> { data: LaunchConfiguration }            (admin)
+ *
+ * Both responses go through `normalizeLaunchConfig` because the backend
+ * deep-merges PATCH bodies and returns whatever the row holds, which can be a
+ * partial object missing most keys.
  */
 export const launchApi = {
-  get: () => apiCall("/launch-config", () => cache, { delay: 120, public: true }),
-  update: (patch: Partial<LaunchConfiguration>) =>
-    apiCall(
-      "/launch-config",
-      () => {
-        cache = { ...cache, ...patch };
-        return cache;
-      },
-      { method: "PATCH", body: patch },
-    ),
+  get: async (): Promise<LaunchConfiguration> => {
+    const res = await apiCall<unknown>("/launch-config", { public: true });
+    return normalizeLaunchConfig(res.data);
+  },
+  update: async (patch: Partial<LaunchConfiguration>): Promise<LaunchConfiguration> => {
+    const res = await apiCall<unknown>("/launch-config", { method: "PATCH", body: patch });
+    return normalizeLaunchConfig(res.data);
+  },
 };

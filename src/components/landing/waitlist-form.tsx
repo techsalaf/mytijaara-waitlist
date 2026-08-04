@@ -7,21 +7,11 @@ import { toast } from "sonner";
 import { waitlistApi } from "@/lib/api";
 import {
   NIGERIAN_CITIES,
-  WAITLIST_INTERESTS,
   WAITLIST_ROLES,
   waitlistSignupSchema,
   type WaitlistSignupInput,
   type WaitlistSignupData,
 } from "@/lib/schemas/waitlist";
-
-const INTEREST_LABELS: Record<(typeof WAITLIST_INTERESTS)[number], string> = {
-  food: "🍽️ Food",
-  groceries: "🛒 Groceries",
-  pharmacy: "💊 Pharmacy",
-  artisans: "🧑‍🔧 Artisans",
-  rentals: "🏠 Rentals",
-  parcel: "📦 Parcel",
-};
 
 const ROLE_LABELS: Record<(typeof WAITLIST_ROLES)[number], string> = {
   customer: "I'm a customer",
@@ -64,7 +54,6 @@ export function WaitlistForm() {
       phone: "",
       city: undefined,
       role: "customer",
-      interest: "",
       referralCode: "",
       consent: false as unknown as true,
       website: "",
@@ -76,7 +65,6 @@ export function WaitlistForm() {
   }, [referralCode, setValue]);
 
   const role = watch("role");
-  const interest = watch("interest");
 
   const onSubmit = handleSubmit(async (data) => {
     // Honeypot: silently drop bot submissions.
@@ -91,7 +79,6 @@ export function WaitlistForm() {
         phone: data.phone || undefined,
         city: data.city,
         role: data.role,
-        interest: data.interest || undefined,
         source: data.referralCode ? "referral" : "organic",
         referralCode: data.referralCode || undefined,
         consent: data.consent,
@@ -202,31 +189,6 @@ export function WaitlistForm() {
             ))}
           </select>
         </FieldW>
-      </div>
-
-      {/* Interests */}
-      <div>
-        <div className="mb-2 text-xs font-semibold text-primary-foreground/80">
-          What would you use it for? <span className="font-normal opacity-70">(optional)</span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {WAITLIST_INTERESTS.map((it) => (
-            <button
-              key={it}
-              type="button"
-              onClick={() =>
-                setValue("interest", interest === it ? "" : it, { shouldValidate: false })
-              }
-              className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
-                interest === it
-                  ? "bg-gold-gradient text-gold-foreground shadow-soft"
-                  : "border border-primary-foreground/25 text-primary-foreground/85 hover:bg-primary-foreground/10"
-              }`}
-            >
-              {INTEREST_LABELS[it]}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Referral code (visible + editable, prefilled from ?ref=) */}

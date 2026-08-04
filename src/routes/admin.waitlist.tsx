@@ -86,8 +86,11 @@ function WaitlistPage() {
         source: source !== "all" ? source : undefined,
       });
       setRows(response.data);
-      // If the API returns metadata, use it; otherwise assume the count from response
-      setTotalCount(response.meta?.total ?? response.data.length);
+      // `meta` is an untyped bag, so the total is narrowed before it reaches a
+      // numeric state setter; a string or missing key falls back to the row count.
+      setTotalCount(
+        typeof response.meta?.total === "number" ? response.meta.total : response.data.length,
+      );
     } catch (error) {
       console.error("Failed to load waitlist:", error);
       setRows([]);

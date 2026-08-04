@@ -44,27 +44,36 @@ export function LaunchStateProvider({
   children,
   /** Test/story override — skips the API read. */
   value,
+  /**
+   * Config resolved in the route's SSR loader. When present the first painted
+   * HTML already carries the admin-configured date, so there is no flash of the
+   * placeholder date and no client fetch on mount.
+   */
+  initialConfig,
 }: {
   children: ReactNode;
   value?: Partial<LaunchConfiguration>;
+  initialConfig?: LaunchConfiguration;
 }) {
-  const [config, setConfig] = useState<LaunchConfiguration>({
+  const seeded = !!value || !!initialConfig;
+  const [config, setConfig] = useState<LaunchConfiguration>(() => ({
     ...DEFAULT_LAUNCH_CONFIG,
+    ...initialConfig,
     ...value,
-  });
-  const [ready, setReady] = useState(!!value);
+  }));
+  const [ready, setReady] = useState(seeded);
   // SSR-stable seed: the first client render matches the server render, then
   // the interval takes over. Avoids a hydration mismatch on the digits.
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    if (value) return;
+    if (seeded) return;
     let cancelled = false;
     launchApi
       .get()
-      .then((r) => {
+      .then((cfg) => {
         if (cancelled) return;
-        setConfig(r.data);
+        setConfig(cfg);
       })
       .catch(() => {
         /* keep the placeholder config */
@@ -75,7 +84,7 @@ export function LaunchStateProvider({
     return () => {
       cancelled = true;
     };
-  }, [value]);
+  }, [seeded]);
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 1000);

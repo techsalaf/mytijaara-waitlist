@@ -1,4 +1,5 @@
 import { apiCall } from "./client";
+import { toQuery } from "./waitlist";
 
 export type AuditEntry = {
   id: number;
@@ -6,23 +7,31 @@ export type AuditEntry = {
   action: string;
   target: string;
   time: string;
+  createdAt: string | null;
   ip: string;
   device: string;
+  changes: Record<string, unknown> | null;
+};
+
+export type AuditListParams = {
+  action?: string;
+  user?: string;
+  search?: string;
+  from?: string;
+  to?: string;
+  page?: number;
+  per_page?: number;
 };
 
 /**
- * Audit log API.
- *
- *   GET /audit-logs -> { data: AuditEntry[], meta: { total, current_page, last_page, per_page } }
+ * Audit log API. Rows are written by controllers as they mutate state, so this
+ * is a record of what happened rather than a rendering of current state.
  */
 export const auditApi = {
-  list: (params?: { action?: string; search?: string; page?: number; per_page?: number }) => {
-    const q = new URLSearchParams();
-    if (params?.action) q.set("action", params.action);
-    if (params?.search) q.set("search", params.search);
-    if (params?.page) q.set("page", String(params.page));
-    if (params?.per_page) q.set("per_page", String(params.per_page));
-    const qs = q.toString();
-    return apiCall(`/audit-logs${qs ? `?${qs}` : ""}`, () => []);
-  },
+  list: (params?: AuditListParams) =>
+    apiCall<AuditEntry[]>(`/audit-logs${toQuery(params as Record<string, unknown>)}`),
+  /** Distinct action names, for the filter dropdown. */
+  actions: () => apiCall<string[]>("/audit-logs/actions"),
+  /** Distinct actor names, for the user dropdown. */
+  actors: () => apiCall<string[]>("/audit-logs/actors"),
 };

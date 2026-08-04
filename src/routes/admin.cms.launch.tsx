@@ -75,7 +75,7 @@ function LaunchCms() {
     let cancelled = false;
     launchApi
       .get()
-      .then((r) => !cancelled && setCfg(r.data))
+      .then((c) => !cancelled && setCfg(c))
       .catch(() => toast.error("Could not load launch configuration"))
       .finally(() => !cancelled && setLoading(false));
     return () => {
@@ -96,8 +96,8 @@ function LaunchCms() {
   const save = async () => {
     setSaving(true);
     try {
-      const r = await launchApi.update(cfg);
-      setCfg(r.data);
+      const saved = await launchApi.update(cfg);
+      setCfg(saved);
       toast.success("Launch configuration saved");
     } catch {
       toast.error("Save failed");
@@ -116,6 +116,9 @@ function LaunchCms() {
 
   const status = resolveLaunchStatus(cfg, now);
   const remaining = getTimeRemaining(cfg.launchDateTime, now);
+  // Master switch off => every dependent control is inert. Editing a countdown
+  // that cannot render is how admins end up believing a setting took effect.
+  const locked = !cfg.launchEnabled;
 
   return (
     <div className="space-y-4">
@@ -184,10 +187,15 @@ function LaunchCms() {
               >
                 <div>
                   <div className="text-sm font-medium">{row.title}</div>
-                  <div className="text-xs text-muted-foreground">{row.hint}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {locked && row.key !== "launchEnabled"
+                      ? "Disabled — launch section is off"
+                      : row.hint}
+                  </div>
                 </div>
                 <Switch
                   checked={cfg[row.key]}
+                  disabled={locked && row.key !== "launchEnabled"}
                   onCheckedChange={(v) => set(row.key, v)}
                 />
               </div>
@@ -196,6 +204,7 @@ function LaunchCms() {
               <Label>Launch status override</Label>
               <Select
                 value={cfg.launchStatus}
+                disabled={locked}
                 onValueChange={(v) => set("launchStatus", v as LaunchStatusSetting)}
               >
                 <SelectTrigger className="mt-1.5">
@@ -228,6 +237,7 @@ function LaunchCms() {
                 id="launch-dt"
                 type="datetime-local"
                 className="mt-1.5"
+                disabled={locked}
                 value={isoToLocalInput(cfg.launchDateTime)}
                 onChange={(e) =>
                   set(
@@ -241,6 +251,7 @@ function LaunchCms() {
               <Label>Timezone</Label>
               <Select
                 value={cfg.timezone}
+                disabled={locked}
                 onValueChange={(v) => set("timezone", v)}
               >
                 <SelectTrigger className="mt-1.5">
@@ -254,6 +265,28 @@ function LaunchCms() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div>
+              <Label htmlFor="celebration-days">Celebration window (days)</Label>
+              <Input
+                id="celebration-days"
+                type="number"
+                min={0}
+                max={30}
+                className="mt-1.5"
+                disabled={locked}
+                value={cfg.launchCelebrationDays}
+                onChange={(e) =>
+                  set(
+                    "launchCelebrationDays",
+                    Math.min(30, Math.max(0, Number(e.target.value) || 0)),
+                  )
+                }
+              />
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                How long the "We're live" banner, ribbon and confetti stay up
+                after launch. Afterwards the page becomes the plain homepage.
+              </p>
             </div>
             <div className="rounded-lg border border-border/60 bg-surface p-3 text-sm">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -269,6 +302,83 @@ function LaunchCms() {
         </SectionCard>
 
         <SectionCard
+          title="Top ribbon (marquee)"
+          description="Thin animated strip pinned above the navigation"
+        >
+          <div className="space-y-4">
+            <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
+              <div>
+                <div className="text-sm font-medium">Ribbon enabled</div>
+                <div className="text-xs text-muted-foreground">
+                  Off removes the strip entirely — the nav sits at the top
+                </div>
+              </div>
+              <Switch
+                checked={cfg.ticker.enabled}
+                disabled={locked}
+                onCheckedChange={(v) =>
+                  set("ticker", { ...cfg.ticker, enabled: v })
+                }
+              />
+            </div>
+            <div>
+              <Label>Pre-launch text</Label>
+              <Input
+                className="mt-1.5"
+                disabled={locked || !cfg.ticker.enabled}
+                value={cfg.ticker.text}
+                onChange={(e) =>
+                  set("ticker", { ...cfg.ticker, text: e.target.value })
+                }
+              />
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                <code>{"{days}"}</code> is replaced with the time remaining.
+              </p>
+            </div>
+            <div>
+              <Label>Launch-day text</Label>
+              <Input
+                className="mt-1.5"
+                disabled={locked || !cfg.ticker.enabled}
+                value={cfg.ticker.liveText}
+                onChange={(e) =>
+                  set("ticker", { ...cfg.ticker, liveText: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <Label>Link</Label>
+              <Input
+                className="mt-1.5"
+                disabled={locked || !cfg.ticker.enabled}
+                value={cfg.ticker.href}
+                onChange={(e) =>
+                  set("ticker", { ...cfg.ticker, href: e.target.value })
+                }
+              />
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                Leave empty for a non-clickable strip.
+              </p>
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
+              <div>
+                <div className="text-sm font-medium">Confetti from the ribbon</div>
+                <div className="text-xs text-muted-foreground">
+                  Fires for first-time visitors during the celebration window
+                </div>
+              </div>
+              <Switch
+                checked={cfg.ticker.confetti}
+                disabled={locked || !cfg.ticker.enabled}
+                onCheckedChange={(v) =>
+                  set("ticker", { ...cfg.ticker, confetti: v })
+                }
+              />
+            </div>
+          </div>
+        </SectionCard>
+
+        <SectionCard
           title="Pre-launch copy"
           description="Shown while the countdown is running"
         >
@@ -277,6 +387,7 @@ function LaunchCms() {
               <Label>Badge</Label>
               <Input
                 className="mt-1.5"
+                disabled={locked}
                 value={cfg.badge}
                 onChange={(e) => set("badge", e.target.value)}
               />
@@ -285,6 +396,7 @@ function LaunchCms() {
               <Label>Headline</Label>
               <Input
                 className="mt-1.5"
+                disabled={locked}
                 value={cfg.launchTitle}
                 onChange={(e) => set("launchTitle", e.target.value)}
               />
@@ -294,6 +406,7 @@ function LaunchCms() {
               <Textarea
                 rows={4}
                 className="mt-1.5"
+                disabled={locked}
                 value={cfg.launchSubtitle}
                 onChange={(e) => set("launchSubtitle", e.target.value)}
               />
@@ -319,6 +432,7 @@ function LaunchCms() {
                     <span className="text-xs text-muted-foreground">Visible</span>
                     <Switch
                       checked={!cfg[key].hidden}
+                      disabled={locked}
                       onCheckedChange={(v) =>
                         set(key, { ...cfg[key], hidden: !v })
                       }
@@ -330,6 +444,7 @@ function LaunchCms() {
                     <Label>Label</Label>
                     <Input
                       className="mt-1.5"
+                      disabled={locked}
                       value={cfg[key].label}
                       onChange={(e) =>
                         set(key, { ...cfg[key], label: e.target.value })
@@ -340,6 +455,7 @@ function LaunchCms() {
                     <Label>Link</Label>
                     <Input
                       className="mt-1.5"
+                      disabled={locked}
                       value={cfg[key].href}
                       onChange={(e) =>
                         set(key, { ...cfg[key], href: e.target.value })
@@ -361,6 +477,7 @@ function LaunchCms() {
               <Label>Badge</Label>
               <Input
                 className="mt-1.5"
+                disabled={locked}
                 value={cfg.live.badge}
                 onChange={(e) =>
                   set("live", { ...cfg.live, badge: e.target.value })
@@ -371,6 +488,7 @@ function LaunchCms() {
               <Label>Title</Label>
               <Input
                 className="mt-1.5"
+                disabled={locked}
                 value={cfg.live.title}
                 onChange={(e) =>
                   set("live", { ...cfg.live, title: e.target.value })
@@ -382,6 +500,7 @@ function LaunchCms() {
               <Textarea
                 rows={3}
                 className="mt-1.5"
+                disabled={locked}
                 value={cfg.live.subtitle}
                 onChange={(e) =>
                   set("live", { ...cfg.live, subtitle: e.target.value })
@@ -397,6 +516,7 @@ function LaunchCms() {
               </div>
               <Switch
                 checked={cfg.live.confetti}
+                disabled={locked}
                 onCheckedChange={(v) => set("live", { ...cfg.live, confetti: v })}
               />
             </div>
@@ -423,6 +543,7 @@ function LaunchCms() {
                     </span>
                     <Switch
                       checked={!!store.comingSoon}
+                      disabled={locked}
                       onCheckedChange={(v) => {
                         const stores = cfg.live.stores.map((s, idx) =>
                           idx === i ? { ...s, comingSoon: v } : s,
@@ -438,6 +559,7 @@ function LaunchCms() {
                       <Label className="capitalize">{field}</Label>
                       <Input
                         className="mt-1.5"
+                        disabled={locked}
                         value={store[field]}
                         onChange={(e) => {
                           const stores = cfg.live.stores.map((s, idx) =>

@@ -150,8 +150,6 @@ export type Role = {
   color: string;
 };
 
-export type PermissionGroup = { group: string; items: string[] };
-
 export type Faq = {
   id: number;
   question: string;

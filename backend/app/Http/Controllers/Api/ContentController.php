@@ -64,11 +64,23 @@ class ContentController extends Controller
     public function reorderFaqs(Request $request): JsonResponse
     {
         $data = $request->validate(['order' => ['required', 'array'], 'order.*' => ['integer']]);
+        $reordered = 0;
         foreach ($data['order'] as $position => $id) {
-            Faq::where('id', $id)->update(['order' => $position]);
+            $reordered += Faq::where('id', $id)->update(['order' => $position]);
         }
 
-        return response()->json(['data' => FaqResource::collection(Faq::orderBy('order')->get())]);
+        return response()->json(['data' => ['reordered' => $reordered]]);
+    }
+
+    public function reorderTestimonials(Request $request): JsonResponse
+    {
+        $data = $request->validate(['order' => ['required', 'array'], 'order.*' => ['integer']]);
+        $reordered = 0;
+        foreach ($data['order'] as $position => $id) {
+            $reordered += Testimonial::where('id', $id)->update(['order' => $position]);
+        }
+
+        return response()->json(['data' => ['reordered' => $reordered]]);
     }
 
     // ---- Testimonials ----

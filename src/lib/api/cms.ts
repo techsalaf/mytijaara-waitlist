@@ -1,74 +1,81 @@
 import { apiCall } from "./client";
+import type { Faq, Testimonial } from "@/lib/types";
 
-export type Faq = {
-  id: number;
-  question: string;
-  answer: string;
-  order: number;
+export type { Faq, Testimonial };
+
+/** One row of `cms_sections` as `CmsController::present()` returns it. */
+export type CmsSection<T = Record<string, unknown>> = {
+  section: string;
+  title: string;
+  data: T;
+  draft: T | null;
+  enabled: boolean;
   published: boolean;
+  order: number;
+  scheduledAt: string | null;
 };
 
-export type Testimonial = {
-  id: number;
-  name: string;
-  role: string;
-  quote: string;
-  rating: number;
-  published: boolean;
-  avatar: string;
+export type CmsSectionPatch = {
+  title?: string;
+  data?: Record<string, unknown>;
+  draft?: Record<string, unknown> | null;
+  enabled?: boolean;
+  published?: boolean;
+  order?: number;
+  scheduled_at?: string | null;
+  /** Promote `draft` into `data` and publish in one write. */
+  publish_draft?: boolean;
 };
 
 /**
  * CMS content API.
  *
- * Editable sections (hero, features, footer, etc.) are keyed by section slug:
- *   GET   /cms            -> { data: Record<string, unknown> }
- *   GET   /cms/:section   -> { data: unknown }   (public read)
- *   PATCH /cms/:section   -> { data: unknown }   (admin)
- *
- * FAQs + testimonials have their own collection endpoints:
- *   GET/POST/PATCH/DELETE /content/faqs
- *   POST /content/faqs/reorder
- *   GET/POST/PATCH/DELETE /content/testimonials
+ * `sections`/`section` hit the admin endpoints (`/cms-admin`), which return
+ * unpublished rows and the draft column. `publicSections`/`publicSection` hit
+ * the public `/cms` routes the landing page uses, which only ever return rows
+ * that are both published and enabled.
  */
 export const cmsApi = {
-  sections: () => apiCall("/cms-admin", () => ({})),
-  section: (slug: string) => apiCall(`/cms-admin/${slug}`, () => ({})),
-  updateSection: (slug: string, patch: Record<string, unknown>) =>
-    apiCall(`/cms/${slug}`, () => patch, { method: "PATCH", body: patch }),
+  sections: () => apiCall<Record<string, CmsSection>>("/cms-admin"),
+  section: <T = Record<string, unknown>>(slug: string) =>
+    apiCall<CmsSection<T>>(`/cms-admin/${slug}`),
+  publicSections: () => apiCall<Record<string, CmsSection>>("/cms", { public: true }),
+  publicSection: <T = Record<string, unknown>>(slug: string) =>
+    apiCall<CmsSection<T>>(`/cms/${slug}`, { public: true }),
+  updateSection: (slug: string, patch: CmsSectionPatch) =>
+    apiCall<CmsSection>(`/cms/${slug}`, { method: "PATCH", body: patch }),
 
-  faqs: () => apiCall("/content/faqs", () => [] as Faq[]),
-  createFaq: (payload: Partial<Faq>) =>
-    apiCall("/content/faqs", () => ({ id: Date.now(), question: "", answer: "", order: 0, published: false, ...payload } as Faq), {
-      method: "POST",
-      body: payload,
-    }),
-  updateFaq: (id: number, patch: Partial<Faq>) =>
-    apiCall(`/content/faqs/${id}`, () => ({ id, question: "", answer: "", order: 0, published: false, ...patch } as Faq), {
-      method: "PATCH",
-      body: patch,
-    }),
+  faqs: () => apiCall<Faq[]>("/content/faqs", { public: true }),
+  /** `order` is optional: the backend appends to the end when it is omitted. */
+  createFaq: (payload: Omit<Faq, "id" | "order"> & { order?: number }) =>
+    apiCall<Faq>("/content/faqs", { method: "POST", body: payload }),
+  updateFaq: (id: number, patch: Partial<Omit<Faq, "id">>) =>
+    apiCall<Faq>(`/content/faqs/${id}`, { method: "PATCH", body: patch }),
   removeFaq: (id: number) =>
-    apiCall(`/content/faqs/${id}`, () => ({ deleted: true }), { method: "DELETE" }),
+    apiCall<{ deleted: boolean }>(`/content/faqs/${id}`, { method: "DELETE" }),
+  /** `ids` in the new display order; the backend rewrites `order` to match. */
   reorderFaqs: (ids: number[]) =>
-    apiCall("/content/faqs/reorder", () => ({ ok: true }), {
+    apiCall<{ reordered: number }>("/content/faqs/reorder", {
       method: "POST",
       body: { order: ids },
     }),
 
-  testimonials: () => apiCall("/content/testimonials", () => [] as Testimonial[]),
-  createTestimonial: (payload: Partial<Testimonial>) =>
-    apiCall(
-      "/content/testimonials",
-      () => ({ id: Date.now(), name: "", role: "", quote: "", rating: 0, published: false, avatar: "", ...payload } as Testimonial),
-      { method: "POST", body: payload },
-    ),
-  updateTestimonial: (id: number, patch: Partial<Testimonial>) =>
-    apiCall(
-      `/content/testimonials/${id}`,
-      () => ({ id, name: "", role: "", quote: "", rating: 0, published: false, avatar: "", ...patch } as Testimonial),
-      { method: "PATCH", body: patch },
-    ),
+  testimonials: () => apiCall<Testimonial[]>("/content/testimonials", { public: true }),
+  /** `avatar`/`rating`/`order` are optional; the backend fills the defaults. */
+  createTestimonial: (
+    payload: Omit<Testimonial, "id" | "order" | "avatar" | "rating"> & {
+      order?: number;
+      avatar?: string;
+      rating?: number;
+    },
+  ) => apiCall<Testimonial>("/content/testimonials", { method: "POST", body: payload }),
+  updateTestimonial: (id: number, patch: Partial<Omit<Testimonial, "id">>) =>
+    apiCall<Testimonial>(`/content/testimonials/${id}`, { method: "PATCH", body: patch }),
   removeTestimonial: (id: number) =>
-    apiCall(`/content/testimonials/${id}`, () => ({ deleted: true }), { method: "DELETE" }),
+    apiCall<{ deleted: boolean }>(`/content/testimonials/${id}`, { method: "DELETE" }),
+  reorderTestimonials: (ids: number[]) =>
+    apiCall<{ reordered: number }>("/content/testimonials/reorder", {
+      method: "POST",
+      body: { order: ids },
+    }),
 };

@@ -1,15 +1,69 @@
 import { apiCall } from "./client";
 
 /**
- * Settings API. Settings are grouped (general, integrations, smtp, api-keys,
- * branding, seo, social, company, system). Secret values are redacted by the
- * backend on read and only overwritten when a non-masked value is sent.
- *
- *   GET   /settings/:group -> { data: Record<string, unknown> }
- *   PATCH /settings/:group -> { data: Record<string, unknown> }
+ * Settings API. One JSON row per group on the backend
+ * (`SettingsController::GROUPS`). Secrets are redacted on read; posting a
+ * redacted value back is a no-op server-side, so a saved form never destroys a
+ * stored password or key.
  */
+
+export type SettingsGroup =
+  | "company"
+  | "branding"
+  | "seo"
+  | "social"
+  | "smtp"
+  | "integrations"
+  | "system";
+
+export type SmtpSettings = {
+  enabled: boolean;
+  host: string;
+  port: number;
+  encryption: "tls" | "ssl" | "none";
+  username: string;
+  /** Always the redaction placeholder on read. Send a new value to change it. */
+  password: string;
+  passwordSet?: boolean;
+  fromAddress: string;
+  fromName: string;
+};
+
+export type ApiKeyRecord = {
+  id: string;
+  name: string;
+  masked: string;
+  scopes: string[];
+  createdAt: string | null;
+  createdBy: string | null;
+  lastUsedAt: string | null;
+  revokedAt: string | null;
+  active: boolean;
+};
+
 export const settingsApi = {
-  get: (group: string) => apiCall(`/settings/${group}`, () => ({}) as Record<string, unknown>),
-  update: (group: string, patch: Record<string, unknown>) =>
-    apiCall(`/settings/${group}`, () => patch, { method: "PATCH", body: patch }),
+  get: <T = Record<string, unknown>>(group: SettingsGroup) =>
+    apiCall<T>(`/settings/${group}`),
+  update: <T = Record<string, unknown>>(group: SettingsGroup, patch: Record<string, unknown>) =>
+    apiCall<T>(`/settings/${group}`, { method: "PATCH", body: patch }),
+
+  /** Opens a real SMTP connection. Rejects with `ApiError` on failure. */
+  testSmtp: (override?: Partial<Omit<SmtpSettings, "enabled" | "fromAddress" | "fromName">>) =>
+    apiCall<{ ok: boolean; message: string }>("/settings/smtp/test", {
+      method: "POST",
+      body: override ?? {},
+      timeoutMs: 30000, // an unreachable SMTP host can take a while to fail
+    }),
+
+  apiKeys: {
+    list: () => apiCall<ApiKeyRecord[]>("/settings/api-keys"),
+    /** The plaintext `key` is returned once and never retrievable again. */
+    generate: (name: string, scopes: string[] = ["read"]) =>
+      apiCall<{ key: string; record: ApiKeyRecord }>("/settings/api-keys", {
+        method: "POST",
+        body: { name, scopes },
+      }),
+    revoke: (id: string) =>
+      apiCall<{ revoked: string }>(`/settings/api-keys/${id}`, { method: "DELETE" }),
+  },
 };

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\RoleResource;
+use App\Support\Audit;
 use App\Support\RoleMeta;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\JsonResponse;
@@ -51,42 +52,82 @@ class RoleController extends Controller
         return response()->json(['data' => $groups]);
     }
 
-    /** POST /roles */
+    /**
+     * POST /roles
+     *
+     * `name` is the display copy an admin typed; it is stored in `label` and the
+     * slug derived from it becomes the spatie role name the `permission:`
+     * middleware checks. Keeping them separate means renaming a role never
+     * breaks a route gate.
+     */
     public function store(Request $request): JsonResponse
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'slug' => ['nullable', 'string', 'max:120'],
+            'description' => ['nullable', 'string', 'max:500'],
+            'color' => ['nullable', 'string', 'max:32'],
             'permissions' => ['nullable', 'array'],
             'permissions.*' => ['string'],
         ]);
 
         $slug = $data['slug'] ?? Str::slug($data['name'], '_');
         $role = Role::firstOrCreate(['name' => $slug, 'guard_name' => 'web']);
+        $role->forceFill([
+            'label' => $data['name'],
+            'description' => $data['description'] ?? null,
+            'color' => $data['color'] ?? null,
+        ])->save();
         $role->syncPermissions($this->validPermissions($data['permissions'] ?? []));
+
+        Audit::record($request, 'role.created', $data['name'], [
+            'slug' => $slug,
+            'permissions' => count($data['permissions'] ?? []),
+        ], Role::class, (string) $role->id);
 
         return response()->json(['data' => new RoleResource($role->loadCount(['users', 'permissions']))], 201);
     }
 
-    /** PATCH /roles/:id — update the granted permission set. */
+    /**
+     * PATCH /roles/:id — display copy and/or the granted permission set.
+     *
+     * The slug (`roles.name`) is deliberately immutable: it is what the
+     * `permission:` middleware and every `hasRole()` check reference.
+     */
     public function update(Request $request, string $id): JsonResponse
     {
         $role = Role::findOrFail($this->pk($id));
 
         $data = $request->validate([
+            'name' => ['sometimes', 'string', 'max:120'],
+            'description' => ['sometimes', 'nullable', 'string', 'max:500'],
+            'color' => ['sometimes', 'nullable', 'string', 'max:32'],
             'permissions' => ['sometimes', 'array'],
             'permissions.*' => ['string'],
         ]);
 
+        $changes = [];
+
+        foreach (['name' => 'label', 'description' => 'description', 'color' => 'color'] as $field => $column) {
+            if (array_key_exists($field, $data)) {
+                $changes[$field] = $data[$field];
+                $role->forceFill([$column => $data[$field]]);
+            }
+        }
+        $role->save();
+
         if (isset($data['permissions'])) {
             $role->syncPermissions($this->validPermissions($data['permissions']));
+            $changes['permissions'] = count($data['permissions']);
         }
+
+        Audit::record($request, 'role.updated', $role->label ?: $role->name, $changes, Role::class, (string) $role->id);
 
         return response()->json(['data' => new RoleResource($role->loadCount(['users', 'permissions']))]);
     }
 
     /** DELETE /roles/:id — refuses to delete the seeded base roles. */
-    public function destroy(string $id): JsonResponse
+    public function destroy(Request $request, string $id): JsonResponse
     {
         $role = Role::findOrFail($this->pk($id));
 
@@ -94,7 +135,11 @@ class RoleController extends Controller
             return response()->json(['message' => 'Built-in roles cannot be deleted.'], 422);
         }
 
+        $label = $role->label ?: $role->name;
+        $roleId = (string) $role->id;
         $role->delete();
+
+        Audit::record($request, 'role.deleted', $label, ['slug' => $role->name], Role::class, $roleId);
 
         return response()->json(['data' => ['deleted' => true]]);
     }
