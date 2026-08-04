@@ -1,7 +1,7 @@
 import { apiCall } from "./client";
 
 /**
- * Analytics API. Returns realistic test data by default.
+ * Analytics API.
  *
  *   GET /analytics/overview        -> { data: DashboardStats }
  *   GET /analytics/trends          -> { data: SignupTrendPoint[] }
@@ -27,7 +27,7 @@ export const analyticsApi = {
         emailClickRate: 8.2,
         verifiedRate: 68,
       }),
-      { public: true },
+      {},
     ),
   trends: (days = 30) => apiCall(`/analytics/trends?days=${days}`, () => []),
   trafficSources: () => apiCall("/analytics/traffic-sources", () => [

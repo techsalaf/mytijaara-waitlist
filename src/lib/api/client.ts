@@ -42,8 +42,6 @@ const API_BASE_URL =
     ? (import.meta.env.VITE_API_BASE_URL as string | undefined)
     : undefined;
 
-const USE_MOCK = !API_BASE_URL;
-
 function getAuthToken(): string | null {
   if (typeof window === "undefined") return null;
   try {
@@ -53,20 +51,10 @@ function getAuthToken(): string | null {
   }
 }
 
-async function mockCall<T>(
-  factory: () => T | Promise<T>,
-  opts: ApiCallOptions = {},
-): Promise<ApiResponse<T>> {
-  const delay = opts.delay ?? 300 + Math.random() * 300;
-  await new Promise((r) => setTimeout(r, delay));
-  if (opts.failRate && Math.random() < opts.failRate) {
-    throw new ApiError("Simulated failure", 500);
-  }
-  const data = await factory();
-  return { data };
-}
-
 async function httpCall<T>(endpoint: string, opts: ApiCallOptions = {}): Promise<ApiResponse<T>> {
+  if (!API_BASE_URL) {
+    throw new ApiError("The API is not configured. Set VITE_API_BASE_URL.", 503);
+  }
   const url = `${API_BASE_URL}${endpoint}`;
   const headers: Record<string, string> = {
     Accept: "application/json",
@@ -122,11 +110,8 @@ async function httpCall<T>(endpoint: string, opts: ApiCallOptions = {}): Promise
 
 export async function apiCall<T>(
   endpoint: string,
-  factory: () => T | Promise<T>,
+  _fallback: () => T | Promise<T>,
   opts: ApiCallOptions = {},
 ): Promise<ApiResponse<T>> {
-  if (USE_MOCK) {
-    return mockCall(factory, opts);
-  }
   return httpCall<T>(endpoint, opts);
 }
