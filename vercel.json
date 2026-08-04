@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build:vercel",
+  "buildCommand": "NITRO_PRESET=vercel npm run build",
   "outputDirectory": ".vercel/output/static",
   "framework": "vite"
 }
