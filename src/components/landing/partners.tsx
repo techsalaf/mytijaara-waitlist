@@ -2,9 +2,20 @@ import { ArrowRight, Check, Sparkles } from "lucide-react";
 
 import { Reveal } from "./reveal";
 import { usePrimaryCta } from "@/components/launch/launch-cta";
-import screenVendor from "@/assets/screens/screen-vendor-1.png.asset.json";
-import screenRider from "@/assets/screens/screen-rider-1.png.asset.json";
-import screenArtisans from "@/assets/screens/screen-customer-8-artisans.png.asset.json";
+
+/**
+ * These three images used to be imported from `src/assets/screens/*.asset.json`,
+ * whose `url` field is a `/__l5e/assets-v1/<uuid>/…` path. That path only exists
+ * inside the Lovable editor's dev server, so in production all three 404'd —
+ * which is where `screen-vendor-1.png` and `screen-rider-1.png` in the console
+ * came from. The real files are committed under `public/screens/` and served
+ * from the site root.
+ */
+export const PARTNER_SCREENS = {
+  vendor: "/screens/screen-vendor-1.webp",
+  rider: "/screens/screen-rider-1.webp",
+  artisans: "/screens/screen-customer-8-artisans.webp",
+} as const;
 
 const PARTNERS = [
   {
@@ -13,7 +24,7 @@ const PARTNERS = [
     body: "Reach new customers in your area without setting up your own store, app or delivery team.",
     perks: ["New customers, every day", "Simple dashboard on your phone", "Get paid on time"],
     cta: "Join as vendor",
-    image: screenVendor.url,
+    image: PARTNER_SCREENS.vendor,
     accent: "from-primary/95 via-primary/80 to-primary/40",
   },
   {
@@ -22,7 +33,7 @@ const PARTNERS = [
     body: "Deliver food, packages and groceries. Choose when you work, get paid weekly.",
     perks: ["Flexible hours", "Weekly payouts", "In-app support 24/7"],
     cta: "Join as rider",
-    image: screenRider.url,
+    image: PARTNER_SCREENS.rider,
     accent: "from-[oklch(0.28_0.08_156)]/95 via-[oklch(0.32_0.09_156)]/75 to-[oklch(0.4_0.1_156)]/30",
   },
   {
@@ -31,7 +42,7 @@ const PARTNERS = [
     body: "Show off your work, get booked in your area and get paid straight to your account.",
     perks: ["Verified profile", "Bookings that fit your day", "Fair, upfront pricing"],
     cta: "Join as artisan",
-    image: screenArtisans.url,
+    image: PARTNER_SCREENS.artisans,
     accent: "from-[oklch(0.35_0.1_156)]/95 via-[oklch(0.45_0.12_156)]/70 to-gold/25",
   },
 ];

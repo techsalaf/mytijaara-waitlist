@@ -5,16 +5,27 @@ import { Reveal } from "./reveal";
 
 type Screen = { src: string; caption: string; tag: string };
 
-const INSIDE_SCREENS: Screen[] = [
-  { src: "/placeholder-phone.svg", caption: "Craving jollof? Order in taps", tag: "Food" },
-  { src: "/placeholder-phone.svg", caption: "One wallet for every payment", tag: "Wallet" },
-  { src: "/placeholder-phone.svg", caption: "Rent a car for the weekend", tag: "Car Rental" },
-  { src: "/placeholder-phone.svg", caption: "Everything on one home screen", tag: "Home" },
-  { src: "/placeholder-phone.svg", caption: "Send parcels across Nigeria", tag: "Parcels" },
-  { src: "/placeholder-phone.svg", caption: "Genuine meds, delivered fast", tag: "Pharmacy" },
-  { src: "/placeholder-phone.svg", caption: "Buy data & airtime instantly", tag: "Data & Airtime" },
-  { src: "/placeholder-phone.svg", caption: "Deliver to anywhere in Lagos", tag: "Locations" },
-  { src: "/placeholder-phone.svg", caption: "Fresh groceries, same day", tag: "Groceries" },
+/**
+ * The nine real product screens, in the order they read as a story: arrive,
+ * pick where you are, then one screen per service, ending on the wallet.
+ *
+ * These were `/placeholder-phone.svg` nine times over, which is why the section
+ * showed the same grey phone outline nine times. The files live in
+ * `public/screens/` and are served from the site root, so the paths below are
+ * absolute. `src/components/landing/inside-the-app.test.ts` reads this array and
+ * asserts every file exists on disk, so a renamed asset fails the build instead
+ * of shipping a 404.
+ */
+export const INSIDE_SCREENS: Screen[] = [
+  { src: "/screens/screen-customer-1.webp", caption: "Everything on one home screen", tag: "Home" },
+  { src: "/screens/screen-customer-2.webp", caption: "Deliver to anywhere in Nigeria", tag: "Locations" },
+  { src: "/screens/screen-customer-5-food.webp", caption: "Craving jollof? Order in taps", tag: "Food" },
+  { src: "/screens/screen-customer-4-groceries.webp", caption: "Fresh groceries, same day", tag: "Groceries" },
+  { src: "/screens/screen-customer-7-pharmacy.webp", caption: "Genuine meds, delivered fast", tag: "Pharmacy" },
+  { src: "/screens/screen-customer-6-parcel.webp", caption: "Send parcels across Nigeria", tag: "Parcels" },
+  { src: "/screens/screen-customer-8-artisans.webp", caption: "Book a trusted artisan today", tag: "Artisans" },
+  { src: "/screens/screen-customer-9-rentals.webp", caption: "Rent a car for the weekend", tag: "Car Rental" },
+  { src: "/screens/screen-customer-3.webp", caption: "One wallet for every payment", tag: "Wallet" },
 ];
 
 function ScreenCard({ src, caption, tag, onOpen }: Screen & { onOpen: () => void }) {
