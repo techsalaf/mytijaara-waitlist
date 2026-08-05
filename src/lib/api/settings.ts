@@ -8,13 +8,7 @@ import { apiCall } from "./client";
  */
 
 export type SettingsGroup =
-  | "company"
-  | "branding"
-  | "seo"
-  | "social"
-  | "smtp"
-  | "integrations"
-  | "system";
+  "company" | "branding" | "seo" | "social" | "smtp" | "integrations" | "system" | "referrals";
 
 export type SmtpSettings = {
   enabled: boolean;
@@ -61,8 +55,7 @@ export type SystemSettings = {
 };
 
 export const settingsApi = {
-  get: <T = Record<string, unknown>>(group: SettingsGroup) =>
-    apiCall<T>(`/settings/${group}`),
+  get: <T = Record<string, unknown>>(group: SettingsGroup) => apiCall<T>(`/settings/${group}`),
   update: <T = Record<string, unknown>>(group: SettingsGroup, patch: Record<string, unknown>) =>
     apiCall<T>(`/settings/${group}`, { method: "PATCH", body: patch }),
 

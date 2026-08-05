@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { referralsApi } from "@/lib/api";
+import { useCallback, useEffect, useState } from "react";
+import { referralsApi, ApiError } from "@/lib/api";
 import type { ReferralLeaderboardEntry } from "@/lib/types";
-import { SectionCard } from "@/components/admin/ui-bits";
+import { EmptyState, SectionCard } from "@/components/admin/ui-bits";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Medal, Award, type LucideIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Trophy, Medal, Award, Loader2, AlertTriangle, type LucideIcon } from "lucide-react";
 
 export const Route = createFileRoute("/admin/referrals/leaderboard")({
   component: Leaderboard,
@@ -12,9 +13,62 @@ export const Route = createFileRoute("/admin/referrals/leaderboard")({
 
 function Leaderboard() {
   const [referralLeaderboard, setReferralLeaderboard] = useState<ReferralLeaderboardEntry[]>([]);
-  useEffect(() => {
-    void referralsApi.leaderboard().then((response) => setReferralLeaderboard(response.data));
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await referralsApi.leaderboard();
+      setReferralLeaderboard(response.data);
+    } catch (err) {
+      setError(
+        err instanceof ApiError
+          ? err.firstError
+          : err instanceof Error
+            ? err.message
+            : "Could not load the leaderboard.",
+      );
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 px-6 py-16 text-center">
+        <AlertTriangle className="h-6 w-6 text-destructive" />
+        <p className="text-sm font-medium text-destructive">{error}</p>
+        <Button variant="outline" size="sm" onClick={() => void load()}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  if (referralLeaderboard.length === 0) {
+    return (
+      <EmptyState
+        illustration="inbox"
+        title="No referrers yet"
+        description="The podium fills in when waitlist members start referring."
+      />
+    );
+  }
+
   const [first, second, third, ...rest] = referralLeaderboard;
   return (
     <div className="space-y-6">
@@ -41,6 +95,11 @@ function Leaderboard() {
         description={`${referralLeaderboard.length} active referrers`}
       >
         <div className="space-y-1">
+          {rest.length === 0 && (
+            <p className="rounded-lg bg-muted/30 px-3 py-4 text-center text-sm text-muted-foreground">
+              Everyone on the board is on the podium above.
+            </p>
+          )}
           {rest.map((u) => (
             <Link
               key={u.id}

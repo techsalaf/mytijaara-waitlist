@@ -6,6 +6,10 @@
  * fixture any more.
  */
 
+// The program shape lives with the endpoint that owns it; imported here only so
+// `ReferralAnalytics.program` can reference it, and re-exported below.
+import type { ReferralProgram as ReferralProgramSettings } from "@/lib/api/referrals";
+
 export type WaitlistStatus = "active" | "invited" | "onboarded" | "unsubscribed";
 export type WaitlistSource =
   "organic" | "referral" | "instagram" | "twitter" | "facebook" | "tiktok" | "google";
@@ -46,6 +50,8 @@ export type ReferralTrendPoint = {
 };
 
 export type ReferralAnalytics = {
+  /** Window the numbers cover. 0 = all time. */
+  periodDays: number;
   totalVisits: number;
   conversions: number;
   conversionRate: number;
@@ -53,7 +59,28 @@ export type ReferralAnalytics = {
   activeReferrers: number;
   trend: ReferralTrendPoint[];
   sources: { name: string; value: number }[];
+  /**
+   * Real payout figures. The analytics page used to print `value="₦124k"
+   * delta={38.4}` as a literal; these come from the rows actually marked
+   * rewarded and the program settings behind them.
+   */
+  rewards: ReferralRewardTotals;
+  program: ReferralProgramSettings;
 };
+
+export type ReferralRewardTotals = {
+  currency: string;
+  referrerReward: number;
+  paidReferrals: number;
+  paidReferrers: number;
+  pendingReferrals: number;
+  amountPaid: number;
+  /** Pre-formatted with the program currency symbol, e.g. `₦12,500`. */
+  amountPaidLabel: string;
+};
+
+/** Re-exported from the module that owns the endpoint. */
+export type { ReferralProgramSettings };
 
 /**
  * Re-exported, not redeclared.

@@ -24,7 +24,7 @@ use Illuminate\Validation\Rule;
  */
 class SettingsController extends Controller
 {
-    private const GROUPS = ['company', 'branding', 'seo', 'social', 'smtp', 'integrations', 'api_keys', 'system'];
+    private const GROUPS = ['company', 'branding', 'seo', 'social', 'smtp', 'integrations', 'api_keys', 'system', 'referrals'];
 
     /** Placeholder the client sees instead of a stored secret. */
     private const REDACTED = '••••••••';
@@ -330,6 +330,19 @@ class SettingsController extends Controller
                 'weeklyDigestRecipients.*' => ['email'],
                 'notifyOnSignup' => ['sometimes', 'boolean'],
             ],
+            // The reward structure the referral card used to hardcode. Amounts
+            // are minor-unit-free integers in `currency`; `RewardDispatcher`
+            // reads the same row when it pays, so card and payout agree.
+            'referrals' => [
+                'rewardsEnabled' => ['sometimes', 'boolean'],
+                'currency' => ['sometimes', Rule::in(['NGN', 'USD', 'GBP', 'EUR'])],
+                'referrerReward' => ['sometimes', 'integer', 'min:0', 'max:10000000'],
+                'referredReward' => ['sometimes', 'integer', 'min:0', 'max:10000000'],
+                'minimumVerifiedForPayout' => ['sometimes', 'integer', 'min:0', 'max:1000'],
+                'bonusMilestoneRefs' => ['sometimes', 'integer', 'min:0', 'max:10000'],
+                'bonusMilestoneReward' => ['sometimes', 'integer', 'min:0', 'max:10000000'],
+                'rewardNote' => ['sometimes', 'nullable', 'string', 'max:255'],
+            ],
             default => [],
         };
     }
@@ -399,6 +412,8 @@ class SettingsController extends Controller
                 'notifyOnSignup' => true,
             ],
             'api_keys' => ['keys' => []],
+            // One source of truth, shared with `RewardDispatcher`.
+            'referrals' => \App\Support\ReferralProgram::defaults(),
             default => [],
         };
 
@@ -413,12 +428,16 @@ class SettingsController extends Controller
      */
     private function normalize(array $data): array
     {
-        foreach (['enabled', 'noindex', 'maintenanceMode', 'signupsPaused', 'weeklyDigestEnabled', 'notifyOnSignup'] as $bool) {
+        foreach (['enabled', 'noindex', 'maintenanceMode', 'signupsPaused', 'weeklyDigestEnabled', 'notifyOnSignup', 'rewardsEnabled'] as $bool) {
             if (array_key_exists($bool, $data)) {
                 $data[$bool] = filter_var($data[$bool], FILTER_VALIDATE_BOOLEAN);
             }
         }
-        foreach (['port', 'signupRateLimitPerHour'] as $int) {
+        foreach ([
+            'port', 'signupRateLimitPerHour',
+            'referrerReward', 'referredReward', 'minimumVerifiedForPayout',
+            'bonusMilestoneRefs', 'bonusMilestoneReward',
+        ] as $int) {
             if (array_key_exists($int, $data) && $data[$int] !== null) {
                 $data[$int] = (int) $data[$int];
             }

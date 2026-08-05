@@ -115,8 +115,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('permission:referrals.view')->group(function () {
         Route::get('/referrals/leaderboard', [ReferralController::class, 'leaderboard']);
         Route::get('/referrals/analytics', [ReferralController::class, 'analytics']);
-        Route::get('/referrals/{id}', [ReferralController::class, 'show']);
+        Route::get('/referrals/rewards/pending', [ReferralController::class, 'pendingRewards']);
     });
+    Route::get('/referrals/export', [ReferralController::class, 'export'])
+        ->middleware('permission:referrals.export');
+    // Paying rewards writes to `referrals` and sends mail, so it needs manage,
+    // not the read permission the rest of the module uses.
+    Route::post('/referrals/rewards', [ReferralController::class, 'sendRewards'])
+        ->middleware('permission:referrals.manage');
+    // Last: `{id}` would otherwise swallow `export` and `rewards`.
+    Route::get('/referrals/{id}', [ReferralController::class, 'show'])
+        ->middleware('permission:referrals.view');
 
     // CMS authoring
     Route::get('/cms-admin', [CmsController::class, 'adminIndex'])->middleware('permission:cms.view');

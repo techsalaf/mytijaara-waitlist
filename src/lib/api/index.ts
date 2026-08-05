@@ -27,7 +27,9 @@ export type {
 export { dashboardApi } from "./dashboard";
 
 export { referralsApi } from "./referrals";
-export type { ReferralDetail, RewardResult } from "./referrals";
+export type { ReferralDetail, RewardResult, ReferralProgram, PendingReward } from "./referrals";
+
+export { downloadEndpoint } from "./download";
 
 export { campaignsApi } from "./campaigns";
 export type { CampaignInput, CampaignStats } from "./campaigns";
