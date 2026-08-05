@@ -28,10 +28,18 @@ export const Route = createFileRoute("/")({
    * the first painted HTML. Without this the provider seeded from
    * DEFAULT_LAUNCH_CONFIG and swapped in the real date after the client fetch,
    * which is what made the countdown flash the wrong date on load.
+   *
+   * `serverNow` ships alongside it because the countdown digits are text derived
+   * from the current instant. Reading the clock again during the client's first
+   * render produced different digits than the server rendered, which is the text
+   * hydration mismatch (React #418) that showed up in the console.
    */
-  loader: async (): Promise<{ launchConfig: LaunchConfiguration }> => {
+  loader: async (): Promise<{
+    launchConfig: LaunchConfiguration;
+    serverNow: number;
+  }> => {
     const raw = await serverGet<unknown>("/launch-config");
-    return { launchConfig: normalizeLaunchConfig(raw) };
+    return { launchConfig: normalizeLaunchConfig(raw), serverNow: Date.now() };
   },
   head: () => ({
     meta: [
@@ -54,9 +62,9 @@ export const Route = createFileRoute("/")({
  * renders at all — pre-launch, launch day and post-launch, no code change.
  */
 function Landing() {
-  const { launchConfig } = Route.useLoaderData();
+  const { launchConfig, serverNow } = Route.useLoaderData();
   return (
-    <LaunchStateProvider initialConfig={launchConfig}>
+    <LaunchStateProvider initialConfig={launchConfig} initialNow={serverNow}>
       <div className="min-h-screen bg-background text-foreground">
         <Nav />
         <main>

@@ -22,6 +22,12 @@ type LaunchContextValue = {
   /** Effective state right now — recomputed every tick. */
   status: LaunchStatus;
   remaining: TimeRemaining;
+  /**
+   * The clock the whole page renders from. Seeded from the SSR loader, so
+   * anything date-derived (the countdown digits, the footer's copyright year)
+   * renders the same on the server and on the client's first paint.
+   */
+  now: number;
   /** Launch moment reached (launch day or later). */
   isLaunched: boolean;
   /** Render the countdown section? */
@@ -50,10 +56,20 @@ export function LaunchStateProvider({
    * placeholder date and no client fetch on mount.
    */
   initialConfig,
+  /**
+   * The clock reading taken on the server, from the same loader. The countdown
+   * digits are text derived from `now`, so seeding it with a fresh `Date.now()`
+   * during render made the server HTML and the first client render disagree by
+   * however long the response took — a text hydration mismatch (React #418) on
+   * every load. Both sides now render this one number, and the real clock takes
+   * over in an effect after hydration.
+   */
+  initialNow,
 }: {
   children: ReactNode;
   value?: Partial<LaunchConfiguration>;
   initialConfig?: LaunchConfiguration;
+  initialNow?: number;
 }) {
   const seeded = !!value || !!initialConfig;
   const [config, setConfig] = useState<LaunchConfiguration>(() => ({
@@ -62,9 +78,8 @@ export function LaunchStateProvider({
     ...value,
   }));
   const [ready, setReady] = useState(seeded);
-  // SSR-stable seed: the first client render matches the server render, then
-  // the interval takes over. Avoids a hydration mismatch on the digits.
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState(() => initialNow ?? Date.now());
+
 
   useEffect(() => {
     if (seeded) return;
@@ -87,6 +102,10 @@ export function LaunchStateProvider({
   }, [seeded]);
 
   useEffect(() => {
+    // Sync once immediately: `initialNow` came from the server, so it is behind
+    // by however long the response and hydration took. This runs after
+    // hydration, so correcting the digits here cannot produce a mismatch.
+    setNow(Date.now());
     const id = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(id);
   }, []);
@@ -99,6 +118,7 @@ export function LaunchStateProvider({
       config,
       status,
       remaining,
+      now,
       isLaunched,
       showCountdown:
         config.launchEnabled && config.countdownEnabled && !isLaunched,

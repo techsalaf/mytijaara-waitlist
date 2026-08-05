@@ -1,6 +1,7 @@
 import { Facebook, Instagram, Twitter } from "lucide-react";
 
 import { Logo } from "./logo";
+import { useLaunch } from "@/components/launch/launch-state-provider";
 
 const SOCIALS = [
   { Icon: Instagram, label: "MyTijaara on Instagram", href: "https://instagram.com" },
@@ -39,6 +40,13 @@ const COLUMNS = [
 ];
 
 export function Footer() {
+  // The copyright year came from a bare `new Date()` during render. On a page
+  // rendered on the server on 31 December and hydrated on 1 January the two
+  // years disagree, and the whole footer subtree is a hydration mismatch. The
+  // provider's clock is seeded from the SSR loader, so both sides agree.
+  const { now } = useLaunch();
+  const year = new Date(now).getFullYear();
+
   return (
     <footer className="border-t border-border bg-surface py-14">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
@@ -83,7 +91,7 @@ export function Footer() {
         </div>
         <div className="mt-12 flex flex-col items-start justify-between gap-4 border-t border-border pt-6 sm:flex-row sm:items-center">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} MyTijaara. Made with love in Nigeria.
+            © {year} MyTijaara. Made with love in Nigeria.
           </p>
           <p className="text-xs text-muted-foreground">
             Everything you need, all in one place.

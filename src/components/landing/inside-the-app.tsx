@@ -12,7 +12,7 @@ type Screen = { src: string; caption: string; tag: string };
  * These were `/placeholder-phone.svg` nine times over, which is why the section
  * showed the same grey phone outline nine times. The files live in
  * `public/screens/` and are served from the site root, so the paths below are
- * absolute. `src/components/landing/inside-the-app.test.ts` reads this array and
+ * absolute. `src/components/landing/landing-assets.test.ts` reads this array and
  * asserts every file exists on disk, so a renamed asset fails the build instead
  * of shipping a 404.
  */
