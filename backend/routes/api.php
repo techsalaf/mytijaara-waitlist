@@ -94,7 +94,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/analytics/devices', [AnalyticsController::class, 'devices']);
         Route::get('/analytics/browsers', [AnalyticsController::class, 'browsers']);
         Route::get('/analytics/funnel', [AnalyticsController::class, 'funnel']);
+        Route::get('/analytics/digest', [AnalyticsController::class, 'digestPreview']);
     });
+
+    // Building the weekly digest writes a draft campaign, so it is gated on
+    // email.create rather than analytics.view.
+    Route::post('/analytics/digest', [AnalyticsController::class, 'digest'])
+        ->middleware('permission:email.create');
 
     // Waitlist
     Route::get('/waitlist', [WaitlistController::class, 'index'])->middleware('permission:waitlist.view');

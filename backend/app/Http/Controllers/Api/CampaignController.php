@@ -46,7 +46,7 @@ class CampaignController extends Controller
         $data = $this->validated($request);
 
         $campaign = EmailCampaign::create([
-            'public_id' => $this->nextPublicId(),
+            'public_id' => EmailCampaign::nextPublicId(),
             'name' => $data['name'],
             'subject' => $data['subject'],
             'html' => $data['html'] ?? null,
@@ -142,16 +142,5 @@ class CampaignController extends Controller
         }
 
         return EmailTemplate::where('public_id', $publicId)->value('id');
-    }
-
-    private function nextPublicId(): string
-    {
-        $n = EmailCampaign::withTrashed()->count() + 1;
-
-        do {
-            $id = 'cmp_'.str_pad((string) $n++, 3, '0', STR_PAD_LEFT);
-        } while (EmailCampaign::withTrashed()->where('public_id', $id)->exists());
-
-        return $id;
     }
 }

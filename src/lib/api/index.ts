@@ -15,6 +15,9 @@ export { analyticsApi } from "./analytics";
 export type {
   AnalyticsPeriod,
   DashboardStats,
+  DigestDraft,
+  DigestMetrics,
+  DigestPreview,
   TrendPoint,
   Slice,
   CityRow,

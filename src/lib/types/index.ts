@@ -1,8 +1,9 @@
 /**
  * Shared domain types for MyTijaara.
  *
- * The backend agent should import types from here — never from mock-data —
- * so swapping the data source out doesn't touch consumers.
+ * Routes import their row shapes from here or from the `@/lib/api` module that
+ * owns the endpoint. `src/lib/mock-data.ts` is gone; nothing in the app ships a
+ * fixture any more.
  */
 
 export type WaitlistStatus = "active" | "invited" | "onboarded" | "unsubscribed";
@@ -54,18 +55,17 @@ export type ReferralAnalytics = {
   sources: { name: string; value: number }[];
 };
 
-export type DashboardStats = {
-  visitors: number;
-  totalWaitlist: number;
-  todaySignups: number;
-  weeklyGrowth: number;
-  monthlyGrowth: number;
-  conversionRate: number;
-  ctaClicks: number;
-  emailOpenRate: number;
-  emailClickRate: number;
-  verifiedRate: number;
-};
+/**
+ * Re-exported, not redeclared.
+ *
+ * There used to be a second copy of this shape here, missing `periodDays`,
+ * `periodSignups` and `previousPeriodSignups`. The backend has always returned
+ * those three, so any route importing the copy from here could not see the
+ * fields it needed to label the selected window — and the two definitions could
+ * drift again on the next backend change. One declaration, in the file that owns
+ * the endpoint.
+ */
+export type { DashboardStats } from "@/lib/api/analytics";
 
 export type SignupTrendPoint = {
   date: string;
