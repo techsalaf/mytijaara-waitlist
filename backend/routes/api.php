@@ -61,9 +61,22 @@ Route::get('/content/testimonials', [ContentController::class, 'testimonials']);
 // Authenticated admin panel.
 // ---------------------------------------------------------------------------
 Route::middleware('auth:sanctum')->group(function () {
-    // Session
+    // Session + own profile. No permission gate: every admin owns their account.
     Route::get('/auth/me', [AuthController::class, 'me']);
+    Route::patch('/auth/me', [AuthController::class, 'updateProfile']);
+    Route::post('/auth/password', [AuthController::class, 'changePassword']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
+
+    // Active sessions = this account's Sanctum tokens.
+    Route::get('/auth/sessions', [AuthController::class, 'sessions']);
+    Route::post('/auth/sessions/revoke-others', [AuthController::class, 'revokeOtherSessions']);
+    Route::delete('/auth/sessions/{id}', [AuthController::class, 'revokeSession']);
+
+    // Two-factor enrolment. Confirm before it is enforced.
+    Route::post('/auth/two-factor', [AuthController::class, 'startTwoFactor']);
+    Route::post('/auth/two-factor/confirm', [AuthController::class, 'confirmTwoFactor']);
+    Route::post('/auth/two-factor/recovery-codes', [AuthController::class, 'regenerateRecoveryCodes']);
+    Route::delete('/auth/two-factor', [AuthController::class, 'disableTwoFactor']);
 
     // Notifications — any authenticated admin sees their own.
     Route::get('/notifications', [NotificationController::class, 'index']);
@@ -179,6 +192,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/settings/api-keys', [SettingsController::class, 'generateApiKey'])->middleware('permission:settings.edit-general');
     Route::delete('/settings/api-keys/{id}', [SettingsController::class, 'revokeApiKey'])->middleware('permission:settings.edit-general');
     Route::post('/settings/smtp/test', [SettingsController::class, 'testSmtp'])->middleware('permission:settings.edit-general');
+    Route::post('/settings/cache/purge', [SettingsController::class, 'purgeCache'])->middleware('permission:settings.edit-general');
     Route::get('/settings/{group}', [SettingsController::class, 'show'])->middleware('permission:settings.view');
     Route::patch('/settings/{group}', [SettingsController::class, 'update'])->middleware('permission:settings.edit-general');
 });

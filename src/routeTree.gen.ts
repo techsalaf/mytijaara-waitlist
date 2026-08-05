@@ -55,7 +55,6 @@ import { Route as AdminRolesIdRouteImport } from './routes/admin.roles.$id'
 import { Route as AdminSettingsIndexRouteImport } from './routes/admin.settings.index'
 import { Route as AdminSettingsApiKeysRouteImport } from './routes/admin.settings.api-keys'
 import { Route as AdminSettingsBrandingRouteImport } from './routes/admin.settings.branding'
-import { Route as AdminSettingsCompanyRouteImport } from './routes/admin.settings.company'
 import { Route as AdminSettingsIntegrationsRouteImport } from './routes/admin.settings.integrations'
 import { Route as AdminSettingsSeoRouteImport } from './routes/admin.settings.seo'
 import { Route as AdminSettingsSmtpRouteImport } from './routes/admin.settings.smtp'
@@ -294,11 +293,6 @@ const AdminSettingsBrandingRoute = AdminSettingsBrandingRouteImport.update({
   path: '/branding',
   getParentRoute: () => AdminSettingsRoute,
 } as any)
-const AdminSettingsCompanyRoute = AdminSettingsCompanyRouteImport.update({
-  id: '/company',
-  path: '/company',
-  getParentRoute: () => AdminSettingsRoute,
-} as any)
 const AdminSettingsIntegrationsRoute =
   AdminSettingsIntegrationsRouteImport.update({
     id: '/integrations',
@@ -374,7 +368,6 @@ export interface FileRoutesByFullPath {
   '/admin/roles/$id': typeof AdminRolesIdRoute
   '/admin/settings/api-keys': typeof AdminSettingsApiKeysRoute
   '/admin/settings/branding': typeof AdminSettingsBrandingRoute
-  '/admin/settings/company': typeof AdminSettingsCompanyRoute
   '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
   '/admin/settings/seo': typeof AdminSettingsSeoRoute
   '/admin/settings/smtp': typeof AdminSettingsSmtpRoute
@@ -424,7 +417,6 @@ export interface FileRoutesByTo {
   '/admin/roles/$id': typeof AdminRolesIdRoute
   '/admin/settings/api-keys': typeof AdminSettingsApiKeysRoute
   '/admin/settings/branding': typeof AdminSettingsBrandingRoute
-  '/admin/settings/company': typeof AdminSettingsCompanyRoute
   '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
   '/admin/settings/seo': typeof AdminSettingsSeoRoute
   '/admin/settings/smtp': typeof AdminSettingsSmtpRoute
@@ -480,7 +472,6 @@ export interface FileRoutesById {
   '/admin/roles/$id': typeof AdminRolesIdRoute
   '/admin/settings/api-keys': typeof AdminSettingsApiKeysRoute
   '/admin/settings/branding': typeof AdminSettingsBrandingRoute
-  '/admin/settings/company': typeof AdminSettingsCompanyRoute
   '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
   '/admin/settings/seo': typeof AdminSettingsSeoRoute
   '/admin/settings/smtp': typeof AdminSettingsSmtpRoute
@@ -537,7 +528,6 @@ export interface FileRouteTypes {
     | '/admin/roles/$id'
     | '/admin/settings/api-keys'
     | '/admin/settings/branding'
-    | '/admin/settings/company'
     | '/admin/settings/integrations'
     | '/admin/settings/seo'
     | '/admin/settings/smtp'
@@ -587,7 +577,6 @@ export interface FileRouteTypes {
     | '/admin/roles/$id'
     | '/admin/settings/api-keys'
     | '/admin/settings/branding'
-    | '/admin/settings/company'
     | '/admin/settings/integrations'
     | '/admin/settings/seo'
     | '/admin/settings/smtp'
@@ -642,7 +631,6 @@ export interface FileRouteTypes {
     | '/admin/roles/$id'
     | '/admin/settings/api-keys'
     | '/admin/settings/branding'
-    | '/admin/settings/company'
     | '/admin/settings/integrations'
     | '/admin/settings/seo'
     | '/admin/settings/smtp'
@@ -985,13 +973,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsBrandingRouteImport
       parentRoute: typeof AdminSettingsRoute
     }
-    '/admin/settings/company': {
-      id: '/admin/settings/company'
-      path: '/company'
-      fullPath: '/admin/settings/company'
-      preLoaderRoute: typeof AdminSettingsCompanyRouteImport
-      parentRoute: typeof AdminSettingsRoute
-    }
     '/admin/settings/integrations': {
       id: '/admin/settings/integrations'
       path: '/integrations'
@@ -1124,7 +1105,6 @@ const AdminRolesRouteWithChildren = AdminRolesRoute._addFileChildren(
 interface AdminSettingsRouteChildren {
   AdminSettingsApiKeysRoute: typeof AdminSettingsApiKeysRoute
   AdminSettingsBrandingRoute: typeof AdminSettingsBrandingRoute
-  AdminSettingsCompanyRoute: typeof AdminSettingsCompanyRoute
   AdminSettingsIntegrationsRoute: typeof AdminSettingsIntegrationsRoute
   AdminSettingsSeoRoute: typeof AdminSettingsSeoRoute
   AdminSettingsSmtpRoute: typeof AdminSettingsSmtpRoute
@@ -1136,7 +1116,6 @@ interface AdminSettingsRouteChildren {
 const AdminSettingsRouteChildren: AdminSettingsRouteChildren = {
   AdminSettingsApiKeysRoute: AdminSettingsApiKeysRoute,
   AdminSettingsBrandingRoute: AdminSettingsBrandingRoute,
-  AdminSettingsCompanyRoute: AdminSettingsCompanyRoute,
   AdminSettingsIntegrationsRoute: AdminSettingsIntegrationsRoute,
   AdminSettingsSeoRoute: AdminSettingsSeoRoute,
   AdminSettingsSmtpRoute: AdminSettingsSmtpRoute,

@@ -1,19 +1,20 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { PageHeader } from "@/components/admin/ui-bits";
-import { Button } from "@/components/ui/button";
-import { Save } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/settings")({
   head: () => ({ meta: [{ title: "Settings — MyTijaara Admin" }, { name: "robots", content: "noindex" }] }),
   component: SettingsLayout,
 });
 
+/**
+ * One tab per settings group on the backend. There is deliberately no second
+ * tab writing a group another tab already owns: two forms merging into the same
+ * row would each silently revert the other's fields.
+ */
 const nav = [
-  { to: "/admin/settings", label: "General", exact: true },
+  { to: "/admin/settings", label: "General" },
   { to: "/admin/settings/branding", label: "Branding" },
-  { to: "/admin/settings/company", label: "Company" },
   { to: "/admin/settings/smtp", label: "SMTP / Email" },
   { to: "/admin/settings/integrations", label: "Analytics & Tracking" },
   { to: "/admin/settings/social", label: "Social" },
@@ -26,15 +27,18 @@ function SettingsLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
     <div className="space-y-6">
+      {/*
+        No Save button here. Each tab owns its own save because each tab writes a
+        different settings group; a shared button could only ever fake it.
+      */}
       <PageHeader
         title="Settings"
         description="Configure your workspace, branding, integrations and more."
-        actions={<Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => toast.success("Saved")}><Save className="mr-2 h-4 w-4" /> Save changes</Button>}
       />
       <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
         <aside className="space-y-0.5">
           {nav.map((t) => {
-            const active = t.exact ? pathname === t.to : pathname === t.to;
+            const active = pathname === t.to || pathname === `${t.to}/`;
             return (
               <Link key={t.to} to={t.to} className={cn(
                 "block rounded-lg px-3 py-2 text-sm font-medium",

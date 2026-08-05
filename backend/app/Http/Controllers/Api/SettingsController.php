@@ -8,6 +8,8 @@ use App\Models\Setting;
 use App\Support\SmtpConfig;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -89,6 +91,56 @@ class SettingsController extends Controller
         $this->audit($request, 'settings.smtp.test', ['ok' => $result['ok']]);
 
         return response()->json(['data' => $result], $result['ok'] ? 200 : 422);
+    }
+
+    /**
+     * POST /settings/cache/purge — flush the application cache for real.
+     *
+     * Reports the driver and the entry count it saw beforehand, so the page can
+     * say what was actually cleared instead of a bare success toast. A driver
+     * that cannot be counted reports null rather than a made-up number.
+     */
+    public function purgeCache(Request $request): JsonResponse
+    {
+        $store = config('cache.default');
+        $before = $this->cacheEntryCount();
+
+        try {
+            Cache::store($store)->flush();
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'The cache store refused the flush: '.$e->getMessage(),
+            ], 422);
+        }
+
+        $this->audit($request, 'settings.cache.purge', ['store' => $store, 'entries' => $before]);
+
+        return response()->json([
+            'data' => [
+                'store' => $store,
+                'entriesCleared' => $before,
+                'purgedAt' => now()->toIso8601String(),
+            ],
+        ]);
+    }
+
+    /**
+     * Rows in the cache table, or null when the driver cannot be counted.
+     *
+     * Only the database driver keeps an enumerable store here; redis and file
+     * would need a scan that is not worth the cost on a settings page.
+     */
+    private function cacheEntryCount(): ?int
+    {
+        if (config('cache.default') !== 'database') {
+            return null;
+        }
+
+        try {
+            return (int) DB::table(config('cache.stores.database.table', 'cache'))->count();
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     /** GET /settings/api-keys — masked keys, newest first. */

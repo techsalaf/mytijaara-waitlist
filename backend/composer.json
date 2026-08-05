@@ -7,11 +7,13 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "bacon/bacon-qr-code": "^3.0",
         "dedoc/scramble": "^0.13.36",
         "intervention/image": "^3.11",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
+        "pragmarx/google2fa": "^8.0",
         "predis/predis": "^3.5",
         "spatie/laravel-permission": "^6.25"
     },

@@ -54,7 +54,13 @@ export { auditApi } from "./audit";
 export type { AuditEntry, AuditListParams } from "./audit";
 
 export { settingsApi } from "./settings";
-export type { SettingsGroup, SmtpSettings, ApiKeyRecord } from "./settings";
+export type {
+  SettingsGroup,
+  SmtpSettings,
+  ApiKeyRecord,
+  CachePurgeResult,
+  SystemSettings,
+} from "./settings";
 
 export { healthApi } from "./health";
 export type { SystemHealth, HealthCheck, HealthSample } from "./health";

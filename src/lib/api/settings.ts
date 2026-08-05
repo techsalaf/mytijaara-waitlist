@@ -41,6 +41,25 @@ export type ApiKeyRecord = {
   active: boolean;
 };
 
+/** Result of `POST /settings/cache/purge`. */
+export type CachePurgeResult = {
+  store: string;
+  /** Entries seen before the flush, or null when the driver cannot be counted. */
+  entriesCleared: number | null;
+  purgedAt: string;
+};
+
+/** The `system` group. Mirrors `SettingsController::rules('system')`. */
+export type SystemSettings = {
+  maintenanceMode: boolean;
+  signupsPaused: boolean;
+  signupRateLimitPerHour: number;
+  weeklyDigestEnabled: boolean;
+  weeklyDigestDay: "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+  weeklyDigestRecipients: string[];
+  notifyOnSignup: boolean;
+};
+
 export const settingsApi = {
   get: <T = Record<string, unknown>>(group: SettingsGroup) =>
     apiCall<T>(`/settings/${group}`),
@@ -54,6 +73,10 @@ export const settingsApi = {
       body: override ?? {},
       timeoutMs: 30000, // an unreachable SMTP host can take a while to fail
     }),
+
+  /** Flushes the configured cache store. Reports what was actually cleared. */
+  purgeCache: () =>
+    apiCall<CachePurgeResult>("/settings/cache/purge", { method: "POST", timeoutMs: 30000 }),
 
   apiKeys: {
     list: () => apiCall<ApiKeyRecord[]>("/settings/api-keys"),
