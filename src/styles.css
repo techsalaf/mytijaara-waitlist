@@ -182,3 +182,28 @@
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 @utility animate-digit-in { animation: digit-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+/*
+ * Indeterminate navigation bar in the admin topbar. There is no real progress
+ * to read from the router, so it eases toward 90% and the element unmounts on
+ * completion, which is the convention users already read as "working".
+ */
+@keyframes nav-progress {
+  from { transform: scaleX(0); }
+  60% { transform: scaleX(0.7); }
+  to { transform: scaleX(0.9); }
+}
+@utility animate-nav-progress { animation: nav-progress 1.4s ease-out forwards; }
+
+/*
+ * Launch ticker strip above the nav. The content is rendered four times, so a
+ * -25% translation returns to a pixel-identical position and the loop is
+ * seamless. Slower than `animate-marquee` (40s) would be unreadable on a strip
+ * this short, faster than ~18s reads as frantic.
+ */
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-25%); }
+}
+@utility animate-ticker { animation: ticker 22s linear infinite; }
+

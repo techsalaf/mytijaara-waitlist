@@ -3,6 +3,7 @@ import { ArrowRight, Download, Menu, X } from "lucide-react";
 
 import { Logo } from "./logo";
 import { usePrimaryCta } from "@/components/launch/launch-cta";
+import { LaunchTicker } from "@/components/launch/launch-ticker";
 
 const LINKS = [
   { href: "#moments", label: "Everyday moments" },
@@ -27,10 +28,16 @@ export function Nav() {
   }, []);
 
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all ${scrolled ? "py-2" : "py-4"}`}
-    >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+    <header className="fixed inset-x-0 top-0 z-50">
+      {/*
+        Full-bleed launch strip. It sits inside the fixed header rather than as
+        its own fixed element so that when it returns null (post-launch, or when
+        an admin turns the ticker off) the nav moves up on its own — no offset to
+        keep in sync and no leftover gap.
+      */}
+      <LaunchTicker />
+      <div className={`transition-all ${scrolled ? "py-2" : "py-4"}`}>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div
           className={`flex items-center justify-between rounded-2xl px-4 py-3 transition-all ${
             scrolled ? "glass shadow-soft" : ""
@@ -90,6 +97,7 @@ export function Nav() {
             </nav>
           </div>
         )}
+        </div>
       </div>
     </header>
   );
