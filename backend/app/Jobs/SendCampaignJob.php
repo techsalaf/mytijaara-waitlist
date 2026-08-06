@@ -6,18 +6,29 @@ use App\Mail\CampaignMail;
 use App\Models\EmailCampaign;
 use App\Models\EmailEvent;
 use App\Models\Unsubscribe;
-use App\Models\WaitlistEntry;
+use App\Support\CampaignSegment;
+use App\Support\SmtpConfig;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 /**
  * Delivers a campaign to its target segment. Records a per-recipient `sent`
  * event and updates the campaign counters. Runs on the queue so the API
  * request returns immediately.
+ *
+ * Two things this job is careful about:
+ *
+ *  1. It applies the admin SMTP settings before sending. Without this the queue
+ *     worker used whatever was in `.env`, so a campaign ignored the mail server
+ *     configured in the admin panel.
+ *  2. A campaign that matched nobody goes back to `draft`, not `sent`. Marking
+ *     an empty run as sent made a broken segment look like a delivered campaign
+ *     and was unrecoverable, because `sent` is a terminal status.
  */
 class SendCampaignJob implements ShouldQueue
 {
@@ -36,12 +47,18 @@ class SendCampaignJob implements ShouldQueue
             return;
         }
 
+        // Use the mail server the admin configured, not the one in .env.
+        SmtpConfig::apply();
+
         $unsubscribed = Unsubscribe::pluck('email')->flip();
 
         $sent = 0;
-        $this->recipients($campaign)->chunkById(200, function ($entries) use ($campaign, $unsubscribed, &$sent) {
+        $skipped = 0;
+        $this->recipients($campaign)->chunkById(200, function ($entries) use ($campaign, $unsubscribed, &$sent, &$skipped) {
             foreach ($entries as $entry) {
                 if ($unsubscribed->has($entry->email) || $entry->status === 'unsubscribed') {
+                    $skipped++;
+
                     continue;
                 }
 
@@ -66,6 +83,18 @@ class SendCampaignJob implements ShouldQueue
             }
         });
 
+        // Nobody was reachable: return the campaign to draft so the segment can
+        // be fixed and the run retried, instead of stranding it in `sent`.
+        if ($sent === 0) {
+            $campaign->update(['status' => 'draft']);
+            Log::warning('campaign matched no deliverable recipients', [
+                'campaign' => $campaign->public_id,
+                'suppressed' => $skipped,
+            ]);
+
+            return;
+        }
+
         $campaign->update([
             'status' => 'sent',
             'sent' => $campaign->sent + $sent,
@@ -74,25 +103,14 @@ class SendCampaignJob implements ShouldQueue
         ]);
     }
 
-    /** Build the recipient query from the campaign segment rules. */
+    /**
+     * Build the recipient query from the campaign segment rules.
+     *
+     * Delegated to `CampaignSegment` so the estimated reach in the builder and
+     * the rows actually mailed here can never drift apart.
+     */
     private function recipients(EmailCampaign $campaign)
     {
-        $query = WaitlistEntry::query()->whereNotNull('email');
-        $segment = $campaign->segment ?? [];
-
-        if (! empty($segment['status'])) {
-            $query->where('status', $segment['status']);
-        }
-        if (! empty($segment['verified'])) {
-            $query->where('verified', true);
-        }
-        if (! empty($segment['source'])) {
-            $query->where('source', $segment['source']);
-        }
-        if (! empty($segment['city'])) {
-            $query->where('city', $segment['city']);
-        }
-
-        return $query;
+        return CampaignSegment::query($campaign->segment ?? []);
     }
 }

@@ -107,17 +107,32 @@ export type DeviceBreakdown = { name: string; value: number; color: string };
 export type BrowserBreakdown = { name: string; value: number; color: string };
 export type FunnelStep = { stage: string; value: number; pct: number };
 
-export type CampaignStatus = "draft" | "scheduled" | "sent";
+export type CampaignStatus = "draft" | "scheduled" | "sending" | "sent";
 export type Campaign = {
   id: string;
   name: string;
   status: CampaignStatus;
   subject: string;
+  html: string | null;
   sent: number;
   opens: number;
   clicks: number;
-  sentAt: string;
-  template: string;
+  openRate: number;
+  clickRate: number;
+  sentAt: string | null;
+  scheduledAt: string | null;
+  /** Template public_id, or null when the HTML was authored directly. */
+  templateId: string | null;
+  segment: Record<string, unknown> | null;
+  createdAt: string;
+};
+
+/** One preset segment with its live reach. */
+export type CampaignSegment = {
+  value: string;
+  label: string;
+  rules: Record<string, unknown>;
+  reach: number;
 };
 
 export type EmailTemplate = {

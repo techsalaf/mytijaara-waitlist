@@ -8,8 +8,10 @@ use App\Jobs\SendCampaignJob;
 use App\Models\EmailCampaign;
 use App\Models\EmailEvent;
 use App\Models\EmailTemplate;
+use App\Support\CampaignSegment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -88,6 +90,53 @@ class CampaignController extends Controller
         return response()->json(['data' => ['deleted' => true]]);
     }
 
+    /**
+     * POST /campaigns/:id/duplicate — copy a campaign back to draft.
+     *
+     * The counters and send timestamps are deliberately not copied: a duplicate
+     * has sent nothing, so inheriting the original's opens would invent stats.
+     */
+    public function duplicate(Request $request, string $id): JsonResponse
+    {
+        $source = EmailCampaign::where('public_id', $id)->firstOrFail();
+
+        $copy = EmailCampaign::create([
+            'public_id' => EmailCampaign::nextPublicId(),
+            'name' => Str::limit($source->name.' (copy)', 255, ''),
+            'subject' => $source->subject,
+            'html' => $source->html,
+            'status' => 'draft',
+            'template_id' => $source->template_id,
+            'segment' => $source->segment,
+            'scheduled_at' => null,
+            'created_by' => $request->user()?->id,
+        ]);
+
+        return response()->json(['data' => new CampaignResource($copy->load('template'))], 201);
+    }
+
+    /**
+     * GET /campaigns/segments — the preset list with a live reach for each.
+     *
+     * The builder hardcoded these counts ("All active users (2,847)"), so the
+     * figure on screen had no connection to who would actually be mailed.
+     */
+    public function segments(): JsonResponse
+    {
+        $presets = [];
+        foreach (CampaignSegment::PRESETS as $value => $label) {
+            $rules = CampaignSegment::rulesFor($value);
+            $presets[] = [
+                'value' => $value,
+                'label' => $label,
+                'rules' => $rules,
+                'reach' => CampaignSegment::reach($rules),
+            ];
+        }
+
+        return response()->json(['data' => $presets]);
+    }
+
     /** POST /campaigns/:id/send — queue the campaign for delivery. */
     public function send(string $id): JsonResponse
     {
@@ -124,15 +173,36 @@ class CampaignController extends Controller
 
     private function validated(Request $request, bool $creating = true): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'name' => [$creating ? 'required' : 'sometimes', 'string', 'max:255'],
             'subject' => [$creating ? 'required' : 'sometimes', 'string', 'max:255'],
             'html' => ['sometimes', 'nullable', 'string'],
             'status' => ['sometimes', Rule::in(['draft', 'scheduled', 'sending', 'sent'])],
             'template' => ['sometimes', 'nullable', 'string', 'max:64'],
             'segment' => ['sometimes', 'nullable', 'array'],
+            // Future-dating is enforced below rather than with `after:now`,
+            // because it must only apply when the status is `scheduled` (a draft
+            // may legitimately keep an old timestamp).
             'scheduledAt' => ['sometimes', 'nullable', 'date'],
         ]);
+
+        // A `scheduled` campaign with no send time never sends: the dispatcher
+        // filters on `whereNotNull('scheduled_at')`. Rejecting it here is what
+        // stops "Schedule for later" from silently becoming a dead draft.
+        if (($data['status'] ?? null) === 'scheduled' && empty($data['scheduledAt'])) {
+            throw ValidationException::withMessages([
+                'scheduledAt' => ['Pick a send time for a scheduled campaign.'],
+            ]);
+        }
+
+        if (! empty($data['scheduledAt']) && ($data['status'] ?? null) === 'scheduled'
+            && now()->gte($data['scheduledAt'])) {
+            throw ValidationException::withMessages([
+                'scheduledAt' => ['The send time has to be in the future.'],
+            ]);
+        }
+
+        return $data;
     }
 
     private function resolveTemplateId(?string $publicId): ?int

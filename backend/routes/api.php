@@ -169,9 +169,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Email — campaigns
     Route::get('/campaigns', [CampaignController::class, 'index'])->middleware('permission:email.view');
+    // Before `{id}`, which would otherwise match "segments".
+    Route::get('/campaigns/segments', [CampaignController::class, 'segments'])->middleware('permission:email.view');
     Route::get('/campaigns/{id}', [CampaignController::class, 'show'])->middleware('permission:email.view');
     Route::get('/campaigns/{id}/stats', [CampaignController::class, 'stats'])->middleware('permission:email.view');
     Route::post('/campaigns', [CampaignController::class, 'store'])->middleware('permission:email.create');
+    Route::post('/campaigns/{id}/duplicate', [CampaignController::class, 'duplicate'])->middleware('permission:email.create');
     Route::patch('/campaigns/{id}', [CampaignController::class, 'update'])->middleware('permission:email.create');
     Route::delete('/campaigns/{id}', [CampaignController::class, 'destroy'])->middleware('permission:email.delete');
     Route::post('/campaigns/{id}/send', [CampaignController::class, 'send'])->middleware('permission:email.send');
