@@ -2,6 +2,20 @@ import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 
 import { Reveal } from "./reveal";
+import { useCmsData } from "@/lib/cms-context";
+
+type InsideTheAppCmsData = {
+  badge?: string;
+  heading?: string;
+  subheading?: string;
+};
+
+const DEFAULT_INSIDE: InsideTheAppCmsData = {
+  badge: "Inside the app",
+  heading: "Nine screens. One tidy life.",
+  subheading:
+    "A peek at the real MyTijaara — from food to fuel money, groceries to getaways. Swipe, drag, or tap any screen to see it up close.",
+};
 
 type Screen = { src: string; caption: string; tag: string };
 
@@ -109,6 +123,7 @@ function ScreenModal({ screen, onClose }: { screen: Screen | null; onClose: () =
 }
 
 export function InsideTheApp() {
+  const cms = useCmsData("inside_the_app", DEFAULT_INSIDE);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const offsetRef = useRef(0);
   const halfWidthRef = useRef(0);
@@ -195,13 +210,13 @@ export function InsideTheApp() {
         <div className="mx-auto max-w-2xl text-center">
           <Reveal>
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-primary">
-              Inside the app
+              {cms.badge ?? DEFAULT_INSIDE.badge}
             </span>
             <h2 className="mt-5 font-display text-4xl font-bold tracking-tight sm:text-5xl">
-              Nine screens. One tidy life.
+              {cms.heading ?? DEFAULT_INSIDE.heading}
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              A peek at the real MyTijaara — from food to fuel money, groceries to getaways. Swipe, drag, or tap any screen to see it up close.
+              {cms.subheading ?? DEFAULT_INSIDE.subheading}
             </p>
           </Reveal>
         </div>

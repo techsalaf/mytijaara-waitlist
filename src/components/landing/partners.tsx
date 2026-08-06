@@ -2,6 +2,19 @@ import { ArrowRight, Check, Sparkles } from "lucide-react";
 
 import { Reveal } from "./reveal";
 import { usePrimaryCta } from "@/components/launch/launch-cta";
+import { useCmsData } from "@/lib/cms-context";
+
+type PartnersCmsData = {
+  badge?: string;
+  heading?: string;
+  subheading?: string;
+};
+
+const DEFAULT_PARTNERS: PartnersCmsData = {
+  badge: "Grow with us",
+  heading: "A better way to earn.",
+  subheading: "Vendors, riders and artisans — MyTijaara helps you find more customers.",
+};
 
 /**
  * These three images used to be imported from `src/assets/screens/*.asset.json`,
@@ -50,6 +63,7 @@ const PARTNERS = [
 export function Partners() {
   // Partner CTAs point at the waitlist pre-launch, the download section after.
   const primary = usePrimaryCta();
+  const cms = useCmsData("partners", DEFAULT_PARTNERS);
 
   return (
     <section id="partners" className="relative overflow-hidden bg-surface py-24 sm:py-32">
@@ -59,13 +73,13 @@ export function Partners() {
           <Reveal>
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-primary">
               <Sparkles className="h-3.5 w-3.5 text-gold" />
-              Grow with us
+              {cms.badge ?? DEFAULT_PARTNERS.badge}
             </span>
             <h2 className="mt-5 font-display text-4xl font-bold tracking-tight sm:text-5xl">
-              A better way to earn.
+              {cms.heading ?? DEFAULT_PARTNERS.heading}
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Vendors, riders and artisans — MyTijaara helps you find more customers.
+              {cms.subheading ?? DEFAULT_PARTNERS.subheading}
             </p>
           </Reveal>
         </div>

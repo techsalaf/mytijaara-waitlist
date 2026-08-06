@@ -15,7 +15,19 @@ import { WaitlistCount } from "./waitlist-count";
 import { AvatarCluster } from "./avatar-cluster";
 import { usePrimaryCta } from "@/components/launch/launch-cta";
 import { useLaunch } from "@/components/launch/launch-state-provider";
+import { useCmsData } from "@/lib/cms-context";
 import heroImg from "@/assets/hero-illustration.png";
+
+type HeroCmsData = {
+  subtitle?: string;
+  secondaryCtaLabel?: string;
+};
+
+const DEFAULT_HERO: HeroCmsData = {
+  subtitle:
+    "Order food, groceries and pharmacy items, book trusted artisans, send packages, rent cars, and shop from businesses around you — all from one app built for Nigerians.",
+  secondaryCtaLabel: "See How It Works",
+};
 
 const HERO_SERVICES = [
   { icon: UtensilsCrossed, label: "Food" },
@@ -30,6 +42,7 @@ export function Hero() {
   const cta = usePrimaryCta();
   const { isLaunched, showWaitlist } = useLaunch();
   const CtaIcon = cta.download ? Download : ArrowRight;
+  const cms = useCmsData("hero", DEFAULT_HERO);
 
   return (
     <section id="top" className="relative overflow-hidden pt-32 pb-20 sm:pt-40 lg:pb-32">
@@ -76,9 +89,7 @@ export function Hero() {
           </Reveal>
           <Reveal delay={200}>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
-              Order food, groceries and pharmacy items, book trusted artisans, send
-              packages, rent cars, and shop from businesses around you — all from one
-              app built for Nigerians.
+              {cms.subtitle}
             </p>
           </Reveal>
           <Reveal delay={300}>
@@ -94,7 +105,7 @@ export function Hero() {
                 href="#how"
                 className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-7 py-4 text-base font-semibold text-foreground transition-colors hover:bg-primary-soft"
               >
-                See How It Works
+              {cms.secondaryCtaLabel ?? DEFAULT_HERO.secondaryCtaLabel}
               </a>
             </div>
           </Reveal>

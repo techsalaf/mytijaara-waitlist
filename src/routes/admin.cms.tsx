@@ -14,7 +14,12 @@ export const Route = createFileRoute("/admin/cms")({
 const tabs = [
   { to: "/admin/cms", label: "Hero", exact: true },
   { to: "/admin/cms/launch", label: "Launch" },
-  { to: "/admin/cms/features", label: "Features" },
+  { to: "/admin/cms/features", label: "Services" },
+  { to: "/admin/cms/how", label: "How It Works" },
+  { to: "/admin/cms/why", label: "Why" },
+  { to: "/admin/cms/inside-the-app", label: "Inside App" },
+  { to: "/admin/cms/built-for-nigerians", label: "Built for NG" },
+  { to: "/admin/cms/partners", label: "Partners" },
   { to: "/admin/cms/testimonials", label: "Testimonials" },
   { to: "/admin/cms/faqs", label: "FAQs" },
   { to: "/admin/cms/statistics", label: "Statistics" },
