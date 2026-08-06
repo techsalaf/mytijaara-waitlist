@@ -15,6 +15,9 @@ export { analyticsApi } from "./analytics";
 export type {
   AnalyticsPeriod,
   DashboardStats,
+  DigestDraft,
+  DigestMetrics,
+  DigestPreview,
   TrendPoint,
   Slice,
   CityRow,
@@ -24,7 +27,9 @@ export type {
 export { dashboardApi } from "./dashboard";
 
 export { referralsApi } from "./referrals";
-export type { ReferralDetail, RewardResult } from "./referrals";
+export type { ReferralDetail, RewardResult, ReferralProgram, PendingReward } from "./referrals";
+
+export { downloadEndpoint } from "./download";
 
 export { campaignsApi } from "./campaigns";
 export type { CampaignInput, CampaignStats } from "./campaigns";
@@ -54,7 +59,13 @@ export { auditApi } from "./audit";
 export type { AuditEntry, AuditListParams } from "./audit";
 
 export { settingsApi } from "./settings";
-export type { SettingsGroup, SmtpSettings, ApiKeyRecord } from "./settings";
+export type {
+  SettingsGroup,
+  SmtpSettings,
+  ApiKeyRecord,
+  CachePurgeResult,
+  SystemSettings,
+} from "./settings";
 
 export { healthApi } from "./health";
-export type { SystemHealth, HealthCheck } from "./health";
+export type { SystemHealth, HealthCheck, HealthSample } from "./health";

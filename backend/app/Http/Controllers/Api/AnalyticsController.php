@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\AnalyticsEvent;
 use App\Models\EmailCampaign;
 use App\Models\WaitlistEntry;
+use App\Support\Audit;
+use App\Support\WeeklyDigest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -257,6 +259,48 @@ class AnalyticsController extends Controller
         }
 
         return response()->json(['data' => $steps]);
+    }
+
+    /**
+     * GET /analytics/digest?days=7 — the weekly digest numbers plus the rendered
+     * email body, without writing anything. The admin preview reads this.
+     */
+    public function digestPreview(Request $request): JsonResponse
+    {
+        $metrics = WeeklyDigest::metrics((int) $request->input('days', 7));
+
+        return response()->json(['data' => [
+            'metrics' => $metrics,
+            'subject' => WeeklyDigest::subject($metrics),
+            'html' => WeeklyDigest::html($metrics),
+        ]]);
+    }
+
+    /**
+     * POST /analytics/digest — build the digest and save it as a draft campaign.
+     *
+     * A draft, not a send: the operator picks the segment and presses send in the
+     * Email module. Returns the campaign id so the dashboard can link straight to
+     * it instead of only toasting.
+     */
+    public function digest(Request $request): JsonResponse
+    {
+        $days = (int) $request->input('days', 7);
+        $metrics = WeeklyDigest::metrics($days);
+        $campaign = WeeklyDigest::draft($metrics, $request->user()?->id);
+
+        Audit::record($request, 'digest.created', "campaign {$campaign->public_id}", [
+            'days' => $metrics['days'],
+            'signups' => $metrics['signups'],
+        ], 'EmailCampaign', $campaign->public_id);
+
+        return response()->json(['data' => [
+            'campaignId' => $campaign->public_id,
+            'name' => $campaign->name,
+            'subject' => $campaign->subject,
+            'status' => $campaign->status,
+            'metrics' => $metrics,
+        ]], 201);
     }
 
     /** @param array<string,string> $colors */

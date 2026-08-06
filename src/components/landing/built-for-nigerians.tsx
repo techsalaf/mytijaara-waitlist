@@ -1,6 +1,7 @@
 import { Check } from "lucide-react";
 
 import { Reveal } from "./reveal";
+import { useCmsData } from "@/lib/cms-context";
 
 const NG_CARDS = [
   { title: "Suya night", emoji: "🍢", bg: "bg-[oklch(0.94_0.06_70)]", fg: "text-[oklch(0.45_0.15_45)]" },
@@ -9,14 +10,23 @@ const NG_CARDS = [
   { title: "Home fix", emoji: "🔧", bg: "bg-[oklch(0.94_0.06_70)]", fg: "text-[oklch(0.45_0.15_45)]" },
 ];
 
-const POINTS = [
-  "Pay how you already pay — card, transfer or on delivery.",
-  "Prices in naira. No surprise conversions.",
-  "Support that speaks your language, based in Nigeria.",
-  "Works with the shops and services on your street.",
-];
+type BfnCmsData = { heading?: string; body?: string; points?: string[] };
+
+const DEFAULT: BfnCmsData = {
+  heading: "Made here. For here.",
+  body: "We know Nigerian streets, Nigerian shops, Nigerian tastes — MyTijaara is built with all of it in mind. Not a copy of something from abroad.",
+  points: [
+    "Pay how you already pay — card, transfer or on delivery.",
+    "Prices in naira. No surprise conversions.",
+    "Support that speaks your language, based in Nigeria.",
+    "Works with the shops and services on your street.",
+  ],
+};
 
 export function BuiltForNigerians() {
+  const cms = useCmsData("built_for_nigerians", DEFAULT);
+  const points = cms.points && cms.points.length > 0 ? cms.points : DEFAULT.points!;
+
   return (
     <section className="relative overflow-hidden py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
@@ -27,14 +37,13 @@ export function BuiltForNigerians() {
                 Built for Nigerians
               </span>
               <h2 className="mt-6 font-display text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-                Made here. For here.
+                {cms.heading}
               </h2>
               <p className="mt-5 max-w-lg text-lg text-muted-foreground">
-                We know Nigerian streets, Nigerian shops, Nigerian tastes — MyTijaara is
-                built with all of it in mind. Not a copy of something from abroad.
+                {cms.body}
               </p>
               <ul className="mt-8 space-y-4">
-                {POINTS.map((p) => (
+                {points.map((p) => (
                   <li key={p} className="flex items-start gap-3">
                     <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-gold text-gold-foreground">
                       <Check className="h-3.5 w-3.5" strokeWidth={3} />

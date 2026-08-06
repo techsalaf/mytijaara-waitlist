@@ -32,15 +32,20 @@ import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-passw
 import { Route as AuthSessionExpiredRouteImport } from './routes/auth.session-expired'
 import { Route as AdminCmsIndexRouteImport } from './routes/admin.cms.index'
 import { Route as AdminCmsAnnouncementRouteImport } from './routes/admin.cms.announcement'
+import { Route as AdminCmsBuiltForNigeriansRouteImport } from './routes/admin.cms.built-for-nigerians'
 import { Route as AdminCmsFaqsRouteImport } from './routes/admin.cms.faqs'
 import { Route as AdminCmsFeaturesRouteImport } from './routes/admin.cms.features'
 import { Route as AdminCmsFooterRouteImport } from './routes/admin.cms.footer'
+import { Route as AdminCmsHowRouteImport } from './routes/admin.cms.how'
+import { Route as AdminCmsInsideTheAppRouteImport } from './routes/admin.cms.inside-the-app'
 import { Route as AdminCmsLaunchRouteImport } from './routes/admin.cms.launch'
 import { Route as AdminCmsNavigationRouteImport } from './routes/admin.cms.navigation'
+import { Route as AdminCmsPartnersRouteImport } from './routes/admin.cms.partners'
 import { Route as AdminCmsSeoRouteImport } from './routes/admin.cms.seo'
 import { Route as AdminCmsSocialRouteImport } from './routes/admin.cms.social'
 import { Route as AdminCmsStatisticsRouteImport } from './routes/admin.cms.statistics'
 import { Route as AdminCmsTestimonialsRouteImport } from './routes/admin.cms.testimonials'
+import { Route as AdminCmsWhyRouteImport } from './routes/admin.cms.why'
 import { Route as AdminEmailIndexRouteImport } from './routes/admin.email.index'
 import { Route as AdminEmailIdRouteImport } from './routes/admin.email.$id'
 import { Route as AdminEmailBuilderRouteImport } from './routes/admin.email.builder'
@@ -55,7 +60,6 @@ import { Route as AdminRolesIdRouteImport } from './routes/admin.roles.$id'
 import { Route as AdminSettingsIndexRouteImport } from './routes/admin.settings.index'
 import { Route as AdminSettingsApiKeysRouteImport } from './routes/admin.settings.api-keys'
 import { Route as AdminSettingsBrandingRouteImport } from './routes/admin.settings.branding'
-import { Route as AdminSettingsCompanyRouteImport } from './routes/admin.settings.company'
 import { Route as AdminSettingsIntegrationsRouteImport } from './routes/admin.settings.integrations'
 import { Route as AdminSettingsSeoRouteImport } from './routes/admin.settings.seo'
 import { Route as AdminSettingsSmtpRouteImport } from './routes/admin.settings.smtp'
@@ -178,6 +182,12 @@ const AdminCmsAnnouncementRoute = AdminCmsAnnouncementRouteImport.update({
   path: '/announcement',
   getParentRoute: () => AdminCmsRoute,
 } as any)
+const AdminCmsBuiltForNigeriansRoute =
+  AdminCmsBuiltForNigeriansRouteImport.update({
+    id: '/built-for-nigerians',
+    path: '/built-for-nigerians',
+    getParentRoute: () => AdminCmsRoute,
+  } as any)
 const AdminCmsFaqsRoute = AdminCmsFaqsRouteImport.update({
   id: '/faqs',
   path: '/faqs',
@@ -193,6 +203,16 @@ const AdminCmsFooterRoute = AdminCmsFooterRouteImport.update({
   path: '/footer',
   getParentRoute: () => AdminCmsRoute,
 } as any)
+const AdminCmsHowRoute = AdminCmsHowRouteImport.update({
+  id: '/how',
+  path: '/how',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
+const AdminCmsInsideTheAppRoute = AdminCmsInsideTheAppRouteImport.update({
+  id: '/inside-the-app',
+  path: '/inside-the-app',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
 const AdminCmsLaunchRoute = AdminCmsLaunchRouteImport.update({
   id: '/launch',
   path: '/launch',
@@ -201,6 +221,11 @@ const AdminCmsLaunchRoute = AdminCmsLaunchRouteImport.update({
 const AdminCmsNavigationRoute = AdminCmsNavigationRouteImport.update({
   id: '/navigation',
   path: '/navigation',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
+const AdminCmsPartnersRoute = AdminCmsPartnersRouteImport.update({
+  id: '/partners',
+  path: '/partners',
   getParentRoute: () => AdminCmsRoute,
 } as any)
 const AdminCmsSeoRoute = AdminCmsSeoRouteImport.update({
@@ -221,6 +246,11 @@ const AdminCmsStatisticsRoute = AdminCmsStatisticsRouteImport.update({
 const AdminCmsTestimonialsRoute = AdminCmsTestimonialsRouteImport.update({
   id: '/testimonials',
   path: '/testimonials',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
+const AdminCmsWhyRoute = AdminCmsWhyRouteImport.update({
+  id: '/why',
+  path: '/why',
   getParentRoute: () => AdminCmsRoute,
 } as any)
 const AdminEmailIndexRoute = AdminEmailIndexRouteImport.update({
@@ -294,11 +324,6 @@ const AdminSettingsBrandingRoute = AdminSettingsBrandingRouteImport.update({
   path: '/branding',
   getParentRoute: () => AdminSettingsRoute,
 } as any)
-const AdminSettingsCompanyRoute = AdminSettingsCompanyRouteImport.update({
-  id: '/company',
-  path: '/company',
-  getParentRoute: () => AdminSettingsRoute,
-} as any)
 const AdminSettingsIntegrationsRoute =
   AdminSettingsIntegrationsRouteImport.update({
     id: '/integrations',
@@ -354,15 +379,20 @@ export interface FileRoutesByFullPath {
   '/auth/session-expired': typeof AuthSessionExpiredRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/cms/announcement': typeof AdminCmsAnnouncementRoute
+  '/admin/cms/built-for-nigerians': typeof AdminCmsBuiltForNigeriansRoute
   '/admin/cms/faqs': typeof AdminCmsFaqsRoute
   '/admin/cms/features': typeof AdminCmsFeaturesRoute
   '/admin/cms/footer': typeof AdminCmsFooterRoute
+  '/admin/cms/how': typeof AdminCmsHowRoute
+  '/admin/cms/inside-the-app': typeof AdminCmsInsideTheAppRoute
   '/admin/cms/launch': typeof AdminCmsLaunchRoute
   '/admin/cms/navigation': typeof AdminCmsNavigationRoute
+  '/admin/cms/partners': typeof AdminCmsPartnersRoute
   '/admin/cms/seo': typeof AdminCmsSeoRoute
   '/admin/cms/social': typeof AdminCmsSocialRoute
   '/admin/cms/statistics': typeof AdminCmsStatisticsRoute
   '/admin/cms/testimonials': typeof AdminCmsTestimonialsRoute
+  '/admin/cms/why': typeof AdminCmsWhyRoute
   '/admin/email/$id': typeof AdminEmailIdRoute
   '/admin/email/builder': typeof AdminEmailBuilderRoute
   '/admin/email/drafts': typeof AdminEmailDraftsRoute
@@ -374,7 +404,6 @@ export interface FileRoutesByFullPath {
   '/admin/roles/$id': typeof AdminRolesIdRoute
   '/admin/settings/api-keys': typeof AdminSettingsApiKeysRoute
   '/admin/settings/branding': typeof AdminSettingsBrandingRoute
-  '/admin/settings/company': typeof AdminSettingsCompanyRoute
   '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
   '/admin/settings/seo': typeof AdminSettingsSeoRoute
   '/admin/settings/smtp': typeof AdminSettingsSmtpRoute
@@ -404,15 +433,20 @@ export interface FileRoutesByTo {
   '/auth/session-expired': typeof AuthSessionExpiredRoute
   '/admin': typeof AdminIndexRoute
   '/admin/cms/announcement': typeof AdminCmsAnnouncementRoute
+  '/admin/cms/built-for-nigerians': typeof AdminCmsBuiltForNigeriansRoute
   '/admin/cms/faqs': typeof AdminCmsFaqsRoute
   '/admin/cms/features': typeof AdminCmsFeaturesRoute
   '/admin/cms/footer': typeof AdminCmsFooterRoute
+  '/admin/cms/how': typeof AdminCmsHowRoute
+  '/admin/cms/inside-the-app': typeof AdminCmsInsideTheAppRoute
   '/admin/cms/launch': typeof AdminCmsLaunchRoute
   '/admin/cms/navigation': typeof AdminCmsNavigationRoute
+  '/admin/cms/partners': typeof AdminCmsPartnersRoute
   '/admin/cms/seo': typeof AdminCmsSeoRoute
   '/admin/cms/social': typeof AdminCmsSocialRoute
   '/admin/cms/statistics': typeof AdminCmsStatisticsRoute
   '/admin/cms/testimonials': typeof AdminCmsTestimonialsRoute
+  '/admin/cms/why': typeof AdminCmsWhyRoute
   '/admin/email/$id': typeof AdminEmailIdRoute
   '/admin/email/builder': typeof AdminEmailBuilderRoute
   '/admin/email/drafts': typeof AdminEmailDraftsRoute
@@ -424,7 +458,6 @@ export interface FileRoutesByTo {
   '/admin/roles/$id': typeof AdminRolesIdRoute
   '/admin/settings/api-keys': typeof AdminSettingsApiKeysRoute
   '/admin/settings/branding': typeof AdminSettingsBrandingRoute
-  '/admin/settings/company': typeof AdminSettingsCompanyRoute
   '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
   '/admin/settings/seo': typeof AdminSettingsSeoRoute
   '/admin/settings/smtp': typeof AdminSettingsSmtpRoute
@@ -460,15 +493,20 @@ export interface FileRoutesById {
   '/auth/session-expired': typeof AuthSessionExpiredRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/cms/announcement': typeof AdminCmsAnnouncementRoute
+  '/admin/cms/built-for-nigerians': typeof AdminCmsBuiltForNigeriansRoute
   '/admin/cms/faqs': typeof AdminCmsFaqsRoute
   '/admin/cms/features': typeof AdminCmsFeaturesRoute
   '/admin/cms/footer': typeof AdminCmsFooterRoute
+  '/admin/cms/how': typeof AdminCmsHowRoute
+  '/admin/cms/inside-the-app': typeof AdminCmsInsideTheAppRoute
   '/admin/cms/launch': typeof AdminCmsLaunchRoute
   '/admin/cms/navigation': typeof AdminCmsNavigationRoute
+  '/admin/cms/partners': typeof AdminCmsPartnersRoute
   '/admin/cms/seo': typeof AdminCmsSeoRoute
   '/admin/cms/social': typeof AdminCmsSocialRoute
   '/admin/cms/statistics': typeof AdminCmsStatisticsRoute
   '/admin/cms/testimonials': typeof AdminCmsTestimonialsRoute
+  '/admin/cms/why': typeof AdminCmsWhyRoute
   '/admin/email/$id': typeof AdminEmailIdRoute
   '/admin/email/builder': typeof AdminEmailBuilderRoute
   '/admin/email/drafts': typeof AdminEmailDraftsRoute
@@ -480,7 +518,6 @@ export interface FileRoutesById {
   '/admin/roles/$id': typeof AdminRolesIdRoute
   '/admin/settings/api-keys': typeof AdminSettingsApiKeysRoute
   '/admin/settings/branding': typeof AdminSettingsBrandingRoute
-  '/admin/settings/company': typeof AdminSettingsCompanyRoute
   '/admin/settings/integrations': typeof AdminSettingsIntegrationsRoute
   '/admin/settings/seo': typeof AdminSettingsSeoRoute
   '/admin/settings/smtp': typeof AdminSettingsSmtpRoute
@@ -517,15 +554,20 @@ export interface FileRouteTypes {
     | '/auth/session-expired'
     | '/admin/'
     | '/admin/cms/announcement'
+    | '/admin/cms/built-for-nigerians'
     | '/admin/cms/faqs'
     | '/admin/cms/features'
     | '/admin/cms/footer'
+    | '/admin/cms/how'
+    | '/admin/cms/inside-the-app'
     | '/admin/cms/launch'
     | '/admin/cms/navigation'
+    | '/admin/cms/partners'
     | '/admin/cms/seo'
     | '/admin/cms/social'
     | '/admin/cms/statistics'
     | '/admin/cms/testimonials'
+    | '/admin/cms/why'
     | '/admin/email/$id'
     | '/admin/email/builder'
     | '/admin/email/drafts'
@@ -537,7 +579,6 @@ export interface FileRouteTypes {
     | '/admin/roles/$id'
     | '/admin/settings/api-keys'
     | '/admin/settings/branding'
-    | '/admin/settings/company'
     | '/admin/settings/integrations'
     | '/admin/settings/seo'
     | '/admin/settings/smtp'
@@ -567,15 +608,20 @@ export interface FileRouteTypes {
     | '/auth/session-expired'
     | '/admin'
     | '/admin/cms/announcement'
+    | '/admin/cms/built-for-nigerians'
     | '/admin/cms/faqs'
     | '/admin/cms/features'
     | '/admin/cms/footer'
+    | '/admin/cms/how'
+    | '/admin/cms/inside-the-app'
     | '/admin/cms/launch'
     | '/admin/cms/navigation'
+    | '/admin/cms/partners'
     | '/admin/cms/seo'
     | '/admin/cms/social'
     | '/admin/cms/statistics'
     | '/admin/cms/testimonials'
+    | '/admin/cms/why'
     | '/admin/email/$id'
     | '/admin/email/builder'
     | '/admin/email/drafts'
@@ -587,7 +633,6 @@ export interface FileRouteTypes {
     | '/admin/roles/$id'
     | '/admin/settings/api-keys'
     | '/admin/settings/branding'
-    | '/admin/settings/company'
     | '/admin/settings/integrations'
     | '/admin/settings/seo'
     | '/admin/settings/smtp'
@@ -622,15 +667,20 @@ export interface FileRouteTypes {
     | '/auth/session-expired'
     | '/admin/'
     | '/admin/cms/announcement'
+    | '/admin/cms/built-for-nigerians'
     | '/admin/cms/faqs'
     | '/admin/cms/features'
     | '/admin/cms/footer'
+    | '/admin/cms/how'
+    | '/admin/cms/inside-the-app'
     | '/admin/cms/launch'
     | '/admin/cms/navigation'
+    | '/admin/cms/partners'
     | '/admin/cms/seo'
     | '/admin/cms/social'
     | '/admin/cms/statistics'
     | '/admin/cms/testimonials'
+    | '/admin/cms/why'
     | '/admin/email/$id'
     | '/admin/email/builder'
     | '/admin/email/drafts'
@@ -642,7 +692,6 @@ export interface FileRouteTypes {
     | '/admin/roles/$id'
     | '/admin/settings/api-keys'
     | '/admin/settings/branding'
-    | '/admin/settings/company'
     | '/admin/settings/integrations'
     | '/admin/settings/seo'
     | '/admin/settings/smtp'
@@ -824,6 +873,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCmsAnnouncementRouteImport
       parentRoute: typeof AdminCmsRoute
     }
+    '/admin/cms/built-for-nigerians': {
+      id: '/admin/cms/built-for-nigerians'
+      path: '/built-for-nigerians'
+      fullPath: '/admin/cms/built-for-nigerians'
+      preLoaderRoute: typeof AdminCmsBuiltForNigeriansRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
     '/admin/cms/faqs': {
       id: '/admin/cms/faqs'
       path: '/faqs'
@@ -845,6 +901,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCmsFooterRouteImport
       parentRoute: typeof AdminCmsRoute
     }
+    '/admin/cms/how': {
+      id: '/admin/cms/how'
+      path: '/how'
+      fullPath: '/admin/cms/how'
+      preLoaderRoute: typeof AdminCmsHowRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/cms/inside-the-app': {
+      id: '/admin/cms/inside-the-app'
+      path: '/inside-the-app'
+      fullPath: '/admin/cms/inside-the-app'
+      preLoaderRoute: typeof AdminCmsInsideTheAppRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
     '/admin/cms/launch': {
       id: '/admin/cms/launch'
       path: '/launch'
@@ -857,6 +927,13 @@ declare module '@tanstack/react-router' {
       path: '/navigation'
       fullPath: '/admin/cms/navigation'
       preLoaderRoute: typeof AdminCmsNavigationRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/cms/partners': {
+      id: '/admin/cms/partners'
+      path: '/partners'
+      fullPath: '/admin/cms/partners'
+      preLoaderRoute: typeof AdminCmsPartnersRouteImport
       parentRoute: typeof AdminCmsRoute
     }
     '/admin/cms/seo': {
@@ -885,6 +962,13 @@ declare module '@tanstack/react-router' {
       path: '/testimonials'
       fullPath: '/admin/cms/testimonials'
       preLoaderRoute: typeof AdminCmsTestimonialsRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/cms/why': {
+      id: '/admin/cms/why'
+      path: '/why'
+      fullPath: '/admin/cms/why'
+      preLoaderRoute: typeof AdminCmsWhyRouteImport
       parentRoute: typeof AdminCmsRoute
     }
     '/admin/email/': {
@@ -985,13 +1069,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsBrandingRouteImport
       parentRoute: typeof AdminSettingsRoute
     }
-    '/admin/settings/company': {
-      id: '/admin/settings/company'
-      path: '/company'
-      fullPath: '/admin/settings/company'
-      preLoaderRoute: typeof AdminSettingsCompanyRouteImport
-      parentRoute: typeof AdminSettingsRoute
-    }
     '/admin/settings/integrations': {
       id: '/admin/settings/integrations'
       path: '/integrations'
@@ -1039,29 +1116,39 @@ declare module '@tanstack/react-router' {
 
 interface AdminCmsRouteChildren {
   AdminCmsAnnouncementRoute: typeof AdminCmsAnnouncementRoute
+  AdminCmsBuiltForNigeriansRoute: typeof AdminCmsBuiltForNigeriansRoute
   AdminCmsFaqsRoute: typeof AdminCmsFaqsRoute
   AdminCmsFeaturesRoute: typeof AdminCmsFeaturesRoute
   AdminCmsFooterRoute: typeof AdminCmsFooterRoute
+  AdminCmsHowRoute: typeof AdminCmsHowRoute
+  AdminCmsInsideTheAppRoute: typeof AdminCmsInsideTheAppRoute
   AdminCmsLaunchRoute: typeof AdminCmsLaunchRoute
   AdminCmsNavigationRoute: typeof AdminCmsNavigationRoute
+  AdminCmsPartnersRoute: typeof AdminCmsPartnersRoute
   AdminCmsSeoRoute: typeof AdminCmsSeoRoute
   AdminCmsSocialRoute: typeof AdminCmsSocialRoute
   AdminCmsStatisticsRoute: typeof AdminCmsStatisticsRoute
   AdminCmsTestimonialsRoute: typeof AdminCmsTestimonialsRoute
+  AdminCmsWhyRoute: typeof AdminCmsWhyRoute
   AdminCmsIndexRoute: typeof AdminCmsIndexRoute
 }
 
 const AdminCmsRouteChildren: AdminCmsRouteChildren = {
   AdminCmsAnnouncementRoute: AdminCmsAnnouncementRoute,
+  AdminCmsBuiltForNigeriansRoute: AdminCmsBuiltForNigeriansRoute,
   AdminCmsFaqsRoute: AdminCmsFaqsRoute,
   AdminCmsFeaturesRoute: AdminCmsFeaturesRoute,
   AdminCmsFooterRoute: AdminCmsFooterRoute,
+  AdminCmsHowRoute: AdminCmsHowRoute,
+  AdminCmsInsideTheAppRoute: AdminCmsInsideTheAppRoute,
   AdminCmsLaunchRoute: AdminCmsLaunchRoute,
   AdminCmsNavigationRoute: AdminCmsNavigationRoute,
+  AdminCmsPartnersRoute: AdminCmsPartnersRoute,
   AdminCmsSeoRoute: AdminCmsSeoRoute,
   AdminCmsSocialRoute: AdminCmsSocialRoute,
   AdminCmsStatisticsRoute: AdminCmsStatisticsRoute,
   AdminCmsTestimonialsRoute: AdminCmsTestimonialsRoute,
+  AdminCmsWhyRoute: AdminCmsWhyRoute,
   AdminCmsIndexRoute: AdminCmsIndexRoute,
 }
 
@@ -1124,7 +1211,6 @@ const AdminRolesRouteWithChildren = AdminRolesRoute._addFileChildren(
 interface AdminSettingsRouteChildren {
   AdminSettingsApiKeysRoute: typeof AdminSettingsApiKeysRoute
   AdminSettingsBrandingRoute: typeof AdminSettingsBrandingRoute
-  AdminSettingsCompanyRoute: typeof AdminSettingsCompanyRoute
   AdminSettingsIntegrationsRoute: typeof AdminSettingsIntegrationsRoute
   AdminSettingsSeoRoute: typeof AdminSettingsSeoRoute
   AdminSettingsSmtpRoute: typeof AdminSettingsSmtpRoute
@@ -1136,7 +1222,6 @@ interface AdminSettingsRouteChildren {
 const AdminSettingsRouteChildren: AdminSettingsRouteChildren = {
   AdminSettingsApiKeysRoute: AdminSettingsApiKeysRoute,
   AdminSettingsBrandingRoute: AdminSettingsBrandingRoute,
-  AdminSettingsCompanyRoute: AdminSettingsCompanyRoute,
   AdminSettingsIntegrationsRoute: AdminSettingsIntegrationsRoute,
   AdminSettingsSeoRoute: AdminSettingsSeoRoute,
   AdminSettingsSmtpRoute: AdminSettingsSmtpRoute,

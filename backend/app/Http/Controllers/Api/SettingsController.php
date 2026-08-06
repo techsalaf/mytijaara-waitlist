@@ -8,6 +8,8 @@ use App\Models\Setting;
 use App\Support\SmtpConfig;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -22,7 +24,7 @@ use Illuminate\Validation\Rule;
  */
 class SettingsController extends Controller
 {
-    private const GROUPS = ['company', 'branding', 'seo', 'social', 'smtp', 'integrations', 'api_keys', 'system'];
+    private const GROUPS = ['company', 'branding', 'seo', 'social', 'smtp', 'integrations', 'api_keys', 'system', 'referrals'];
 
     /** Placeholder the client sees instead of a stored secret. */
     private const REDACTED = '••••••••';
@@ -89,6 +91,56 @@ class SettingsController extends Controller
         $this->audit($request, 'settings.smtp.test', ['ok' => $result['ok']]);
 
         return response()->json(['data' => $result], $result['ok'] ? 200 : 422);
+    }
+
+    /**
+     * POST /settings/cache/purge — flush the application cache for real.
+     *
+     * Reports the driver and the entry count it saw beforehand, so the page can
+     * say what was actually cleared instead of a bare success toast. A driver
+     * that cannot be counted reports null rather than a made-up number.
+     */
+    public function purgeCache(Request $request): JsonResponse
+    {
+        $store = config('cache.default');
+        $before = $this->cacheEntryCount();
+
+        try {
+            Cache::store($store)->flush();
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'The cache store refused the flush: '.$e->getMessage(),
+            ], 422);
+        }
+
+        $this->audit($request, 'settings.cache.purge', ['store' => $store, 'entries' => $before]);
+
+        return response()->json([
+            'data' => [
+                'store' => $store,
+                'entriesCleared' => $before,
+                'purgedAt' => now()->toIso8601String(),
+            ],
+        ]);
+    }
+
+    /**
+     * Rows in the cache table, or null when the driver cannot be counted.
+     *
+     * Only the database driver keeps an enumerable store here; redis and file
+     * would need a scan that is not worth the cost on a settings page.
+     */
+    private function cacheEntryCount(): ?int
+    {
+        if (config('cache.default') !== 'database') {
+            return null;
+        }
+
+        try {
+            return (int) DB::table(config('cache.stores.database.table', 'cache'))->count();
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     /** GET /settings/api-keys — masked keys, newest first. */
@@ -278,6 +330,19 @@ class SettingsController extends Controller
                 'weeklyDigestRecipients.*' => ['email'],
                 'notifyOnSignup' => ['sometimes', 'boolean'],
             ],
+            // The reward structure the referral card used to hardcode. Amounts
+            // are minor-unit-free integers in `currency`; `RewardDispatcher`
+            // reads the same row when it pays, so card and payout agree.
+            'referrals' => [
+                'rewardsEnabled' => ['sometimes', 'boolean'],
+                'currency' => ['sometimes', Rule::in(['NGN', 'USD', 'GBP', 'EUR'])],
+                'referrerReward' => ['sometimes', 'integer', 'min:0', 'max:10000000'],
+                'referredReward' => ['sometimes', 'integer', 'min:0', 'max:10000000'],
+                'minimumVerifiedForPayout' => ['sometimes', 'integer', 'min:0', 'max:1000'],
+                'bonusMilestoneRefs' => ['sometimes', 'integer', 'min:0', 'max:10000'],
+                'bonusMilestoneReward' => ['sometimes', 'integer', 'min:0', 'max:10000000'],
+                'rewardNote' => ['sometimes', 'nullable', 'string', 'max:255'],
+            ],
             default => [],
         };
     }
@@ -347,6 +412,8 @@ class SettingsController extends Controller
                 'notifyOnSignup' => true,
             ],
             'api_keys' => ['keys' => []],
+            // One source of truth, shared with `RewardDispatcher`.
+            'referrals' => \App\Support\ReferralProgram::defaults(),
             default => [],
         };
 
@@ -361,12 +428,16 @@ class SettingsController extends Controller
      */
     private function normalize(array $data): array
     {
-        foreach (['enabled', 'noindex', 'maintenanceMode', 'signupsPaused', 'weeklyDigestEnabled', 'notifyOnSignup'] as $bool) {
+        foreach (['enabled', 'noindex', 'maintenanceMode', 'signupsPaused', 'weeklyDigestEnabled', 'notifyOnSignup', 'rewardsEnabled'] as $bool) {
             if (array_key_exists($bool, $data)) {
                 $data[$bool] = filter_var($data[$bool], FILTER_VALIDATE_BOOLEAN);
             }
         }
-        foreach (['port', 'signupRateLimitPerHour'] as $int) {
+        foreach ([
+            'port', 'signupRateLimitPerHour',
+            'referrerReward', 'referredReward', 'minimumVerifiedForPayout',
+            'bonusMilestoneRefs', 'bonusMilestoneReward',
+        ] as $int) {
             if (array_key_exists($int, $data) && $data[$int] !== null) {
                 $data[$int] = (int) $data[$int];
             }

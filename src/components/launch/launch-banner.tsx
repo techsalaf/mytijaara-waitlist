@@ -1,48 +1,26 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { Apple, PartyPopper, Play } from "lucide-react";
 
 import { useLaunch } from "./launch-state-provider";
+import { celebrate, celebrateOnce } from "@/lib/launch/celebrate";
 
 /**
  * Launch-day / post-launch banner. Replaces the countdown once the launch
- * moment passes. Confetti fires at most once per browser session, and never
- * for visitors who prefer reduced motion.
+ * moment passes.
+ *
+ * The celebration itself lives in src/lib/launch/celebrate.ts and is shared with
+ * the ticker, which is why `celebrateOnce` is safe to call from both: the first
+ * one to run records the visitor and the second becomes a no-op, so a launch-day
+ * visitor never gets two overlapping confetti sequences.
  */
 export function LaunchBanner() {
   const { config, status } = useLaunch();
-  const fired = useRef(false);
 
   useEffect(() => {
-    if (fired.current) return;
     if (status !== "launch_day" || !config.live.confetti) return;
-    if (typeof window === "undefined") return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    if (sessionStorage.getItem("mytijaara_launch_confetti") === "1") return;
-
-    fired.current = true;
-    sessionStorage.setItem("mytijaara_launch_confetti", "1");
-
-    let cancelled = false;
-    import("canvas-confetti").then(({ default: confetti }) => {
-      if (cancelled) return;
-      const colors = ["#c9a24c", "#1f5c3a", "#f4e4bc"];
-      confetti({ particleCount: 70, spread: 70, origin: { y: 0.35 }, colors });
-      window.setTimeout(
-        () =>
-          confetti({
-            particleCount: 45,
-            spread: 100,
-            origin: { y: 0.4 },
-            colors,
-            scalar: 0.9,
-          }),
-        260,
-      );
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [status, config.live.confetti]);
+    const run = celebrateOnce(config.launchDateTime);
+    return () => run.stop();
+  }, [status, config.live.confetti, config.launchDateTime]);
 
   return (
     <section
@@ -67,6 +45,20 @@ export function LaunchBanner() {
         <p className="mt-4 text-lg text-primary-foreground/85">
           {config.live.subtitle}
         </p>
+
+        {/*
+          The celebration is interactive, not just an on-load effect: a visitor
+          who arrives after their one automatic run (or with reduced motion since
+          turned off) can still fire it deliberately.
+        */}
+        <button
+          type="button"
+          onClick={() => celebrate()}
+          className="mt-6 inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/15 px-4 py-2 text-xs font-bold uppercase tracking-widest text-gold transition-transform hover:scale-105 active:scale-95"
+        >
+          <PartyPopper className="h-3.5 w-3.5" />
+          Celebrate with us
+        </button>
 
         <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
           {config.live.stores.map((store) => {

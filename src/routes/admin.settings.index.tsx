@@ -1,121 +1,155 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { SectionCard } from "@/components/admin/ui-bits";
-import { Button } from "@/components/ui/button";
+import { SettingsForm } from "@/components/admin/settings-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { settingsApi } from "@/lib/api";
-import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { useSettingsGroup } from "@/lib/admin/use-settings-group";
 
 export const Route = createFileRoute("/admin/settings/")({
   component: GeneralSettingsPage,
 });
 
+/**
+ * The `company` group. Field names here have to match
+ * `SettingsController::rules('company')` exactly: anything else is dropped by
+ * the validated merge, which is how this page used to report a save that never
+ * happened (it was posting `workspaceName`, `siteUrl`, `language` and
+ * `enablePublicWaitlist`, none of which the backend accepts).
+ */
+const DEFAULTS = {
+  siteName: "",
+  tagline: "",
+  contactEmail: "",
+  supportEmail: "",
+  phone: "",
+  launchCity: "",
+  address: "",
+  timezone: "Africa/Lagos",
+};
+
+/** IANA names, because the backend stores the string verbatim. */
+const TIMEZONES = [
+  "Africa/Lagos",
+  "Africa/Accra",
+  "Africa/Nairobi",
+  "Africa/Johannesburg",
+  "Europe/London",
+  "UTC",
+];
+
 function GeneralSettingsPage() {
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({
-    workspaceName: "MyTijaara",
-    siteUrl: "https://mytijaara.com",
-    timezone: "wat",
-    language: "en",
-    enablePublicWaitlist: true,
-    requireEmailVerification: true,
-    maintenanceMode: false,
-  });
-
-  useEffect(() => {
-    let active = true;
-    setLoading(true);
-    void settingsApi.get("company").then((response) => {
-      if (!active) return;
-      const data = (response.data ?? {}) as Record<string, unknown>;
-      setForm((prev) => ({
-        ...prev,
-        workspaceName: String(data.workspaceName ?? prev.workspaceName),
-        siteUrl: String(data.siteUrl ?? prev.siteUrl),
-        timezone: String(data.timezone ?? prev.timezone),
-        language: String(data.language ?? prev.language),
-        enablePublicWaitlist: Boolean(data.enablePublicWaitlist ?? prev.enablePublicWaitlist),
-        requireEmailVerification: Boolean(data.requireEmailVerification ?? prev.requireEmailVerification),
-        maintenanceMode: Boolean(data.maintenanceMode ?? prev.maintenanceMode),
-      }));
-    }).catch(() => {
-      toast.error("Unable to load general settings.");
-    }).finally(() => {
-      if (active) setLoading(false);
-    });
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  const save = async () => {
-    setSaving(true);
-    try {
-      await settingsApi.update("company", form);
-      toast.success("General settings saved.");
-    } catch {
-      toast.error("Failed to save general settings.");
-    } finally {
-      setSaving(false);
-    }
-  };
+  const state = useSettingsGroup("company", DEFAULTS);
 
   return (
-    <SectionCard title="General" actions={
-      <Button size="sm" onClick={() => void save()} disabled={saving}>
-        {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-        Save changes
-      </Button>
-    }>
-      {loading ? <div className="text-sm text-muted-foreground">Loading settings…</div> : (
+    <SettingsForm
+      title="General"
+      description="Identity and contact details for the workspace. Used on the landing page and in outgoing email."
+      state={state}
+      successMessage="General settings saved."
+    >
+      {(form) => (
         <>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div><Label>Workspace name</Label><Input value={form.workspaceName} onChange={(e) => setForm((prev) => ({ ...prev, workspaceName: e.target.value }))} className="mt-1.5" /></div>
-            <div><Label>Site URL</Label><Input value={form.siteUrl} onChange={(e) => setForm((prev) => ({ ...prev, siteUrl: e.target.value }))} className="mt-1.5" /></div>
             <div>
-              <Label>Timezone</Label>
-              <Select value={form.timezone} onValueChange={(value) => setForm((prev) => ({ ...prev, timezone: value }))}>
-                <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="wat">West Africa Time (WAT)</SelectItem>
-                  <SelectItem value="utc">UTC</SelectItem>
-                  <SelectItem value="gmt">GMT</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="siteName">Site name</Label>
+              <Input
+                id="siteName"
+                value={form.siteName}
+                onChange={(e) => state.set("siteName", e.target.value)}
+                className="mt-1.5"
+                maxLength={120}
+              />
             </div>
             <div>
-              <Label>Default language</Label>
-              <Select value={form.language} onValueChange={(value) => setForm((prev) => ({ ...prev, language: value }))}>
-                <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
+              <Label htmlFor="launchCity">Launch city</Label>
+              <Input
+                id="launchCity"
+                value={form.launchCity}
+                onChange={(e) => state.set("launchCity", e.target.value)}
+                className="mt-1.5"
+                placeholder="Ibadan"
+              />
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <Label htmlFor="tagline">Tagline</Label>
+            <Input
+              id="tagline"
+              value={form.tagline}
+              onChange={(e) => state.set("tagline", e.target.value)}
+              className="mt-1.5"
+              maxLength={255}
+            />
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              {form.tagline.length}/255 characters
+            </p>
+          </div>
+
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="contactEmail">Contact email</Label>
+              <Input
+                id="contactEmail"
+                type="email"
+                value={form.contactEmail}
+                onChange={(e) => state.set("contactEmail", e.target.value)}
+                className="mt-1.5"
+                placeholder="hello@mytijaara.com"
+              />
+            </div>
+            <div>
+              <Label htmlFor="supportEmail">Support email</Label>
+              <Input
+                id="supportEmail"
+                type="email"
+                value={form.supportEmail}
+                onChange={(e) => state.set("supportEmail", e.target.value)}
+                className="mt-1.5"
+                placeholder="support@mytijaara.com"
+              />
+            </div>
+            <div>
+              <Label htmlFor="phone">Phone</Label>
+              <Input
+                id="phone"
+                value={form.phone}
+                onChange={(e) => state.set("phone", e.target.value)}
+                className="mt-1.5"
+                placeholder="+234 800 000 0000"
+              />
+            </div>
+            <div>
+              <Label htmlFor="timezone">Timezone</Label>
+              <Select value={form.timezone} onValueChange={(v) => state.set("timezone", v)}>
+                <SelectTrigger id="timezone" className="mt-1.5">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="ha">Hausa</SelectItem>
-                  <SelectItem value="yo">Yoruba</SelectItem>
-                  <SelectItem value="ig">Igbo</SelectItem>
+                  {TIMEZONES.map((tz) => (
+                    <SelectItem key={tz} value={tz}>
+                      {tz}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
-          <div className="mt-6 space-y-3">
-            {[
-              { label: "Enable public waitlist", desc: "Users can join from the landing page", key: "enablePublicWaitlist" as const },
-              { label: "Require email verification", desc: "Users must verify before appearing in exports", key: "requireEmailVerification" as const },
-              { label: "Maintenance mode", desc: "Show a maintenance page to visitors", key: "maintenanceMode" as const },
-            ].map((p) => (
-              <div key={p.key} className="flex items-center justify-between rounded-lg border border-border/60 p-3">
-                <div><div className="text-sm font-medium">{p.label}</div><div className="text-xs text-muted-foreground">{p.desc}</div></div>
-                <Switch checked={Boolean(form[p.key])} onCheckedChange={(checked) => setForm((prev) => ({ ...prev, [p.key]: checked }))} />
-              </div>
-            ))}
+
+          <div className="mt-4">
+            <Label htmlFor="address">Address</Label>
+            <Textarea
+              id="address"
+              rows={3}
+              value={form.address}
+              onChange={(e) => state.set("address", e.target.value)}
+              className="mt-1.5"
+              maxLength={500}
+            />
           </div>
         </>
       )}
-    </SectionCard>
+    </SettingsForm>
   );
 }

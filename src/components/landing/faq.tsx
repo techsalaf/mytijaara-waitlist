@@ -2,8 +2,9 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 import { Reveal } from "./reveal";
+import { useFaqs, useCmsData } from "@/lib/cms-context";
 
-const FAQS = [
+const HARDCODED_FAQS = [
   { q: "What is MyTijaara?", a: "MyTijaara is one app that lets you order food, buy groceries and medicine, book artisans, send parcels, rent cars and shop from local businesses — all in Nigeria." },
   { q: "Where is MyTijaara available?", a: "We're launching first in Lagos, Abuja and Port Harcourt, then rolling out across Nigeria. Join the waitlist and we'll let you know as soon as we're in your city." },
   { q: "How much does it cost to use?", a: "The app is free to download. You only pay for what you order, at prices set by our vendors and partners. Delivery fees are shown clearly before you check out." },
@@ -12,8 +13,19 @@ const FAQS = [
   { q: "Is my information safe?", a: "Yes. We take your privacy seriously and only use your information to give you a great experience with MyTijaara." },
 ];
 
+type FaqCmsData = { heading?: string; subheading?: string };
+const DEFAULT_FAQ: FaqCmsData = {
+  heading: "Answers, straight up.",
+  subheading: "Short answers to the questions we hear the most.",
+};
+
 export function FAQ() {
   const [open, setOpen] = useState<number | null>(0);
+  const dbFaqs = useFaqs();
+  const cms = useCmsData("faqs", DEFAULT_FAQ);
+  const FAQS = dbFaqs.length > 0
+    ? dbFaqs.map((f) => ({ q: f.question, a: f.answer }))
+    : HARDCODED_FAQS;
   return (
     <section id="faq" className="py-24 sm:py-32">
       <div className="mx-auto max-w-4xl px-4 sm:px-6">
@@ -23,10 +35,10 @@ export function FAQ() {
               FAQ
             </span>
             <h2 className="mt-5 font-display text-4xl font-bold tracking-tight sm:text-5xl">
-              Answers, straight up.
+              {cms.heading}
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Short answers to the questions we hear the most.
+              {cms.subheading}
             </p>
           </Reveal>
         </div>

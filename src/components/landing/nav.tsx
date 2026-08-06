@@ -3,14 +3,21 @@ import { ArrowRight, Download, Menu, X } from "lucide-react";
 
 import { Logo } from "./logo";
 import { usePrimaryCta } from "@/components/launch/launch-cta";
+import { LaunchTicker } from "@/components/launch/launch-ticker";
+import { useCmsData } from "@/lib/cms-context";
 
-const LINKS = [
-  { href: "#moments", label: "Everyday moments" },
-  { href: "#services", label: "What you can do" },
-  { href: "#how", label: "How it works" },
-  { href: "#partners", label: "For partners" },
-  { href: "#faq", label: "FAQ" },
-];
+type NavLink = { href: string; label: string };
+type NavCmsData = { links?: NavLink[] };
+
+const DEFAULT_NAV: NavCmsData = {
+  links: [
+    { href: "#moments", label: "Everyday moments" },
+    { href: "#services", label: "What you can do" },
+    { href: "#how", label: "How it works" },
+    { href: "#partners", label: "For partners" },
+    { href: "#faq", label: "FAQ" },
+  ],
+};
 
 export function Nav() {
   const [open, setOpen] = useState(false);
@@ -18,6 +25,8 @@ export function Nav() {
   // Flips from "Join the waitlist" to "Download App" automatically at launch.
   const cta = usePrimaryCta();
   const CtaIcon = cta.download ? Download : ArrowRight;
+  const cms = useCmsData("navigation", DEFAULT_NAV);
+  const links = cms.links && cms.links.length > 0 ? cms.links : DEFAULT_NAV.links!;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -27,10 +36,16 @@ export function Nav() {
   }, []);
 
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 transition-all ${scrolled ? "py-2" : "py-4"}`}
-    >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+    <header className="fixed inset-x-0 top-0 z-50">
+      {/*
+        Full-bleed launch strip. It sits inside the fixed header rather than as
+        its own fixed element so that when it returns null (post-launch, or when
+        an admin turns the ticker off) the nav moves up on its own — no offset to
+        keep in sync and no leftover gap.
+      */}
+      <LaunchTicker />
+      <div className={`transition-all ${scrolled ? "py-2" : "py-4"}`}>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div
           className={`flex items-center justify-between rounded-2xl px-4 py-3 transition-all ${
             scrolled ? "glass shadow-soft" : ""
@@ -40,7 +55,7 @@ export function Nav() {
             <Logo />
           </a>
           <nav className="hidden items-center gap-8 md:flex" aria-label="Primary">
-            {LINKS.map((l) => (
+            {links.map((l) => (
               <a
                 key={l.href}
                 href={l.href}
@@ -70,7 +85,7 @@ export function Nav() {
         {open && (
           <div className="mt-2 rounded-2xl glass p-4 shadow-soft md:hidden">
             <nav className="flex flex-col gap-1" aria-label="Mobile">
-              {LINKS.map((l) => (
+              {links.map((l) => (
                 <a
                   key={l.href}
                   href={l.href}
@@ -90,6 +105,7 @@ export function Nav() {
             </nav>
           </div>
         )}
+        </div>
       </div>
     </header>
   );

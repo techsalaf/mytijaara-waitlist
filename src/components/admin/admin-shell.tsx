@@ -19,6 +19,7 @@ import {
   LogOut,
   Menu,
   Sparkles,
+  ExternalLink,
 } from "lucide-react";
 import { getSession, signOut, type AdminSession } from "@/lib/auth";
 import { notificationsApi, type Notification, waitlistApi } from "@/lib/api";
@@ -35,6 +36,7 @@ import {
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { CommandPalette } from "./command-palette";
 import { AdminSkeleton } from "./admin-skeleton";
+import { NavProgress } from "./nav-progress";
 
 import { cn } from "@/lib/utils";
 
@@ -57,7 +59,7 @@ const nav: NavGroup[] = [
   {
     label: "Growth",
     items: [
-      { label: "Waitlist", to: "/admin/waitlist", icon: Users, badge: "247" },
+      { label: "Waitlist", to: "/admin/waitlist", icon: Users },
       { label: "Referrals", to: "/admin/referrals", icon: Award },
       { label: "Email Marketing", to: "/admin/email", icon: Mail },
     ],
@@ -139,7 +141,8 @@ export function AdminShell() {
 
       <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
         {/* Topbar */}
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border/60 bg-card/80 px-4 backdrop-blur-md lg:px-6 ">
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border/60 bg-card/80 px-4 backdrop-blur-md lg:px-6 relative">
+          <NavProgress />
           <Button
             variant="ghost"
             size="icon"
@@ -163,6 +166,23 @@ export function AdminShell() {
           </button>
 
           <div className="flex items-center gap-2">
+            {/*
+              Global "Preview site". This used to sit in the body of
+              /admin/cms only, which meant every other page had no way out to
+              the public site. Opens in a new tab so admin work is not lost.
+            */}
+            <Button variant="outline" size="sm" asChild className="hidden sm:inline-flex">
+              <a href="/" target="_blank" rel="noreferrer noopener" title="Open the public site in a new tab">
+                <ExternalLink className="mr-2 h-4 w-4" /> Preview site
+              </a>
+            </Button>
+            <Button variant="ghost" size="icon" asChild className="sm:hidden">
+              <a href="/" target="_blank" rel="noreferrer noopener" title="Open the public site in a new tab">
+                <ExternalLink className="h-5 w-5" />
+                <span className="sr-only">Preview site</span>
+              </a>
+            </Button>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative">

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\CmsController;
 use App\Http\Controllers\Api\ContentController;
 use App\Http\Controllers\Api\EmailTrackingController;
 use App\Http\Controllers\Api\EventController;
+use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\LaunchConfigController;
 use App\Http\Controllers\Api\MediaController;
 use App\Http\Controllers\Api\NotificationController;
@@ -60,9 +61,22 @@ Route::get('/content/testimonials', [ContentController::class, 'testimonials']);
 // Authenticated admin panel.
 // ---------------------------------------------------------------------------
 Route::middleware('auth:sanctum')->group(function () {
-    // Session
+    // Session + own profile. No permission gate: every admin owns their account.
     Route::get('/auth/me', [AuthController::class, 'me']);
+    Route::patch('/auth/me', [AuthController::class, 'updateProfile']);
+    Route::post('/auth/password', [AuthController::class, 'changePassword']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
+
+    // Active sessions = this account's Sanctum tokens.
+    Route::get('/auth/sessions', [AuthController::class, 'sessions']);
+    Route::post('/auth/sessions/revoke-others', [AuthController::class, 'revokeOtherSessions']);
+    Route::delete('/auth/sessions/{id}', [AuthController::class, 'revokeSession']);
+
+    // Two-factor enrolment. Confirm before it is enforced.
+    Route::post('/auth/two-factor', [AuthController::class, 'startTwoFactor']);
+    Route::post('/auth/two-factor/confirm', [AuthController::class, 'confirmTwoFactor']);
+    Route::post('/auth/two-factor/recovery-codes', [AuthController::class, 'regenerateRecoveryCodes']);
+    Route::delete('/auth/two-factor', [AuthController::class, 'disableTwoFactor']);
 
     // Notifications — any authenticated admin sees their own.
     Route::get('/notifications', [NotificationController::class, 'index']);
@@ -80,7 +94,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/analytics/devices', [AnalyticsController::class, 'devices']);
         Route::get('/analytics/browsers', [AnalyticsController::class, 'browsers']);
         Route::get('/analytics/funnel', [AnalyticsController::class, 'funnel']);
+        Route::get('/analytics/digest', [AnalyticsController::class, 'digestPreview']);
     });
+
+    // Building the weekly digest writes a draft campaign, so it is gated on
+    // email.create rather than analytics.view.
+    Route::post('/analytics/digest', [AnalyticsController::class, 'digest'])
+        ->middleware('permission:email.create');
 
     // Waitlist
     Route::get('/waitlist', [WaitlistController::class, 'index'])->middleware('permission:waitlist.view');
@@ -95,8 +115,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('permission:referrals.view')->group(function () {
         Route::get('/referrals/leaderboard', [ReferralController::class, 'leaderboard']);
         Route::get('/referrals/analytics', [ReferralController::class, 'analytics']);
-        Route::get('/referrals/{id}', [ReferralController::class, 'show']);
+        Route::get('/referrals/rewards/pending', [ReferralController::class, 'pendingRewards']);
     });
+    Route::get('/referrals/export', [ReferralController::class, 'export'])
+        ->middleware('permission:referrals.export');
+    // Paying rewards writes to `referrals` and sends mail, so it needs manage,
+    // not the read permission the rest of the module uses.
+    Route::post('/referrals/rewards', [ReferralController::class, 'sendRewards'])
+        ->middleware('permission:referrals.manage');
+    // Last: `{id}` would otherwise swallow `export` and `rewards`.
+    Route::get('/referrals/{id}', [ReferralController::class, 'show'])
+        ->middleware('permission:referrals.view');
 
     // CMS authoring
     Route::get('/cms-admin', [CmsController::class, 'adminIndex'])->middleware('permission:cms.view');
@@ -127,6 +156,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/media/folders', [MediaController::class, 'folders'])->middleware('permission:media.view');
     Route::post('/media', [MediaController::class, 'store'])->middleware('permission:media.upload');
     Route::post('/media/folders', [MediaController::class, 'createFolder'])->middleware('permission:media.manage-folders');
+    Route::post('/media/{id}/replace', [MediaController::class, 'replace'])->middleware('permission:media.upload');
     Route::patch('/media/{id}', [MediaController::class, 'update'])->middleware('permission:media.upload');
     Route::delete('/media/{id}', [MediaController::class, 'destroy'])->middleware('permission:media.delete');
 
@@ -139,9 +169,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Email — campaigns
     Route::get('/campaigns', [CampaignController::class, 'index'])->middleware('permission:email.view');
+    // Before `{id}`, which would otherwise match "segments".
+    Route::get('/campaigns/segments', [CampaignController::class, 'segments'])->middleware('permission:email.view');
     Route::get('/campaigns/{id}', [CampaignController::class, 'show'])->middleware('permission:email.view');
     Route::get('/campaigns/{id}/stats', [CampaignController::class, 'stats'])->middleware('permission:email.view');
     Route::post('/campaigns', [CampaignController::class, 'store'])->middleware('permission:email.create');
+    Route::post('/campaigns/{id}/duplicate', [CampaignController::class, 'duplicate'])->middleware('permission:email.create');
     Route::patch('/campaigns/{id}', [CampaignController::class, 'update'])->middleware('permission:email.create');
     Route::delete('/campaigns/{id}', [CampaignController::class, 'destroy'])->middleware('permission:email.delete');
     Route::post('/campaigns/{id}/send', [CampaignController::class, 'send'])->middleware('permission:email.send');
@@ -167,12 +200,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/audit-logs/actors', [AuditController::class, 'actors'])->middleware('permission:users.view');
     Route::get('/audit-logs', [AuditController::class, 'index'])->middleware('permission:users.view');
 
+    // System health — live probes, gated behind settings read.
+    Route::get('/system/health/history', [HealthController::class, 'history'])->middleware('permission:settings.view');
+    Route::get('/system/health', [HealthController::class, 'show'])->middleware('permission:settings.view');
+
     // Settings — read is broad, writes are gated per group.
     // Fixed segments come first so `api-keys` is never captured as `{group}`.
     Route::get('/settings/api-keys', [SettingsController::class, 'listApiKeys'])->middleware('permission:settings.view');
     Route::post('/settings/api-keys', [SettingsController::class, 'generateApiKey'])->middleware('permission:settings.edit-general');
     Route::delete('/settings/api-keys/{id}', [SettingsController::class, 'revokeApiKey'])->middleware('permission:settings.edit-general');
     Route::post('/settings/smtp/test', [SettingsController::class, 'testSmtp'])->middleware('permission:settings.edit-general');
+    Route::post('/settings/cache/purge', [SettingsController::class, 'purgeCache'])->middleware('permission:settings.edit-general');
     Route::get('/settings/{group}', [SettingsController::class, 'show'])->middleware('permission:settings.view');
     Route::patch('/settings/{group}', [SettingsController::class, 'update'])->middleware('permission:settings.edit-general');
 });

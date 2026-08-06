@@ -2,9 +2,33 @@ import { ArrowRight, Check, Sparkles } from "lucide-react";
 
 import { Reveal } from "./reveal";
 import { usePrimaryCta } from "@/components/launch/launch-cta";
-import screenVendor from "@/assets/screens/screen-vendor-1.png.asset.json";
-import screenRider from "@/assets/screens/screen-rider-1.png.asset.json";
-import screenArtisans from "@/assets/screens/screen-customer-8-artisans.png.asset.json";
+import { useCmsData } from "@/lib/cms-context";
+
+type PartnersCmsData = {
+  badge?: string;
+  heading?: string;
+  subheading?: string;
+};
+
+const DEFAULT_PARTNERS: PartnersCmsData = {
+  badge: "Grow with us",
+  heading: "A better way to earn.",
+  subheading: "Vendors, riders and artisans — MyTijaara helps you find more customers.",
+};
+
+/**
+ * These three images used to be imported from `src/assets/screens/*.asset.json`,
+ * whose `url` field is a `/__l5e/assets-v1/<uuid>/…` path. That path only exists
+ * inside the Lovable editor's dev server, so in production all three 404'd —
+ * which is where `screen-vendor-1.png` and `screen-rider-1.png` in the console
+ * came from. The real files are committed under `public/screens/` and served
+ * from the site root.
+ */
+export const PARTNER_SCREENS = {
+  vendor: "/screens/screen-vendor-1.webp",
+  rider: "/screens/screen-rider-1.webp",
+  artisans: "/screens/screen-customer-8-artisans.webp",
+} as const;
 
 const PARTNERS = [
   {
@@ -13,7 +37,7 @@ const PARTNERS = [
     body: "Reach new customers in your area without setting up your own store, app or delivery team.",
     perks: ["New customers, every day", "Simple dashboard on your phone", "Get paid on time"],
     cta: "Join as vendor",
-    image: screenVendor.url,
+    image: PARTNER_SCREENS.vendor,
     accent: "from-primary/95 via-primary/80 to-primary/40",
   },
   {
@@ -22,7 +46,7 @@ const PARTNERS = [
     body: "Deliver food, packages and groceries. Choose when you work, get paid weekly.",
     perks: ["Flexible hours", "Weekly payouts", "In-app support 24/7"],
     cta: "Join as rider",
-    image: screenRider.url,
+    image: PARTNER_SCREENS.rider,
     accent: "from-[oklch(0.28_0.08_156)]/95 via-[oklch(0.32_0.09_156)]/75 to-[oklch(0.4_0.1_156)]/30",
   },
   {
@@ -31,7 +55,7 @@ const PARTNERS = [
     body: "Show off your work, get booked in your area and get paid straight to your account.",
     perks: ["Verified profile", "Bookings that fit your day", "Fair, upfront pricing"],
     cta: "Join as artisan",
-    image: screenArtisans.url,
+    image: PARTNER_SCREENS.artisans,
     accent: "from-[oklch(0.35_0.1_156)]/95 via-[oklch(0.45_0.12_156)]/70 to-gold/25",
   },
 ];
@@ -39,6 +63,7 @@ const PARTNERS = [
 export function Partners() {
   // Partner CTAs point at the waitlist pre-launch, the download section after.
   const primary = usePrimaryCta();
+  const cms = useCmsData("partners", DEFAULT_PARTNERS);
 
   return (
     <section id="partners" className="relative overflow-hidden bg-surface py-24 sm:py-32">
@@ -48,13 +73,13 @@ export function Partners() {
           <Reveal>
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-primary">
               <Sparkles className="h-3.5 w-3.5 text-gold" />
-              Grow with us
+              {cms.badge ?? DEFAULT_PARTNERS.badge}
             </span>
             <h2 className="mt-5 font-display text-4xl font-bold tracking-tight sm:text-5xl">
-              A better way to earn.
+              {cms.heading ?? DEFAULT_PARTNERS.heading}
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              Vendors, riders and artisans — MyTijaara helps you find more customers.
+              {cms.subheading ?? DEFAULT_PARTNERS.subheading}
             </p>
           </Reveal>
         </div>

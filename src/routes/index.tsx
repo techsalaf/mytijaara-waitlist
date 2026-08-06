@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { serverGet } from "@/lib/api";
+import type { CmsSection, Faq, Testimonial } from "@/lib/api";
 import { normalizeLaunchConfig, type LaunchConfiguration } from "@/lib/launch/config";
+import { CmsProvider } from "@/lib/cms-context";
 import { LaunchStateProvider } from "@/components/launch/launch-state-provider";
 import { LaunchCountdown } from "@/components/launch/launch-countdown";
 import { Nav } from "@/components/landing/nav";
@@ -17,64 +19,124 @@ import { Partners } from "@/components/landing/partners";
 import { WaitlistSection } from "@/components/landing/waitlist-section";
 import { FAQ } from "@/components/landing/faq";
 import { Footer } from "@/components/landing/footer";
-
-const TITLE = "MyTijaara — Everything you need, all in one place";
-const DESCRIPTION =
-  "Order food, groceries and pharmacy items, book trusted artisans, send packages, rent cars and shop from businesses around you — all from one app built for Nigerians.";
+import { AnnouncementBar } from "@/components/landing/announcement-bar";
 
 export const Route = createFileRoute("/")({
   /**
-   * Resolve the launch config on the server so the admin-configured date is in
-   * the first painted HTML. Without this the provider seeded from
-   * DEFAULT_LAUNCH_CONFIG and swapped in the real date after the client fetch,
-   * which is what made the countdown flash the wrong date on load.
+   * Fetch the launch config and the full CMS payload together so the first
+   * painted HTML contains both admin-configured dates and all section content.
+   * FAQs and testimonials come from their own tables and are fetched in
+   * parallel with the CMS to avoid a waterfall.
+   *
+   * `serverNow` prevents the hydration mismatch (React #418) that occurs when
+   * the server and client read `Date.now()` at different instants.
    */
-  loader: async (): Promise<{ launchConfig: LaunchConfiguration }> => {
-    const raw = await serverGet<unknown>("/launch-config");
-    return { launchConfig: normalizeLaunchConfig(raw) };
+  loader: async (): Promise<{
+    launchConfig: LaunchConfiguration;
+    serverNow: number;
+    cms: Record<string, CmsSection>;
+    faqs: Faq[];
+    testimonials: Testimonial[];
+  }> => {
+    const [launchRaw, cmsRaw, faqsRaw, testimonialsRaw] = await Promise.all([
+      serverGet<unknown>("/launch-config"),
+      serverGet<{ data: Record<string, CmsSection> }>("/cms"),
+      serverGet<{ data: Faq[] }>("/content/faqs"),
+      serverGet<{ data: Testimonial[] }>("/content/testimonials"),
+    ]);
+
+    const cmsData = (cmsRaw as { data: Record<string, CmsSection> })?.data ?? {};
+    const seoSection = cmsData["seo"]?.data as
+      | { title?: string; description?: string; ogImage?: string; keywords?: string }
+      | undefined;
+
+    return {
+      launchConfig: normalizeLaunchConfig(launchRaw),
+      serverNow: Date.now(),
+      cms: cmsData,
+      faqs: (faqsRaw as { data: Faq[] })?.data ?? [],
+      testimonials: (testimonialsRaw as { data: Testimonial[] })?.data ?? [],
+      // Expose SEO so head() can read it synchronously.
+      _seoTitle: seoSection?.title,
+      _seoDescription: seoSection?.description,
+      _seoOgImage: seoSection?.ogImage,
+    } as ReturnType<typeof Route.useLoaderData> & {
+      _seoTitle?: string;
+      _seoDescription?: string;
+      _seoOgImage?: string;
+    };
   },
-  head: () => ({
-    meta: [
-      { title: TITLE },
-      { name: "description", content: DESCRIPTION },
-      { property: "og:title", content: TITLE },
-      { property: "og:description", content: DESCRIPTION },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: TITLE },
-      { name: "twitter:description", content: DESCRIPTION },
-    ],
-  }),
+  head: ({ loaderData }) => {
+    const DEFAULT_TITLE = "MyTijaara — Everything you need, all in one place";
+    const DEFAULT_DESC =
+      "Order food, groceries and pharmacy items, book trusted artisans, send packages, rent cars and shop from businesses around you — all from one app built for Nigerians.";
+
+    // Type assertion: head() receives the full loader return, TS types it as
+    // the declared return. The extended _seo* fields arrive at runtime.
+    const d = loaderData as typeof loaderData & {
+      _seoTitle?: string;
+      _seoDescription?: string;
+      _seoOgImage?: string;
+    };
+
+    const title = d._seoTitle || DEFAULT_TITLE;
+    const description = d._seoDescription || DEFAULT_DESC;
+    const ogImage = d._seoOgImage;
+
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        ...(ogImage ? [{ property: "og:image", content: ogImage }] : []),
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+      ],
+    };
+  },
   component: Landing,
 });
 
 /**
- * The whole page is wrapped in <LaunchStateProvider> so a single CMS payload
- * drives the nav CTA, the hero CTA, the countdown and whether the waitlist
- * renders at all — pre-launch, launch day and post-launch, no code change.
+ * Wrap the entire page in both LaunchStateProvider and CmsProvider so every
+ * landing component can read its CMS data and its launch-phase variant from
+ * context without prop drilling.
  */
 function Landing() {
-  const { launchConfig } = Route.useLoaderData();
+  const { launchConfig, serverNow, cms, faqs, testimonials } = Route.useLoaderData();
+
+  const announcement = cms["announcement"]?.data as
+    | { enabled?: boolean; text?: string; href?: string }
+    | undefined;
+
   return (
-    <LaunchStateProvider initialConfig={launchConfig}>
-      <div className="min-h-screen bg-background text-foreground">
-        <Nav />
-        <main>
-          <Hero />
-          <TrustedBy />
-          <LaunchCountdown />
-          <Moments />
-          <Services />
-          <Why />
-          <How />
-          <InsideTheApp />
-          <BuiltForNigerians />
-          <Partners />
-          <WaitlistSection />
-          <FAQ />
-        </main>
-        <Footer />
-      </div>
+    <LaunchStateProvider initialConfig={launchConfig} initialNow={serverNow}>
+      <CmsProvider sections={cms} faqs={faqs} testimonials={testimonials}>
+        {announcement?.enabled && (
+          <AnnouncementBar text={announcement.text ?? ""} href={announcement.href ?? "#waitlist"} />
+        )}
+        <div className="min-h-screen bg-background text-foreground">
+          <Nav />
+          <main>
+            <Hero />
+            <TrustedBy />
+            <LaunchCountdown />
+            <Moments />
+            <Services />
+            <Why />
+            <How />
+            <InsideTheApp />
+            <BuiltForNigerians />
+            <Partners />
+            <WaitlistSection />
+            <FAQ />
+          </main>
+          <Footer />
+        </div>
+      </CmsProvider>
     </LaunchStateProvider>
   );
 }

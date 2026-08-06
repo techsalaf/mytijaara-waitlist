@@ -1,9 +1,14 @@
 /**
  * Shared domain types for MyTijaara.
  *
- * The backend agent should import types from here — never from mock-data —
- * so swapping the data source out doesn't touch consumers.
+ * Routes import their row shapes from here or from the `@/lib/api` module that
+ * owns the endpoint. `src/lib/mock-data.ts` is gone; nothing in the app ships a
+ * fixture any more.
  */
+
+// The program shape lives with the endpoint that owns it; imported here only so
+// `ReferralAnalytics.program` can reference it, and re-exported below.
+import type { ReferralProgram as ReferralProgramSettings } from "@/lib/api/referrals";
 
 export type WaitlistStatus = "active" | "invited" | "onboarded" | "unsubscribed";
 export type WaitlistSource =
@@ -45,6 +50,8 @@ export type ReferralTrendPoint = {
 };
 
 export type ReferralAnalytics = {
+  /** Window the numbers cover. 0 = all time. */
+  periodDays: number;
   totalVisits: number;
   conversions: number;
   conversionRate: number;
@@ -52,20 +59,40 @@ export type ReferralAnalytics = {
   activeReferrers: number;
   trend: ReferralTrendPoint[];
   sources: { name: string; value: number }[];
+  /**
+   * Real payout figures. The analytics page used to print `value="₦124k"
+   * delta={38.4}` as a literal; these come from the rows actually marked
+   * rewarded and the program settings behind them.
+   */
+  rewards: ReferralRewardTotals;
+  program: ReferralProgramSettings;
 };
 
-export type DashboardStats = {
-  visitors: number;
-  totalWaitlist: number;
-  todaySignups: number;
-  weeklyGrowth: number;
-  monthlyGrowth: number;
-  conversionRate: number;
-  ctaClicks: number;
-  emailOpenRate: number;
-  emailClickRate: number;
-  verifiedRate: number;
+export type ReferralRewardTotals = {
+  currency: string;
+  referrerReward: number;
+  paidReferrals: number;
+  paidReferrers: number;
+  pendingReferrals: number;
+  amountPaid: number;
+  /** Pre-formatted with the program currency symbol, e.g. `₦12,500`. */
+  amountPaidLabel: string;
 };
+
+/** Re-exported from the module that owns the endpoint. */
+export type { ReferralProgramSettings };
+
+/**
+ * Re-exported, not redeclared.
+ *
+ * There used to be a second copy of this shape here, missing `periodDays`,
+ * `periodSignups` and `previousPeriodSignups`. The backend has always returned
+ * those three, so any route importing the copy from here could not see the
+ * fields it needed to label the selected window — and the two definitions could
+ * drift again on the next backend change. One declaration, in the file that owns
+ * the endpoint.
+ */
+export type { DashboardStats } from "@/lib/api/analytics";
 
 export type SignupTrendPoint = {
   date: string;
@@ -80,17 +107,32 @@ export type DeviceBreakdown = { name: string; value: number; color: string };
 export type BrowserBreakdown = { name: string; value: number; color: string };
 export type FunnelStep = { stage: string; value: number; pct: number };
 
-export type CampaignStatus = "draft" | "scheduled" | "sent";
+export type CampaignStatus = "draft" | "scheduled" | "sending" | "sent";
 export type Campaign = {
   id: string;
   name: string;
   status: CampaignStatus;
   subject: string;
+  html: string | null;
   sent: number;
   opens: number;
   clicks: number;
-  sentAt: string;
-  template: string;
+  openRate: number;
+  clickRate: number;
+  sentAt: string | null;
+  scheduledAt: string | null;
+  /** Template public_id, or null when the HTML was authored directly. */
+  templateId: string | null;
+  segment: Record<string, unknown> | null;
+  createdAt: string;
+};
+
+/** One preset segment with its live reach. */
+export type CampaignSegment = {
+  value: string;
+  label: string;
+  rules: Record<string, unknown>;
+  reach: number;
 };
 
 export type EmailTemplate = {

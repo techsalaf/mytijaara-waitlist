@@ -1,5 +1,6 @@
 import { apiCall } from "./client";
 import { toQuery } from "./waitlist";
+import type { AnalyticsPeriod } from "./analytics";
 import type { ReferralAnalytics, ReferralLeaderboardEntry, WaitlistUser } from "@/lib/types";
 
 /**
@@ -18,14 +19,47 @@ export type RewardResult = {
   rewarded: number;
   skipped: number;
   failed: number;
+  /** One line per referrer, explaining what happened to them. */
   messages: string[];
+};
+
+/** The reward structure, stored in the `referrals` settings group. */
+export type ReferralProgram = {
+  rewardsEnabled: boolean;
+  currency: "NGN" | "USD" | "GBP" | "EUR";
+  referrerReward: number;
+  referredReward: number;
+  minimumVerifiedForPayout: number;
+  bonusMilestoneRefs: number;
+  bonusMilestoneReward: number;
+  rewardNote: string;
+};
+
+/** A referrer with converted referrals that have not been paid yet. */
+export type PendingReward = {
+  id: string;
+  name: string;
+  email: string;
+  pending: number;
+  lifetimeConverted: number;
+  /** False when they are still below `minimumVerifiedForPayout`. */
+  eligible: boolean;
+  payout: number;
+  latestConversionAt: string | null;
 };
 
 export const referralsApi = {
   leaderboard: (limit = 25) =>
     apiCall<ReferralLeaderboardEntry[]>(`/referrals/leaderboard${toQuery({ limit })}`),
-  analytics: () => apiCall<ReferralAnalytics>("/referrals/analytics"),
+
+  /** `days=0` means all time. Scopes every count, not just the chart. */
+  analytics: (days: AnalyticsPeriod = 30) =>
+    apiCall<ReferralAnalytics>(`/referrals/analytics${toQuery({ days })}`),
+
   get: (id: string) => apiCall<ReferralDetail>(`/referrals/${id}`),
+
+  /** Everyone with a payable balance right now, plus the live program. */
+  pendingRewards: () => apiCall<PendingReward[]>("/referrals/rewards/pending"),
 
   /**
    * Dispatch rewards to the given referrers. The backend marks each pending

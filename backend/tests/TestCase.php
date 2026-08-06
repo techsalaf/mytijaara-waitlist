@@ -46,6 +46,32 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
+     * Create an authenticated user holding exactly the given permissions.
+     *
+     * The seeded roles are coarse: none of them, for example, can read settings
+     * without also being able to write them. Testing that a read gate and a write
+     * gate are genuinely separate needs a role built for the assertion.
+     *
+     * @param  array<int,string>  $permissions
+     */
+    protected function actingAsWithPermissions(array $permissions, array $attributes = []): User
+    {
+        $this->seedRoles();
+
+        $slug = 'test_scoped_'.substr(md5(implode('|', $permissions)), 0, 8);
+        $role = Role::firstOrCreate(['name' => $slug, 'guard_name' => 'web']);
+        $role->syncPermissions($permissions);
+
+        $user = User::factory()->create($attributes + ['status' => 'active']);
+        $user->assignRole($slug);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+        Sanctum::actingAs($user);
+
+        return $user;
+    }
+
+    /**
      * Create an authenticated user that holds NO permissions. Any `permission:`
      * gate will reject them with 403, which is exactly what the RBAC negative
      * tests need.

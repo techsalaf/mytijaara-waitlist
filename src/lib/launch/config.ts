@@ -97,8 +97,9 @@ export type LaunchConfiguration = {
 
 /**
  * Last-resort shape used only when `GET /launch-config` fails. Keep in sync
- * with `backend/database/seeders/LaunchConfigSeeder.php`; the gate test
- * `tests/launch-config.test.mjs` fails the build if they drift.
+ * with `backend/database/seeders/LaunchConfigSeeder.php`; the seeder-parity
+ * block in `src/lib/launch/config.test.ts` reads that PHP file and fails if the
+ * two drift.
  * Africa/Lagos is UTC+1 year-round, hence the `+01:00` offset.
  */
 export const DEFAULT_LAUNCH_CONFIG: LaunchConfiguration = {

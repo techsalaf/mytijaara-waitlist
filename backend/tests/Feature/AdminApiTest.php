@@ -22,8 +22,10 @@ class AdminApiTest extends TestCase
             'name' => 'Launch update', 'subject' => 'We are launching', 'status' => 'draft',
         ])->assertCreated()->json('data');
 
-        $this->patchJson("{$this->api}/campaigns/{$created['id']}", ['status' => 'scheduled'])
-            ->assertOk()->assertJsonPath('data.status', 'scheduled');
+        $this->patchJson("{$this->api}/campaigns/{$created['id']}", [
+            'status' => 'scheduled',
+            'scheduledAt' => now()->addHour()->toIso8601String(),
+        ])->assertOk()->assertJsonPath('data.status', 'scheduled');
         $this->getJson("{$this->api}/campaigns/{$created['id']}/stats")
             ->assertOk()->assertJsonPath('data.sent', 0);
     }
