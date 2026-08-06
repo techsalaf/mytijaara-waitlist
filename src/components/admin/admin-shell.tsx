@@ -218,7 +218,7 @@ export function AdminShell() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 rounded-full py-1 pl-1 pr-3 hover:bg-muted/60">
+                <button className="flex cursor-pointer items-center gap-2 rounded-full py-1 pl-1 pr-3 hover:bg-muted/60">
                   <div className="grid h-8 w-8 place-items-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                     {session.avatar}
                   </div>

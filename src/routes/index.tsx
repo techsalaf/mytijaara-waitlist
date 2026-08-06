@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { serverGet } from "@/lib/api";
+import { settingsApi } from "@/lib/api/settings";
 import type { CmsSection, Faq, Testimonial } from "@/lib/api";
+import type { PublicBranding } from "@/lib/api/settings";
 import { normalizeLaunchConfig, type LaunchConfiguration } from "@/lib/launch/config";
 import { CmsProvider } from "@/lib/cms-context";
 import { LaunchStateProvider } from "@/components/launch/launch-state-provider";
@@ -34,18 +36,14 @@ export const Route = createFileRoute("/")({
    * `serverNow` prevents the hydration mismatch (React #418) that occurs when
    * the server and client read `Date.now()` at different instants.
    */
-  loader: async (): Promise<{
-    launchConfig: LaunchConfiguration;
-    serverNow: number;
-    cms: Record<string, CmsSection>;
-    faqs: Faq[];
-    testimonials: Testimonial[];
-  }> => {
-    const [launchRaw, cmsRaw, faqsRaw, testimonialsRaw] = await Promise.all([
+  loader: async () => {
+    const [launchRaw, cmsRaw, faqsRaw, testimonialsRaw, brandingResult] = await Promise.all([
       serverGet<unknown>("/launch-config"),
       serverGet<{ data: Record<string, CmsSection> }>("/cms"),
       serverGet<{ data: Faq[] }>("/content/faqs"),
       serverGet<{ data: Testimonial[] }>("/content/testimonials"),
+      // Branding endpoint may not be deployed yet — degrade gracefully.
+      settingsApi.publicSettings().catch(() => null),
     ]);
 
     const cmsData = (cmsRaw as { data: Record<string, CmsSection> })?.data ?? {};
@@ -53,20 +51,28 @@ export const Route = createFileRoute("/")({
       | { title?: string; description?: string; ogImage?: string; keywords?: string }
       | undefined;
 
+    const branding: PublicBranding = (brandingResult as { data: PublicBranding } | null)?.data ?? {
+      siteName: "MyTijaara",
+      tagline: "One app for food, shopping, deliveries and trusted services.",
+      logoUrl: "",
+      logoDarkUrl: "",
+      faviconUrl: "",
+      ogImageUrl: "",
+      primaryColor: "",
+      accentColor: "",
+    };
+
     return {
       launchConfig: normalizeLaunchConfig(launchRaw),
       serverNow: Date.now(),
       cms: cmsData,
       faqs: (faqsRaw as { data: Faq[] })?.data ?? [],
       testimonials: (testimonialsRaw as { data: Testimonial[] })?.data ?? [],
-      // Expose SEO so head() can read it synchronously.
+      branding,
       _seoTitle: seoSection?.title,
       _seoDescription: seoSection?.description,
-      _seoOgImage: seoSection?.ogImage,
-    } as ReturnType<typeof Route.useLoaderData> & {
-      _seoTitle?: string;
-      _seoDescription?: string;
-      _seoOgImage?: string;
+      _seoOgImage: seoSection?.ogImage || branding.ogImageUrl,
+      _faviconUrl: branding.faviconUrl,
     };
   },
   head: ({ loaderData }) => {
@@ -74,17 +80,17 @@ export const Route = createFileRoute("/")({
     const DEFAULT_DESC =
       "Order food, groceries and pharmacy items, book trusted artisans, send packages, rent cars and shop from businesses around you — all from one app built for Nigerians.";
 
-    // Type assertion: head() receives the full loader return, TS types it as
-    // the declared return. The extended _seo* fields arrive at runtime.
     const d = loaderData as typeof loaderData & {
       _seoTitle?: string;
       _seoDescription?: string;
       _seoOgImage?: string;
+      _faviconUrl?: string;
     };
 
     const title = d._seoTitle || DEFAULT_TITLE;
     const description = d._seoDescription || DEFAULT_DESC;
     const ogImage = d._seoOgImage;
+    const faviconUrl = d._faviconUrl;
 
     return {
       meta: [
@@ -98,6 +104,11 @@ export const Route = createFileRoute("/")({
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: description },
       ],
+      links: [
+        ...(faviconUrl
+          ? [{ rel: "icon", href: faviconUrl }]
+          : [{ rel: "icon", href: "/favicon.ico" }]),
+      ],
     };
   },
   component: Landing,
@@ -109,7 +120,7 @@ export const Route = createFileRoute("/")({
  * context without prop drilling.
  */
 function Landing() {
-  const { launchConfig, serverNow, cms, faqs, testimonials } = Route.useLoaderData();
+  const { launchConfig, serverNow, cms, faqs, testimonials, branding } = Route.useLoaderData();
 
   const announcement = cms["announcement"]?.data as
     | { enabled?: boolean; text?: string; href?: string }
@@ -117,7 +128,7 @@ function Landing() {
 
   return (
     <LaunchStateProvider initialConfig={launchConfig} initialNow={serverNow}>
-      <CmsProvider sections={cms} faqs={faqs} testimonials={testimonials}>
+      <CmsProvider sections={cms} faqs={faqs} testimonials={testimonials} branding={branding}>
         {announcement?.enabled && (
           <AnnouncementBar text={announcement.text ?? ""} href={announcement.href ?? "#waitlist"} />
         )}

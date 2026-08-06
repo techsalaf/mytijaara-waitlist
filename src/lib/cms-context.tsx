@@ -1,33 +1,49 @@
 import { createContext, useContext, type ReactNode } from "react";
 import type { CmsSection, Faq, Testimonial } from "@/lib/api";
+import type { PublicBranding } from "@/lib/api/settings";
 
 type CmsSections = Record<string, CmsSection>;
+
+const DEFAULT_BRANDING: PublicBranding = {
+  siteName: "MyTijaara",
+  tagline: "One app for food, shopping, deliveries and trusted services.",
+  logoUrl: "",
+  logoDarkUrl: "",
+  faviconUrl: "",
+  ogImageUrl: "",
+  primaryColor: "",
+  accentColor: "",
+};
 
 type CmsContextValue = {
   sections: CmsSections;
   faqs: Faq[];
   testimonials: Testimonial[];
+  branding: PublicBranding;
 };
 
 const CmsContext = createContext<CmsContextValue>({
   sections: {},
   faqs: [],
   testimonials: [],
+  branding: DEFAULT_BRANDING,
 });
 
 export function CmsProvider({
   sections,
   faqs,
   testimonials,
+  branding,
   children,
 }: {
   sections: CmsSections;
   faqs: Faq[];
   testimonials: Testimonial[];
+  branding?: PublicBranding;
   children: ReactNode;
 }) {
   return (
-    <CmsContext.Provider value={{ sections, faqs, testimonials }}>
+    <CmsContext.Provider value={{ sections, faqs, testimonials, branding: branding ?? DEFAULT_BRANDING }}>
       {children}
     </CmsContext.Provider>
   );
@@ -47,6 +63,11 @@ export function useCmsData<T extends Record<string, unknown>>(
   const s = sections[section];
   if (!s?.data || Object.keys(s.data).length === 0) return fallback;
   return { ...fallback, ...s.data } as T;
+}
+
+/** Read the public branding settings (logo URL, favicon, site name). */
+export function useBranding(): PublicBranding {
+  return useContext(CmsContext).branding;
 }
 
 /**

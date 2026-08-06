@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Share2, X } from "lucide-react";
-import { SOCIAL_LINKS } from "@/lib/social-links";
+import { useCmsData } from "@/lib/cms-context";
 
 /* ------------------------------------------------------------------ */
 /* Brand SVG icons (not in lucide-react)                               */
@@ -54,50 +54,73 @@ function IconTikTok({ className }: { className?: string }) {
   );
 }
 
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
-  twitter: IconTwitterX,
-  instagram: IconInstagram,
-  linkedin: IconLinkedIn,
-  facebook: IconFacebook,
-  youtube: IconYouTube,
-  tiktok: IconTikTok,
+type SocialCmsData = {
+  twitter?: string;
+  instagram?: string;
+  linkedin?: string;
+  facebook?: string;
+  youtube?: string;
+  tiktok?: string;
+  whatsapp?: string;
 };
 
-/* ------------------------------------------------------------------ */
-/* Component                                                            */
-/* ------------------------------------------------------------------ */
+const DEFAULT_SOCIAL: SocialCmsData = {
+  twitter: "https://twitter.com/mytijaara",
+  instagram: "https://instagram.com/mytijaara",
+  linkedin: "https://linkedin.com/company/mytijaara",
+  facebook: "https://facebook.com/mytijaara",
+  youtube: "https://youtube.com/@mytijaara",
+  tiktok: "https://tiktok.com/@mytijaara",
+};
+
+const ICON_MAP: Record<string, { Icon: React.ComponentType<{ className?: string }>; label: string }> = {
+  twitter: { Icon: IconTwitterX, label: "X / Twitter" },
+  instagram: { Icon: IconInstagram, label: "Instagram" },
+  linkedin: { Icon: IconLinkedIn, label: "LinkedIn" },
+  facebook: { Icon: IconFacebook, label: "Facebook" },
+  youtube: { Icon: IconYouTube, label: "YouTube" },
+  tiktok: { Icon: IconTikTok, label: "TikTok" },
+};
 
 /**
- * Floating social-media menu — fixed bottom-left.
- * Expands upward when toggled, one icon per social link.
- * All URLs are configured in src/lib/social-links.ts.
+ * Floating social-media menu — fixed bottom-left. Expands upward when toggled.
+ * URLs come from the CMS `social` section so the admin can update them without
+ * a deploy. Falls back to hardcoded defaults when the section is unpopulated.
  */
 export function SocialFloat() {
   const [open, setOpen] = useState(false);
+  const socialCms = useCmsData("social", DEFAULT_SOCIAL);
+
+  // Build the ordered list, filtering out any platforms with no URL.
+  const links = (Object.keys(ICON_MAP) as Array<keyof SocialCmsData>)
+    .map((id) => ({ id, href: socialCms[id] || DEFAULT_SOCIAL[id] }))
+    .filter((l): l is { id: keyof SocialCmsData; href: string } => Boolean(l.href));
 
   return (
     <div className="fixed bottom-6 left-6 z-40 flex flex-col-reverse items-start gap-2">
       {/* Social links list — shown above the toggle button */}
       <div
-        className={[
-          "mb-2 flex flex-col gap-2",
-          "transition-all duration-200 ease-out origin-bottom",
-          open
-            ? "opacity-100 scale-100 pointer-events-auto"
-            : "opacity-0 scale-90 pointer-events-none",
-        ].join(" ")}
+        className="mb-2 flex flex-col gap-2"
         aria-hidden={!open}
+        style={{
+          opacity: open ? 1 : 0,
+          transform: open ? "scaleY(1)" : "scaleY(0.9)",
+          transformOrigin: "bottom",
+          pointerEvents: open ? "auto" : "none",
+          transition: "opacity 200ms ease-out, transform 200ms ease-out",
+        }}
       >
-        {SOCIAL_LINKS.map((link, i) => {
-          const Icon = ICON_MAP[link.id];
-          if (!Icon) return null;
+        {links.map((link, i) => {
+          const entry = ICON_MAP[link.id];
+          if (!entry) return null;
+          const { Icon } = entry;
           return (
             <a
               key={link.id}
               href={link.href}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={link.ariaLabel}
+              aria-label={`MyTijaara on ${entry.label}`}
               tabIndex={open ? 0 : -1}
               className="group flex items-center gap-2.5"
               style={{
@@ -109,7 +132,7 @@ export function SocialFloat() {
             >
               {/* Label — only visible on hover, desktop */}
               <span className="hidden rounded-lg border border-border bg-card px-2.5 py-1 text-xs font-medium text-foreground shadow-soft opacity-0 transition-opacity group-hover:opacity-100 sm:block">
-                {link.label}
+                {entry.label}
               </span>
               {/* Icon */}
               <span className="grid h-9 w-9 place-items-center rounded-full border border-border bg-card/80 text-muted-foreground shadow-soft backdrop-blur-sm transition-all hover:scale-110 hover:border-primary/40 hover:bg-primary hover:text-primary-foreground">
@@ -125,14 +148,9 @@ export function SocialFloat() {
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? "Close social links" : "Open social links"}
         aria-expanded={open}
-        className="grid h-11 w-11 place-items-center rounded-full border border-border bg-card/80 text-muted-foreground shadow-soft backdrop-blur-sm transition-all duration-150 hover:scale-105 hover:border-primary/40 hover:bg-primary hover:text-primary-foreground active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="grid h-11 w-11 cursor-pointer place-items-center rounded-full border border-border bg-card/80 text-muted-foreground shadow-soft backdrop-blur-sm transition-all duration-150 hover:scale-105 hover:border-primary/40 hover:bg-primary hover:text-primary-foreground active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
-        <span
-          className="transition-all duration-150"
-          style={{ transform: open ? "rotate(0deg)" : "rotate(0deg)" }}
-        >
-          {open ? <X className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
-        </span>
+        {open ? <X className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
       </button>
     </div>
   );

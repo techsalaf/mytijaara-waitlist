@@ -123,7 +123,7 @@ export function WaitlistForm() {
             role="radio"
             aria-checked={role === r}
             onClick={() => setValue("role", r, { shouldValidate: false })}
-            className={`rounded-full px-4 py-2 text-xs font-semibold transition-all ${
+            className={`cursor-pointer rounded-full px-4 py-2 text-xs font-semibold transition-all ${
               role === r
                 ? "bg-gold-gradient text-gold-foreground shadow-soft"
                 : "border border-primary-foreground/25 text-primary-foreground/85 hover:bg-primary-foreground/10"
@@ -227,7 +227,7 @@ export function WaitlistForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-gold-gradient px-6 py-3.5 text-sm font-bold text-gold-foreground shadow-soft transition-transform hover:scale-[1.02] disabled:opacity-70"
+        className="mt-2 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full bg-gold-gradient px-6 py-3.5 text-sm font-bold text-gold-foreground shadow-soft transition-transform hover:scale-[1.02] disabled:opacity-70"
       >
         {isSubmitting ? (
           "Joining…"

@@ -52,6 +52,7 @@ Route::post('/webhooks/email', [EmailTrackingController::class, 'webhook']);
 Route::post('/unsubscribe', [EmailTrackingController::class, 'unsubscribe']);
 
 // Public read of published CMS content for the landing page.
+Route::get('/settings/public', [SettingsController::class, 'publicSettings']);
 Route::get('/cms', [CmsController::class, 'index']);
 Route::get('/cms/{section}', [CmsController::class, 'show']);
 Route::get('/content/faqs', [ContentController::class, 'faqs']);

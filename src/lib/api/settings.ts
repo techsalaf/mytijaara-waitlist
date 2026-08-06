@@ -54,7 +54,21 @@ export type SystemSettings = {
   notifyOnSignup: boolean;
 };
 
+/** Non-secret subset returned by `GET /settings/public`. */
+export type PublicBranding = {
+  siteName: string;
+  tagline: string;
+  logoUrl: string;
+  logoDarkUrl: string;
+  faviconUrl: string;
+  ogImageUrl: string;
+  primaryColor: string;
+  accentColor: string;
+};
+
 export const settingsApi = {
+  /** Public endpoint — no auth needed. Returns branding URLs and company name. */
+  publicSettings: () => apiCall<PublicBranding>("/settings/public"),
   get: <T = Record<string, unknown>>(group: SettingsGroup) => apiCall<T>(`/settings/${group}`),
   update: <T = Record<string, unknown>>(group: SettingsGroup, patch: Record<string, unknown>) =>
     apiCall<T>(`/settings/${group}`, { method: "PATCH", body: patch }),

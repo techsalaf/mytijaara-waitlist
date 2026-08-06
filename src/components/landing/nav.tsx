@@ -75,7 +75,7 @@ export function Nav() {
             </a>
           </div>
           <button
-            className="grid h-11 w-11 place-items-center rounded-xl border border-border md:hidden"
+            className="grid h-11 w-11 cursor-pointer place-items-center rounded-xl border border-border transition-colors hover:bg-primary-soft md:hidden"
             aria-label={open ? "Close menu" : "Open menu"}
             onClick={() => setOpen((o) => !o)}
           >

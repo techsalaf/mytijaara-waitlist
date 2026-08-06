@@ -29,6 +29,33 @@ class SettingsController extends Controller
     /** Placeholder the client sees instead of a stored secret. */
     private const REDACTED = '••••••••';
 
+    /**
+     * GET /settings/public — safe non-secret subset for the landing page.
+     * Returns company name + branding URLs only. No passwords, API keys, or
+     * SMTP credentials are included.
+     */
+    public function publicSettings(): JsonResponse
+    {
+        $company = Setting::firstOrCreate(['group' => 'company'], ['data' => []]);
+        $branding = Setting::firstOrCreate(['group' => 'branding'], ['data' => []]);
+
+        $co = $this->withDefaults('company', is_array($company->data) ? $company->data : []);
+        $br = $this->withDefaults('branding', is_array($branding->data) ? $branding->data : []);
+
+        return response()->json([
+            'data' => [
+                'siteName'     => $co['siteName'] ?? 'MyTijaara',
+                'tagline'      => $co['tagline'] ?? '',
+                'logoUrl'      => $br['logoUrl'] ?? '',
+                'logoDarkUrl'  => $br['logoDarkUrl'] ?? '',
+                'faviconUrl'   => $br['faviconUrl'] ?? '',
+                'ogImageUrl'   => $br['ogImageUrl'] ?? '',
+                'primaryColor' => $br['primaryColor'] ?? '',
+                'accentColor'  => $br['accentColor'] ?? '',
+            ],
+        ]);
+    }
+
     /** GET /settings/:group */
     public function show(string $group): JsonResponse
     {

@@ -1,11 +1,12 @@
 {{-- Waitlist welcome email. Table layout + inline styles: mail clients ignore
-     most modern CSS, so nothing here relies on flex, grid, or custom props. --}}
+     most modern CSS, so nothing here relies on flex, grid, or custom props.
+     The `$role` variable drives the role-specific blurb below the opener. --}}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>You're on the MyTijaara waitlist</title>
+  <title>{{ $role === 'vendor' ? "Your vendor spot on MyTijaara is reserved" : ($role === 'artisan' ? "You're on the MyTijaara waitlist — artisan edition" : ($role === 'rider' ? "You're on the MyTijaara rider waitlist" : "You're on the MyTijaara waitlist")) }}</title>
 </head>
 <body style="margin:0;padding:0;background:#f6f4ef;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1a1a1a;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f6f4ef;padding:24px 12px;">
@@ -20,10 +21,29 @@
           <tr>
             <td style="padding:28px;">
               <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3;">You're in, {{ $name }}.</h1>
-              <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#3f3f3f;">
-                Thanks for joining the MyTijaara waitlist. One app for food, shopping,
-                deliveries and trusted services across Nigeria.
-              </p>
+
+              {{-- Role-specific opener --}}
+              @if ($role === 'vendor')
+                <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#3f3f3f;">
+                  Your spot as a <strong>vendor</strong> on MyTijaara is reserved. We'll reach out with
+                  onboarding details before launch so you can list your products from day one.
+                </p>
+              @elseif ($role === 'artisan')
+                <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#3f3f3f;">
+                  Your spot as an <strong>artisan</strong> on MyTijaara is reserved. We connect skilled
+                  professionals like you with Nigerians who need reliable, vetted service providers.
+                </p>
+              @elseif ($role === 'rider')
+                <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#3f3f3f;">
+                  Your spot as a <strong>delivery rider</strong> on MyTijaara is reserved. We'll send
+                  you everything you need to start earning on the platform before we go live.
+                </p>
+              @else
+                <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#3f3f3f;">
+                  Thanks for joining the MyTijaara waitlist. One app for food, shopping,
+                  deliveries and trusted services across Nigeria.
+                </p>
+              @endif
 
               @if ($position)
                 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">

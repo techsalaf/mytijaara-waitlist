@@ -18,31 +18,65 @@ import { useLaunch } from "@/components/launch/launch-state-provider";
 import { useCmsData } from "@/lib/cms-context";
 import heroImg from "@/assets/hero-illustration.png";
 
+type HeroService = { icon: string; label: string };
+
 type HeroCmsData = {
+  eyebrow?: string;
+  heading?: string;
+  headingHighlight?: string;
   subtitle?: string;
+  imageUrl?: string;
   secondaryCtaLabel?: string;
+  services?: HeroService[];
 };
 
 const DEFAULT_HERO: HeroCmsData = {
+  eyebrow: "Built for Nigerians — Launching soon",
+  eyebrowLive: "Built for Nigerians — Now live",
+  heading: "Everything you need,",
+  headingHighlight: "all in one place.",
   subtitle:
     "Order food, groceries and pharmacy items, book trusted artisans, send packages, rent cars, and shop from businesses around you — all from one app built for Nigerians.",
+  imageUrl: "",
   secondaryCtaLabel: "See How It Works",
+  services: [],
+} as HeroCmsData & { eyebrowLive?: string };
+
+// Lucide icon lookup so service chip icons can be stored as strings in the DB.
+const SERVICE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  UtensilsCrossed,
+  ShoppingBasket,
+  Pill,
+  Package,
+  Car,
+  Wrench,
 };
 
-const HERO_SERVICES = [
-  { icon: UtensilsCrossed, label: "Food" },
-  { icon: ShoppingBasket, label: "Groceries" },
-  { icon: Pill, label: "Pharmacy" },
-  { icon: Package, label: "Parcels" },
-  { icon: Car, label: "Cars" },
-  { icon: Wrench, label: "Artisans" },
+const DEFAULT_SERVICES = [
+  { icon: "UtensilsCrossed", label: "Food" },
+  { icon: "ShoppingBasket", label: "Groceries" },
+  { icon: "Pill", label: "Pharmacy" },
+  { icon: "Package", label: "Parcels" },
+  { icon: "Car", label: "Cars" },
+  { icon: "Wrench", label: "Artisans" },
 ];
 
 export function Hero() {
   const cta = usePrimaryCta();
   const { isLaunched, showWaitlist } = useLaunch();
   const CtaIcon = cta.download ? Download : ArrowRight;
-  const cms = useCmsData("hero", DEFAULT_HERO);
+  const cms = useCmsData("hero", DEFAULT_HERO as HeroCmsData);
+
+  const eyebrow = isLaunched
+    ? ((DEFAULT_HERO as HeroCmsData & { eyebrowLive?: string }).eyebrowLive ?? "Built for Nigerians — Now live")
+    : (cms.eyebrow ?? (DEFAULT_HERO as HeroCmsData).eyebrow!);
+
+  const heading = cms.heading || DEFAULT_HERO.heading!;
+  const headingHighlight = cms.headingHighlight || DEFAULT_HERO.headingHighlight!;
+  const subtitle = cms.subtitle || DEFAULT_HERO.subtitle!;
+  const secondaryCtaLabel = cms.secondaryCtaLabel || DEFAULT_HERO.secondaryCtaLabel!;
+  const heroImage = cms.imageUrl || heroImg;
+  const services = (cms.services && cms.services.length > 0) ? cms.services : DEFAULT_SERVICES;
 
   return (
     <section id="top" className="relative overflow-hidden pt-32 pb-20 sm:pt-40 lg:pb-32">
@@ -54,15 +88,15 @@ export function Hero() {
           <Reveal>
             <span className="inline-flex w-fit items-center gap-2 rounded-full border border-primary/15 bg-primary-soft px-4 py-1.5 text-xs font-semibold text-primary">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-gold" />
-              {isLaunched ? "Built for Nigerians — Now live" : "Built for Nigerians — Launching soon"}
+              {eyebrow}
             </span>
           </Reveal>
           <Reveal delay={100}>
             <h1 className="mt-6 font-display text-5xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-6xl lg:text-7xl">
-              Everything you need,{" "}
+              {heading}{" "}
               <span className="relative inline-block">
                 <span className="bg-gradient-to-r from-primary via-primary to-[oklch(0.5_0.13_150)] bg-clip-text text-transparent">
-                  all in one place.
+                  {headingHighlight}
                 </span>
                 <svg
                   aria-hidden
@@ -89,23 +123,23 @@ export function Hero() {
           </Reveal>
           <Reveal delay={200}>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
-              {cms.subtitle}
+              {subtitle}
             </p>
           </Reveal>
           <Reveal delay={300}>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <a
                 href={cta.href}
-                className="group inline-flex items-center gap-2 rounded-full bg-primary px-7 py-4 text-base font-semibold text-primary-foreground shadow-elegant transition-all hover:scale-[1.02] hover:shadow-glow"
+                className="group inline-flex cursor-pointer items-center gap-2 rounded-full bg-primary px-7 py-4 text-base font-semibold text-primary-foreground shadow-elegant transition-all hover:scale-[1.02] hover:shadow-glow"
               >
                 {cta.label}
                 <CtaIcon className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </a>
               <a
                 href="#how"
-                className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-7 py-4 text-base font-semibold text-foreground transition-colors hover:bg-primary-soft"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-card px-7 py-4 text-base font-semibold text-foreground transition-colors hover:bg-primary-soft"
               >
-              {cms.secondaryCtaLabel ?? DEFAULT_HERO.secondaryCtaLabel}
+                {secondaryCtaLabel}
               </a>
             </div>
           </Reveal>
@@ -138,7 +172,7 @@ export function Hero() {
             <div className="absolute left-1/2 top-1/2 h-[380px] w-[380px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gold-gradient opacity-30 blur-3xl" />
 
             <img
-              src={heroImg}
+              src={typeof heroImage === "string" ? heroImage : (heroImage as { src?: string }).src ?? ""}
               alt="A young Nigerian woman using the MyTijaara app"
               width={1200}
               height={1200}
@@ -194,17 +228,20 @@ export function Hero() {
       <div className="relative mx-auto mt-16 max-w-6xl px-4 sm:px-6">
         <Reveal delay={200}>
           <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
-            {HERO_SERVICES.map(({ icon: Icon, label }) => (
-              <div
-                key={label}
-                className="group flex flex-col items-center gap-2 rounded-2xl border border-border bg-card px-3 py-4 transition-all hover:-translate-y-1 hover:border-primary/30 hover:shadow-soft"
-              >
-                <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary-soft text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                  <Icon className="h-5 w-5" />
+            {services.map(({ icon, label }) => {
+              const Icon = SERVICE_ICONS[icon];
+              return (
+                <div
+                  key={label}
+                  className="group flex flex-col items-center gap-2 rounded-2xl border border-border bg-card px-3 py-4 transition-all hover:-translate-y-1 hover:border-primary/30 hover:shadow-soft"
+                >
+                  <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary-soft text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                    {Icon ? <Icon className="h-5 w-5" /> : null}
+                  </div>
+                  <span className="text-xs font-semibold text-foreground">{label}</span>
                 </div>
-                <span className="text-xs font-semibold text-foreground">{label}</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </Reveal>
       </div>

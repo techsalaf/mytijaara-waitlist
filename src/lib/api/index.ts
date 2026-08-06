@@ -65,6 +65,7 @@ export type {
   ApiKeyRecord,
   CachePurgeResult,
   SystemSettings,
+  PublicBranding,
 } from "./settings";
 
 export { healthApi } from "./health";

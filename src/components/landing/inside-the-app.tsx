@@ -48,7 +48,7 @@ function ScreenCard({ src, caption, tag, onOpen }: Screen & { onOpen: () => void
       <button
         type="button"
         onClick={onOpen}
-        className="block w-full overflow-hidden rounded-[2rem] transition-transform duration-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary group-hover:-translate-y-1"
+        className="block w-full cursor-pointer overflow-hidden rounded-[2rem] transition-transform duration-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary group-hover:-translate-y-1"
         aria-label={`Open preview: ${caption}`}
       >
         <img
@@ -98,7 +98,7 @@ function ScreenModal({ screen, onClose }: { screen: Screen | null; onClose: () =
         type="button"
         onClick={onClose}
         aria-label="Close preview"
-        className="absolute right-4 top-4 grid h-11 w-11 place-items-center rounded-full bg-card text-foreground shadow-soft transition hover:scale-105 sm:right-6 sm:top-6"
+        className="absolute right-4 top-4 grid h-11 w-11 cursor-pointer place-items-center rounded-full bg-card text-foreground shadow-soft transition hover:scale-105 sm:right-6 sm:top-6"
       >
         <X className="h-5 w-5" />
       </button>

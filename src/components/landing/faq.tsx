@@ -50,7 +50,7 @@ export function FAQ() {
                 <button
                   onClick={() => setOpen(isOpen ? null : i)}
                   aria-expanded={isOpen}
-                  className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left transition-colors hover:bg-primary-soft/40 sm:px-8"
+                  className="flex w-full cursor-pointer items-center justify-between gap-4 px-6 py-5 text-left transition-colors hover:bg-primary-soft/40 sm:px-8"
                 >
                   <span className="font-display text-base font-semibold sm:text-lg">{f.q}</span>
                   <ChevronDown
