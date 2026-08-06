@@ -27,8 +27,11 @@ jobs:
 
             cd /home/mytijaaracp/api
 
-            git pull origin main
+            echo "==> Updating code..."
+            git fetch origin main
+            git reset --hard origin/main
 
+            echo "==> Syncing backend contents..."
             rsync -av \
               --exclude='.env' \
               --exclude='storage/' \
