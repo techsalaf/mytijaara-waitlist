@@ -20,6 +20,9 @@ import { WaitlistSection } from "@/components/landing/waitlist-section";
 import { FAQ } from "@/components/landing/faq";
 import { Footer } from "@/components/landing/footer";
 import { AnnouncementBar } from "@/components/landing/announcement-bar";
+import { AiAssistant } from "@/components/landing/ai-assistant";
+import { ScrollToTop } from "@/components/landing/scroll-to-top";
+import { SocialFloat } from "@/components/landing/social-float";
 
 export const Route = createFileRoute("/")({
   /**
@@ -136,6 +139,10 @@ function Landing() {
           </main>
           <Footer />
         </div>
+        {/* Floating UI — outside the scrollable content div, still inside providers */}
+        <AiAssistant />
+        <ScrollToTop />
+        <SocialFloat />
       </CmsProvider>
     </LaunchStateProvider>
   );

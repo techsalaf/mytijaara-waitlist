@@ -219,29 +219,29 @@ function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Signups"
-          value={formatNumber(stats.periodSignups)}
+          value={formatNumber(stats.periodSignups ?? 0)}
           delta={
             period === 0
               ? undefined
-              : periodGrowth(stats.periodSignups, stats.previousPeriodSignups)
+              : periodGrowth(stats.periodSignups ?? 0, stats.previousPeriodSignups ?? 0)
           }
           icon={Users}
           hint={
             period === 0
               ? "all time"
-              : `vs ${formatNumber(stats.previousPeriodSignups)} in the previous ${period} days`
+              : `vs ${formatNumber(stats.previousPeriodSignups ?? 0)} in the previous ${period} days`
           }
         />
         <StatCard
           label="Today's Signups"
-          value={formatNumber(stats.todaySignups)}
-          delta={stats.weeklyGrowth}
+          value={formatNumber(stats.todaySignups ?? 0)}
+          delta={stats.weeklyGrowth ?? 0}
           icon={TrendingUp}
           hint="week on week"
         />
         <StatCard
           label="Verified"
-          value={`${stats.verifiedRate}%`}
+          value={`${stats.verifiedRate ?? 0}%`}
           icon={BadgeCheck}
           hint={`of signups in ${periodPhrase(period)}`}
         />

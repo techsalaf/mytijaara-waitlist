@@ -118,7 +118,7 @@ function LoginPage() {
       >
         <div>
           <Label htmlFor="email">Work email</Label>
-          <Input id="email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1.5" />
+          <Input id="email" type="email" required autoComplete="email" placeholder="your@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1.5" />
         </div>
         <div>
           <div className="flex items-center justify-between">
@@ -128,7 +128,7 @@ function LoginPage() {
             </Link>
           </div>
           <div className="relative mt-1.5">
-            <Input id="password" type={show ? "text" : "password"} required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <Input id="password" type={show ? "text" : "password"} required autoComplete="current-password" placeholder="Enter your password" value={password} onChange={(e) => setPassword(e.target.value)} />
             <button type="button" onClick={() => setShow((s) => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
               {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>

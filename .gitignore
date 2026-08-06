@@ -21,6 +21,13 @@ dist-ssr
 .wrangler/
 .dev.vars
 
+# Lovable editor artefacts
+.lovable/
+
+# PHP test cache
+backend/.phpunit.result.cache
+.phpunit.result.cache
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

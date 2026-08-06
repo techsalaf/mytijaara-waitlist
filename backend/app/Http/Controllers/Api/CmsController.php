@@ -40,10 +40,24 @@ class CmsController extends Controller
 
     public function adminShow(string $section): JsonResponse
     {
-        return response()->json(['data' => $this->present(
-            CmsSection::where('section', $section)->firstOrFail(),
-            true,
-        )]);
+        // Return a sensible empty structure when the section hasn't been seeded
+        // yet — this avoids a 404 on fresh deployments where the CMS table exists
+        // but specific sections have not yet been inserted.
+        $row = CmsSection::where('section', $section)->first();
+        if (! $row) {
+            return response()->json(['data' => [
+                'section' => $section,
+                'title' => ucfirst(str_replace(['_', '-'], ' ', $section)),
+                'data' => (object) [],
+                'draft' => null,
+                'enabled' => false,
+                'published' => false,
+                'order' => 0,
+                'scheduledAt' => null,
+            ]]);
+        }
+
+        return response()->json(['data' => $this->present($row, true)]);
     }
 
     public function update(Request $request, string $section): JsonResponse
