@@ -24,7 +24,7 @@ jobs:
           script_stop: true
 
           script: |
-            set -e
+            set -ex
 
             REPO=/home/mytijaaracp/repo
             APP=/home/mytijaaracp/api
