@@ -57,8 +57,8 @@ export const Route = createFileRoute("/")({
       contactEmail: "",
       supportEmail: "",
       phone: "",
-      launchCity: "Ibadan",
       address: "",
+      launchCity: "",
       logoUrl: "",
       logoDarkUrl: "",
       faviconUrl: "",
@@ -137,21 +137,26 @@ export const Route = createFileRoute("/")({
  * has set a non-empty value, so unset colors keep the stylesheet default.
  */
 function BrandColors({
-  primaryColor, accentColor, secondaryColor, backgroundColor, surfaceColor,
+  primaryColor,
+  accentColor,
+  secondaryColor,
+  backgroundColor,
+  surfaceColor,
 }: {
-  primaryColor: string; accentColor: string;
-  secondaryColor: string; backgroundColor: string; surfaceColor: string;
+  primaryColor: string;
+  accentColor: string;
+  secondaryColor: string;
+  backgroundColor: string;
+  surfaceColor: string;
 }) {
-  const pairs: [string, string][] = [
-    ["--primary",    primaryColor],
-    ["--gold",       accentColor],
-    ["--secondary",  secondaryColor],
-    ["--background", backgroundColor],
-    ["--surface",    surfaceColor],
-  ];
-  const declarations = pairs
-    .filter(([, v]) => v)
-    .map(([k, v]) => `${k}: ${v};`)
+  const declarations = [
+    primaryColor    ? `--primary: ${primaryColor};`       : "",
+    accentColor     ? `--gold: ${accentColor};`           : "",
+    secondaryColor  ? `--secondary: ${secondaryColor};`   : "",
+    backgroundColor ? `--background: ${backgroundColor};` : "",
+    surfaceColor    ? `--surface: ${surfaceColor};`        : "",
+  ]
+    .filter(Boolean)
     .join(" ");
   if (!declarations) return null;
   return <style>{`:root { ${declarations} }`}</style>;

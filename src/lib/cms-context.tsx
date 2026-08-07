@@ -6,12 +6,12 @@ type CmsSections = Record<string, CmsSection>;
 
 const DEFAULT_BRANDING: PublicBranding = {
   siteName: "MyTijaara",
-  tagline: "Everything you need, all in one place.",
-  contactEmail: "hello@mytijaara.com",
-  supportEmail: "support@mytijaara.com",
-  phone: "+2349032617923",
-  launchCity: "Ibadan",
+  tagline: "One app for food, shopping, deliveries and trusted services.",
+  contactEmail: "",
+  supportEmail: "",
+  phone: "",
   address: "",
+  launchCity: "",
   logoUrl: "",
   logoDarkUrl: "",
   faviconUrl: "",
