@@ -1,4 +1,4 @@
-name: Deploy Laravel Backend
+name: 🚀 Deploy Laravel Backend
 
 on:
   push:
@@ -10,7 +10,6 @@ on:
 jobs:
   detect:
     runs-on: ubuntu-latest
-
     outputs:
       composer: ${{ steps.changes.outputs.composer }}
       migrate: ${{ steps.changes.outputs.migrate }}
@@ -20,17 +19,20 @@ jobs:
       queue: ${{ steps.changes.outputs.queue }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 2  # needed for git diff
 
-      - id: changes
+      - name: 🔍 Detect changed backend files
+        id: changes
         run: |
           CHANGED=$(git diff --name-only HEAD^ HEAD)
 
-          echo "Changed files:"
+          echo "📂 Changed files:"
           echo "$CHANGED"
 
+          # Initialize flags
           composer=false
           migrate=false
           config=false
@@ -38,36 +40,31 @@ jobs:
           views=false
           queue=false
 
+          # Loop through changed files and set flags
           while IFS= read -r file; do
             case "$file" in
-
               backend/composer.json|backend/composer.lock)
                 composer=true
                 ;;
-
               backend/database/migrations/*)
                 migrate=true
                 ;;
-
               backend/config/*|backend/bootstrap/*)
                 config=true
                 ;;
-
               backend/routes/*)
                 routes=true
                 ;;
-
               backend/resources/views/*)
                 views=true
                 ;;
-
               backend/app/Jobs/*|backend/app/Listeners/*)
                 queue=true
                 ;;
-
             esac
           done <<< "$CHANGED"
 
+          # Output flags for next job
           echo "composer=$composer" >> $GITHUB_OUTPUT
           echo "migrate=$migrate" >> $GITHUB_OUTPUT
           echo "config=$config" >> $GITHUB_OUTPUT
@@ -77,11 +74,10 @@ jobs:
 
   deploy:
     needs: detect
-
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy
+      - name: 🌐 SSH Deploy to Namecheap
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.NAMECHEAP_SSH_HOST }}
@@ -92,6 +88,7 @@ jobs:
           command_timeout: 30m
           script_stop: true
 
+          # Environment variables passed to the remote script
           envs: COMPOSER,RUN_MIGRATE,RUN_CONFIG,RUN_ROUTES,RUN_VIEWS,RUN_QUEUE
 
           env: |
@@ -103,20 +100,23 @@ jobs:
             RUN_QUEUE=${{ needs.detect.outputs.queue }}
 
           script: |
-            set -e
+            set -e  # exit on any failure
 
             REPO=/home/mytijaaracp/repo
             APP=/home/mytijaaracp/api
 
-            echo "Updating repository..."
-
+            # ----------------------------------------------------------
+            # 📥 Update repository
+            # ----------------------------------------------------------
+            echo "🔄 Updating repository..."
             cd "$REPO"
-
             git fetch origin main
             git reset --hard origin/main
 
-            echo "Syncing backend..."
-
+            # ----------------------------------------------------------
+            # 📂 Sync backend files (exclude sensitive and cache dirs)
+            # ----------------------------------------------------------
+            echo "📂 Syncing backend files to application directory..."
             rsync -az --delete-delay \
               --exclude=.env \
               --exclude=storage/ \
@@ -127,35 +127,77 @@ jobs:
 
             cd "$APP"
 
+            # ----------------------------------------------------------
+            # 📦 Composer dependencies (only if composer files changed)
+            # ----------------------------------------------------------
             if [ "$COMPOSER" = "true" ]; then
-              echo "Running Composer..."
+              echo "📦 Installing/updating Composer dependencies..."
               php ~/composer.phar install \
                 --no-dev \
                 --prefer-dist \
                 --optimize-autoloader \
                 --no-interaction
+            else
+              echo "⏩ Composer skipped (no changes in composer files)."
             fi
 
+            # ----------------------------------------------------------
+            # ⚙️ Cache configuration (if config/bootstrap changed)
+            # ----------------------------------------------------------
             if [ "$RUN_CONFIG" = "true" ]; then
+              echo "⚙️ Caching configuration..."
               php artisan config:cache
+            else
+              echo "⏩ Config cache skipped."
             fi
 
+            # ----------------------------------------------------------
+            # 🛣️ Cache routes (if routes changed)
+            # ----------------------------------------------------------
             if [ "$RUN_ROUTES" = "true" ]; then
+              echo "🛣️ Caching routes..."
               php artisan route:cache
+            else
+              echo "⏩ Route cache skipped."
             fi
 
+            # ----------------------------------------------------------
+            # 🖼️ Cache Blade views (if views changed)
+            # ----------------------------------------------------------
             if [ "$RUN_VIEWS" = "true" ]; then
+              echo "🖼️ Caching Blade views..."
               php artisan view:cache
+            else
+              echo "⏩ View cache skipped."
             fi
 
+            # ----------------------------------------------------------
+            # 🗄️ Run database migrations (if migrations changed)
+            # ----------------------------------------------------------
             if [ "$RUN_MIGRATE" = "true" ]; then
+              echo "🗄️ Running database migrations..."
               php artisan migrate --force
+            else
+              echo "⏩ Migrations skipped."
             fi
 
+            # ----------------------------------------------------------
+            # 🔄 Restart queue workers (if Jobs/Listeners changed)
+            # ----------------------------------------------------------
             if [ "$RUN_QUEUE" = "true" ]; then
+              echo "🔄 Restarting queue workers..."
               php artisan queue:restart || true
+            else
+              echo "⏩ Queue restart skipped."
             fi
 
+            # ----------------------------------------------------------
+            # 🔐 Set correct permissions
+            # ----------------------------------------------------------
+            echo "🔐 Setting directory permissions..."
             chmod -R 775 storage bootstrap/cache
 
-            echo "Deployment completed successfully."
+            # ----------------------------------------------------------
+            # ✅ Done
+            # ----------------------------------------------------------
+            echo "✅ Deployment completed successfully!"
