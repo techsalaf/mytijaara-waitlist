@@ -87,18 +87,15 @@ jobs:
           command_timeout: 30m
           script_stop: true
 
-          envs: COMPOSER,RUN_MIGRATE,RUN_CONFIG,RUN_ROUTES,RUN_VIEWS,RUN_QUEUE
-
-          env: |
-            COMPOSER=${{ needs.detect.outputs.composer }}
-            RUN_MIGRATE=${{ needs.detect.outputs.migrate }}
-            RUN_CONFIG=${{ needs.detect.outputs.config }}
-            RUN_ROUTES=${{ needs.detect.outputs.routes }}
-            RUN_VIEWS=${{ needs.detect.outputs.views }}
-            RUN_QUEUE=${{ needs.detect.outputs.queue }}
-
           script: |
             set -e
+
+            COMPOSER="${{ needs.detect.outputs.composer }}"
+            RUN_MIGRATE="${{ needs.detect.outputs.migrate }}"
+            RUN_CONFIG="${{ needs.detect.outputs.config }}"
+            RUN_ROUTES="${{ needs.detect.outputs.routes }}"
+            RUN_VIEWS="${{ needs.detect.outputs.views }}"
+            RUN_QUEUE="${{ needs.detect.outputs.queue }}"
 
             REPO="/home/mytijaaracp/repo"
             APP="/home/mytijaaracp/api"
