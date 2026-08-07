@@ -1,203 +1,109 @@
-name: 🚀 Deploy Laravel Backend
+script: |
+  set -ex
+  trap 'echo "❌ ERROR at line $LINENO (exit $?)"' ERR
 
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - "backend/**"
+  REPO=/home/mytijaaracp/repo
+  APP=/home/mytijaaracp/api
 
-jobs:
-  detect:
-    runs-on: ubuntu-latest
-    outputs:
-      composer: ${{ steps.changes.outputs.composer }}
-      migrate: ${{ steps.changes.outputs.migrate }}
-      config: ${{ steps.changes.outputs.config }}
-      routes: ${{ steps.changes.outputs.routes }}
-      views: ${{ steps.changes.outputs.views }}
-      queue: ${{ steps.changes.outputs.queue }}
+  # ----------------------------------------------------------
+  # 📥 Update repository
+  # ----------------------------------------------------------
+  echo "🔄 Updating repository..."
+  cd "$REPO"
+  git fetch origin main
+  git reset --hard origin/main
 
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2  # needed for git diff
+  # ----------------------------------------------------------
+  # 📂 Ensure application directory exists
+  # ----------------------------------------------------------
+  echo "📁 Checking/creating application directory..."
+  mkdir -p "$APP"
+  ls -ld "$APP"
 
-      - name: 🔍 Detect changed backend files
-        id: changes
-        run: |
-          CHANGED=$(git diff --name-only HEAD^ HEAD)
+  # ----------------------------------------------------------
+  # 📂 Sync backend files (errors will be shown)
+  # ----------------------------------------------------------
+  echo "📂 Syncing backend files to application directory..."
+  rsync -az --delete-delay \
+    --exclude=.env \
+    --exclude=storage/ \
+    --exclude=vendor/ \
+    --exclude=.git/ \
+    "$REPO/backend/" \
+    "$APP/" \
+    2>&1
 
-          echo "📂 Changed files:"
-          echo "$CHANGED"
+  cd "$APP"
+  echo "✅ Sync completed."
 
-          # Initialize flags
-          composer=false
-          migrate=false
-          config=false
-          routes=false
-          views=false
-          queue=false
+  # ----------------------------------------------------------
+  # 📦 Composer (if needed)
+  # ----------------------------------------------------------
+  if [ "$COMPOSER" = "true" ]; then
+    echo "📦 Installing Composer dependencies..."
+    php ~/composer.phar install \
+      --no-dev --prefer-dist --optimize-autoloader --no-interaction
+  else
+    echo "⏩ Composer skipped."
+  fi
 
-          # Loop through changed files and set flags
-          while IFS= read -r file; do
-            case "$file" in
-              backend/composer.json|backend/composer.lock)
-                composer=true
-                ;;
-              backend/database/migrations/*)
-                migrate=true
-                ;;
-              backend/config/*|backend/bootstrap/*)
-                config=true
-                ;;
-              backend/routes/*)
-                routes=true
-                ;;
-              backend/resources/views/*)
-                views=true
-                ;;
-              backend/app/Jobs/*|backend/app/Listeners/*)
-                queue=true
-                ;;
-            esac
-          done <<< "$CHANGED"
+  # ----------------------------------------------------------
+  # ⚙️ Config cache
+  # ----------------------------------------------------------
+  if [ "$RUN_CONFIG" = "true" ]; then
+    echo "⚙️ Caching config..."
+    php artisan config:cache
+  else
+    echo "⏩ Config cache skipped."
+  fi
 
-          # Output flags for next job
-          echo "composer=$composer" >> $GITHUB_OUTPUT
-          echo "migrate=$migrate" >> $GITHUB_OUTPUT
-          echo "config=$config" >> $GITHUB_OUTPUT
-          echo "routes=$routes" >> $GITHUB_OUTPUT
-          echo "views=$views" >> $GITHUB_OUTPUT
-          echo "queue=$queue" >> $GITHUB_OUTPUT
+  # ----------------------------------------------------------
+  # 🛣️ Route cache
+  # ----------------------------------------------------------
+  if [ "$RUN_ROUTES" = "true" ]; then
+    echo "🛣️ Caching routes..."
+    php artisan route:cache
+  else
+    echo "⏩ Route cache skipped."
+  fi
 
-  deploy:
-    needs: detect
-    runs-on: ubuntu-latest
+  # ----------------------------------------------------------
+  # 🖼️ View cache
+  # ----------------------------------------------------------
+  if [ "$RUN_VIEWS" = "true" ]; then
+    echo "🖼️ Caching views..."
+    php artisan view:cache
+  else
+    echo "⏩ View cache skipped."
+  fi
 
-    steps:
-      - name: 🌐 SSH Deploy to Namecheap
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.NAMECHEAP_SSH_HOST }}
-          username: ${{ secrets.NAMECHEAP_SSH_USER }}
-          key: ${{ secrets.NAMECHEAP_SSH_KEY }}
-          port: 21098
-          timeout: 60s
-          command_timeout: 30m
-          script_stop: true
+  # ----------------------------------------------------------
+  # 🗄️ Migrations
+  # ----------------------------------------------------------
+  if [ "$RUN_MIGRATE" = "true" ]; then
+    echo "🗄️ Running migrations..."
+    php artisan migrate --force
+  else
+    echo "⏩ Migrations skipped."
+  fi
 
-          # Environment variables passed to the remote script
-          envs: COMPOSER,RUN_MIGRATE,RUN_CONFIG,RUN_ROUTES,RUN_VIEWS,RUN_QUEUE
+  # ----------------------------------------------------------
+  # 🔄 Queue restart
+  # ----------------------------------------------------------
+  if [ "$RUN_QUEUE" = "true" ]; then
+    echo "🔄 Restarting queue workers..."
+    php artisan queue:restart || true
+  else
+    echo "⏩ Queue restart skipped."
+  fi
 
-          env: |
-            COMPOSER=${{ needs.detect.outputs.composer }}
-            RUN_MIGRATE=${{ needs.detect.outputs.migrate }}
-            RUN_CONFIG=${{ needs.detect.outputs.config }}
-            RUN_ROUTES=${{ needs.detect.outputs.routes }}
-            RUN_VIEWS=${{ needs.detect.outputs.views }}
-            RUN_QUEUE=${{ needs.detect.outputs.queue }}
+  # ----------------------------------------------------------
+  # 🔐 Permissions
+  # ----------------------------------------------------------
+  echo "🔐 Setting permissions..."
+  chmod -R 775 storage bootstrap/cache
 
-          script: |
-            set -e  # exit on any failure
-
-            REPO=/home/mytijaaracp/repo
-            APP=/home/mytijaaracp/api
-
-            # ----------------------------------------------------------
-            # 📥 Update repository
-            # ----------------------------------------------------------
-            echo "🔄 Updating repository..."
-            cd "$REPO"
-            git fetch origin main
-            git reset --hard origin/main
-
-            # ----------------------------------------------------------
-            # 📂 Sync backend files (exclude sensitive and cache dirs)
-            # ----------------------------------------------------------
-            echo "📂 Syncing backend files to application directory..."
-            rsync -az --delete-delay \
-              --exclude=.env \
-              --exclude=storage/ \
-              --exclude=vendor/ \
-              --exclude=.git/ \
-              "$REPO/backend/" \
-              "$APP/"
-
-            cd "$APP"
-
-            # ----------------------------------------------------------
-            # 📦 Composer dependencies (only if composer files changed)
-            # ----------------------------------------------------------
-            if [ "$COMPOSER" = "true" ]; then
-              echo "📦 Installing/updating Composer dependencies..."
-              php ~/composer.phar install \
-                --no-dev \
-                --prefer-dist \
-                --optimize-autoloader \
-                --no-interaction
-            else
-              echo "⏩ Composer skipped (no changes in composer files)."
-            fi
-
-            # ----------------------------------------------------------
-            # ⚙️ Cache configuration (if config/bootstrap changed)
-            # ----------------------------------------------------------
-            if [ "$RUN_CONFIG" = "true" ]; then
-              echo "⚙️ Caching configuration..."
-              php artisan config:cache
-            else
-              echo "⏩ Config cache skipped."
-            fi
-
-            # ----------------------------------------------------------
-            # 🛣️ Cache routes (if routes changed)
-            # ----------------------------------------------------------
-            if [ "$RUN_ROUTES" = "true" ]; then
-              echo "🛣️ Caching routes..."
-              php artisan route:cache
-            else
-              echo "⏩ Route cache skipped."
-            fi
-
-            # ----------------------------------------------------------
-            # 🖼️ Cache Blade views (if views changed)
-            # ----------------------------------------------------------
-            if [ "$RUN_VIEWS" = "true" ]; then
-              echo "🖼️ Caching Blade views..."
-              php artisan view:cache
-            else
-              echo "⏩ View cache skipped."
-            fi
-
-            # ----------------------------------------------------------
-            # 🗄️ Run database migrations (if migrations changed)
-            # ----------------------------------------------------------
-            if [ "$RUN_MIGRATE" = "true" ]; then
-              echo "🗄️ Running database migrations..."
-              php artisan migrate --force
-            else
-              echo "⏩ Migrations skipped."
-            fi
-
-            # ----------------------------------------------------------
-            # 🔄 Restart queue workers (if Jobs/Listeners changed)
-            # ----------------------------------------------------------
-            if [ "$RUN_QUEUE" = "true" ]; then
-              echo "🔄 Restarting queue workers..."
-              php artisan queue:restart || true
-            else
-              echo "⏩ Queue restart skipped."
-            fi
-
-            # ----------------------------------------------------------
-            # 🔐 Set correct permissions
-            # ----------------------------------------------------------
-            echo "🔐 Setting directory permissions..."
-            chmod -R 775 storage bootstrap/cache
-
-            # ----------------------------------------------------------
-            # ✅ Done
-            # ----------------------------------------------------------
-            echo "✅ Deployment completed successfully!"
+  # ----------------------------------------------------------
+  # ✅ Done
+  # ----------------------------------------------------------
+  echo "✅ Deployment completed successfully!"
