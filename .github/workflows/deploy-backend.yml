@@ -86,9 +86,9 @@ jobs:
           timeout: 60s
           command_timeout: 30m
           script_stop: true
-
+          
           script: |
-            set -e
+            set -ex
 
             COMPOSER="${{ needs.detect.outputs.composer }}"
             RUN_MIGRATE="${{ needs.detect.outputs.migrate }}"
@@ -100,31 +100,13 @@ jobs:
             REPO="/home/mytijaaracp/repo"
             APP="/home/mytijaaracp/api"
 
-            echo ""
             echo "========================================"
             echo "🚀 MyTijaara Backend Deployment Started"
             echo "========================================"
 
-            #################################################
-            # Update Repository
-            #################################################
-
-            echo ""
-            echo "📥 ==> Updating repository..."
-
             cd "$REPO"
-
             git fetch origin main
             git reset --hard origin/main
-
-            echo "✅ Repository updated."
-
-            #################################################
-            # Sync Backend
-            #################################################
-
-            echo ""
-            echo "📂 ==> Syncing backend files..."
 
             rsync -az --delete-delay --checksum \
               --exclude=".env" \
@@ -135,119 +117,69 @@ jobs:
               "$APP/"
 
             cd "$APP"
-
             echo "✅ Backend synced."
 
-            #################################################
-            # Composer
-            #################################################
+            # --- Debug environment ---
+            echo "--- PHP ---"
+            php -v || echo "php not found"
+            echo "--- Composer ---"
+            ls -la ~/composer.phar || echo "composer.phar missing"
+            which composer || echo "composer not in PATH"
+            echo "--- Current directory ---"
+            pwd
+            echo "--- Artisan exists? ---"
+            ls -la artisan
 
+            # --- Composer ---
             if [ "$COMPOSER" = "true" ]; then
-              echo ""
-              echo "📦 ==> Installing Composer dependencies..."
-
+              echo "📦 Installing Composer dependencies..."
+              # Use full path if needed, e.g. /usr/bin/php
               php ~/composer.phar install \
                 --no-dev \
                 --prefer-dist \
                 --optimize-autoloader \
                 --no-interaction
-
               echo "✅ Composer completed."
             else
               echo "⏩ Composer skipped."
             fi
 
-            #################################################
-            # Config Cache
-            #################################################
-
+            # --- Config, Routes, Views ---
             if [ "$RUN_CONFIG" = "true" ]; then
-              echo ""
-              echo "⚙️ ==> Caching configuration..."
-
               php artisan config:cache
-
-              echo "✅ Config cache rebuilt."
             else
               echo "⏩ Config cache skipped."
             fi
 
-            #################################################
-            # Route Cache
-            #################################################
-
             if [ "$RUN_ROUTES" = "true" ]; then
-              echo ""
-              echo "🛣️ ==> Caching routes..."
-
               php artisan route:cache
-
-              echo "✅ Routes cached."
             else
               echo "⏩ Route cache skipped."
             fi
 
-            #################################################
-            # View Cache
-            #################################################
-
             if [ "$RUN_VIEWS" = "true" ]; then
-              echo ""
-              echo "🖼️ ==> Caching Blade views..."
-
               php artisan view:cache
-
-              echo "✅ Views cached."
             else
               echo "⏩ View cache skipped."
             fi
 
-            #################################################
-            # Migration
-            #################################################
-
+            # --- Migration ---
             if [ "$RUN_MIGRATE" = "true" ]; then
-              echo ""
-              echo "🗄️ ==> Running database migrations..."
-
               php artisan migrate --force
-
-              echo "✅ Database migrated."
             else
               echo "⏩ No migrations to run."
             fi
 
-            #################################################
-            # Queue Restart
-            #################################################
-
+            # --- Queue ---
             if [ "$RUN_QUEUE" = "true" ]; then
-              echo ""
-              echo "🔄 ==> Restarting Laravel queue..."
-
               php artisan queue:restart || true
-
-              echo "✅ Queue restarted."
             else
               echo "⏩ Queue restart skipped."
             fi
 
-            #################################################
-            # Permissions
-            #################################################
-
-            echo ""
-            echo "🔐 ==> Updating permissions..."
-
+            # --- Permissions ---
             chmod -R 775 storage bootstrap/cache
 
-            echo "✅ Permissions updated."
-
-            #################################################
-            # Finish
-            #################################################
-
-            echo ""
             echo "========================================"
             echo "🎉 Deployment completed successfully!"
             echo "========================================"
