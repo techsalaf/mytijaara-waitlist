@@ -176,7 +176,9 @@ class UserController extends Controller
 
         Audit::record($request, 'user.invited', $user->email, ['sent' => $sent], User::class, (string) $user->id);
 
-        return response()->json(['data' => ['sent' => $sent, 'message' => $message]], $sent ? 200 : 422);
+        // SMTP failure is a server-side operational issue, not a 422 client error.
+        // Always return 200; the `sent` flag tells the caller whether the mail was delivered.
+        return response()->json(['data' => ['sent' => $sent, 'message' => $message]]);
     }
 
     /** PATCH /users/:id */

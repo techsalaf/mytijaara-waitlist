@@ -49,6 +49,8 @@ import {
   Trash2,
   Eye,
   RotateCcw,
+  ChevronDown,
+  Copy,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -132,6 +134,69 @@ function PreviewDialog({
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+/** Collapsible panel listing available Blade merge variables. */
+const MERGE_VARS = [
+  { tag: "{{ $name }}", description: "Recipient full name" },
+  { tag: "{{ $firstName }}", description: "Recipient first name" },
+  { tag: "{{ $email }}", description: "Recipient email address" },
+  { tag: "{{ $referralCode }}", description: "Recipient's referral code" },
+  { tag: "{{ $referralLink }}", description: "Full referral URL" },
+  { tag: "{{ $position }}", description: "Waitlist position number" },
+  { tag: "{{ $totalSignups }}", description: "Total waitlist count" },
+  { tag: "{{ $siteName }}", description: "Site name from settings" },
+  { tag: "{{ $siteUrl }}", description: "Frontend base URL" },
+  { tag: "{{ $resetLink }}", description: "Password-reset URL (invite/reset emails)" },
+  { tag: "{{ $unsubscribeLink }}", description: "One-click unsubscribe URL" },
+] as const;
+
+function MergeVarsPanel() {
+  const [open, setOpen] = useState(false);
+  const copy = (tag: string) => {
+    void navigator.clipboard.writeText(tag);
+    toast.success("Copied to clipboard");
+  };
+  return (
+    <div className="rounded-lg border border-border/60 bg-muted/30">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+      >
+        <span>Available merge variables</span>
+        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="border-t border-border/60 px-3 pb-3">
+          <div className="mt-2 grid gap-1 sm:grid-cols-2">
+            {MERGE_VARS.map(({ tag, description }) => (
+              <div
+                key={tag}
+                className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 hover:bg-muted/60"
+              >
+                <div>
+                  <code className="text-[11px] font-mono text-primary">{tag}</code>
+                  <p className="text-[11px] text-muted-foreground">{description}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => copy(tag)}
+                  title="Copy"
+                  className="shrink-0 text-muted-foreground hover:text-foreground"
+                >
+                  <Copy className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            Variables are resolved server-side when a campaign is sent. Use in subject lines and HTML body.
+          </p>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -262,6 +327,9 @@ function TemplateSheet({
                   className="mt-1.5"
                 />
               </div>
+
+              {/* Merge variables reference */}
+              <MergeVarsPanel />
 
               {/* HTML / plain-text tabs */}
               <Tabs defaultValue="html">

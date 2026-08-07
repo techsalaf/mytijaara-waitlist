@@ -130,6 +130,13 @@ async function httpCall<T>(endpoint: string, opts: ApiCallOptions = {}): Promise
       typeof payload === "object" && payload !== null && "errors" in payload
         ? (payload as { errors?: Record<string, string[]> }).errors
         : undefined;
+
+    // Fire a browser event on 401 so the admin shell can redirect to login
+    // without every page needing to handle it individually.
+    if (response.status === 401 && !opts.public && typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("auth:expired"));
+    }
+
     throw new ApiError(message, response.status, errors);
   }
 

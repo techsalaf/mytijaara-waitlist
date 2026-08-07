@@ -20,6 +20,7 @@ import {
   AlertTriangle,
   Check,
   Copy,
+  FolderOpen,
   Key,
   Loader2,
   LogOut,
@@ -35,8 +36,9 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { getStoredTheme, setTheme, type Theme } from "@/lib/theme";
-import { authApi } from "@/lib/api";
+import { authApi, mediaApi } from "@/lib/api";
 import { ApiError } from "@/lib/api/client";
+import type { MediaFile } from "@/lib/types";
 import type {
   AdminSession,
   AuthenticatedUser,
@@ -144,6 +146,82 @@ function ProfilePage() {
 }
 
 // ---------------------------------------------------------------------------
+// Media picker dialog (used by ProfileTab for avatar selection)
+// ---------------------------------------------------------------------------
+
+function MediaPickerDialog({
+  open,
+  onOpenChange,
+  onPick,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  onPick: (url: string) => void;
+}) {
+  const [images, setImages] = useState<MediaFile[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    setLoading(true);
+    void mediaApi
+      .list({ type: "image" })
+      .then((r) => setImages(r.data))
+      .catch(() => setImages([]))
+      .finally(() => setLoading(false));
+  }, [open]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Pick from Media Library</DialogTitle>
+          <DialogDescription>
+            Select an image to use as your avatar.
+          </DialogDescription>
+        </DialogHeader>
+        {loading ? (
+          <div className="grid h-40 place-items-center">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : images.length === 0 ? (
+          <div className="grid h-40 place-items-center text-sm text-muted-foreground">
+            No images in the media library yet. Upload one first.
+          </div>
+        ) : (
+          <div className="grid max-h-[400px] grid-cols-3 gap-3 overflow-y-auto sm:grid-cols-4">
+            {images.map((img) => (
+              <button
+                key={img.id}
+                type="button"
+                onClick={() => {
+                  onPick(img.url);
+                  onOpenChange(false);
+                }}
+                className="group overflow-hidden rounded-lg border border-border hover:ring-2 hover:ring-primary focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <div className="aspect-square bg-muted">
+                  <img
+                    src={img.url}
+                    alt={img.name}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition-opacity group-hover:opacity-90"
+                    onError={(e) => { e.currentTarget.style.display = "none"; }}
+                  />
+                </div>
+                <div className="p-1.5">
+                  <p className="truncate text-[10px] text-muted-foreground">{img.name}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Profile
 // ---------------------------------------------------------------------------
 
@@ -163,6 +241,7 @@ function ProfileTab({
     avatarUrl: user.avatarUrl ?? "",
   });
   const [saving, setSaving] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const dirty =
     form.name !== user.name ||
@@ -227,18 +306,35 @@ function ProfileTab({
           <Label htmlFor="avatarUrl" className="text-xs">
             Avatar image URL
           </Label>
-          <Input
-            id="avatarUrl"
-            placeholder="https://…"
-            value={form.avatarUrl}
-            onChange={(e) => setForm((f) => ({ ...f, avatarUrl: e.target.value }))}
-            className="mt-1.5"
-          />
+          <div className="mt-1.5 flex gap-2">
+            <Input
+              id="avatarUrl"
+              placeholder="https://…"
+              value={form.avatarUrl}
+              onChange={(e) => setForm((f) => ({ ...f, avatarUrl: e.target.value }))}
+              className="flex-1"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setPickerOpen(true)}
+              title="Pick from Media Library"
+            >
+              <FolderOpen className="h-4 w-4" />
+            </Button>
+          </div>
           <div className="mt-1 text-xs text-muted-foreground">
-            Upload the file in the Media Library, then paste its URL here.
+            Paste a URL or pick from the Media Library.
           </div>
         </div>
       </div>
+
+      <MediaPickerDialog
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        onPick={(url) => setForm((f) => ({ ...f, avatarUrl: url }))}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>

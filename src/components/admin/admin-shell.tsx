@@ -113,6 +113,16 @@ export function AdminShell() {
     setMobileOpen(false);
   }, [pathname]);
 
+  // Redirect to login whenever any API call returns 401 (expired/revoked token).
+  useEffect(() => {
+    const handler = () => {
+      signOut();
+      navigate({ to: "/auth/login" });
+    };
+    window.addEventListener("auth:expired", handler);
+    return () => window.removeEventListener("auth:expired", handler);
+  }, [navigate]);
+
   if (!session) {
     return <AdminSkeleton />;
   }
