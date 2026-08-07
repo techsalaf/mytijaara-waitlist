@@ -25,11 +25,14 @@ jobs:
           fetch-depth: 2
 
       - id: changes
+        name: Detect Changed Backend Files
         run: |
           CHANGED=$(git diff --name-only HEAD^ HEAD)
 
+          echo "=============================="
           echo "Changed files:"
           echo "$CHANGED"
+          echo "=============================="
 
           composer=false
           migrate=false
@@ -40,31 +43,24 @@ jobs:
 
           while IFS= read -r file; do
             case "$file" in
-
               backend/composer.json|backend/composer.lock)
                 composer=true
                 ;;
-
               backend/database/migrations/*)
                 migrate=true
                 ;;
-
               backend/config/*|backend/bootstrap/*)
                 config=true
                 ;;
-
               backend/routes/*)
                 routes=true
                 ;;
-
               backend/resources/views/*)
                 views=true
                 ;;
-
               backend/app/Jobs/*|backend/app/Listeners/*)
                 queue=true
                 ;;
-
             esac
           done <<< "$CHANGED"
 
@@ -77,11 +73,10 @@ jobs:
 
   deploy:
     needs: detect
-
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy
+      - name: Deploy to Namecheap
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.NAMECHEAP_SSH_HOST }}
@@ -105,57 +100,157 @@ jobs:
           script: |
             set -e
 
-            REPO=/home/mytijaaracp/repo
-            APP=/home/mytijaaracp/api
+            REPO="/home/mytijaaracp/repo"
+            APP="/home/mytijaaracp/api"
 
-            echo "Updating repository..."
+            echo ""
+            echo "========================================"
+            echo "🚀 MyTijaara Backend Deployment Started"
+            echo "========================================"
+
+            #################################################
+            # Update Repository
+            #################################################
+
+            echo ""
+            echo "📥 ==> Updating repository..."
 
             cd "$REPO"
 
             git fetch origin main
             git reset --hard origin/main
 
-            echo "Syncing backend..."
+            echo "✅ Repository updated."
 
-            rsync -az --delete-delay \
-              --exclude=.env \
-              --exclude=storage/ \
-              --exclude=vendor/ \
-              --exclude=.git/ \
+            #################################################
+            # Sync Backend
+            #################################################
+
+            echo ""
+            echo "📂 ==> Syncing backend files..."
+
+            rsync -az --delete-delay --checksum \
+              --exclude=".env" \
+              --exclude="storage/" \
+              --exclude="vendor/" \
+              --exclude=".git/" \
               "$REPO/backend/" \
               "$APP/"
 
             cd "$APP"
 
+            echo "✅ Backend synced."
+
+            #################################################
+            # Composer
+            #################################################
+
             if [ "$COMPOSER" = "true" ]; then
-              echo "Running Composer..."
+              echo ""
+              echo "📦 ==> Installing Composer dependencies..."
+
               php ~/composer.phar install \
                 --no-dev \
                 --prefer-dist \
                 --optimize-autoloader \
                 --no-interaction
+
+              echo "✅ Composer completed."
+            else
+              echo "⏩ Composer skipped."
             fi
+
+            #################################################
+            # Config Cache
+            #################################################
 
             if [ "$RUN_CONFIG" = "true" ]; then
+              echo ""
+              echo "⚙️ ==> Caching configuration..."
+
               php artisan config:cache
+
+              echo "✅ Config cache rebuilt."
+            else
+              echo "⏩ Config cache skipped."
             fi
+
+            #################################################
+            # Route Cache
+            #################################################
 
             if [ "$RUN_ROUTES" = "true" ]; then
+              echo ""
+              echo "🛣️ ==> Caching routes..."
+
               php artisan route:cache
+
+              echo "✅ Routes cached."
+            else
+              echo "⏩ Route cache skipped."
             fi
+
+            #################################################
+            # View Cache
+            #################################################
 
             if [ "$RUN_VIEWS" = "true" ]; then
+              echo ""
+              echo "🖼️ ==> Caching Blade views..."
+
               php artisan view:cache
+
+              echo "✅ Views cached."
+            else
+              echo "⏩ View cache skipped."
             fi
+
+            #################################################
+            # Migration
+            #################################################
 
             if [ "$RUN_MIGRATE" = "true" ]; then
+              echo ""
+              echo "🗄️ ==> Running database migrations..."
+
               php artisan migrate --force
+
+              echo "✅ Database migrated."
+            else
+              echo "⏩ No migrations to run."
             fi
 
+            #################################################
+            # Queue Restart
+            #################################################
+
             if [ "$RUN_QUEUE" = "true" ]; then
+              echo ""
+              echo "🔄 ==> Restarting Laravel queue..."
+
               php artisan queue:restart || true
+
+              echo "✅ Queue restarted."
+            else
+              echo "⏩ Queue restart skipped."
             fi
+
+            #################################################
+            # Permissions
+            #################################################
+
+            echo ""
+            echo "🔐 ==> Updating permissions..."
 
             chmod -R 775 storage bootstrap/cache
 
-            echo "Deployment completed successfully."
+            echo "✅ Permissions updated."
+
+            #################################################
+            # Finish
+            #################################################
+
+            echo ""
+            echo "========================================"
+            echo "🎉 Deployment completed successfully!"
+            echo "========================================"
