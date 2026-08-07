@@ -19,4 +19,4 @@ $app = require_once __DIR__.'/../bootstrap/app.php';
 
 $app->handleRequest(Request::capture());
 
-// $app->handleRequest(Request::capture()); rs
+// $app->handleRequest(Request::capture()); rskkk
