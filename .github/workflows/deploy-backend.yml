@@ -27,29 +27,103 @@ jobs:
 
             cd /home/mytijaaracp/api
 
-            echo "==> Updating code..."
+            echo "=============================="
+            echo "Fetching latest code..."
+            echo "=============================="
+
             git fetch origin main
+
+            PREVIOUS=$(git rev-parse HEAD)
+
             git reset --hard origin/main
 
-            echo "==> Syncing backend contents..."
-            rsync -av \
-              --exclude='.env' \
-              --exclude='storage/' \
-              --exclude='vendor/' \
-              --exclude='.git/' \
-              --exclude='vendor-from-claude/' \
-              /home/mytijaaracp/api/backend/ \
-              /home/mytijaaracp/api/
+            CURRENT=$(git rev-parse HEAD)
 
-            rm -rf /home/mytijaaracp/api/backend/
+            echo "Previous: $PREVIOUS"
+            echo "Current : $CURRENT"
 
-            composer install --no-dev --optimize-autoloader --no-interaction
+            echo ""
+            echo "Syncing backend..."
 
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
-            php artisan migrate --force
+            rsync -a --delete \
+                --exclude='.env' \
+                --exclude='vendor/' \
+                --exclude='storage/' \
+                --exclude='.git/' \
+                backend/ ./
+
+            echo ""
+
+            CHANGED=$(git diff --name-only $PREVIOUS $CURRENT)
+
+            echo "Changed files:"
+            echo "$CHANGED"
+
+            ##################################################
+            # Composer
+            ##################################################
+
+            if echo "$CHANGED" | grep -Eq '^backend/(composer\.json|composer\.lock)$'
+            then
+                echo ""
+                echo "Running Composer..."
+                php ~/composer.phar install \
+                    --no-dev \
+                    --prefer-dist \
+                    --optimize-autoloader \
+                    --no-interaction
+            else
+                echo ""
+                echo "Composer skipped."
+            fi
+
+            ##################################################
+            # Config Cache
+            ##################################################
+
+            if echo "$CHANGED" | grep -Eq '^backend/config/|^backend/bootstrap/|^backend/\.env\.example'
+            then
+                echo "Caching config..."
+                php artisan config:cache
+            fi
+
+            ##################################################
+            # Route Cache
+            ##################################################
+
+            if echo "$CHANGED" | grep -Eq '^backend/routes/'
+            then
+                echo "Caching routes..."
+                php artisan route:cache
+            fi
+
+            ##################################################
+            # View Cache
+            ##################################################
+
+            if echo "$CHANGED" | grep -Eq '^backend/resources/views/'
+            then
+                echo "Caching views..."
+                php artisan view:cache
+            fi
+
+            ##################################################
+            # Migrations
+            ##################################################
+
+            if echo "$CHANGED" | grep -Eq '^backend/database/migrations/'
+            then
+                echo "Running migrations..."
+                php artisan migrate --force
+            else
+                echo "No migrations."
+            fi
+
+            ##################################################
+            # Permissions
+            ##################################################
 
             chmod -R 775 storage bootstrap/cache
 
-            echo "Deployment complete."
+            echo ""
+            echo "Deployment completed successfully!"
