@@ -8,11 +8,80 @@ on:
       - "backend/**"
 
 jobs:
+  detect:
+    runs-on: ubuntu-latest
+
+    outputs:
+      composer: ${{ steps.changes.outputs.composer }}
+      migrate: ${{ steps.changes.outputs.migrate }}
+      config: ${{ steps.changes.outputs.config }}
+      routes: ${{ steps.changes.outputs.routes }}
+      views: ${{ steps.changes.outputs.views }}
+      queue: ${{ steps.changes.outputs.queue }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - id: changes
+        run: |
+          CHANGED=$(git diff --name-only HEAD^ HEAD)
+
+          echo "Changed files:"
+          echo "$CHANGED"
+
+          composer=false
+          migrate=false
+          config=false
+          routes=false
+          views=false
+          queue=false
+
+          while IFS= read -r file; do
+            case "$file" in
+
+              backend/composer.json|backend/composer.lock)
+                composer=true
+                ;;
+
+              backend/database/migrations/*)
+                migrate=true
+                ;;
+
+              backend/config/*|backend/bootstrap/*)
+                config=true
+                ;;
+
+              backend/routes/*)
+                routes=true
+                ;;
+
+              backend/resources/views/*)
+                views=true
+                ;;
+
+              backend/app/Jobs/*|backend/app/Listeners/*)
+                queue=true
+                ;;
+
+            esac
+          done <<< "$CHANGED"
+
+          echo "composer=$composer" >> $GITHUB_OUTPUT
+          echo "migrate=$migrate" >> $GITHUB_OUTPUT
+          echo "config=$config" >> $GITHUB_OUTPUT
+          echo "routes=$routes" >> $GITHUB_OUTPUT
+          echo "views=$views" >> $GITHUB_OUTPUT
+          echo "queue=$queue" >> $GITHUB_OUTPUT
+
   deploy:
+    needs: detect
+
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to Namecheap
+      - name: Deploy
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.NAMECHEAP_SSH_HOST }}
@@ -22,99 +91,71 @@ jobs:
           timeout: 60s
           command_timeout: 30m
           script_stop: true
+
+          envs: COMPOSER,RUN_MIGRATE,RUN_CONFIG,RUN_ROUTES,RUN_VIEWS,RUN_QUEUE
+
+          env: |
+            COMPOSER=${{ needs.detect.outputs.composer }}
+            RUN_MIGRATE=${{ needs.detect.outputs.migrate }}
+            RUN_CONFIG=${{ needs.detect.outputs.config }}
+            RUN_ROUTES=${{ needs.detect.outputs.routes }}
+            RUN_VIEWS=${{ needs.detect.outputs.views }}
+            RUN_QUEUE=${{ needs.detect.outputs.queue }}
+
           script: |
             set -e
 
-            REPO="/home/mytijaaracp/repo"
-            APP="/home/mytijaaracp/api"
+            REPO=/home/mytijaaracp/repo
+            APP=/home/mytijaaracp/api
 
-            echo "==> Updating repository..."
+            echo "Updating repository..."
+
             cd "$REPO"
-
-            OLD_COMMIT=$(git rev-parse HEAD)
 
             git fetch origin main
             git reset --hard origin/main
 
-            NEW_COMMIT=$(git rev-parse HEAD)
+            echo "Syncing backend..."
 
-            CHANGED=$(git diff --name-only "$OLD_COMMIT" "$NEW_COMMIT")
-
-            echo "===================================="
-            echo "Changed files:"
-            printf "%s\n" "$CHANGED"
-            echo "===================================="
-
-            echo "==> Syncing backend..."
             rsync -az --delete-delay \
-              --exclude=".env" \
-              --exclude="storage/" \
-              --exclude="vendor/" \
-              --exclude=".git/" \
-              "$REPO/backend/" "$APP/"
+              --exclude=.env \
+              --exclude=storage/ \
+              --exclude=vendor/ \
+              --exclude=.git/ \
+              "$REPO/backend/" \
+              "$APP/"
 
             cd "$APP"
 
-            ##############################################
-            # Composer
-            ##############################################
-            if printf "%s\n" "$CHANGED" | grep -q "^backend/composer\.json\|^backend/composer\.lock"; then
+            if [ "$COMPOSER" = "true" ]; then
               echo "Running Composer..."
               php ~/composer.phar install \
                 --no-dev \
                 --prefer-dist \
                 --optimize-autoloader \
                 --no-interaction
-            else
-              echo "Skipping Composer."
             fi
 
-            ##############################################
-            # Config Cache
-            ##############################################
-            if printf "%s\n" "$CHANGED" | grep -q "^backend/config/\|^backend/bootstrap/"; then
-              echo "Caching config..."
+            if [ "$RUN_CONFIG" = "true" ]; then
               php artisan config:cache
             fi
 
-            ##############################################
-            # Route Cache
-            ##############################################
-            if printf "%s\n" "$CHANGED" | grep -q "^backend/routes/"; then
-              echo "Caching routes..."
+            if [ "$RUN_ROUTES" = "true" ]; then
               php artisan route:cache
             fi
 
-            ##############################################
-            # View Cache
-            ##############################################
-            if printf "%s\n" "$CHANGED" | grep -q "^backend/resources/views/"; then
-              echo "Caching views..."
+            if [ "$RUN_VIEWS" = "true" ]; then
               php artisan view:cache
             fi
 
-            ##############################################
-            # Migration
-            ##############################################
-            if printf "%s\n" "$CHANGED" | grep -q "^backend/database/migrations/"; then
-              echo "Running migrations..."
+            if [ "$RUN_MIGRATE" = "true" ]; then
               php artisan migrate --force
-            else
-              echo "No migrations."
             fi
 
-            ##############################################
-            # Queue Restart
-            ##############################################
-            if printf "%s\n" "$CHANGED" | grep -q "^backend/app/Jobs/\|^backend/app/Listeners/"; then
-              echo "Restarting queues..."
+            if [ "$RUN_QUEUE" = "true" ]; then
               php artisan queue:restart || true
             fi
 
-            ##############################################
-            # Permissions
-            ##############################################
             chmod -R 775 storage bootstrap/cache
 
-            echo ""
-            echo "✅ Deployment completed successfully."
+            echo "Deployment completed successfully."
