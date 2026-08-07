@@ -55,7 +55,7 @@ jobs:
             # Sync backend only
             ##########################################
 
-            rsync -a --delete \
+            rsync -a --delete-delay \
               --exclude=.env \
               --exclude=storage \
               --exclude=vendor \
