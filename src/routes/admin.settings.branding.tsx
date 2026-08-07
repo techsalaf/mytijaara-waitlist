@@ -25,8 +25,11 @@ const DEFAULTS = {
   logoDarkUrl: "",
   faviconUrl: "",
   ogImageUrl: "",
-  primaryColor: "#1f5c3a",
-  accentColor: "#c9a24c",
+  primaryColor: "#0D7A46",
+  accentColor: "#D4A017",
+  secondaryColor: "#166534",
+  backgroundColor: "#F8FAF8",
+  surfaceColor: "#FFFFFF",
 };
 
 const IMAGES = [
@@ -55,6 +58,9 @@ const IMAGES = [
 const COLORS = [
   { key: "primaryColor" as const, label: "Primary", hint: "Buttons, links and active states." },
   { key: "accentColor" as const, label: "Accent", hint: "Highlights and the gold detailing." },
+  { key: "secondaryColor" as const, label: "Secondary", hint: "Secondary surfaces and subtle backgrounds." },
+  { key: "backgroundColor" as const, label: "Background", hint: "Page background colour." },
+  { key: "surfaceColor" as const, label: "Surface", hint: "Card and panel surface colour." },
 ];
 
 function BrandingSettingsPage() {

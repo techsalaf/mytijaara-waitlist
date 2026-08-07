@@ -62,6 +62,7 @@ class AnalyticsController extends Controller
             : WaitlistEntry::query();
 
         $total = $scoped()->count();
+        $allTimeTotal = WaitlistEntry::count();
         $verified = $scoped()->where('verified', true)->count();
         $today = WaitlistEntry::whereDate('created_at', today())->count();
 
@@ -84,7 +85,7 @@ class AnalyticsController extends Controller
 
         return response()->json(['data' => [
             'visitors' => $visits,
-            'totalWaitlist' => $total,
+            'totalWaitlist' => $allTimeTotal,
             'todaySignups' => $today,
             'weeklyGrowth' => $this->growth($thisWeek, $lastWeek),
             'monthlyGrowth' => $this->growth($thisMonth, $lastMonth),

@@ -54,12 +54,20 @@ export const Route = createFileRoute("/")({
     const branding: PublicBranding = (brandingResult as { data: PublicBranding } | null)?.data ?? {
       siteName: "MyTijaara",
       tagline: "One app for food, shopping, deliveries and trusted services.",
+      contactEmail: "",
+      supportEmail: "",
+      phone: "",
+      address: "",
+      launchCity: "",
       logoUrl: "",
       logoDarkUrl: "",
       faviconUrl: "",
       ogImageUrl: "",
       primaryColor: "",
       accentColor: "",
+      secondaryColor: "",
+      backgroundColor: "",
+      surfaceColor: "",
       social: {
         instagram: "",
         twitter: "",
@@ -128,14 +136,29 @@ export const Route = createFileRoute("/")({
  * the hardcoded fallbacks in styles.css. Only emits a property when the admin
  * has set a non-empty value, so unset colors keep the stylesheet default.
  */
-function BrandColors({ primaryColor, accentColor }: { primaryColor: string; accentColor: string }) {
-  if (!primaryColor && !accentColor) return null;
+function BrandColors({
+  primaryColor,
+  accentColor,
+  secondaryColor,
+  backgroundColor,
+  surfaceColor,
+}: {
+  primaryColor: string;
+  accentColor: string;
+  secondaryColor: string;
+  backgroundColor: string;
+  surfaceColor: string;
+}) {
   const declarations = [
-    primaryColor ? `--primary: ${primaryColor};` : "",
-    accentColor  ? `--gold: ${accentColor};`     : "",
+    primaryColor    ? `--primary: ${primaryColor};`       : "",
+    accentColor     ? `--gold: ${accentColor};`           : "",
+    secondaryColor  ? `--secondary: ${secondaryColor};`   : "",
+    backgroundColor ? `--background: ${backgroundColor};` : "",
+    surfaceColor    ? `--surface: ${surfaceColor};`        : "",
   ]
     .filter(Boolean)
     .join(" ");
+  if (!declarations) return null;
   return <style>{`:root { ${declarations} }`}</style>;
 }
 
@@ -153,7 +176,13 @@ function Landing() {
 
   return (
     <LaunchStateProvider initialConfig={launchConfig} initialNow={serverNow}>
-      <BrandColors primaryColor={branding.primaryColor} accentColor={branding.accentColor} />
+      <BrandColors
+        primaryColor={branding.primaryColor}
+        accentColor={branding.accentColor}
+        secondaryColor={branding.secondaryColor}
+        backgroundColor={branding.backgroundColor}
+        surfaceColor={branding.surfaceColor}
+      />
       <CmsProvider sections={cms} faqs={faqs} testimonials={testimonials} branding={branding}>
         {announcement?.enabled && (
           <AnnouncementBar text={announcement.text ?? ""} href={announcement.href ?? "#waitlist"} />

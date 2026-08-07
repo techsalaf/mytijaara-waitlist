@@ -69,12 +69,20 @@ export type PublicSocial = {
 export type PublicBranding = {
   siteName: string;
   tagline: string;
+  contactEmail: string;
+  supportEmail: string;
+  phone: string;
+  address: string;
+  launchCity: string;
   logoUrl: string;
   logoDarkUrl: string;
   faviconUrl: string;
   ogImageUrl: string;
   primaryColor: string;
   accentColor: string;
+  secondaryColor: string;
+  backgroundColor: string;
+  surfaceColor: string;
   /** Social profile URLs. Only links with a non-empty value are rendered. */
   social: PublicSocial;
 };
