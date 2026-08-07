@@ -25,14 +25,11 @@ jobs:
           fetch-depth: 2
 
       - id: changes
-        name: Detect Changed Backend Files
         run: |
           CHANGED=$(git diff --name-only HEAD^ HEAD)
 
-          echo "=============================="
           echo "Changed files:"
           echo "$CHANGED"
-          echo "=============================="
 
           composer=false
           migrate=false
@@ -43,24 +40,31 @@ jobs:
 
           while IFS= read -r file; do
             case "$file" in
+
               backend/composer.json|backend/composer.lock)
                 composer=true
                 ;;
+
               backend/database/migrations/*)
                 migrate=true
                 ;;
+
               backend/config/*|backend/bootstrap/*)
                 config=true
                 ;;
+
               backend/routes/*)
                 routes=true
                 ;;
+
               backend/resources/views/*)
                 views=true
                 ;;
+
               backend/app/Jobs/*|backend/app/Listeners/*)
                 queue=true
                 ;;
+
             esac
           done <<< "$CHANGED"
 
@@ -73,10 +77,11 @@ jobs:
 
   deploy:
     needs: detect
+
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to Namecheap
+      - name: Deploy
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.NAMECHEAP_SSH_HOST }}
@@ -87,80 +92,70 @@ jobs:
           command_timeout: 30m
           script_stop: true
 
-script: |
-  #!/bin/bash
-  set -ex
-  trap 'echo "❌ ERROR at line $LINENO (exit code $?)"' ERR
+          envs: COMPOSER,RUN_MIGRATE,RUN_CONFIG,RUN_ROUTES,RUN_VIEWS,RUN_QUEUE
 
-  REPO="/home/mytijaaracp/repo"
-  APP="/home/mytijaaracp/api"
+          env: |
+            COMPOSER=${{ needs.detect.outputs.composer }}
+            RUN_MIGRATE=${{ needs.detect.outputs.migrate }}
+            RUN_CONFIG=${{ needs.detect.outputs.config }}
+            RUN_ROUTES=${{ needs.detect.outputs.routes }}
+            RUN_VIEWS=${{ needs.detect.outputs.views }}
+            RUN_QUEUE=${{ needs.detect.outputs.queue }}
 
-  echo "========================================"
-  echo "🚀 MyTijaara Backend Deployment Started"
-  echo "========================================"
+          script: |
+            set -e
 
-  cd "$REPO"
-  git fetch origin main
-  git reset --hard origin/main
+            REPO=/home/mytijaaracp/repo
+            APP=/home/mytijaaracp/api
 
-  rsync -az --delete-delay --checksum \
-    --exclude=".env" \
-    --exclude="storage/" \
-    --exclude="vendor/" \
-    --exclude=".git/" \
-    "$REPO/backend/" \
-    "$APP/"
+            echo "Updating repository..."
 
-  cd "$APP"
-  echo "✅ Backend synced."
+            cd "$REPO"
 
-  # Use booleans from detect job
-  COMPOSER="${{ needs.detect.outputs.composer }}"
-  RUN_MIGRATE="${{ needs.detect.outputs.migrate }}"
-  RUN_CONFIG="${{ needs.detect.outputs.config }}"
-  RUN_ROUTES="${{ needs.detect.outputs.routes }}"
-  RUN_VIEWS="${{ needs.detect.outputs.views }}"
-  RUN_QUEUE="${{ needs.detect.outputs.queue }}"
+            git fetch origin main
+            git reset --hard origin/main
 
-  # Composer
-  [ "$COMPOSER" = "true" ] && {
-    echo "📦 Installing Composer..."
-    php ~/composer.phar install --no-dev --prefer-dist --optimize-autoloader --no-interaction
-  } || echo "⏩ Composer skipped."
+            echo "Syncing backend..."
 
-  # Config cache
-  [ "$RUN_CONFIG" = "true" ] && {
-    echo "⚙️ Caching config..."
-    php artisan config:cache
-  } || echo "⏩ Config cache skipped."
+            rsync -az --delete-delay \
+              --exclude=.env \
+              --exclude=storage/ \
+              --exclude=vendor/ \
+              --exclude=.git/ \
+              "$REPO/backend/" \
+              "$APP/"
 
-  # Route cache
-  [ "$RUN_ROUTES" = "true" ] && {
-    echo "🛣️ Caching routes..."
-    php artisan route:cache
-  } || echo "⏩ Route cache skipped."
+            cd "$APP"
 
-  # View cache
-  [ "$RUN_VIEWS" = "true" ] && {
-    echo "🖼️ Caching views..."
-    php artisan view:cache
-  } || echo "⏩ View cache skipped."
+            if [ "$COMPOSER" = "true" ]; then
+              echo "Running Composer..."
+              php ~/composer.phar install \
+                --no-dev \
+                --prefer-dist \
+                --optimize-autoloader \
+                --no-interaction
+            fi
 
-  # Migrations
-  [ "$RUN_MIGRATE" = "true" ] && {
-    echo "🗄️ Running migrations..."
-    php artisan migrate --force
-  } || echo "⏩ No migrations."
+            if [ "$RUN_CONFIG" = "true" ]; then
+              php artisan config:cache
+            fi
 
-  # Queue restart
-  [ "$RUN_QUEUE" = "true" ] && {
-    echo "🔄 Restarting queue..."
-    php artisan queue:restart || true
-  } || echo "⏩ Queue restart skipped."
+            if [ "$RUN_ROUTES" = "true" ]; then
+              php artisan route:cache
+            fi
 
-  # Permissions
-  chmod -R 775 storage bootstrap/cache
+            if [ "$RUN_VIEWS" = "true" ]; then
+              php artisan view:cache
+            fi
 
-  echo "========================================"
-  echo "🎉 Deployment completed successfully!"
-  echo "========================================"
+            if [ "$RUN_MIGRATE" = "true" ]; then
+              php artisan migrate --force
+            fi
+
+            if [ "$RUN_QUEUE" = "true" ]; then
+              php artisan queue:restart || true
+            fi
+
+            chmod -R 775 storage bootstrap/cache
+
+            echo "Deployment completed successfully."
