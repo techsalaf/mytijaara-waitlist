@@ -29,13 +29,7 @@ jobs:
             REPO=/home/mytijaaracp/repo
             APP=/home/mytijaaracp/api
 
-            ##########################################
-            # Clone repo first time
-            ##########################################
-
-            if [ ! -d "$REPO/.git" ]; then
-              git clone https://github.com/techsalaf/mytijaara-waitlist.git "$REPO"
-            fi
+            echo "==> Updating repository..."
 
             cd "$REPO"
 
@@ -46,30 +40,29 @@ jobs:
 
             NEW_COMMIT=$(git rev-parse HEAD)
 
-            CHANGED=$(git diff --name-only $OLD_COMMIT $NEW_COMMIT)
+            CHANGED=$(git diff --name-only "$OLD_COMMIT" "$NEW_COMMIT")
 
+            echo "=============================="
             echo "Changed files:"
             echo "$CHANGED"
+            echo "=============================="
 
-            ##########################################
-            # Sync backend only
-            ##########################################
+            echo "==> Syncing backend..."
 
-            rsync -a --delete-delay \
-              --exclude=.env \
-              --exclude=storage \
-              --exclude=vendor \
-              --exclude=.git \
+            rsync -az --delete-delay \
+              --exclude=".env" \
+              --exclude="storage/" \
+              --exclude="vendor/" \
+              --exclude=".git/" \
               "$REPO/backend/" \
               "$APP/"
 
             cd "$APP"
 
-            ##########################################
+            ####################################################
             # Composer
-            ##########################################
-
-            if echo "$CHANGED" | grep -Eq '^backend/(composer\.json|composer\.lock)$'; then
+            ####################################################
+            if [[ "$CHANGED" == *"backend/composer.json"* || "$CHANGED" == *"backend/composer.lock"* ]]; then
               echo "Running Composer..."
               php ~/composer.phar install \
                 --no-dev \
@@ -77,55 +70,54 @@ jobs:
                 --optimize-autoloader \
                 --no-interaction
             else
-              echo "Composer skipped."
+              echo "Skipping Composer."
             fi
 
-            ##########################################
+            ####################################################
             # Config Cache
-            ##########################################
-
-            if echo "$CHANGED" | grep -Eq '^backend/config/|^backend/bootstrap/'; then
+            ####################################################
+            if [[ "$CHANGED" == *"backend/config/"* || "$CHANGED" == *"backend/bootstrap/"* ]]; then
+              echo "Caching config..."
               php artisan config:cache
             fi
 
-            ##########################################
+            ####################################################
             # Route Cache
-            ##########################################
-
-            if echo "$CHANGED" | grep -Eq '^backend/routes/'; then
+            ####################################################
+            if [[ "$CHANGED" == *"backend/routes/"* ]]; then
+              echo "Caching routes..."
               php artisan route:cache
             fi
 
-            ##########################################
+            ####################################################
             # View Cache
-            ##########################################
-
-            if echo "$CHANGED" | grep -Eq '^backend/resources/views/'; then
+            ####################################################
+            if [[ "$CHANGED" == *"backend/resources/views/"* ]]; then
+              echo "Caching views..."
               php artisan view:cache
             fi
 
-            ##########################################
+            ####################################################
             # Migration
-            ##########################################
-
-            if echo "$CHANGED" | grep -Eq '^backend/database/migrations/'; then
+            ####################################################
+            if [[ "$CHANGED" == *"backend/database/migrations/"* ]]; then
+              echo "Running migrations..."
               php artisan migrate --force
             else
               echo "No migrations."
             fi
 
-            ##########################################
-            # Restart queues if needed
-            ##########################################
-
-            if echo "$CHANGED" | grep -Eq '^backend/app/Jobs/|^backend/app/Listeners/'; then
+            ####################################################
+            # Queue Restart
+            ####################################################
+            if [[ "$CHANGED" == *"backend/app/Jobs/"* || "$CHANGED" == *"backend/app/Listeners/"* ]]; then
+              echo "Restarting queues..."
               php artisan queue:restart || true
             fi
 
-            ##########################################
+            ####################################################
             # Permissions
-            ##########################################
-
+            ####################################################
             chmod -R 775 storage bootstrap/cache
 
-            echo "Deployment completed successfully."
+            echo "✅ Deployment completed successfully."
