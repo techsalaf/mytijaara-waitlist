@@ -13,6 +13,15 @@ const DEFAULT_BRANDING: PublicBranding = {
   ogImageUrl: "",
   primaryColor: "",
   accentColor: "",
+  social: {
+    instagram: "",
+    twitter: "",
+    facebook: "",
+    linkedin: "",
+    tiktok: "",
+    youtube: "",
+    whatsapp: "",
+  },
 };
 
 type CmsContextValue = {

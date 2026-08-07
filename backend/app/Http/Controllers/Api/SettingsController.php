@@ -38,20 +38,32 @@ class SettingsController extends Controller
     {
         $company = Setting::firstOrCreate(['group' => 'company'], ['data' => []]);
         $branding = Setting::firstOrCreate(['group' => 'branding'], ['data' => []]);
+        $social   = Setting::firstOrCreate(['group' => 'social'],   ['data' => []]);
 
-        $co = $this->withDefaults('company', is_array($company->data) ? $company->data : []);
+        $co = $this->withDefaults('company',  is_array($company->data)  ? $company->data  : []);
         $br = $this->withDefaults('branding', is_array($branding->data) ? $branding->data : []);
+        $so = $this->withDefaults('social',   is_array($social->data)   ? $social->data   : []);
 
         return response()->json([
             'data' => [
                 'siteName'     => $co['siteName'] ?? 'MyTijaara',
-                'tagline'      => $co['tagline'] ?? '',
-                'logoUrl'      => $br['logoUrl'] ?? '',
-                'logoDarkUrl'  => $br['logoDarkUrl'] ?? '',
-                'faviconUrl'   => $br['faviconUrl'] ?? '',
-                'ogImageUrl'   => $br['ogImageUrl'] ?? '',
+                'tagline'      => $co['tagline']  ?? '',
+                'logoUrl'      => $br['logoUrl']      ?? '',
+                'logoDarkUrl'  => $br['logoDarkUrl']  ?? '',
+                'faviconUrl'   => $br['faviconUrl']   ?? '',
+                'ogImageUrl'   => $br['ogImageUrl']   ?? '',
                 'primaryColor' => $br['primaryColor'] ?? '',
-                'accentColor'  => $br['accentColor'] ?? '',
+                'accentColor'  => $br['accentColor']  ?? '',
+                // Social links are public — no secrets involved.
+                'social' => [
+                    'instagram' => $so['instagram'] ?? '',
+                    'twitter'   => $so['twitter']   ?? '',
+                    'facebook'  => $so['facebook']  ?? '',
+                    'linkedin'  => $so['linkedin']  ?? '',
+                    'tiktok'    => $so['tiktok']    ?? '',
+                    'youtube'   => $so['youtube']   ?? '',
+                    'whatsapp'  => $so['whatsapp']  ?? '',
+                ],
             ],
         ]);
     }

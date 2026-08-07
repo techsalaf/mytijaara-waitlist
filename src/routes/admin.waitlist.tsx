@@ -73,6 +73,7 @@ function WaitlistPage() {
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [totalCount, setTotalCount] = useState(0);
   const [view, setView] = useState<WaitlistUser | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
 
   // Fetch data from server with current filters and pagination
   const loadUsers = async (currentPage: number, currentPageSize: number) => {
@@ -210,7 +211,7 @@ function WaitlistPage() {
             <Button variant="outline" size="sm" onClick={exportCsv}>
               <Download className="mr-2 h-4 w-4" /> Export
             </Button>
-            <Button size="sm" className="bg-primary hover:bg-primary/90">
+            <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={() => setAddOpen(true)}>
               <Plus className="mr-2 h-4 w-4" /> Add user
             </Button>
           </>
@@ -601,6 +602,15 @@ function WaitlistPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AddUserDialog
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        onCreated={() => {
+          window.dispatchEvent(new CustomEvent("waitlist:changed"));
+          setAddOpen(false);
+        }}
+      />
     </div>
   );
 }
@@ -673,5 +683,201 @@ function RowMenu({
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Add User Dialog                                                      */
+/* ------------------------------------------------------------------ */
+
+type AddForm = {
+  name: string;
+  email: string;
+  phone: string;
+  city: string;
+  role: string;
+  source: string;
+  referralCode: string;
+};
+
+const EMPTY_FORM: AddForm = {
+  name: "",
+  email: "",
+  phone: "",
+  city: "",
+  role: "customer",
+  source: "organic",
+  referralCode: "",
+};
+
+function AddUserDialog({
+  open,
+  onOpenChange,
+  onCreated,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  onCreated: () => void;
+}) {
+  const [form, setForm] = useState<AddForm>(EMPTY_FORM);
+  const [saving, setSaving] = useState(false);
+
+  const set = (key: keyof AddForm) => (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm((f) => ({ ...f, [key]: e.target.value }));
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name.trim() || !form.email.trim() || !form.city.trim()) {
+      toast.error("Name, email and city are required.");
+      return;
+    }
+    setSaving(true);
+    try {
+      await waitlistApi.create({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim() || undefined,
+        city: form.city.trim(),
+        role: form.role as "customer" | "vendor" | "rider" | "artisan",
+        source: form.source as "organic" | "referral",
+        referralCode: form.source === "referral" && form.referralCode.trim()
+          ? form.referralCode.trim()
+          : undefined,
+        consent: true,
+      });
+      toast.success(`${form.name} added to the waitlist.`);
+      setForm(EMPTY_FORM);
+      onCreated();
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error ? err.message : "Failed to add user. Check if the email already exists.";
+      toast.error(msg);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Add waitlist user</DialogTitle>
+          <DialogDescription>
+            Manually add a user to the waitlist. They will receive position #
+            {/* position is assigned server-side */} based on current signup order.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="col-span-2">
+              <Label htmlFor="add-name">Full name *</Label>
+              <Input
+                id="add-name"
+                value={form.name}
+                onChange={set("name")}
+                placeholder="Amuda Rasheed"
+                required
+                className="mt-1"
+              />
+            </div>
+            <div className="col-span-2">
+              <Label htmlFor="add-email">Email *</Label>
+              <Input
+                id="add-email"
+                type="email"
+                value={form.email}
+                onChange={set("email")}
+                placeholder="rasheed@example.com"
+                required
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="add-phone">Phone</Label>
+              <Input
+                id="add-phone"
+                type="tel"
+                value={form.phone}
+                onChange={set("phone")}
+                placeholder="+234 800 000 0000"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="add-city">City *</Label>
+              <Input
+                id="add-city"
+                value={form.city}
+                onChange={set("city")}
+                placeholder="Lagos"
+                required
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="add-role">Role *</Label>
+              <Select value={form.role} onValueChange={(v) => setForm((f) => ({ ...f, role: v }))}>
+                <SelectTrigger id="add-role" className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="customer">Customer</SelectItem>
+                  <SelectItem value="vendor">Vendor</SelectItem>
+                  <SelectItem value="rider">Rider</SelectItem>
+                  <SelectItem value="artisan">Artisan</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="add-source">Source *</Label>
+              <Select
+                value={form.source}
+                onValueChange={(v) => setForm((f) => ({ ...f, source: v }))}
+              >
+                <SelectTrigger id="add-source" className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="organic">Organic</SelectItem>
+                  <SelectItem value="referral">Referral</SelectItem>
+                  <SelectItem value="instagram">Instagram</SelectItem>
+                  <SelectItem value="twitter">Twitter/X</SelectItem>
+                  <SelectItem value="facebook">Facebook</SelectItem>
+                  <SelectItem value="tiktok">TikTok</SelectItem>
+                  <SelectItem value="google">Google</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {form.source === "referral" && (
+              <div className="col-span-2">
+                <Label htmlFor="add-referral">Referral code</Label>
+                <Input
+                  id="add-referral"
+                  value={form.referralCode}
+                  onChange={set("referralCode")}
+                  placeholder="ABC123"
+                  className="mt-1"
+                />
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setForm(EMPTY_FORM);
+                onOpenChange(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={saving}>
+              {saving ? "Adding…" : "Add user"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

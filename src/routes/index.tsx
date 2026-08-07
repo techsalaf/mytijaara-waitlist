@@ -60,6 +60,15 @@ export const Route = createFileRoute("/")({
       ogImageUrl: "",
       primaryColor: "",
       accentColor: "",
+      social: {
+        instagram: "",
+        twitter: "",
+        facebook: "",
+        linkedin: "",
+        tiktok: "",
+        youtube: "",
+        whatsapp: "",
+      },
     };
 
     return {
@@ -115,6 +124,22 @@ export const Route = createFileRoute("/")({
 });
 
 /**
+ * Injects admin-configured brand colors as CSS custom properties, overriding
+ * the hardcoded fallbacks in styles.css. Only emits a property when the admin
+ * has set a non-empty value, so unset colors keep the stylesheet default.
+ */
+function BrandColors({ primaryColor, accentColor }: { primaryColor: string; accentColor: string }) {
+  if (!primaryColor && !accentColor) return null;
+  const declarations = [
+    primaryColor ? `--primary: ${primaryColor};` : "",
+    accentColor  ? `--gold: ${accentColor};`     : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+  return <style>{`:root { ${declarations} }`}</style>;
+}
+
+/**
  * Wrap the entire page in both LaunchStateProvider and CmsProvider so every
  * landing component can read its CMS data and its launch-phase variant from
  * context without prop drilling.
@@ -128,6 +153,7 @@ function Landing() {
 
   return (
     <LaunchStateProvider initialConfig={launchConfig} initialNow={serverNow}>
+      <BrandColors primaryColor={branding.primaryColor} accentColor={branding.accentColor} />
       <CmsProvider sections={cms} faqs={faqs} testimonials={testimonials} branding={branding}>
         {announcement?.enabled && (
           <AnnouncementBar text={announcement.text ?? ""} href={announcement.href ?? "#waitlist"} />

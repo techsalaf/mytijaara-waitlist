@@ -1,15 +1,7 @@
-import { Facebook, Instagram, Twitter } from "lucide-react";
-
+import { SOCIAL_ICON_MAP, SOCIAL_PLATFORMS } from "./social-icons";
 import { Logo } from "./logo";
 import { useLaunch } from "@/components/launch/launch-state-provider";
-import { useCmsData } from "@/lib/cms-context";
-
-type SocialCmsData = {
-  twitter?: string;
-  instagram?: string;
-  facebook?: string;
-  tiktok?: string;
-};
+import { useCmsData, useBranding } from "@/lib/cms-context";
 
 type FooterLink = { label: string; href: string };
 type FooterColumn = { title?: string; h?: string; links?: FooterLink[]; l?: FooterLink[] };
@@ -53,12 +45,6 @@ const DEFAULT_FOOTER: FooterCmsData = {
   ],
 };
 
-const DEFAULT_SOCIAL: SocialCmsData = {
-  instagram: "https://instagram.com",
-  twitter: "https://x.com",
-  facebook: "https://facebook.com",
-};
-
 export function Footer() {
   // The copyright year came from a bare `new Date()` during render. On a page
   // rendered on the server on 31 December and hydrated on 1 January the two
@@ -68,18 +54,21 @@ export function Footer() {
   const year = new Date(now).getFullYear();
 
   const footerCms = useCmsData("footer", DEFAULT_FOOTER);
-  const socialCms = useCmsData("social", DEFAULT_SOCIAL);
+  // Social URLs come from the Settings panel (branding.social), not cms_sections.
+  const { social } = useBranding();
 
   const tagline = footerCms.tagline ?? DEFAULT_FOOTER.tagline;
-  const columns = footerCms.columns && footerCms.columns.length > 0
-    ? footerCms.columns
-    : DEFAULT_FOOTER.columns!;
+  const columns =
+    footerCms.columns && footerCms.columns.length > 0
+      ? footerCms.columns
+      : DEFAULT_FOOTER.columns!;
 
-  const socials = [
-    { Icon: Instagram, label: "MyTijaara on Instagram", href: socialCms.instagram || DEFAULT_SOCIAL.instagram! },
-    { Icon: Twitter, label: "MyTijaara on X", href: socialCms.twitter || DEFAULT_SOCIAL.twitter! },
-    { Icon: Facebook, label: "MyTijaara on Facebook", href: socialCms.facebook || DEFAULT_SOCIAL.facebook! },
-  ].filter((s) => s.href);
+  // Only render platforms the admin has configured a URL for.
+  const socials = SOCIAL_PLATFORMS.map((id) => ({
+    id,
+    href: social[id],
+    ...SOCIAL_ICON_MAP[id],
+  })).filter((s): s is typeof s & { href: string } => Boolean(s.href));
 
   return (
     <footer className="border-t border-border bg-surface py-14">
@@ -88,14 +77,14 @@ export function Footer() {
           <div>
             <Logo />
             <p className="mt-4 max-w-xs text-sm text-muted-foreground">{tagline}</p>
-            <div className="mt-5 flex gap-3">
-              {socials.map(({ Icon, label, href }) => (
+            <div className="mt-5 flex flex-wrap gap-3">
+              {socials.map(({ id, Icon, label, href }) => (
                 <a
-                  key={label}
+                  key={id}
                   href={href}
                   target="_blank"
                   rel="noreferrer"
-                  aria-label={label}
+                  aria-label={`MyTijaara on ${label}`}
                   className="grid h-10 w-10 place-items-center rounded-full border border-border text-foreground/70 transition-colors hover:bg-primary hover:text-primary-foreground"
                 >
                   <Icon className="h-4 w-4" />

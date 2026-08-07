@@ -54,6 +54,17 @@ export type SystemSettings = {
   notifyOnSignup: boolean;
 };
 
+/** Social profile URLs returned as part of `/settings/public`. */
+export type PublicSocial = {
+  instagram: string;
+  twitter: string;
+  facebook: string;
+  linkedin: string;
+  tiktok: string;
+  youtube: string;
+  whatsapp: string;
+};
+
 /** Non-secret subset returned by `GET /settings/public`. */
 export type PublicBranding = {
   siteName: string;
@@ -64,6 +75,8 @@ export type PublicBranding = {
   ogImageUrl: string;
   primaryColor: string;
   accentColor: string;
+  /** Social profile URLs. Only links with a non-empty value are rendered. */
+  social: PublicSocial;
 };
 
 export const settingsApi = {
