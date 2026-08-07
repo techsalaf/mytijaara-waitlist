@@ -100,14 +100,14 @@ src/
 
 Defined in `src/styles.css` via Tailwind v4 `@theme`. Semantic tokens (do **not** hardcode hex colors in components; use `bg-primary`, `text-foreground`, etc.):
 
-- **Primary**: deep green `oklch(0.36 0.09 156)` (~`#0D7A46` / `#166534`) — MyTijaara brand.
+- **Primary**: deep green `oklch(0.36 0.09 156)` (~`#004A28` / `#166534`) — MyTijaara brand.
 - **Gold accent**: `oklch(0.78 0.13 82)` (~`#D4A017`).
 - **Fonts**: Display = **Plus Jakarta Sans**, Body = **Inter** (loaded from Google Fonts via `<link>` in `__root.tsx`).
 - **Radius**: base `1rem`, scaled `sm→4xl`.
 - **Shadows**: `--shadow-elegant`, `--shadow-soft`, `--shadow-glow` (color-mixed from primary/gold).
 - **Dark mode**: `.dark` class variant; toggled by `src/lib/theme.ts` (localStorage key).
 
-A sweep has already replaced the old `#0D7A46` / `#D4A017` literals across the landing page, admin shell and admin routes with `bg-primary` / `text-gold` / `var(--primary)` / `var(--gold)`. Keep it that way — no new hex literals.
+A sweep has already replaced the old `#004A28` / `#D4A017` literals across the landing page, admin shell and admin routes with `bg-primary` / `text-gold` / `var(--primary)` / `var(--gold)`. Keep it that way — no new hex literals.
 
 ---
 
@@ -374,7 +374,7 @@ Campaign send/schedule uses Laravel Mailables + Queue. Store templates in `email
 - **Use `<Link to="..." params={...}>`** — never string-interpolate paths in `href`.
 - **Server functions**: read `process.env.X` inside `.handler()`, not at module scope. Never import `*.server.ts` from client components — the whole chain leaks into the client bundle and build protection blocks it.
 - **Toaster (`<Toaster />` from `sonner`)** — code calls `toast.success/error` heavily; make sure the Toaster is mounted in `__root.tsx` when you add real auth flows (currently it may only be mounted per-page).
-- **Design tokens > hex literals**. Migrate stray `#0D7A46`/`#D4A017` to `bg-primary`/`bg-gold` for dark-mode correctness as you touch each screen.
+- **Design tokens > hex literals**. Migrate stray `#004A28`/`#D4A017` to `bg-primary`/`bg-gold` for dark-mode correctness as you touch each screen.
 - **TanStack Query is installed but underused.** Prefer `queryOptions` + `ensureQueryData` in loaders + `useSuspenseQuery` in components going forward, instead of `useEffect + setState`.
 
 ---
@@ -400,7 +400,7 @@ Campaign send/schedule uses Laravel Mailables + Queue. Store templates in `email
 **Changed**
 
 - `src/routes/index.tsx` went from ~1400 lines to ~70. Every section now lives in `src/components/landing/*`.
-- Hex literals (`#0D7A46`, `#D4A017`, `bg-white`, `#F8FAF8`) swept out of the landing page, admin shell and 40+ admin routes in favour of semantic tokens (`bg-primary`, `text-gold`, `bg-card`, `bg-surface`, `var(--primary)`).
+- Hex literals (`#004A28`, `#D4A017`, `bg-white`, `#F8FAF8`) swept out of the landing page, admin shell and 40+ admin routes in favour of semantic tokens (`bg-primary`, `text-gold`, `bg-card`, `bg-surface`, `var(--primary)`).
 - `styles.css` gained `@keyframes digit-in` / float animations used by the countdown.
 - `<Toaster />` is mounted in `src/routes/__root.tsx`.
 

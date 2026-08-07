@@ -19,7 +19,7 @@ export function How() {
   const steps = cms.steps && cms.steps.length > 0 ? cms.steps : DEFAULT.steps!;
 
   return (
-    <section id="how" className="relative overflow-hidden bg-primary py-24 text-primary-foreground sm:py-32">
+    <section id="how" className="relative overflow-hidden bg-primary-gradient py-24 text-primary-foreground sm:py-32">
       <div className="pointer-events-none absolute -left-40 top-1/2 h-[500px] w-[500px] -translate-y-1/2 rounded-full bg-gold opacity-15 blur-3xl" />
       <div className="pointer-events-none absolute -right-40 top-10 h-[400px] w-[400px] rounded-full bg-primary-foreground/5 blur-3xl" />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6">

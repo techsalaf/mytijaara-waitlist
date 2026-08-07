@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { AlertTriangle, CheckCircle2, Loader2, Plug } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Eye, EyeOff, Loader2, Plug } from "lucide-react";
 import { settingsApi } from "@/lib/api/settings";
 import { useSettingsGroup, settingsError } from "@/lib/admin/use-settings-group";
 import { toast } from "sonner";
@@ -49,6 +49,7 @@ type TestState =
 function SmtpSettingsPage() {
   const state = useSettingsGroup("smtp", DEFAULTS);
   const [test, setTest] = useState<TestState>({ status: "idle" });
+  const [showPwd, setShowPwd] = useState(false);
 
   const runTest = async () => {
     if (!state.form) return;
@@ -186,18 +187,34 @@ function SmtpSettingsPage() {
               </div>
               <div>
                 <Label htmlFor="password">Password / API key</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={form.password}
-                  onChange={(e) => state.set("password", e.target.value)}
-                  autoComplete="new-password"
-                  className="mt-1.5"
-                  disabled={!form.enabled}
-                />
+                <div className="relative mt-1.5">
+                  <Input
+                    id="password"
+                    type={showPwd ? "text" : "password"}
+                    value={form.password}
+                    onChange={(e) => state.set("password", e.target.value)}
+                    autoComplete="new-password"
+                    className="pr-10"
+                    disabled={!form.enabled}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground hover:text-foreground disabled:pointer-events-none"
+                    onClick={() => setShowPwd((v) => !v)}
+                    tabIndex={-1}
+                    disabled={!form.enabled}
+                    aria-label={showPwd ? "Hide password" : "Show password"}
+                  >
+                    {showPwd ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
                 <p className="mt-1.5 text-xs text-muted-foreground">
                   {form.password.startsWith("••••")
-                    ? "A password is stored. Leave this as-is to keep it, or type a new one to replace it."
+                    ? "Password stored. Leave as-is to keep it, or type a new one to replace."
                     : "No password stored yet."}
                 </p>
               </div>

@@ -9,6 +9,7 @@ use App\Support\RoleMeta;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -18,7 +19,19 @@ class RoleController extends Controller
     /** GET /roles — all roles with user + permission counts. */
     public function index(): JsonResponse
     {
-        $roles = Role::query()->withCount(['users', 'permissions'])->orderBy('id')->get();
+        // withCount('users') calls Role::users() which does a guard→model lookup via
+        // config('auth.guards.<guard>.provider'). In HTTP context the sanctum guard has
+        // provider:null, so the lookup returns null and Laravel throws. Bypass the
+        // polymorphic relationship entirely and count model_has_roles directly.
+        $roles = Role::query()
+            ->withCount('permissions')
+            ->addSelect([
+                'users_count' => DB::table('model_has_roles')
+                    ->selectRaw('count(*)')
+                    ->whereColumn('role_id', 'roles.id'),
+            ])
+            ->orderBy('id')
+            ->get();
 
         return response()->json(['data' => RoleResource::collection($roles)]);
     }
@@ -27,9 +40,13 @@ class RoleController extends Controller
     public function show(string $id): JsonResponse
     {
         $role = Role::with('permissions')->findOrFail($this->pk($id));
+        $role->loadCount('permissions');
+        $role->users_count = (int) DB::table('model_has_roles')
+            ->where('role_id', $role->id)
+            ->count();
 
         return response()->json(['data' => array_merge(
-            (new RoleResource($role->loadCount(['users', 'permissions'])))->toArray(request()),
+            (new RoleResource($role))->toArray(request()),
             ['grantedPermissions' => $role->permissions->pluck('name')->all()]
         )]);
     }
@@ -85,7 +102,10 @@ class RoleController extends Controller
             'permissions' => count($data['permissions'] ?? []),
         ], Role::class, (string) $role->id);
 
-        return response()->json(['data' => new RoleResource($role->loadCount(['users', 'permissions']))], 201);
+        $role->loadCount('permissions');
+        $role->users_count = (int) DB::table('model_has_roles')->where('role_id', $role->id)->count();
+
+        return response()->json(['data' => new RoleResource($role)], 201);
     }
 
     /**
@@ -123,7 +143,10 @@ class RoleController extends Controller
 
         Audit::record($request, 'role.updated', $role->label ?: $role->name, $changes, Role::class, (string) $role->id);
 
-        return response()->json(['data' => new RoleResource($role->loadCount(['users', 'permissions']))]);
+        $role->loadCount('permissions');
+        $role->users_count = (int) DB::table('model_has_roles')->where('role_id', $role->id)->count();
+
+        return response()->json(['data' => new RoleResource($role)]);
     }
 
     /** DELETE /roles/:id — refuses to delete the seeded base roles. */

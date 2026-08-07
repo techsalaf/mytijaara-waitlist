@@ -1,33 +1,71 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { useCallback, useEffect, useState } from "react";
 import { SectionCard, StatCard } from "@/components/admin/ui-bits";
 import { campaignsApi } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Eye, MousePointerClick, Send, TrendingUp } from "lucide-react";
+import { ArrowLeft, Eye, Loader2, MousePointerClick, Send, TrendingUp } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import type { Campaign } from "@/lib/types";
+import type { CampaignStats } from "@/lib/api/campaigns";
 
+/**
+ * Campaign detail page. Uses client-side fetching (not an SSR loader) because
+ * the admin API requires a Bearer token that only exists in the browser's
+ * localStorage — a server-side loader has no token and always gets 401.
+ */
 export const Route = createFileRoute("/admin/email/$id")({
-  loader: async ({ params }) => {
-    const [campaignResponse, statsResponse] = await Promise.all([
-      campaignsApi.get(params.id),
-      campaignsApi.stats(params.id),
-    ]);
-    if (!campaignResponse.data) throw notFound();
-    return { campaign: campaignResponse.data, stats: statsResponse.data };
-  },
-  notFoundComponent: () => (
-    <div className="rounded-xl border border-border/60 bg-card p-10 text-center">
-      <p>Campaign not found.</p>
-      <Button asChild variant="link">
-        <Link to="/admin/email">Back to campaigns</Link>
-      </Button>
-    </div>
-  ),
   component: CampaignDetail,
 });
 
 function CampaignDetail() {
-  const { campaign, stats } = Route.useLoaderData();
+  const { id } = useParams({ from: "/admin/email/$id" });
+
+  const [campaign, setCampaign] = useState<Campaign | null>(null);
+  const [stats, setStats] = useState<CampaignStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [cr, sr] = await Promise.all([
+        campaignsApi.get(id),
+        campaignsApi.stats(id),
+      ]);
+      setCampaign(cr.data);
+      setStats(sr.data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not load campaign.");
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => { void load(); }, [load]);
+
+  if (loading) {
+    return (
+      <div className="grid min-h-[40vh] place-items-center text-muted-foreground">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error || !campaign || !stats) {
+    return (
+      <div className="rounded-xl border border-border/60 bg-card p-10 text-center space-y-3">
+        <p className="text-sm text-destructive">{error ?? "Campaign not found."}</p>
+        <Button asChild variant="outline" size="sm">
+          <Link to="/admin/email">
+            <ArrowLeft className="mr-1 h-3 w-3" /> Back to campaigns
+          </Link>
+        </Button>
+      </div>
+    );
+  }
+
   const c = campaign;
   return (
     <div className="space-y-6">

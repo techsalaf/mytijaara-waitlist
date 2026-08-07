@@ -114,6 +114,14 @@
     font-family: var(--font-display);
     letter-spacing: -0.02em;
   }
+  /* Tailwind's preflight resets button cursors to `default`. Restore pointer
+     everywhere a button or role="button" is not explicitly disabled. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  label[for],
+  select:not(:disabled) {
+    cursor: pointer;
+  }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.001ms !important;

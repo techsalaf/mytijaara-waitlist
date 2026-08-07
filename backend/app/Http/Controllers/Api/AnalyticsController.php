@@ -16,8 +16,8 @@ use Illuminate\Support\Facades\DB;
 class AnalyticsController extends Controller
 {
     private const SOURCE_COLORS = [
-        'organic' => ['name' => 'Organic Search', 'color' => '#0D7A46'],
-        'google' => ['name' => 'Organic Search', 'color' => '#0D7A46'],
+        'organic' => ['name' => 'Organic Search', 'color' => '#004A28'],
+        'google' => ['name' => 'Organic Search', 'color' => '#004A28'],
         'referral' => ['name' => 'Referral', 'color' => '#D4A017'],
         'instagram' => ['name' => 'Instagram', 'color' => '#166534'],
         'twitter' => ['name' => 'Twitter/X', 'color' => '#1DA1F2'],
@@ -26,9 +26,9 @@ class AnalyticsController extends Controller
         'direct' => ['name' => 'Direct', 'color' => '#64748b'],
     ];
 
-    private const DEVICE_COLORS = ['Android' => '#0D7A46', 'iOS' => '#166534', 'Web' => '#D4A017'];
+    private const DEVICE_COLORS = ['Android' => '#004A28', 'iOS' => '#166534', 'Web' => '#D4A017'];
 
-    private const BROWSER_COLORS = ['Chrome' => '#F4B400', 'Safari' => '#0D7A46', 'Firefox' => '#FF7139', 'Edge' => '#0078D7', 'Other' => '#64748b'];
+    private const BROWSER_COLORS = ['Chrome' => '#F4B400', 'Safari' => '#004A28', 'Firefox' => '#FF7139', 'Edge' => '#0078D7', 'Other' => '#64748b'];
 
     /**
      * Window length in days for a period-scoped request. `days=0` (or `all`)
@@ -62,6 +62,7 @@ class AnalyticsController extends Controller
             : WaitlistEntry::query();
 
         $total = $scoped()->count();
+        $allTimeTotal = WaitlistEntry::count();
         $verified = $scoped()->where('verified', true)->count();
         $today = WaitlistEntry::whereDate('created_at', today())->count();
 
@@ -84,7 +85,7 @@ class AnalyticsController extends Controller
 
         return response()->json(['data' => [
             'visitors' => $visits,
-            'totalWaitlist' => $total,
+            'totalWaitlist' => $allTimeTotal,
             'todaySignups' => $today,
             'weeklyGrowth' => $this->growth($thisWeek, $lastWeek),
             'monthlyGrowth' => $this->growth($thisMonth, $lastMonth),

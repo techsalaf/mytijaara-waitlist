@@ -24,7 +24,7 @@ class RoleMeta
     ];
 
     public const COLORS = [
-        'super_admin' => '#0D7A46',
+        'super_admin' => '#004A28',
         'admin' => '#166534',
         'marketing' => '#D4A017',
         'content_editor' => '#0891b2',

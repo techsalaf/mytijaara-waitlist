@@ -17,7 +17,7 @@ export const Route = createFileRoute("/admin/roles/$id")({
   component: RoleDetailPage,
 });
 
-const COLORS = ["#0D7A46", "#166534", "#D4A017", "#0891b2", "#7c3aed", "#64748b"];
+const COLORS = ["#004A28", "#166534", "#D4A017", "#0891b2", "#7c3aed", "#64748b"];
 
 function RoleDetailPage() {
   const { id } = Route.useParams();

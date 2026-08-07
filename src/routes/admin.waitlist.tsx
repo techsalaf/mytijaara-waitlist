@@ -739,7 +739,7 @@ function AddUserDialog({
         phone: form.phone.trim() || undefined,
         city: form.city.trim(),
         role: form.role as "customer" | "vendor" | "rider" | "artisan",
-        source: form.source as "organic" | "referral",
+        source: form.source as "organic" | "referral" | "instagram" | "twitter" | "facebook" | "tiktok" | "google",
         referralCode: form.source === "referral" && form.referralCode.trim()
           ? form.referralCode.trim()
           : undefined,

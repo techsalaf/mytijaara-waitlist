@@ -7,7 +7,7 @@ export type WaitlistSignupPayload = {
   phone?: string;
   city: string;
   role: WaitlistRole;
-  source: "organic" | "referral";
+  source: "organic" | "referral" | "instagram" | "twitter" | "facebook" | "tiktok" | "google";
   referralCode?: string;
   consent: true;
   /** Honeypot. Always empty for a real person. */

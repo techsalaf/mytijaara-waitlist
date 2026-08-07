@@ -452,13 +452,29 @@ function MediaPage() {
                         }
                       }}
                     />
+                  ) : selected.type === "video" ? (
+                    <video
+                      src={selected.url}
+                      controls
+                      className="mx-auto max-h-[420px] w-full rounded-lg"
+                    />
+                  ) : selected.name?.toLowerCase().endsWith(".pdf") ? (
+                    <iframe
+                      src={selected.url}
+                      title={selected.name}
+                      className="h-[420px] w-full rounded-lg border-0"
+                    />
                   ) : (
-                    <div className="grid h-64 place-items-center">
-                      {selected.type === "video" ? (
-                        <FileVideo className="h-10 w-10 text-muted-foreground" />
-                      ) : (
-                        <FileText className="h-10 w-10 text-muted-foreground" />
-                      )}
+                    <div className="grid h-64 place-items-center gap-3">
+                      <FileText className="h-10 w-10 text-muted-foreground" />
+                      <a
+                        href={selected.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs text-primary underline underline-offset-2"
+                      >
+                        Open in new tab
+                      </a>
                     </div>
                   )}
                 </div>

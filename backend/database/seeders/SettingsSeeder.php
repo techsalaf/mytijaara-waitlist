@@ -17,7 +17,7 @@ class SettingsSeeder extends Seeder
             'address' => 'Lagos, Nigeria',
         ],
         'branding' => [
-            'primaryColor' => '#0D7A46',
+            'primaryColor' => '#004A28',
             'accentColor' => '#D4A017',
             'logo' => '',
             'favicon' => '',

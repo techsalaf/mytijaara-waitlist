@@ -27,6 +27,9 @@ const DEFAULTS = {
   ogImageUrl: "",
   primaryColor: "#1f5c3a",
   accentColor: "#c9a24c",
+  secondaryColor: "",
+  backgroundColor: "",
+  surfaceColor: "",
 };
 
 const IMAGES = [
@@ -54,7 +57,10 @@ const IMAGES = [
 
 const COLORS = [
   { key: "primaryColor" as const, label: "Primary", hint: "Buttons, links and active states." },
-  { key: "accentColor" as const, label: "Accent", hint: "Highlights and the gold detailing." },
+  { key: "accentColor" as const, label: "Accent / Gold", hint: "Highlights and the gold detailing." },
+  { key: "secondaryColor" as const, label: "Secondary", hint: "Secondary backgrounds and muted tones." },
+  { key: "backgroundColor" as const, label: "Page background", hint: "Main site background colour." },
+  { key: "surfaceColor" as const, label: "Surface", hint: "Cards, inputs and elevated surfaces." },
 ];
 
 function BrandingSettingsPage() {

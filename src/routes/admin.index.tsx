@@ -228,8 +228,8 @@ function DashboardPage() {
           icon={Users}
           hint={
             period === 0
-              ? "all time"
-              : `vs ${formatNumber(stats.previousPeriodSignups ?? 0)} in the previous ${period} days`
+              ? `${formatNumber(stats.totalWaitlist)} all time`
+              : `of ${formatNumber(stats.totalWaitlist)} total · vs ${formatNumber(stats.previousPeriodSignups ?? 0)} previous period`
           }
         />
         <StatCard
@@ -251,7 +251,9 @@ function DashboardPage() {
           icon={MousePointerClick}
           hint={
             stats.visitors > 0
-              ? `${stats.conversionRate}% of ${formatNumber(stats.visitors)} visitors signed up`
+              ? (stats.periodSignups ?? 0) > 0
+                ? `${stats.conversionRate}% of ${formatNumber(stats.visitors)} visitors signed up`
+                : `${formatNumber(stats.visitors)} visitors · no signups in this window`
               : "no pageview events recorded yet"
           }
         />

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { EmptyState, SectionCard } from "@/components/admin/ui-bits";
 import { templatesApi } from "@/lib/api";
 import type { EmailTemplateDetail, EmailTemplateInput } from "@/lib/api";
@@ -75,18 +75,10 @@ const BLANK_INPUT: EmailTemplateInput = {
 
 /** HTML thumbnail preview rendered inline on the card */
 function TemplateThumbnail({ html }: { html: string | null }) {
-  const ref = useRef<HTMLIFrameElement>(null);
-  useEffect(() => {
-    const doc = ref.current?.contentDocument;
-    if (!doc) return;
-    doc.open();
-    doc.write(html ?? "<p style='color:#aaa;font-family:sans-serif;padding:24px'>No HTML yet</p>");
-    doc.close();
-  }, [html]);
   return (
     <iframe
-      ref={ref}
       title="preview-thumb"
+      srcDoc={html ?? "<p style='color:#aaa;font-family:sans-serif;padding:24px'>No HTML yet</p>"}
       sandbox="allow-same-origin"
       className="pointer-events-none h-full w-full border-0"
       aria-hidden="true"
@@ -104,15 +96,6 @@ function PreviewDialog({
   onClose: () => void;
   template: EmailTemplateDetail | null;
 }) {
-  const ref = useRef<HTMLIFrameElement>(null);
-  useEffect(() => {
-    if (!open || !template) return;
-    const doc = ref.current?.contentDocument;
-    if (!doc) return;
-    doc.open();
-    doc.write(template.html ?? "<p>No HTML content</p>");
-    doc.close();
-  }, [open, template]);
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="flex h-[90vh] max-h-[90vh] max-w-4xl flex-col p-0">
@@ -126,8 +109,9 @@ function PreviewDialog({
         </DialogHeader>
         <div className="flex-1 overflow-hidden border-t border-border">
           <iframe
-            ref={ref}
+            key={template?.id ?? "preview"}
             title="email-preview"
+            srcDoc={template?.html ?? "<p style='padding:24px;font-family:sans-serif;color:#666'>No HTML content</p>"}
             sandbox="allow-same-origin"
             className="h-full w-full border-0 bg-white"
           />

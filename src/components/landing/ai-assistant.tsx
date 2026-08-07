@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useId } from "react";
 import { MessageCircle, X, Send, Sparkles } from "lucide-react";
+import { getResponse } from "./knowledge-base";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                                */
@@ -12,62 +13,10 @@ interface Message {
 }
 
 /* ------------------------------------------------------------------ */
-/* Knowledge base — deterministic keyword matching, zero API cost      */
+/* Knowledge base — see ./knowledge-base.ts                            */
+/* Deterministic, weighted keyword matching. Zero API/token cost.      */
+/* Edit knowledge-base.ts to add or update what Camila knows.          */
 /* ------------------------------------------------------------------ */
-
-const RESPONSES: Record<string, string> = {
-  greeting:
-    "Hey there! 👋 I'm Camila, your MyTijaara assistant. Ask me anything about the app, our services, the waitlist, or the referral program.",
-  about:
-    "MyTijaara is Nigeria's all-in-one super-app 🇳🇬\n\nYou can order food, groceries, and pharmacy items, book trusted artisans, send packages, rent cars, and shop from businesses around you — all in one place.",
-  waitlist:
-    "Joining is free and takes 30 seconds! 🎉\n\nJust scroll up to the waitlist form, enter your email address, and you're in. You'll get early access before the general public, plus exclusive launch perks.",
-  launch:
-    "We're launching very soon! 🚀\n\nJoin the waitlist to be among the first to know the exact date and get early access before the general public opens.",
-  services:
-    "MyTijaara covers everything you need:\n\n🍛 Food — restaurants near you\n🛒 Groceries — supermarkets & fresh markets\n💊 Pharmacy — medications delivered\n📦 Parcels — same-day delivery\n🔧 Artisans — verified plumbers, electricians & more\n🚗 Car rental — short and long term\n\nAll from one app.",
-  referral:
-    "Our referral program rewards you for inviting friends! 🎁\n\nShare your unique referral link — when friends join the waitlist, you climb the priority queue and unlock exclusive perks. The more you invite, the earlier your access.",
-  location:
-    "We're starting in Nigeria, with Ibadan and Lagos as our launch city 📍\n\nMore cities and states will follow shortly after launch. Watch this space!",
-  payment:
-    "MyTijaara supports bank cards, bank transfers, and wallet payments — fast, secure, and naira-denominated 💳\n\nWe're built for Nigerian payment methods.",
-  safety:
-    "Your privacy matters to us 🔒\n\nWe use industry-standard encryption and never sell your data. All artisans and vendors on the platform are verified before they can serve customers.",
-  support:
-    "Need help? Reach our team at:\n\n📧 hello@mytijaara.com\n📲 @mytijaara on all social platforms\n\nWe're here for you!",
-  download:
-     "The app isn't live yet — that's why we have the waitlist! 📱\n\nJoin now to get first access when we launch on iOS and Android. You'll be notified the moment it drops.",
-  fallback:
-    "I'm not sure I caught that — sorry! 😅\n\nHere are things I can help with: the waitlist, our services, the launch date, the referral program, payment methods, or how to contact us.",
-};
-
-function getResponse(input: string): string {
-  const q = input.toLowerCase();
-  if (/\b(hi|hello|hey|good\s+morning|good\s+evening|howdy|what'?s\s+up|sup)\b/.test(q))
-    return RESPONSES.greeting;
-  if (/\b(what\s+is|about|who\s+are|tell\s+me|describe|explain|overview)\b/.test(q))
-    return RESPONSES.about;
-  if (/\b(waitlist|join|sign\s*up|register|enroll|get\s+access|early\s+access)\b/.test(q))
-    return RESPONSES.waitlist;
-  if (/\b(launch|when|release\s+date|go\s+live|available|soon|ready|open)\b/.test(q))
-    return RESPONSES.launch;
-  if (/\b(services?|food|groceries?|grocery|artisan|delivery|pharmacy|parcel|car\s+rental|rental|electrician|plumber)\b/.test(q))
-    return RESPONSES.services;
-  if (/\b(referral|refer|invite|friend|share|link|reward|bonus)\b/.test(q))
-    return RESPONSES.referral;
-  if (/\b(nigeria|lagos|abuja|city|cities|location|where|area|state|region)\b/.test(q))
-    return RESPONSES.location;
-  if (/\b(pay(ment)?|price|cost|fee|money|naira|ngn|charge|bank|card|transfer|wallet)\b/.test(q))
-    return RESPONSES.payment;
-  if (/\b(safe|secure|trust|privacy|data|scam|legit|real|verified|security)\b/.test(q))
-    return RESPONSES.safety;
-  if (/\b(contact|support|help|team|email|reach|talk|chat)\b/.test(q))
-    return RESPONSES.support;
-  if (/\b(app|ios|android|download|install|phone|mobile|play\s+store|app\s+store)\b/.test(q))
-    return RESPONSES.download;
-  return RESPONSES.fallback;
-}
 
 /* ------------------------------------------------------------------ */
 /* Quick action chips                                                        */

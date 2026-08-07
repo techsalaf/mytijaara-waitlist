@@ -133,6 +133,18 @@ export function AdminShell() {
   };
 
   const unreadCount = notifications.filter((n) => n.unread).length;
+
+  const markNotificationRead = async (n: Notification) => {
+    if (!n.unread) return;
+    try {
+      await notificationsApi.markRead(n.id);
+      setNotifications((prev) =>
+        prev.map((x) => (x.id === n.id ? { ...x, unread: false } : x)),
+      );
+    } catch {
+      // non-blocking: badge will correct on next load
+    }
+  };
   const isMac = typeof navigator !== "undefined" && /mac/i.test(navigator.platform);
 
   return (
@@ -214,7 +226,11 @@ export function AdminShell() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {notifications.slice(0, 4).map((n) => (
-                  <DropdownMenuItem key={n.id} className="flex flex-col items-start gap-0.5 py-2.5">
+                  <DropdownMenuItem
+                    key={n.id}
+                    className="flex flex-col items-start gap-0.5 py-2.5"
+                    onClick={() => void markNotificationRead(n)}
+                  >
                     <div className="flex w-full items-center gap-2">
                       <span className="text-sm font-medium">{n.title}</span>
                       {n.unread && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-gold" />}

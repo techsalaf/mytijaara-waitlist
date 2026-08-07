@@ -102,8 +102,8 @@ export function Footer() {
   const year = new Date(now).getFullYear();
 
   const footerCms = useCmsData("footer", DEFAULT_FOOTER);
-  // Social URLs come from the Settings panel (branding.social), not cms_sections.
-  const { social } = useBranding();
+  // Social URLs and contact emails come from the Settings panel (branding), not cms_sections.
+  const { social, supportEmail, contactEmail } = useBranding();
 
   const tagline = footerCms.tagline ?? DEFAULT_FOOTER.tagline;
   const columns =
@@ -211,8 +211,12 @@ export function Footer() {
               { label: "Privacy", href: "#faq" },
               { label: "Terms", href: "#faq" },
               { label: "Cookies", href: "#faq" },
-              { label: "Support", href: "mailto:support@mytijaara.com" },
-              { label: "Contact", href: "mailto:hello@mytijaara.com" },
+              ...(supportEmail
+                ? [{ label: "Support", href: `mailto:${supportEmail}` }]
+                : [{ label: "Support", href: "mailto:support@mytijaara.com" }]),
+              ...(contactEmail
+                ? [{ label: "Contact", href: `mailto:${contactEmail}` }]
+                : [{ label: "Contact", href: "mailto:hello@mytijaara.com" }]),
             ].map(({ label, href }) => (
               <a
                 key={label}
