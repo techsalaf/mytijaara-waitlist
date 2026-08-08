@@ -7,12 +7,13 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Analytics } from "@vercel/analytics/react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
+import { settingsApi } from "@/lib/api/settings";
 
 function NotFoundComponent() {
   return (
@@ -123,6 +124,50 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const [integrations, setIntegrations] = useState<{ googleAnalyticsId?: string; metaPixelId?: string }>({});
+
+  useEffect(() => {
+    settingsApi.get<{ googleAnalyticsId?: string; metaPixelId?: string }>("integrations")
+      .then(res => setIntegrations(res.data))
+      .catch(() => {}); // fail silently — analytics is non-critical
+  }, []);
+
+  useEffect(() => {
+    if (integrations.googleAnalyticsId && typeof window !== "undefined") {
+      const script = document.createElement("script");
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${integrations.googleAnalyticsId}`;
+      script.async = true;
+      document.head.appendChild(script);
+
+      const inline = document.createElement("script");
+      inline.textContent = `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '${integrations.googleAnalyticsId}');
+      `;
+      document.head.appendChild(inline);
+    }
+  }, [integrations.googleAnalyticsId]);
+
+  useEffect(() => {
+    if (integrations.metaPixelId && typeof window !== "undefined") {
+      const inline = document.createElement("script");
+      inline.textContent = `
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '${integrations.metaPixelId}');
+        fbq('track', 'PageView');
+      `;
+      document.head.appendChild(inline);
+    }
+  }, [integrations.metaPixelId]);
 
   return (
     <QueryClientProvider client={queryClient}>

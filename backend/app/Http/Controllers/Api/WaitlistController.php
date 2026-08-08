@@ -269,20 +269,13 @@ class WaitlistController extends Controller
     }
 
     /**
-     * Confirmation mail + admin notification. Both are best-effort: the signup
-     * is already committed, so a broken SMTP config must not surface as a 500.
+     * Confirmation mail + admin notification. Mail is dispatched to the queue so
+     * a slow SMTP server doesn't block the signup response. Notification is
+     * synchronous but best-effort (failure is logged, not thrown).
      */
     private function afterSignup(WaitlistEntry $entry): void
     {
-        try {
-            SmtpConfig::apply();
-            Mail::to($entry->email)->send(new WaitlistWelcomeMail($entry));
-        } catch (\Throwable $e) {
-            Log::warning('waitlist welcome mail failed', [
-                'entry' => $entry->public_id,
-                'error' => $e->getMessage(),
-            ]);
-        }
+        \App\Jobs\SendWaitlistWelcomeJob::dispatch($entry->id);
 
         try {
             AdminNotification::record(
