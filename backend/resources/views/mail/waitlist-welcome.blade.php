@@ -15,7 +15,11 @@
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e8e2d5;">
           <tr>
             <td style="background:#1f5c3a;padding:22px 28px;">
-              <span style="color:#f4e4bc;font-size:20px;font-weight:700;letter-spacing:-0.2px;">MyTijaara</span>
+              @if ($logoUrl)
+                <img src="{{ $logoUrl }}" alt="{{ $siteName }}" style="height:32px;width:auto;display:block;">
+              @else
+                <span style="color:#f4e4bc;font-size:20px;font-weight:700;letter-spacing:-0.2px;">{{ $siteName }}</span>
+              @endif
             </td>
           </tr>
           <tr>

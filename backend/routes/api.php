@@ -39,6 +39,7 @@ Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
 
 Route::post('/waitlist', [WaitlistController::class, 'store']);
 Route::get('/waitlist/count', [WaitlistController::class, 'count']);
+Route::get('/waitlist/avatars', [WaitlistController::class, 'avatars']);
 Route::get('/waitlist/verify/{token}', [WaitlistController::class, 'verify']);
 
 Route::get('/launch-config', [LaunchConfigController::class, 'show']);

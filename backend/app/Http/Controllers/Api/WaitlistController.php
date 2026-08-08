@@ -113,6 +113,35 @@ class WaitlistController extends Controller
         return response()->json(['data' => ['total' => WaitlistEntry::count()]]);
     }
 
+    /** GET /waitlist/avatars — PUBLIC: returns up to 6 recent waitlist entries for avatar display. */
+    public function avatars(): JsonResponse
+    {
+        $total = WaitlistEntry::count();
+        $entries = WaitlistEntry::latest()
+            ->take(6)
+            ->get(['name'])
+            ->map(fn ($e) => [
+                'name' => $e->name,
+                'initials' => $this->initials($e->name),
+            ]);
+
+        return response()->json([
+            'data' => [
+                'avatars' => $entries,
+                'total' => $total,
+            ],
+        ]);
+    }
+
+    private function initials(string $name): string
+    {
+        $parts = explode(' ', trim($name));
+        if (count($parts) === 1) {
+            return strtoupper(substr($parts[0], 0, 2));
+        }
+        return strtoupper(substr($parts[0], 0, 1) . substr($parts[count($parts) - 1], 0, 1));
+    }
+
     /** GET /waitlist/verify/:token — PUBLIC: confirm a signup's email. */
     public function verify(string $token): JsonResponse
     {

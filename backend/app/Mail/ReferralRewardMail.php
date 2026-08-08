@@ -38,6 +38,11 @@ class ReferralRewardMail extends Mailable
     {
         $site = rtrim((string) config('app.frontend_url', config('app.url')), '/');
 
+        // Fetch logo from branding settings
+        $branding = \App\Models\Setting::where('group', 'branding')->first();
+        $logoUrl = $branding?->data['logoUrl'] ?? null;
+        $siteName = $branding?->data['siteName'] ?? 'MyTijaara';
+
         return new Content(view: 'mail.referral-reward', with: [
             'name' => $this->entry->name,
             'referrals' => $this->referralsRewarded,
@@ -45,6 +50,8 @@ class ReferralRewardMail extends Mailable
             'note' => $this->note,
             'referralUrl' => $site.'/?ref='.$this->entry->referral_code,
             'unsubscribeUrl' => $site.'/unsubscribe?email='.urlencode($this->entry->email),
+            'logoUrl' => $logoUrl,
+            'siteName' => $siteName,
         ]);
     }
 }

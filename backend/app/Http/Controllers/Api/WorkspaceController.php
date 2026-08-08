@@ -8,6 +8,7 @@ use App\Models\EmailEvent;
 use App\Models\Event;
 use App\Models\Referral;
 use App\Models\WaitlistEntry;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -39,6 +40,7 @@ class WorkspaceController extends Controller
                     'campaigns' => Campaign::count(),
                     'waitlist_entries' => WaitlistEntry::withTrashed()->count(),
                     'events' => Event::count(),
+                    'notifications' => DatabaseNotification::count(),
                 ];
 
                 EmailEvent::truncate();
@@ -47,6 +49,7 @@ class WorkspaceController extends Controller
                 // Force-delete ALL waitlist entries including soft-deleted ones.
                 WaitlistEntry::withTrashed()->forceDelete();
                 Event::truncate();
+                DatabaseNotification::truncate();
 
                 Log::info('workspace_reset', ['deleted' => $deleted, 'admin' => auth()->id()]);
             });

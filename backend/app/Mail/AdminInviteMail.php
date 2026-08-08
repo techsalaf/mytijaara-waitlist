@@ -29,10 +29,17 @@ class AdminInviteMail extends Mailable
     {
         $site = rtrim((string) config('app.frontend_url', config('app.url')), '/');
 
+        // Fetch logo from branding settings
+        $branding = \App\Models\Setting::where('group', 'branding')->first();
+        $logoUrl = $branding?->data['logoUrl'] ?? null;
+        $siteName = $branding?->data['siteName'] ?? 'MyTijaara';
+
         return new Content(view: 'mail.admin-invite', with: [
             'name' => $this->user->name,
             'role' => $this->user->roles->first()?->label ?: 'Team member',
             'acceptUrl' => $site.'/auth/reset-password?token='.$this->token.'&email='.urlencode($this->user->email),
+            'logoUrl' => $logoUrl,
+            'siteName' => $siteName,
         ]);
     }
 }

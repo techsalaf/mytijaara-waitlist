@@ -375,7 +375,7 @@ function WorkspaceResetCard() {
             <div>
               <div className="text-sm font-semibold text-destructive">Reset workspace</div>
               <div className="text-xs text-muted-foreground">
-                Deletes all waitlist users, campaigns, referrals, and analytics. Cannot be undone.
+                Deletes all waitlist users, campaigns, referrals, analytics, and notifications. Cannot be undone.
               </div>
             </div>
           </div>
@@ -406,6 +406,7 @@ function WorkspaceResetCard() {
                 <li>All referrals</li>
                 <li>All campaigns and email events</li>
                 <li>All analytics visits and clicks</li>
+                <li>All notifications</li>
               </ul>
               <p className="mt-3 font-semibold text-destructive">
                 This action cannot be undone. Settings, roles, users, CMS, and media will remain.

@@ -43,9 +43,13 @@ class WaitlistWelcomeMail extends Mailable
         $site = rtrim((string) config('app.frontend_url', config('app.url')), '/');
         $api  = rtrim((string) config('app.url'), '/');
 
-        // Fetch WhatsApp channel URL from integrations settings
-        $whatsappChannelUrl = \App\Models\Setting::where('group', 'integrations')
-            ->first()?->data['whatsappChannelUrl'] ?? null;
+        // Fetch WhatsApp channel URL and logo from settings
+        $integrations = \App\Models\Setting::where('group', 'integrations')->first();
+        $branding = \App\Models\Setting::where('group', 'branding')->first();
+
+        $whatsappChannelUrl = $integrations?->data['whatsappChannelUrl'] ?? null;
+        $logoUrl = $branding?->data['logoUrl'] ?? null;
+        $siteName = $branding?->data['siteName'] ?? 'MyTijaara';
 
         return new Content(view: 'mail.waitlist-welcome', with: [
             'name'           => $this->entry->name,
@@ -57,6 +61,8 @@ class WaitlistWelcomeMail extends Mailable
                 : null,
             'unsubscribeUrl' => $site.'/unsubscribe?email='.urlencode($this->entry->email),
             'whatsappChannelUrl' => $whatsappChannelUrl,
+            'logoUrl'        => $logoUrl,
+            'siteName'       => $siteName,
         ]);
     }
 }
