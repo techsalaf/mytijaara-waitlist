@@ -12,6 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAuditLogsRouteImport } from './routes/admin.audit-logs'
@@ -80,6 +83,21 @@ const AdminRoute = AdminRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -360,6 +378,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/cookies': typeof CookiesRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-logs': typeof AdminAuditLogsRoute
   '/admin/cms': typeof AdminCmsRouteWithChildren
@@ -418,6 +439,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/cookies': typeof CookiesRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-logs': typeof AdminAuditLogsRoute
   '/admin/media': typeof AdminMediaRoute
@@ -474,6 +498,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/cookies': typeof CookiesRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-logs': typeof AdminAuditLogsRoute
   '/admin/cms': typeof AdminCmsRouteWithChildren
@@ -535,6 +562,9 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/cookies'
+    | '/privacy'
+    | '/terms'
     | '/admin/analytics'
     | '/admin/audit-logs'
     | '/admin/cms'
@@ -593,6 +623,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/cookies'
+    | '/privacy'
+    | '/terms'
     | '/admin/analytics'
     | '/admin/audit-logs'
     | '/admin/media'
@@ -648,6 +681,9 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/cookies'
+    | '/privacy'
+    | '/terms'
     | '/admin/analytics'
     | '/admin/audit-logs'
     | '/admin/cms'
@@ -708,6 +744,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
+  CookiesRoute: typeof CookiesRoute
+  PrivacyRoute: typeof PrivacyRoute
+  TermsRoute: typeof TermsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -731,6 +770,27 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -1302,6 +1362,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
+  CookiesRoute: CookiesRoute,
+  PrivacyRoute: PrivacyRoute,
+  TermsRoute: TermsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

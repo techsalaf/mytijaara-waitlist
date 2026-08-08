@@ -20,6 +20,9 @@ import {
   Menu,
   Sparkles,
   ExternalLink,
+  Sun,
+  Moon,
+  Monitor,
 } from "lucide-react";
 import { getSession, signOut, type AdminSession } from "@/lib/auth";
 import { notificationsApi, type Notification, waitlistApi } from "@/lib/api";
@@ -37,6 +40,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { CommandPalette } from "./command-palette";
 import { AdminSkeleton } from "./admin-skeleton";
 import { NavProgress } from "./nav-progress";
+import { getStoredTheme, setTheme, type Theme } from "@/lib/theme";
 
 import { cn } from "@/lib/utils";
 
@@ -92,11 +96,13 @@ export function AdminShell() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [waitlistCount, setWaitlistCount] = useState<number | null>(null);
+  const [theme, setThemeState] = useState<Theme>(() => getStoredTheme());
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
     setSession(getSession());
+    setThemeState(getStoredTheme());
     void notificationsApi.list().then((response) => setNotifications(response.data));
     void waitlistApi.count().then((r) => setWaitlistCount(r.data.total ?? 0)).catch(() => setWaitlistCount(null));
   }, []);
@@ -130,6 +136,11 @@ export function AdminShell() {
   const handleSignOut = () => {
     signOut();
     navigate({ to: "/auth/login" });
+  };
+
+  const handleTheme = (t: Theme) => {
+    setTheme(t);
+    setThemeState(t);
   };
 
   const unreadCount = notifications.filter((n) => n.unread).length;
@@ -204,6 +215,32 @@ export function AdminShell() {
                 <span className="sr-only">Preview site</span>
               </a>
             </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" title="Toggle theme">
+                  {theme === "dark" ? (
+                    <Moon className="h-5 w-5" />
+                  ) : theme === "light" ? (
+                    <Sun className="h-5 w-5" />
+                  ) : (
+                    <Monitor className="h-5 w-5" />
+                  )}
+                  <span className="sr-only">Toggle theme</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleTheme("light")}>
+                  <Sun className="mr-2 h-4 w-4" /> Light
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleTheme("dark")}>
+                  <Moon className="mr-2 h-4 w-4" /> Dark
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleTheme("system")}>
+                  <Monitor className="mr-2 h-4 w-4" /> System
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

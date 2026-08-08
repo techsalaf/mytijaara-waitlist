@@ -2,6 +2,7 @@ import { ArrowRight, Download } from "lucide-react";
 
 import { useLaunch } from "./launch-state-provider";
 import type { LaunchCta } from "@/lib/launch/config";
+import { trackEvent } from "@/lib/analytics/track";
 
 /**
  * The launch-aware primary call to action.
@@ -23,10 +24,14 @@ export function usePrimaryCta(): LaunchCta & { download: boolean } {
 export function LaunchCTA({
   variant = "primary",
   cta,
+  label: labelOverride,
+  trackLabel,
   className = "",
 }: {
   variant?: "primary" | "secondary" | "gold";
   cta: LaunchCta & { download?: boolean };
+  label?: string;
+  trackLabel?: string;
   className?: string;
 }) {
   if (cta.hidden) return null;
@@ -42,10 +47,15 @@ export function LaunchCTA({
   }[variant];
 
   const Icon = cta.download ? Download : ArrowRight;
+  const displayLabel = labelOverride ?? cta.label;
 
   return (
-    <a href={cta.href} className={`${base} ${styles} ${className}`}>
-      {cta.label}
+    <a
+      href={cta.href}
+      className={`${base} ${styles} ${className}`}
+      onClick={() => trackEvent("cta_click", { label: trackLabel ?? displayLabel, href: cta.href })}
+    >
+      {displayLabel}
       <Icon className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
     </a>
   );

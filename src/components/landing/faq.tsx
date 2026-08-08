@@ -3,6 +3,7 @@ import { ChevronDown } from "lucide-react";
 
 import { Reveal } from "./reveal";
 import { useFaqs, useCmsData } from "@/lib/cms-context";
+import { trackEvent } from "@/lib/analytics/track";
 
 const HARDCODED_FAQS = [
   { q: "What is MyTijaara?", a: "MyTijaara is one app that lets you order food, buy groceries and medicine, book artisans, send parcels, rent cars and shop from local businesses — all in Nigeria." },
@@ -48,7 +49,11 @@ export function FAQ() {
             return (
               <div key={f.q}>
                 <button
-                  onClick={() => setOpen(isOpen ? null : i)}
+                  onClick={() => {
+                    const next = isOpen ? null : i;
+                    setOpen(next);
+                    if (next !== null) trackEvent("faq_open", { question: f.q });
+                  }}
                   aria-expanded={isOpen}
                   className="flex w-full cursor-pointer items-center justify-between gap-4 px-6 py-5 text-left transition-colors hover:bg-primary-soft/40 sm:px-8"
                 >
@@ -59,11 +64,15 @@ export function FAQ() {
                     }`}
                   />
                 </button>
-                {isOpen && (
-                  <div className="px-6 pb-6 text-sm leading-relaxed text-muted-foreground sm:px-8 sm:text-base">
-                    {f.a}
+                <div
+                  className={`grid overflow-hidden transition-all duration-200 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
+                >
+                  <div className="min-h-0 overflow-hidden">
+                    <div className="px-6 pb-6 text-sm leading-relaxed text-muted-foreground sm:px-8 sm:text-base">
+                      {f.a}
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
             );
           })}

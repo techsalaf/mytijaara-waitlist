@@ -3,6 +3,7 @@ import { ArrowRight, Check, Sparkles } from "lucide-react";
 import { Reveal } from "./reveal";
 import { usePrimaryCta } from "@/components/launch/launch-cta";
 import { useCmsData } from "@/lib/cms-context";
+import { trackEvent } from "@/lib/analytics/track";
 
 type PartnersCmsData = {
   badge?: string;
@@ -118,6 +119,7 @@ export function Partners() {
                   </ul>
                   <a
                     href={primary.href}
+                    onClick={() => trackEvent("cta_click", { label: p.cta, location: "partners", tag: p.tag })}
                     className="mt-8 inline-flex items-center justify-center gap-2 self-start rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-soft transition-all hover:scale-[1.03] hover:shadow-elegant"
                   >
                     {primary.download ? "Download App" : p.cta}

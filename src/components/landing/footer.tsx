@@ -38,9 +38,9 @@ const DEFAULT_FOOTER: FooterCmsData = {
       links: [
         { label: "About", href: "#top" },
         { label: "Careers", href: "mailto:careers@mytijaara.com" },
-        { label: "Privacy policy", href: "#faq" },
-        { label: "Terms of service", href: "#faq" },
-        { label: "Cookie policy", href: "#faq" },
+        { label: "Privacy policy", href: "/privacy" },
+        { label: "Terms of service", href: "/terms" },
+        { label: "Cookie policy", href: "/cookies" },
       ],
     },
   ],
@@ -208,9 +208,9 @@ export function Footer() {
           </p>
           <div className="flex flex-wrap gap-x-4 gap-y-1">
             {[
-              { label: "Privacy", href: "#faq" },
-              { label: "Terms", href: "#faq" },
-              { label: "Cookies", href: "#faq" },
+              { label: "Privacy", href: "/privacy" },
+              { label: "Terms", href: "/terms" },
+              { label: "Cookies", href: "/cookies" },
               ...(supportEmail
                 ? [{ label: "Support", href: `mailto:${supportEmail}` }]
                 : [{ label: "Support", href: "mailto:support@mytijaara.com" }]),

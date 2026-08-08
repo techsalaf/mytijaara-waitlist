@@ -5,6 +5,7 @@ import { Logo } from "./logo";
 import { usePrimaryCta } from "@/components/launch/launch-cta";
 import { LaunchTicker } from "@/components/launch/launch-ticker";
 import { useCmsData } from "@/lib/cms-context";
+import { trackEvent } from "@/lib/analytics/track";
 
 type NavLink = { href: string; label: string };
 type NavCmsData = { links?: NavLink[] };
@@ -68,6 +69,7 @@ export function Nav() {
           <div className="hidden items-center gap-3 md:flex">
             <a
               href={cta.href}
+              onClick={() => trackEvent("cta_click", { label: cta.label, location: "nav" })}
               className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-soft transition-transform hover:scale-[1.03]"
             >
               {cta.label}
@@ -97,7 +99,7 @@ export function Nav() {
               ))}
               <a
                 href={cta.href}
-                onClick={() => setOpen(false)}
+                onClick={() => { setOpen(false); trackEvent("cta_click", { label: cta.label, location: "nav_mobile" }); }}
                 className="mt-2 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground"
               >
                 {cta.label} <CtaIcon className="h-4 w-4" />

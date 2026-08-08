@@ -17,6 +17,7 @@ import { usePrimaryCta } from "@/components/launch/launch-cta";
 import { useLaunch } from "@/components/launch/launch-state-provider";
 import { useCmsData } from "@/lib/cms-context";
 import heroImg from "@/assets/hero-illustration.png";
+import { trackEvent } from "@/lib/analytics/track";
 
 type HeroService = { icon: string; label: string };
 
@@ -130,6 +131,7 @@ export function Hero() {
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <a
                 href={cta.href}
+                onClick={() => trackEvent("cta_click", { label: cta.label, location: "hero_primary" })}
                 className="group inline-flex cursor-pointer items-center gap-2 rounded-full bg-primary px-7 py-4 text-base font-semibold text-primary-foreground shadow-elegant transition-all hover:scale-[1.02] hover:shadow-glow"
               >
                 {cta.label}
@@ -137,6 +139,7 @@ export function Hero() {
               </a>
               <a
                 href="#how"
+                onClick={() => trackEvent("cta_click", { label: secondaryCtaLabel, location: "hero_secondary" })}
                 className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-card px-7 py-4 text-base font-semibold text-foreground transition-colors hover:bg-primary-soft"
               >
                 {secondaryCtaLabel}
