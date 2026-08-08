@@ -199,12 +199,19 @@ class WaitlistController extends Controller
         ]);
 
         // Soft-deleted rows still hold their email on the unique index, so check
-        // trashed rows too: otherwise the insert dies on a duplicate key with a
-        // 500 instead of this 422.
-        if (WaitlistEntry::withTrashed()->where('email', $data['email'])->exists()) {
-            throw ValidationException::withMessages([
-                'email' => ['This email is already on the waitlist.'],
-            ]);
+        // trashed rows too. If a trashed entry exists, force-delete it to allow
+        // re-signup. If a live (non-deleted) entry exists, block normally.
+        $existing = WaitlistEntry::withTrashed()->where('email', $data['email'])->first();
+        if ($existing) {
+            if ($existing->trashed()) {
+                // Force-delete the soft-deleted entry so the email can be reused.
+                $existing->forceDelete();
+            } else {
+                // A live entry exists — block the signup.
+                throw ValidationException::withMessages([
+                    'email' => ['This email is already on the waitlist.'],
+                ]);
+            }
         }
 
         $entry = DB::transaction(function () use ($data, $request) {

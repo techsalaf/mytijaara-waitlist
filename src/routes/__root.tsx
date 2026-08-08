@@ -127,8 +127,11 @@ function RootComponent() {
   const [integrations, setIntegrations] = useState<{ googleAnalyticsId?: string; metaPixelId?: string }>({});
 
   useEffect(() => {
-    settingsApi.get<{ googleAnalyticsId?: string; metaPixelId?: string }>("integrations")
-      .then(res => setIntegrations(res.data))
+    settingsApi.public<{ googleAnalyticsId?: string; metaPixelId?: string }>()
+      .then(res => setIntegrations({
+        googleAnalyticsId: res.data.googleAnalyticsId,
+        metaPixelId: res.data.metaPixelId,
+      }))
       .catch(() => {}); // fail silently — analytics is non-critical
   }, []);
 

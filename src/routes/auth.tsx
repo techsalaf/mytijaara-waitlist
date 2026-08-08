@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, Link } from "@tanstack/react-router";
 import { Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Sign in — MyTijaara Admin" }, { name: "robots", content: "noindex" }] }),
@@ -7,6 +8,15 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthLayout() {
+  const [settings, setSettings] = useState<{ logoUrl?: string; siteName?: string }>({});
+
+  useEffect(() => {
+    fetch("/api/v1/settings/public")
+      .then(res => res.json())
+      .then(data => setSettings(data.data))
+      .catch(() => {}); // fail silently — logo is non-critical
+  }, []);
+
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="relative hidden overflow-hidden bg-primary-gradient lg:block">
@@ -16,11 +26,15 @@ function AuthLayout() {
         }} />
         <div className="relative flex h-full flex-col justify-between p-12 text-primary-foreground">
           <Link to="/" className="flex items-center gap-2">
-            <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary-foreground/10 backdrop-blur">
-              <Sparkles className="h-5 w-5" />
-            </div>
+            {settings.logoUrl ? (
+              <img src={settings.logoUrl} alt="Logo" className="h-10 w-10 rounded-xl object-cover" />
+            ) : (
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary-foreground/10 backdrop-blur">
+                <Sparkles className="h-5 w-5" />
+              </div>
+            )}
             <div>
-              <div className="text-sm font-bold">MyTijaara</div>
+              <div className="text-sm font-bold">{settings.siteName || "MyTijaara"}</div>
               <div className="text-[10px] font-medium uppercase tracking-widest text-gold">Admin</div>
             </div>
           </Link>
@@ -30,11 +44,11 @@ function AuthLayout() {
             </blockquote>
             <div className="mt-4 flex items-center gap-3">
               <div className="grid h-10 w-10 place-items-center rounded-full bg-gold text-sm font-bold text-primary">
-                AO
+                AR
               </div>
               <div>
-                <div className="text-sm font-medium">Adaeze Okafor</div>
-                <div className="text-xs text-primary-foreground/70">Head of Product, MyTijaara</div>
+                <div className="text-sm font-medium">Amuda Rasheed</div>
+                <div className="text-xs text-primary-foreground/70">Founder, MyTijaara</div>
               </div>
             </div>
           </div>

@@ -136,7 +136,7 @@ export function AiAssistant() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 pointer-events-none">
       {/* Chat panel */}
       <div
         role="dialog"
@@ -144,10 +144,10 @@ export function AiAssistant() {
         aria-modal="false"
         aria-hidden={!isOpen}
         className={[
-          "w-[340px] max-w-[calc(100vw-3rem)] overflow-hidden rounded-2xl border border-border bg-card shadow-elegant",
+          "w-[340px] max-w-[calc(100vw-3rem)] overflow-hidden rounded-2xl border border-border bg-card shadow-elegant pointer-events-auto",
           "transition-all duration-200 ease-out origin-bottom-right",
           isOpen
-            ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
+            ? "opacity-100 scale-100 translate-y-0"
             : "opacity-0 scale-90 translate-y-4 pointer-events-none",
         ].join(" ")}
       >
@@ -230,7 +230,7 @@ export function AiAssistant() {
         aria-label={isOpen ? "Close CamilaAI assistant" : "Chat with CamilaAI, our AI assistant"}
         aria-expanded={isOpen}
         aria-haspopup="dialog"
-        className="relative grid h-14 w-14 cursor-pointer place-items-center rounded-full bg-primary text-primary-foreground shadow-glow transition-transform duration-150 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/30"
+        className="relative grid h-14 w-14 cursor-pointer place-items-center rounded-full bg-primary text-primary-foreground shadow-glow transition-transform duration-150 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/30 pointer-events-auto"
       >
         {/* Icon swap via opacity transition */}
         <span

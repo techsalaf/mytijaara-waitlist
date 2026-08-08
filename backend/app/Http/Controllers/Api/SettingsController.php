@@ -77,6 +77,9 @@ class SettingsController extends Controller
                 // App store URLs are public — exposed for footer badges.
                 'iosAppUrl'     => $it['iosAppUrl']     ?? '',
                 'androidAppUrl' => $it['androidAppUrl'] ?? '',
+                // Analytics IDs are public — scripts run client-side anyway.
+                'googleAnalyticsId' => $it['googleAnalyticsId'] ?? '',
+                'metaPixelId'       => $it['metaPixelId']       ?? '',
             ],
         ]);
     }

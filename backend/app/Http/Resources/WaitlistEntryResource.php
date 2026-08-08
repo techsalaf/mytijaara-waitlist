@@ -27,7 +27,8 @@ class WaitlistEntryResource extends JsonResource
             'notes' => $this->notes,
             'joinedAt' => optional($this->created_at)->toIso8601String(),
             'lastActive' => optional($this->last_active_at ?? $this->created_at)->toIso8601String(),
-            'position' => (int) $this->position,
+            // Position shown to user excludes soft-deleted entries — counts only live waitlist.
+            'position' => \App\Models\WaitlistEntry::where('position', '<=', $this->position)->count(),
         ];
     }
 }
