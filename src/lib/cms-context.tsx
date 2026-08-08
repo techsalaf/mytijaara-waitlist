@@ -30,6 +30,8 @@ const DEFAULT_BRANDING: PublicBranding = {
     youtube: "https://youtube.com/@mytijaara",
     whatsapp: "https://whatsapp.com/channel/0029VbE63oZGOj9vfKqWbQ1D",
   },
+  iosAppUrl: "",
+  androidAppUrl: "",
 };
 
 type CmsContextValue = {

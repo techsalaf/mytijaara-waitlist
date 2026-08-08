@@ -3,7 +3,7 @@ import { SettingsForm } from "@/components/admin/settings-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Activity, BarChart3, KeyRound, MousePointerClick, MessageCircle } from "lucide-react";
+import { Activity, BarChart3, KeyRound, MousePointerClick, MessageCircle, Smartphone } from "lucide-react";
 import { useSettingsGroup } from "@/lib/admin/use-settings-group";
 
 export const Route = createFileRoute("/admin/settings/integrations")({
@@ -25,6 +25,8 @@ const DEFAULTS = {
   metaPixelId: "",
   slackWebhookUrl: "",
   whatsappChannelUrl: "",
+  iosAppUrl: "",
+  androidAppUrl: "",
 };
 
 const FIELDS = [
@@ -62,6 +64,24 @@ const FIELDS = [
     label: "Channel invite URL",
     placeholder: "https://whatsapp.com/channel/…",
     hint: "Included in the waitlist welcome email. Users can join your official WhatsApp channel.",
+    secret: false,
+  },
+  {
+    key: "iosAppUrl" as const,
+    icon: Smartphone,
+    name: "iOS App Store",
+    label: "App Store URL",
+    placeholder: "https://apps.apple.com/app/…",
+    hint: "Link to your iOS app. Footer badge becomes active when filled.",
+    secret: false,
+  },
+  {
+    key: "androidAppUrl" as const,
+    icon: Smartphone,
+    name: "Android Google Play",
+    label: "Google Play URL",
+    placeholder: "https://play.google.com/store/apps/details?id=…",
+    hint: "Link to your Android app. Footer badge becomes active when filled.",
     secret: false,
   },
   {

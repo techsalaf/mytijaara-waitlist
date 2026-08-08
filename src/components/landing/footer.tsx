@@ -103,7 +103,7 @@ export function Footer() {
 
   const footerCms = useCmsData("footer", DEFAULT_FOOTER);
   // Social URLs and contact emails come from the Settings panel (branding), not cms_sections.
-  const { social, supportEmail, contactEmail } = useBranding();
+  const { social, supportEmail, contactEmail, iosAppUrl, androidAppUrl } = useBranding();
 
   const tagline = footerCms.tagline ?? DEFAULT_FOOTER.tagline;
   const columns =
@@ -152,10 +152,12 @@ export function Footer() {
                 Get the app
               </p>
               <div className="flex flex-col gap-2 sm:flex-row lg:flex-col xl:flex-row">
-                <AppStoreBadge store="ios" />
-                <AppStoreBadge store="android" />
+                <AppStoreBadge store="ios" href={iosAppUrl || undefined} />
+                <AppStoreBadge store="android" href={androidAppUrl || undefined} />
               </div>
-              <p className="text-[11px] text-muted-foreground">Coming soon to both stores.</p>
+              {!iosAppUrl && !androidAppUrl && (
+                <p className="text-[11px] text-muted-foreground">Coming soon to both stores.</p>
+              )}
             </div>
           </div>
 

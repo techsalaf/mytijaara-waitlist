@@ -86,6 +86,9 @@ export type PublicBranding = {
   surfaceColor: string;
   /** Social profile URLs. Only links with a non-empty value are rendered. */
   social: PublicSocial;
+  /** App store URLs. Footer badges become clickable when filled. */
+  iosAppUrl: string;
+  androidAppUrl: string;
 };
 
 export const settingsApi = {

@@ -39,10 +39,12 @@ class SettingsController extends Controller
         $company = Setting::firstOrCreate(['group' => 'company'], ['data' => []]);
         $branding = Setting::firstOrCreate(['group' => 'branding'], ['data' => []]);
         $social   = Setting::firstOrCreate(['group' => 'social'],   ['data' => []]);
+        $integrations = Setting::firstOrCreate(['group' => 'integrations'], ['data' => []]);
 
         $co = $this->withDefaults('company',  is_array($company->data)  ? $company->data  : []);
         $br = $this->withDefaults('branding', is_array($branding->data) ? $branding->data : []);
         $so = $this->withDefaults('social',   is_array($social->data)   ? $social->data   : []);
+        $it = $this->withDefaults('integrations', is_array($integrations->data) ? $integrations->data : []);
 
         return response()->json([
             'data' => [
@@ -72,6 +74,9 @@ class SettingsController extends Controller
                     'youtube'   => $so['youtube']   ?? '',
                     'whatsapp'  => $so['whatsapp']  ?? '',
                 ],
+                // App store URLs are public — exposed for footer badges.
+                'iosAppUrl'     => $it['iosAppUrl']     ?? '',
+                'androidAppUrl' => $it['androidAppUrl'] ?? '',
             ],
         ]);
     }
@@ -370,6 +375,8 @@ class SettingsController extends Controller
                 'metaPixelId' => ['sometimes', 'nullable', 'string', 'max:64'],
                 'slackWebhookUrl' => ['sometimes', 'nullable', 'string', 'max:2048'],
                 'whatsappChannelUrl' => ['sometimes', 'nullable', 'string', 'max:512'],
+                'iosAppUrl' => ['sometimes', 'nullable', 'string', 'max:512'],
+                'androidAppUrl' => ['sometimes', 'nullable', 'string', 'max:512'],
             ],
             'system' => [
                 'maintenanceMode' => ['sometimes', 'boolean'],
@@ -455,6 +462,7 @@ class SettingsController extends Controller
             'integrations' => [
                 'resendApiKey' => '', 'googleAnalyticsId' => '',
                 'metaPixelId' => '', 'slackWebhookUrl' => '', 'whatsappChannelUrl' => '',
+                'iosAppUrl' => '', 'androidAppUrl' => '',
             ],
             'system' => [
                 'maintenanceMode' => false,

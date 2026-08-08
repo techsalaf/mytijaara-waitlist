@@ -78,6 +78,8 @@ export const Route = createFileRoute("/")({
         youtube: "",
         whatsapp: "",
       },
+      iosAppUrl: "",
+      androidAppUrl: "",
     };
 
     return {
