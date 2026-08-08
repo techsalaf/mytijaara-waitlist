@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Share2, X } from "lucide-react";
 import { useBranding } from "@/lib/cms-context";
 import { SOCIAL_ICON_MAP, SOCIAL_PLATFORMS } from "./social-icons";
@@ -11,6 +11,18 @@ import { SOCIAL_ICON_MAP, SOCIAL_PLATFORMS } from "./social-icons";
 export function SocialFloat() {
   const [open, setOpen] = useState(false);
   const { social } = useBranding();
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
 
   // Build the ordered list, filtering out any platforms with no URL.
   const links = SOCIAL_PLATFORMS.map((id) => ({ id, href: social[id] })).filter(
@@ -18,7 +30,7 @@ export function SocialFloat() {
   );
 
   return (
-    <div className="fixed bottom-6 left-6 z-40 flex flex-col-reverse items-start gap-2">
+    <div ref={ref} className="fixed bottom-6 left-6 z-40 flex flex-col-reverse items-start gap-2">
       {/* Social links list — shown above the toggle button */}
       <div
         className="mb-2 flex flex-col gap-2"

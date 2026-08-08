@@ -70,4 +70,7 @@ export const waitlistApi = {
       method: "POST",
       body: { ids, ...patch },
     }),
+  /** POST /waitlist/:id/email — resend welcome email to one entry. */
+  email: (id: string) =>
+    apiCall<{ sent: boolean }>(`/waitlist/${id}/email`, { method: "POST" }),
 };

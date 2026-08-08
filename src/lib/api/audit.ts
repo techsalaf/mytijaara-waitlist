@@ -34,4 +34,6 @@ export const auditApi = {
   actions: () => apiCall<string[]>("/audit-logs/actions"),
   /** Distinct actor names, for the user dropdown. */
   actors: () => apiCall<string[]>("/audit-logs/actors"),
+  /** DELETE /audit-logs — purge all log entries. Requires settings.edit-general. */
+  clear: () => apiCall<{ cleared: number }>("/audit-logs", { method: "DELETE" }),
 };

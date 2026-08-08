@@ -659,6 +659,20 @@ function RowMenu({
   onView: (u: WaitlistUser) => void;
   onDelete: (id: string) => void;
 }) {
+  const [emailing, setEmailing] = useState(false);
+
+  const sendEmail = async () => {
+    setEmailing(true);
+    try {
+      await waitlistApi.email(user.id);
+      toast.success(`Welcome email sent to ${user.email}`);
+    } catch {
+      toast.error("Failed to send email — check SMTP settings");
+    } finally {
+      setEmailing(false);
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -671,11 +685,11 @@ function RowMenu({
         <DropdownMenuItem onClick={() => onView(user)}>
           <Eye className="mr-2 h-3.5 w-3.5" /> View
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => toast.success("Edit dialog would open")}>
+        <DropdownMenuItem disabled>
           <Pencil className="mr-2 h-3.5 w-3.5" /> Edit
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => toast.success(`Emailed ${user.email}`)}>
-          Email user
+        <DropdownMenuItem onClick={() => void sendEmail()} disabled={emailing}>
+          {emailing ? "Sending…" : "Email user"}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="text-red-600" onClick={() => onDelete(user.id)}>

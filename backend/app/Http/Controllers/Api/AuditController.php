@@ -98,4 +98,13 @@ class AuditController extends Controller
 
         return response()->json(['data' => $actors]);
     }
+
+    /** DELETE /audit-logs — purge all entries. Requires settings.edit-general. */
+    public function clear(): JsonResponse
+    {
+        $count = AuditLog::query()->count();
+        AuditLog::query()->delete();
+
+        return response()->json(['data' => ['cleared' => $count]]);
+    }
 }

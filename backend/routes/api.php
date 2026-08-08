@@ -108,6 +108,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/waitlist/export', [WaitlistController::class, 'export'])->middleware('permission:waitlist.export');
     Route::get('/waitlist/{id}', [WaitlistController::class, 'show'])->middleware('permission:waitlist.view');
     Route::patch('/waitlist/{id}', [WaitlistController::class, 'update'])->middleware('permission:waitlist.edit');
+    Route::post('/waitlist/{id}/email', [WaitlistController::class, 'resendEmail'])->middleware('permission:waitlist.edit');
     Route::post('/waitlist/bulk-delete', [WaitlistController::class, 'bulkDelete'])->middleware('permission:waitlist.bulk-actions');
     Route::post('/waitlist/bulk-update', [WaitlistController::class, 'bulkUpdate'])->middleware('permission:waitlist.bulk-actions');
     Route::post('/waitlist/restore', [WaitlistController::class, 'restore'])->middleware('permission:waitlist.bulk-actions');
@@ -200,6 +201,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/audit-logs/actions', [AuditController::class, 'actions'])->middleware('permission:users.view');
     Route::get('/audit-logs/actors', [AuditController::class, 'actors'])->middleware('permission:users.view');
     Route::get('/audit-logs', [AuditController::class, 'index'])->middleware('permission:users.view');
+    Route::delete('/audit-logs', [AuditController::class, 'clear'])->middleware('permission:settings.edit-general');
 
     // System health — live probes, gated behind settings read.
     Route::get('/system/health/history', [HealthController::class, 'history'])->middleware('permission:settings.view');

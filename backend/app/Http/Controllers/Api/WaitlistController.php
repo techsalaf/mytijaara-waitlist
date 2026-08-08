@@ -397,6 +397,26 @@ class WaitlistController extends Controller
         return response()->json(['data' => ['updated' => $updated]]);
     }
 
+    /** POST /waitlist/:id/email — resend the welcome mail for one entry. */
+    public function resendEmail(string $id): JsonResponse
+    {
+        $entry = WaitlistEntry::where('public_id', $id)->firstOrFail();
+
+        try {
+            SmtpConfig::apply();
+            Mail::to($entry->email)->send(new WaitlistWelcomeMail($entry));
+        } catch (\Throwable $e) {
+            Log::warning('waitlist resend mail failed', [
+                'entry' => $entry->public_id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json(['error' => 'Mail could not be sent. Check SMTP settings.'], 422);
+        }
+
+        return response()->json(['data' => ['sent' => true]]);
+    }
+
     /** GET /waitlist/export — CSV of exactly the current filter set. */
     public function export(Request $request): StreamedResponse
     {

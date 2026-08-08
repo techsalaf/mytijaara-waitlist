@@ -21,6 +21,7 @@ import {
   Search,
   Server,
   Smartphone,
+  Trash2,
 } from "lucide-react";
 import { toCsv, downloadCsv } from "@/lib/csv";
 import { toast } from "sonner";
@@ -50,6 +51,7 @@ function AuditLogs() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const [clearing, setClearing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const params = useCallback(
@@ -135,26 +137,60 @@ function AuditLogs() {
     }
   };
 
+  const clearLogs = async () => {
+    if (!window.confirm("Permanently delete all audit log entries? This cannot be undone.")) return;
+    setClearing(true);
+    try {
+      const result = await auditApi.clear();
+      toast.success(`Cleared ${result.data.cleared} audit log entries`);
+      setEntries([]);
+      setTotal(0);
+      setLastPage(1);
+      setPage(1);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to clear logs");
+    } finally {
+      setClearing(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Audit Logs"
         description="Every important action across your admin panel."
         actions={
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => void exportCsv()}
-            disabled={exporting || total === 0}
-            title={total === 0 ? "No entries to export" : undefined}
-          >
-            {exporting ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Download className="mr-2 h-4 w-4" />
-            )}
-            Export
-          </Button>
+          <>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => void exportCsv()}
+              disabled={exporting || total === 0}
+              title={total === 0 ? "No entries to export" : undefined}
+            >
+              {exporting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="mr-2 h-4 w-4" />
+              )}
+              Export
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+              onClick={() => void clearLogs()}
+              disabled={clearing || total === 0}
+              title={total === 0 ? "No entries to clear" : "Permanently delete all log entries"}
+            >
+              {clearing ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="mr-2 h-4 w-4" />
+              )}
+              Clear Logs
+            </Button>
+          </>
         }
       />
       <SectionCard>
@@ -194,7 +230,7 @@ function AuditLogs() {
               ))}
             </SelectContent>
           </Select>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 gap-2">
             <Input
               type="date"
               aria-label="From date"
