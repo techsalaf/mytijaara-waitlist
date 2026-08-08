@@ -28,6 +28,18 @@ export type SystemHealth = {
     writable: boolean;
     freeBytes: number | null;
   };
+  php: {
+    version: string;
+    memoryLimit: string;
+    memoryPeakUsage: number;
+    extensions: string[];
+  };
+  server: {
+    os: string;
+    webServer: string;
+    laravelVersion: string;
+    environment: string;
+  };
 };
 
 /** One recorded sample. Written by the probe, read back for the latency chart. */

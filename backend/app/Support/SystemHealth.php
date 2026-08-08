@@ -55,6 +55,8 @@ class SystemHealth
         $errors = self::errorCounts();
         $queue = self::queueDepth();
         $storage = self::storageFacts();
+        $php = self::phpFacts();
+        $server = self::serverFacts();
         $status = self::worst(array_column($checks, 'status'));
 
         if ($record) {
@@ -69,6 +71,8 @@ class SystemHealth
             'queue' => $queue,
             'errors' => $errors,
             'storage' => $storage,
+            'php' => $php,
+            'server' => $server,
         ];
     }
 
@@ -263,6 +267,39 @@ class SystemHealth
         return [
             'writable' => is_string($root) && is_dir($root) && is_writable($root),
             'freeBytes' => $free,
+        ];
+    }
+
+    /**
+     * PHP runtime facts: version, memory limit, peak usage, extensions.
+     *
+     * @return array{version:string,memoryLimit:string,memoryPeakUsage:int,extensions:array<int,string>}
+     */
+    private static function phpFacts(): array
+    {
+        $critical = ['pdo', 'mbstring', 'openssl', 'json', 'curl', 'gd'];
+        $loaded = array_values(array_filter($critical, 'extension_loaded'));
+
+        return [
+            'version' => PHP_VERSION,
+            'memoryLimit' => ini_get('memory_limit') ?: 'unknown',
+            'memoryPeakUsage' => memory_get_peak_usage(true),
+            'extensions' => $loaded,
+        ];
+    }
+
+    /**
+     * Server environment facts: OS, web server software, Laravel version.
+     *
+     * @return array{os:string,webServer:string,laravelVersion:string,environment:string}
+     */
+    private static function serverFacts(): array
+    {
+        return [
+            'os' => PHP_OS,
+            'webServer' => $_SERVER['SERVER_SOFTWARE'] ?? 'unknown',
+            'laravelVersion' => app()->version(),
+            'environment' => app()->environment(),
         ];
     }
 

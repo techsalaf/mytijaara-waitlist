@@ -322,6 +322,56 @@ function HealthPage() {
           )}
         </SectionCard>
       </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <SectionCard title="PHP Runtime" description="PHP version, memory usage, and loaded extensions.">
+          <dl className="space-y-3 text-sm">
+            <div className="flex justify-between border-b border-border/40 pb-2">
+              <dt className="text-muted-foreground">Version</dt>
+              <dd className="font-mono text-xs">{health.php.version}</dd>
+            </div>
+            <div className="flex justify-between border-b border-border/40 pb-2">
+              <dt className="text-muted-foreground">Memory limit</dt>
+              <dd className="font-mono text-xs">{health.php.memoryLimit}</dd>
+            </div>
+            <div className="flex justify-between border-b border-border/40 pb-2">
+              <dt className="text-muted-foreground">Peak usage</dt>
+              <dd className="font-mono text-xs">{humanBytes(health.php.memoryPeakUsage)}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">Critical extensions</dt>
+              <dd className="text-right font-mono text-xs">
+                {health.php.extensions.length > 0 ? health.php.extensions.join(", ") : "none loaded"}
+              </dd>
+            </div>
+          </dl>
+        </SectionCard>
+
+        <SectionCard title="Server Environment" description="Operating system, web server, and Laravel version.">
+          <dl className="space-y-3 text-sm">
+            <div className="flex justify-between border-b border-border/40 pb-2">
+              <dt className="text-muted-foreground">Operating System</dt>
+              <dd className="font-mono text-xs">{health.server.os}</dd>
+            </div>
+            <div className="flex justify-between border-b border-border/40 pb-2">
+              <dt className="text-muted-foreground">Web Server</dt>
+              <dd className="font-mono text-xs">{health.server.webServer}</dd>
+            </div>
+            <div className="flex justify-between border-b border-border/40 pb-2">
+              <dt className="text-muted-foreground">Laravel</dt>
+              <dd className="font-mono text-xs">{health.server.laravelVersion}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-muted-foreground">Environment</dt>
+              <dd className="font-mono text-xs">
+                <span className={health.server.environment === "production" ? "text-emerald-600 font-semibold" : "text-gold-foreground font-semibold"}>
+                  {health.server.environment}
+                </span>
+              </dd>
+            </div>
+          </dl>
+        </SectionCard>
+      </div>
     </div>
   );
 }
