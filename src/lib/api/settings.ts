@@ -89,6 +89,9 @@ export type PublicBranding = {
   /** App store URLs. Footer badges become clickable when filled. */
   iosAppUrl: string;
   androidAppUrl: string;
+  /** Analytics IDs — public because scripts run client-side. */
+  googleAnalyticsId: string;
+  metaPixelId: string;
 };
 
 export const settingsApi = {

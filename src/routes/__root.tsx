@@ -127,7 +127,7 @@ function RootComponent() {
   const [integrations, setIntegrations] = useState<{ googleAnalyticsId?: string; metaPixelId?: string }>({});
 
   useEffect(() => {
-    settingsApi.public<{ googleAnalyticsId?: string; metaPixelId?: string }>()
+    settingsApi.publicSettings()
       .then(res => setIntegrations({
         googleAnalyticsId: res.data.googleAnalyticsId,
         metaPixelId: res.data.metaPixelId,
