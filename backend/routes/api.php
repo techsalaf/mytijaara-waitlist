@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\TemplateController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\WaitlistController;
+use App\Http\Controllers\Api\WorkspaceController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -216,4 +217,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/settings/cache/purge', [SettingsController::class, 'purgeCache'])->middleware('permission:settings.edit-general');
     Route::get('/settings/{group}', [SettingsController::class, 'show'])->middleware('permission:settings.view');
     Route::patch('/settings/{group}', [SettingsController::class, 'update'])->middleware('permission:settings.edit-general');
+
+    // Workspace reset — destructive dev operation, requires highest permission.
+    Route::post('/workspace/reset', [WorkspaceController::class, 'reset'])->middleware('permission:settings.edit-general');
 });

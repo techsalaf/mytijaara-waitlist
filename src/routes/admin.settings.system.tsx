@@ -9,8 +9,12 @@ import { Switch } from "@/components/ui/switch";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { HardDrive, Loader2, Trash2, X } from "lucide-react";
+import { HardDrive, Loader2, Trash2, X, AlertTriangle } from "lucide-react";
 import { settingsApi } from "@/lib/api/settings";
 import { useSettingsGroup, settingsError } from "@/lib/admin/use-settings-group";
 import { toast } from "sonner";
@@ -154,6 +158,7 @@ function SystemSettingsPage() {
       </SettingsForm>
 
       <CacheCard />
+      <WorkspaceResetCard />
     </div>
   );
 }
@@ -326,5 +331,102 @@ function CacheCard() {
         </Button>
       </div>
     </SectionCard>
+  );
+}
+
+/**
+ * Workspace reset — destructive dev operation that force-deletes all waitlist
+ * entries, referrals, campaigns, email events, and analytics visits.
+ * Leaves settings, roles, users, CMS, and media intact.
+ */
+function WorkspaceResetCard() {
+  const [busy, setBusy] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const reset = async () => {
+    setBusy(true);
+    try {
+      const res = await fetch("/api/v1/workspace/reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: "Workspace reset failed" }));
+        throw new Error(err.error || "Workspace reset failed");
+      }
+      toast.success("Workspace reset complete. All data cleared.");
+      setConfirmOpen(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Workspace reset failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <>
+      <SectionCard title="Danger zone">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4">
+          <div className="flex items-center gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-lg bg-destructive/10 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-destructive">Reset workspace</div>
+              <div className="text-xs text-muted-foreground">
+                Deletes all waitlist users, campaigns, referrals, and analytics. Cannot be undone.
+              </div>
+            </div>
+          </div>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => setConfirmOpen(true)}
+            disabled={busy}
+          >
+            {busy ? (
+              <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+            ) : (
+              <Trash2 className="mr-2 h-3 w-3" />
+            )}
+            {busy ? "Resetting…" : "Reset workspace"}
+          </Button>
+        </div>
+      </SectionCard>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset workspace?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete:
+              <ul className="mt-2 list-inside list-disc space-y-1 text-sm">
+                <li>All waitlist entries (including soft-deleted)</li>
+                <li>All referrals</li>
+                <li>All campaigns and email events</li>
+                <li>All analytics visits and clicks</li>
+              </ul>
+              <p className="mt-3 font-semibold text-destructive">
+                This action cannot be undone. Settings, roles, users, CMS, and media will remain.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={busy}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                void reset();
+              }}
+              disabled={busy}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {busy ? "Resetting…" : "Yes, reset workspace"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
