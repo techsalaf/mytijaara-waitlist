@@ -36,8 +36,8 @@ const DEFAULT_FOOTER: FooterCmsData = {
     {
       h: "Company",
       links: [
-        { label: "About", href: "#top" },
-        { label: "Careers", href: "mailto:careers@mytijaara.com" },
+        { label: "About", href: "/about" },
+        { label: "Careers", href: "/careers" },
         { label: "Privacy policy", href: "/privacy" },
         { label: "Terms of service", href: "/terms" },
         { label: "Cookie policy", href: "/cookies" },
