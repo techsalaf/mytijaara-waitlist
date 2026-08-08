@@ -25,6 +25,7 @@ import { AnnouncementBar } from "@/components/landing/announcement-bar";
 import { AiAssistant } from "@/components/landing/ai-assistant";
 import { ScrollToTop } from "@/components/landing/scroll-to-top";
 import { SocialFloat } from "@/components/landing/social-float";
+import { Particles } from "@/components/landing/particles";
 
 export const Route = createFileRoute("/")({
   /**
@@ -187,6 +188,7 @@ function Landing() {
         {announcement?.enabled && (
           <AnnouncementBar text={announcement.text ?? ""} href={announcement.href ?? "#waitlist"} />
         )}
+        <Particles />
         <div className="min-h-screen bg-background text-foreground">
           <Nav />
           <main>

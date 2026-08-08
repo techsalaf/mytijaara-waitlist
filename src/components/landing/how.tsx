@@ -39,10 +39,11 @@ export function How() {
             const body = s.description ?? s.body ?? "";
             return (
               <Reveal key={s.title} delay={i * 100}>
-                <div className="relative h-full rounded-3xl border border-primary-foreground/15 bg-primary-foreground/[0.06] p-7 backdrop-blur-sm">
-                  <span className="font-display text-5xl font-bold text-gold">{n}</span>
-                  <h3 className="mt-4 font-display text-xl font-bold">{s.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-primary-foreground/75">{body}</p>
+                <div className="group relative h-full rounded-3xl border border-primary-foreground/15 bg-primary-foreground/[0.06] p-7 backdrop-blur-sm transition-all duration-300 hover:-translate-y-2 hover:border-primary-foreground/30 hover:bg-primary-foreground/[0.12] hover:shadow-elegant cursor-pointer">
+                  <span className="font-display text-5xl font-bold text-gold transition-all duration-300 group-hover:scale-110 inline-block group-hover:text-gold-bright">{n}</span>
+                  <h3 className="mt-4 font-display text-xl font-bold transition-colors duration-200 group-hover:text-gold">{s.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-primary-foreground/75 transition-colors duration-200 group-hover:text-primary-foreground/90">{body}</p>
+                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-gold/0 via-gold/0 to-gold/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none" />
                 </div>
               </Reveal>
             );

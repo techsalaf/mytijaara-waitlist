@@ -63,16 +63,17 @@ export function Services() {
             const body = s.description ?? s.body ?? "";
             return (
               <Reveal key={s.title} delay={i * 40}>
-                <div className="group relative h-full rounded-3xl border border-border bg-card p-7 transition-all hover:-translate-y-1 hover:border-primary/25 hover:shadow-soft">
+                <div className="group relative h-full rounded-3xl border border-border bg-card p-7 transition-all duration-300 hover:-translate-y-2 hover:border-primary/30 hover:shadow-elegant cursor-pointer">
                   <div
-                    className={`grid h-12 w-12 place-items-center rounded-2xl ${
-                      alt ? "bg-gold/20" : "bg-primary-soft"
+                    className={`grid h-12 w-12 place-items-center rounded-2xl transition-all duration-300 group-hover:scale-110 ${
+                      alt ? "bg-gold/20 group-hover:bg-gold/30" : "bg-primary-soft group-hover:bg-primary/20"
                     }`}
                   >
-                    <Icon className={`h-6 w-6 ${alt ? "text-gold-foreground" : "text-primary"}`} />
+                    <Icon className={`h-6 w-6 transition-transform duration-300 group-hover:rotate-6 ${alt ? "text-gold-foreground" : "text-primary"}`} />
                   </div>
-                  <h3 className="mt-6 font-display text-lg font-bold text-foreground">{s.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
+                  <h3 className="mt-6 font-display text-lg font-bold text-foreground transition-colors duration-200 group-hover:text-primary">{s.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground transition-colors duration-200 group-hover:text-foreground/80">{body}</p>
+                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/0 via-primary/0 to-primary/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none" />
                 </div>
               </Reveal>
             );
