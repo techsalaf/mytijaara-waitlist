@@ -3,7 +3,7 @@ import { SettingsForm } from "@/components/admin/settings-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Activity, BarChart3, KeyRound, MousePointerClick } from "lucide-react";
+import { Activity, BarChart3, KeyRound, MousePointerClick, MessageCircle } from "lucide-react";
 import { useSettingsGroup } from "@/lib/admin/use-settings-group";
 
 export const Route = createFileRoute("/admin/settings/integrations")({
@@ -24,6 +24,7 @@ const DEFAULTS = {
   googleAnalyticsId: "",
   metaPixelId: "",
   slackWebhookUrl: "",
+  whatsappChannelUrl: "",
 };
 
 const FIELDS = [
@@ -52,6 +53,15 @@ const FIELDS = [
     label: "Incoming webhook URL",
     placeholder: "https://hooks.slack.com/services/…",
     hint: "Posts a message when someone joins the waitlist.",
+    secret: false,
+  },
+  {
+    key: "whatsappChannelUrl" as const,
+    icon: MessageCircle,
+    name: "WhatsApp Channel",
+    label: "Channel invite URL",
+    placeholder: "https://whatsapp.com/channel/…",
+    hint: "Included in the waitlist welcome email. Users can join your official WhatsApp channel.",
     secret: false,
   },
   {

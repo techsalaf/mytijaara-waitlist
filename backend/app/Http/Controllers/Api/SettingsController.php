@@ -369,6 +369,7 @@ class SettingsController extends Controller
                 'googleAnalyticsId' => ['sometimes', 'nullable', 'string', 'max:64'],
                 'metaPixelId' => ['sometimes', 'nullable', 'string', 'max:64'],
                 'slackWebhookUrl' => ['sometimes', 'nullable', 'string', 'max:2048'],
+                'whatsappChannelUrl' => ['sometimes', 'nullable', 'string', 'max:512'],
             ],
             'system' => [
                 'maintenanceMode' => ['sometimes', 'boolean'],
@@ -453,7 +454,7 @@ class SettingsController extends Controller
             ],
             'integrations' => [
                 'resendApiKey' => '', 'googleAnalyticsId' => '',
-                'metaPixelId' => '', 'slackWebhookUrl' => '',
+                'metaPixelId' => '', 'slackWebhookUrl' => '', 'whatsappChannelUrl' => '',
             ],
             'system' => [
                 'maintenanceMode' => false,

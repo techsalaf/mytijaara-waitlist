@@ -77,6 +77,25 @@
                 <a href="{{ $referralUrl }}" style="font-size:14px;color:#1f5c3a;word-break:break-all;">{{ $referralUrl }}</a>
               </p>
 
+              @if ($whatsappChannelUrl)
+                <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px;border-top:1px solid #e8e2d5;padding-top:20px;">
+                  <tr>
+                    <td>
+                      <p style="margin:0 0 10px;font-size:15px;line-height:1.6;color:#3f3f3f;">
+                        <strong>Stay in the loop</strong> — join our official WhatsApp channel for launch updates, exclusive previews, and early access offers.
+                      </p>
+                      <table role="presentation" cellpadding="0" cellspacing="0">
+                        <tr>
+                          <td style="background:#25D366;border-radius:8px;">
+                            <a href="{{ $whatsappChannelUrl }}" style="display:inline-block;padding:12px 22px;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;">Join WhatsApp Channel</a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              @endif
+
               <p style="margin:0;font-size:14px;line-height:1.6;color:#6b6b6b;">
                 See you at launch,<br>The MyTijaara team
               </p>

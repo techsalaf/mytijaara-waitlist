@@ -43,6 +43,10 @@ class WaitlistWelcomeMail extends Mailable
         $site = rtrim((string) config('app.frontend_url', config('app.url')), '/');
         $api  = rtrim((string) config('app.url'), '/');
 
+        // Fetch WhatsApp channel URL from integrations settings
+        $whatsappChannelUrl = \App\Models\Setting::where('group', 'integrations')
+            ->first()?->data['whatsappChannelUrl'] ?? null;
+
         return new Content(view: 'mail.waitlist-welcome', with: [
             'name'           => $this->entry->name,
             'role'           => $this->entry->role ?? 'customer',
@@ -52,6 +56,7 @@ class WaitlistWelcomeMail extends Mailable
                 ? $api.'/api/v1/waitlist/verify/'.$this->entry->verification_token
                 : null,
             'unsubscribeUrl' => $site.'/unsubscribe?email='.urlencode($this->entry->email),
+            'whatsappChannelUrl' => $whatsappChannelUrl,
         ]);
     }
 }
