@@ -127,6 +127,8 @@ jobs:
 
             cd "$APP"
 
+            php artisan storage:link
+
             if [ "$COMPOSER" = "true" ]; then
               echo "Running Composer..."
               php ~/composer.phar install \

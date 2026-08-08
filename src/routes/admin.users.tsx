@@ -150,8 +150,8 @@ function UsersPage() {
         }
       />
       <SectionCard>
-        <div className="mb-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="relative lg:col-span-1">
+        <div className="mb-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search name or email…"
@@ -185,21 +185,6 @@ function UsersPage() {
               ))}
             </SelectContent>
           </Select>
-          <Input
-            type="date"
-            aria-label="Joined from"
-            value={from}
-            onChange={(event) => setFrom(event.target.value)}
-          />
-        </div>
-        <div className="mb-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          <Input
-            type="date"
-            aria-label="Joined to"
-            value={to}
-            onChange={(event) => setTo(event.target.value)}
-            className="lg:col-start-4"
-          />
         </div>
 
         {loading && (
