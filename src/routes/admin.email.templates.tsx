@@ -315,36 +315,6 @@ function TemplateSheet({
               {/* Merge variables reference */}
               <MergeVarsPanel />
 
-// Intelligent HTML <-> Plain Text conversion utilities
-function htmlToPlainText(html: string): string {
-  if (!html) return "";
-  let text = html;
-  text = text.replace(/<br\s*\/?>/gi, "\n");
-  text = text.replace(/<\/p>/gi, "\n\n");
-  text = text.replace(/<\/div>/gi, "\n");
-  text = text.replace(/<\/h[1-6]>/gi, "\n\n");
-  text = text.replace(/<\/li>/gi, "\n");
-  text = text.replace(/<li[^>]*>/gi, "• ");
-  text = text.replace(/<[^>]+>/g, "");
-  text = text.replace(/&nbsp;/g, " ");
-  text = text.replace(/&amp;/g, "&");
-  text = text.replace(/&lt;/g, "<");
-  text = text.replace(/&gt;/g, ">");
-  text = text.replace(/&quot;/g, '"');
-  return text.replace(/\n{3,}/g, "\n\n").trim();
-}
-
-function plainTextToHtml(text: string): string {
-  if (!text) return "";
-  const paragraphs = text
-    .split(/\n\s*\n/)
-    .map((p) => p.trim())
-    .filter(Boolean);
-  return paragraphs
-    .map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`)
-    .join("\n");
-}
-
               {/* HTML / plain-text tabs */}
               <Tabs defaultValue="html">
                 <div className="mb-2 flex items-center justify-between">
@@ -728,4 +698,34 @@ function EmailTemplates() {
       </AlertDialog>
     </>
   );
+}
+
+// Intelligent HTML <-> Plain Text conversion utilities
+function htmlToPlainText(html: string): string {
+  if (!html) return "";
+  let text = html;
+  text = text.replace(/<br\s*\/?>/gi, "\n");
+  text = text.replace(/<\/p>/gi, "\n\n");
+  text = text.replace(/<\/div>/gi, "\n");
+  text = text.replace(/<\/h[1-6]>/gi, "\n\n");
+  text = text.replace(/<\/li>/gi, "\n");
+  text = text.replace(/<li[^>]*>/gi, "• ");
+  text = text.replace(/<[^>]+>/g, "");
+  text = text.replace(/&nbsp;/g, " ");
+  text = text.replace(/&amp;/g, "&");
+  text = text.replace(/&lt;/g, "<");
+  text = text.replace(/&gt;/g, ">");
+  text = text.replace(/&quot;/g, '"');
+  return text.replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function plainTextToHtml(text: string): string {
+  if (!text) return "";
+  const paragraphs = text
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  return paragraphs
+    .map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`)
+    .join("\n");
 }
