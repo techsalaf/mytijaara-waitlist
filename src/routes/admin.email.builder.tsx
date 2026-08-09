@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -17,11 +18,16 @@ import {
   Bold,
   Italic,
   Link as LinkIcon,
-  Image,
   Send,
   Save,
   Clock,
   Loader2,
+  List,
+  Heading2,
+  Eye,
+  Code,
+  Sparkles,
+  Type,
 } from "lucide-react";
 import { toast } from "sonner";
 import { campaignsApi, templatesApi } from "@/lib/api";
@@ -45,32 +51,90 @@ function Builder() {
   const [scheduleMode, setScheduleMode] = useState<"now" | "later">("now");
   const [scheduledAt, setScheduledAt] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [editorMode, setEditorMode] = useState<"edit" | "preview">("edit");
 
-  // The selected segment's live reach.
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+
+  // Selected segment's live reach count
   const reach = segments.find((s) => s.value === segmentValue)?.reach ?? null;
 
   useEffect(() => {
+    nameRef.current?.focus();
     void Promise.all([
       templatesApi.list().then((r) => setTemplates(r.data)),
-      /**
-       * These counts come from `CampaignSegment::reach()` on the server,
-       * which is the same function the dispatcher uses to build the actual
-       * recipient list, so "Estimated reach: 2,847" matches who would
-       * actually be mailed.
-       */
       campaignsApi.segments().then((r) => setSegments(r.data)),
     ]);
   }, []);
 
+  const handleSelectTemplate = async (selectedId: string) => {
+    if (selectedId === "none" || !selectedId) {
+      setTemplateId("");
+      return;
+    }
+    setTemplateId(selectedId);
+    try {
+      const res = await templatesApi.get(selectedId);
+      const t = res.data;
+      if (t) {
+        if (t.name) setName(t.name);
+        if (t.subject) setSubject(t.subject);
+        if (t.text) {
+          setBody(t.text);
+        } else if (t.html) {
+          const cleanText = t.html
+            .replace(/<br\s*\/?>/gi, "\n")
+            .replace(/<\/p>/gi, "\n\n")
+            .replace(/<[^>]+>/g, "")
+            .trim();
+          setBody(cleanText);
+        }
+        toast.success(`Prefilled campaign with template "${t.name}".`);
+      }
+    } catch {
+      // Degrade gracefully
+    }
+  };
+
+  const insertFormatting = (prefix: string, suffix: string = "") => {
+    const el = textareaRef.current;
+    if (!el) {
+      setBody((prev) => prev + prefix + suffix);
+      return;
+    }
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    const text = el.value;
+    const selected = text.substring(start, end);
+    const replacement = prefix + (selected || "text") + suffix;
+    const nextValue = text.substring(0, start) + replacement + text.substring(end);
+    setBody(nextValue);
+
+    setTimeout(() => {
+      el.focus();
+      el.setSelectionRange(start + prefix.length, start + prefix.length + (selected.length || 4));
+    }, 50);
+  };
+
+  const insertToken = (token: string) => {
+    insertFormatting(token);
+  };
+
   const buildHtml = () => {
     const escapedPreheader = preheader
-      ? `<p style="color:#888;font-size:13px;">${preheader}</p>`
+      ? `<p style="color:#666666;font-size:13px;margin:0 0 16px;">${preheader}</p>`
       : "";
-    const escapedBody = body
-      .split("\n")
-      .map((line) => `<p>${line || "&nbsp;"}</p>`)
-      .join("");
-    return `${escapedPreheader}${escapedBody}`;
+
+    // Convert newlines to formatted paragraph blocks if body is raw text
+    let formattedBody = body;
+    if (!body.includes("<p>") && !body.includes("<div>")) {
+      formattedBody = body
+        .split("\n\n")
+        .map((para) => `<p style="margin:0 0 16px;line-height:1.6;">${para.replace(/\n/g, "<br>")}</p>`)
+        .join("");
+    }
+
+    return `${escapedPreheader}${formattedBody}`;
   };
 
   const campaignPayload = (status: "draft" | "sending" | "scheduled") => ({
@@ -87,7 +151,7 @@ function Builder() {
     setIsSaving(true);
     try {
       const r = await campaignsApi.create(campaignPayload("draft"));
-      toast.success("Draft saved");
+      toast.success("Draft saved successfully!");
       void navigate({ to: "/admin/email/$id", params: { id: r.data.id } });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not save the draft.");
@@ -105,10 +169,10 @@ function Builder() {
     try {
       const r = await campaignsApi.create(campaignPayload("draft"));
       await campaignsApi.send(r.data.id);
-      toast.success("Campaign queued for sending.");
+      toast.success("Campaign sent successfully!");
       void navigate({ to: "/admin/email/$id", params: { id: r.data.id } });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not queue the campaign.");
+      toast.error(err instanceof Error ? err.message : "Could not send the campaign.");
     } finally {
       setIsSaving(false);
     }
@@ -126,7 +190,7 @@ function Builder() {
     setIsSaving(true);
     try {
       const r = await campaignsApi.create(campaignPayload("scheduled"));
-      toast.success("Campaign scheduled.");
+      toast.success("Campaign scheduled successfully.");
       void navigate({ to: "/admin/email/$id", params: { id: r.data.id } });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not schedule the campaign.");
@@ -135,14 +199,11 @@ function Builder() {
     }
   };
 
-  const nameRef = useRef<HTMLInputElement>(null);
-  useEffect(() => { nameRef.current?.focus(); }, []);
-
   return (
     <div className="space-y-4">
       <Button asChild variant="ghost" size="sm" className="-ml-2">
         <Link to="/admin/email">
-          <ArrowLeft className="mr-1 h-3 w-3" /> All campaigns
+          <ArrowLeft className="mr-1.5 h-4 w-4" /> All campaigns
         </Link>
       </Button>
 
@@ -156,7 +217,7 @@ function Builder() {
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={saveDraft}
+            onClick={() => void saveDraft()}
             disabled={isSaving}
             className="cursor-pointer"
           >
@@ -164,22 +225,23 @@ function Builder() {
           </Button>
 
           {scheduleMode === "now" ? (
-            <Button onClick={sendNow} disabled={isSaving} className="cursor-pointer">
+            <Button onClick={() => void sendNow()} disabled={isSaving} className="cursor-pointer bg-primary hover:bg-primary/90">
               <Send className="mr-1.5 h-4 w-4" /> Send Now
             </Button>
           ) : (
-            <Button onClick={scheduleLater} disabled={isSaving} className="cursor-pointer">
-              <Calendar className="mr-1.5 h-4 w-4" /> Schedule Send
+            <Button onClick={() => void scheduleLater()} disabled={isSaving} className="cursor-pointer bg-primary hover:bg-primary/90">
+              <CalendarIcon className="mr-1.5 h-4 w-4" /> Schedule Send
             </Button>
           )}
         </div>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
-        <SectionCard>
-          <div className="mb-4 grid gap-3 sm:grid-cols-2">
-            <div>
-              <Label>Campaign name</Label>
+      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+        <div className="space-y-6">
+          <SectionCard>
+            <div className="mb-4 grid gap-3 sm:grid-cols-2">
+              <div>
+                <Label>Campaign name</Label>
                 <Input
                   ref={nameRef}
                   value={name}
@@ -195,10 +257,10 @@ function Builder() {
                   onValueChange={(v) => void handleSelectTemplate(v)}
                 >
                   <SelectTrigger className="mt-1.5">
-                    <SelectValue />
+                    <SelectValue placeholder="Select template…" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">No template</SelectItem>
+                    <SelectItem value="none">No template (custom)</SelectItem>
                     {templates.map((t) => (
                       <SelectItem key={t.id} value={t.id}>
                         {t.name}
@@ -209,86 +271,190 @@ function Builder() {
               </div>
             </div>
 
-          <div>
-            <Label>Subject</Label>
-            <Input
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              placeholder="e.g. You're officially on the list 🎉"
-              className="mt-1.5"
-            />
-          </div>
-          <div className="mt-3">
-            <Label>Preheader</Label>
-            <Input
-              value={preheader}
-              onChange={(e) => setPreheader(e.target.value)}
-              placeholder="Short preview shown in inbox"
-              className="mt-1.5"
-            />
-          </div>
-
-          <div className="mt-4 overflow-hidden rounded-xl border border-border/60">
-            <div className="flex items-center gap-1 border-b border-border/60 bg-muted/40 px-2 py-1.5">
-              <Button variant="ghost" size="icon" className="h-7 w-7">
-                <Bold className="h-3.5 w-3.5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-7 w-7">
-                <Italic className="h-3.5 w-3.5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-7 w-7">
-                <LinkIcon className="h-3.5 w-3.5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-7 w-7">
-                <Image className="h-3.5 w-3.5" />
-              </Button>
+            <div>
+              <Label>Subject line</Label>
+              <Input
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                placeholder="e.g. You're officially on the list 🎉"
+                className="mt-1.5"
+              />
             </div>
-            <Textarea
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              placeholder={"Hi {{first_name}},\n\nWrite your email here…"}
-              rows={16}
-              className="rounded-none border-0 font-mono text-sm focus-visible:ring-0"
-            />
-          </div>
 
-          <div className="mt-4 flex flex-wrap justify-end gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={isSaving}
-              onClick={() => void saveDraft()}
-            >
-              {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-              Save draft
-            </Button>
-            {scheduleMode === "later" ? (
+            <div className="mt-3">
+              <Label>Preheader text</Label>
+              <Input
+                value={preheader}
+                onChange={(e) => setPreheader(e.target.value)}
+                placeholder="Short preview snippet shown in recipient's inbox"
+                className="mt-1.5 text-xs"
+              />
+            </div>
+
+            {/* Robust Formatting Toolbar */}
+            <div className="mt-5 rounded-2xl border border-border/70 overflow-hidden shadow-sm bg-card">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border bg-muted/40 p-2">
+                <div className="flex flex-wrap items-center gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => insertFormatting("<strong>", "</strong>")}
+                    className="h-8 px-2 text-xs"
+                    title="Bold"
+                  >
+                    <Bold className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => insertFormatting("<em>", "</em>")}
+                    className="h-8 px-2 text-xs"
+                    title="Italic"
+                  >
+                    <Italic className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => insertFormatting("<h2 style=\"color:#1f5c3a;font-size:20px;\">", "</h2>")}
+                    className="h-8 px-2 text-xs"
+                    title="Heading 2"
+                  >
+                    <Heading2 className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => insertFormatting('<a href="https://" style="color:#1f5c3a;text-decoration:underline;">', "</a>")}
+                    className="h-8 px-2 text-xs"
+                    title="Insert Link"
+                  >
+                    <LinkIcon className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => insertFormatting('<ul style="padding-left:20px;">\n  <li>', "</li>\n</ul>")}
+                    className="h-8 px-2 text-xs"
+                    title="Bullet List"
+                  >
+                    <List className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => insertFormatting('\n<p style="text-align:center;margin:24px 0;"><a href="https://" style="background:#1f5c3a;color:#ffffff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;display:inline-block;">', '</a></p>\n')}
+                    className="h-8 px-2 text-xs font-semibold text-primary"
+                    title="Insert Button CTA"
+                  >
+                    + Button CTA
+                  </Button>
+                </div>
+
+                {/* Tokens insertion */}
+                <div className="flex items-center gap-2">
+                  <Select onValueChange={(v) => insertToken(v)}>
+                    <SelectTrigger className="h-8 text-xs w-[130px] bg-background">
+                      <SelectValue placeholder="Insert tag…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="{{first_name}}">First Name</SelectItem>
+                      <SelectItem value="{{name}}">Full Name</SelectItem>
+                      <SelectItem value="{{email}}">Email</SelectItem>
+                      <SelectItem value="{{unsubscribe}}">Unsubscribe Link</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <div className="flex rounded-lg border border-border p-0.5 bg-background">
+                    <Button
+                      type="button"
+                      variant={editorMode === "edit" ? "secondary" : "ghost"}
+                      size="sm"
+                      onClick={() => setEditorMode("edit")}
+                      className="h-7 px-2.5 text-xs gap-1"
+                    >
+                      <Type className="h-3 w-3" /> Edit
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={editorMode === "preview" ? "secondary" : "ghost"}
+                      size="sm"
+                      onClick={() => setEditorMode("preview")}
+                      className="h-7 px-2.5 text-xs gap-1"
+                    >
+                      <Eye className="h-3 w-3" /> Preview
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {editorMode === "edit" ? (
+                <Textarea
+                  ref={textareaRef}
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  placeholder={"Hi {{first_name}},\n\nWrite your email body content here. You can use formatting buttons above or plain text…"}
+                  rows={16}
+                  className="rounded-none border-0 font-mono text-sm focus-visible:ring-0 p-4"
+                />
+              ) : (
+                <div className="p-6 bg-white min-h-[350px] text-sm text-foreground">
+                  <div className="text-xs text-muted-foreground border-b pb-2 mb-4 font-mono">
+                    Subject: {subject || "(no subject)"}
+                  </div>
+                  <div
+                    className="prose max-w-none text-slate-800"
+                    dangerouslySetInnerHTML={{ __html: buildHtml() }}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
               <Button
+                variant="outline"
                 size="sm"
-                className="bg-primary hover:bg-primary/90"
-                disabled={isSaving || !scheduledAt}
-                onClick={() => void scheduleLater()}
-              >
-                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Clock className="mr-2 h-4 w-4" />}
-                Schedule
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                className="bg-primary hover:bg-primary/90"
                 disabled={isSaving}
-                onClick={() => void sendNow()}
+                onClick={() => void saveDraft()}
               >
-                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                Send now
+                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                Save Draft
               </Button>
-            )}
-          </div>
-        </SectionCard>
+              {scheduleMode === "later" ? (
+                <Button
+                  size="sm"
+                  className="bg-primary hover:bg-primary/90"
+                  disabled={isSaving || !scheduledAt}
+                  onClick={() => void scheduleLater()}
+                >
+                  {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Clock className="mr-2 h-4 w-4" />}
+                  Schedule
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  className="bg-primary hover:bg-primary/90"
+                  disabled={isSaving}
+                  onClick={() => void sendNow()}
+                >
+                  {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                  Send Now
+                </Button>
+              )}
+            </div>
+          </SectionCard>
+        </div>
 
+        {/* Sidebar: Audience & Scheduling */}
         <div className="space-y-4">
-          <SectionCard title="Audience">
-            <Label className="text-xs">Segment</Label>
+          <SectionCard title="Audience Segment">
+            <Label className="text-xs">Target Segment</Label>
             <Select value={segmentValue} onValueChange={setSegmentValue}>
               <SelectTrigger className="mt-1.5">
                 <SelectValue />
@@ -305,45 +471,49 @@ function Builder() {
                 )}
               </SelectContent>
             </Select>
-            <div className="mt-4 rounded-lg bg-muted/40 p-3 text-xs">
-              <div className="font-medium">Estimated reach</div>
+
+            <div className="mt-4 rounded-xl bg-primary/5 border border-primary/10 p-4 text-xs">
+              <div className="font-semibold text-foreground">Estimated Audience Reach</div>
               {reach !== null ? (
                 <>
-                  <div className="mt-1 text-2xl font-bold text-primary">
+                  <div className="mt-1 text-3xl font-extrabold text-primary">
                     {reach.toLocaleString()}
                   </div>
-                  <div className="text-muted-foreground">recipients after suppressions</div>
+                  <div className="text-muted-foreground mt-0.5">recipients after suppressions</div>
                 </>
               ) : (
-                <div className="mt-1 text-muted-foreground">Loading…</div>
+                <div className="mt-1 text-muted-foreground">Calculating reach…</div>
               )}
             </div>
           </SectionCard>
 
-          <SectionCard title="Send options">
+          <SectionCard title="Delivery Schedule">
             <div className="space-y-3 text-sm">
-              <div className="rounded-lg border border-border/60 p-3">
-                <Label className="text-xs">Schedule</Label>
+              <div className="rounded-xl border border-border/60 p-3">
+                <Label className="text-xs">Send Option</Label>
                 <Select
                   value={scheduleMode}
                   onValueChange={(v) => setScheduleMode(v as "now" | "later")}
                 >
-                  <SelectTrigger className="mt-1 h-8">
+                  <SelectTrigger className="mt-1.5 h-8 text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="now">Send immediately</SelectItem>
-                    <SelectItem value="later">Schedule for later</SelectItem>
+                    <SelectItem value="now">Send Immediately</SelectItem>
+                    <SelectItem value="later">Schedule for Later</SelectItem>
                   </SelectContent>
                 </Select>
+
                 {scheduleMode === "later" && (
-                  <Input
-                    type="datetime-local"
-                    value={scheduledAt}
-                    onChange={(e) => setScheduledAt(e.target.value)}
-                    className="mt-2 h-8 text-xs"
-                    min={new Date(Date.now() + 60_000).toISOString().slice(0, 16)}
-                  />
+                  <div className="mt-3">
+                    <Label className="text-xs">Schedule Date & Time</Label>
+                    <Input
+                      type="datetime-local"
+                      value={scheduledAt}
+                      onChange={(e) => setScheduledAt(e.target.value)}
+                      className="mt-1 h-8 text-xs"
+                    />
+                  </div>
                 )}
               </div>
             </div>
@@ -352,4 +522,8 @@ function Builder() {
       </div>
     </div>
   );
+}
+
+function CalendarIcon({ className }: { className?: string }) {
+  return <Clock className={className} />;
 }

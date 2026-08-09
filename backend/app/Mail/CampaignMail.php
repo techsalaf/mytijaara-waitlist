@@ -23,16 +23,37 @@ class CampaignMail extends Mailable
 
     public function content(): Content
     {
-        // Personalise the stored HTML with simple {{name}} / {{unsubscribe}} tokens.
-        $unsubscribeUrl = rtrim(config('app.frontend_url', config('app.url')), '/')
-            .'/unsubscribe?email='.urlencode($this->entry->email);
+        $site = rtrim((string) config('app.frontend_url', config('app.url')), '/');
+        $branding = \App\Models\Setting::where('group', 'branding')->first();
 
-        $html = strtr((string) $this->campaign->html, [
+        $rawLogoUrl = $branding?->data['logoUrl'] ?? null;
+        $siteName = $branding?->data['siteName'] ?? 'MyTijaara';
+
+        $logoUrl = null;
+        if ($rawLogoUrl) {
+            if (str_starts_with($rawLogoUrl, 'http://') || str_starts_with($rawLogoUrl, 'https://')) {
+                $logoUrl = $rawLogoUrl;
+            } else {
+                $logoUrl = $site . '/' . ltrim($rawLogoUrl, '/');
+            }
+        }
+
+        $unsubscribeUrl = $site . '/unsubscribe?email=' . urlencode($this->entry->email);
+
+        // Personalise the stored HTML with tokens.
+        $body = strtr((string) $this->campaign->html, [
             '{{name}}' => e($this->entry->name),
+            '{{first_name}}' => e(explode(' ', trim($this->entry->name))[0]),
             '{{email}}' => e($this->entry->email),
             '{{unsubscribe}}' => $unsubscribeUrl,
         ]);
 
-        return new Content(htmlString: $html !== '' ? $html : $this->campaign->subject);
+        return new Content(view: 'mail.campaign', with: [
+            'subject' => $this->campaign->subject,
+            'body' => $body,
+            'logoUrl' => $logoUrl,
+            'siteName' => $siteName,
+            'unsubscribeUrl' => $unsubscribeUrl,
+        ]);
     }
 }
