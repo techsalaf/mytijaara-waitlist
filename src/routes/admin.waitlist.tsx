@@ -68,12 +68,25 @@ function WaitlistPage() {
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("all");
   const [source, setSource] = useState("all");
+  const [cityFilter, setCityFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [verifiedFilter, setVerifiedFilter] = useState("all");
+  const [availableCities, setAvailableCities] = useState<string[]>([]);
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [totalCount, setTotalCount] = useState(0);
   const [view, setView] = useState<WaitlistUser | null>(null);
   const [addOpen, setAddOpen] = useState(false);
+
+  // Fetch available cities on mount
+  useEffect(() => {
+    waitlistApi
+      .cities()
+      .then((res) => setAvailableCities(res.data || []))
+      .catch(() => setAvailableCities([]));
+  }, []);
 
   // Fetch data from server with current filters and pagination
   const loadUsers = async (currentPage: number, currentPageSize: number) => {
@@ -85,10 +98,11 @@ function WaitlistPage() {
         search: q || undefined,
         status: status !== "all" ? status : undefined,
         source: source !== "all" ? source : undefined,
+        city: cityFilter !== "all" ? cityFilter : undefined,
+        role: roleFilter !== "all" ? roleFilter : undefined,
+        verified: verifiedFilter !== "all" ? (verifiedFilter as "verified" | "unverified") : undefined,
       });
       setRows(response.data);
-      // `meta` is an untyped bag, so the total is narrowed before it reaches a
-      // numeric state setter; a string or missing key falls back to the row count.
       setTotalCount(
         typeof response.meta?.total === "number" ? response.meta.total : response.data.length,
       );
@@ -105,7 +119,7 @@ function WaitlistPage() {
   useEffect(() => {
     setPage(1); // Reset to page 1 when filters change
     loadUsers(1, pageSize);
-  }, [q, status, source, pageSize]);
+  }, [q, status, source, cityFilter, roleFilter, verifiedFilter, pageSize]);
 
   // Load data when page changes
   useEffect(() => {
@@ -253,49 +267,153 @@ function WaitlistPage() {
               className="pl-9"
             />
           </div>
+          {/* City filter */}
           <Select
-            value={status}
+            value={cityFilter}
             onValueChange={(v) => {
-              setStatus(v);
+              setCityFilter(v);
               setPage(1);
             }}
           >
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Status" />
+            <SelectTrigger className="w-[150px]">
+              <SelectValue placeholder="City" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All statuses</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="invited">Invited</SelectItem>
-              <SelectItem value="onboarded">Onboarded</SelectItem>
-              <SelectItem value="unsubscribed">Unsubscribed</SelectItem>
+              <SelectItem value="all">All cities</SelectItem>
+              {availableCities.map((c) => (
+                <SelectItem key={c} value={c}>
+                  {c}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
-          <Select
-            value={source}
-            onValueChange={(v) => {
-              setSource(v);
-              setPage(1);
-            }}
+
+          {/* More filters toggle button */}
+          <Button
+            variant={showMoreFilters ? "secondary" : "outline"}
+            size="sm"
+            onClick={() => setShowMoreFilters((v) => !v)}
+            className="inline-flex items-center gap-1.5"
           >
-            <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Source" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All sources</SelectItem>
-              <SelectItem value="organic">Organic</SelectItem>
-              <SelectItem value="referral">Referral</SelectItem>
-              <SelectItem value="instagram">Instagram</SelectItem>
-              <SelectItem value="twitter">Twitter/X</SelectItem>
-              <SelectItem value="facebook">Facebook</SelectItem>
-              <SelectItem value="tiktok">TikTok</SelectItem>
-              <SelectItem value="google">Google</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="outline" size="sm" className="hidden sm:inline-flex">
-            <Filter className="mr-2 h-4 w-4" /> More filters
+            <Filter className="h-4 w-4" />
+            {showMoreFilters ? "Hide filters" : "More filters"}
           </Button>
         </div>
+
+        {/* Expanded More Filters bar */}
+        {showMoreFilters && (
+          <div className="flex flex-wrap items-center gap-3 border-b border-border/60 bg-muted/20 p-4 text-sm">
+            <div>
+              <Label className="text-xs text-muted-foreground">Status</Label>
+              <Select
+                value={status}
+                onValueChange={(v) => {
+                  setStatus(v);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="mt-1 w-[140px] h-8 text-xs">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All statuses</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="invited">Invited</SelectItem>
+                  <SelectItem value="onboarded">Onboarded</SelectItem>
+                  <SelectItem value="unsubscribed">Unsubscribed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-xs text-muted-foreground">Role</Label>
+              <Select
+                value={roleFilter}
+                onValueChange={(v) => {
+                  setRoleFilter(v);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="mt-1 w-[140px] h-8 text-xs">
+                  <SelectValue placeholder="Role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All roles</SelectItem>
+                  <SelectItem value="customer">Customer</SelectItem>
+                  <SelectItem value="vendor">Vendor</SelectItem>
+                  <SelectItem value="artisan">Artisan</SelectItem>
+                  <SelectItem value="rider">Rider</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-xs text-muted-foreground">Source</Label>
+              <Select
+                value={source}
+                onValueChange={(v) => {
+                  setSource(v);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="mt-1 w-[140px] h-8 text-xs">
+                  <SelectValue placeholder="Source" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All sources</SelectItem>
+                  <SelectItem value="organic">Organic</SelectItem>
+                  <SelectItem value="referral">Referral</SelectItem>
+                  <SelectItem value="instagram">Instagram</SelectItem>
+                  <SelectItem value="twitter">Twitter/X</SelectItem>
+                  <SelectItem value="facebook">Facebook</SelectItem>
+                  <SelectItem value="tiktok">TikTok</SelectItem>
+                  <SelectItem value="google">Google</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-xs text-muted-foreground">Verification</Label>
+              <Select
+                value={verifiedFilter}
+                onValueChange={(v) => {
+                  setVerifiedFilter(v);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="mt-1 w-[140px] h-8 text-xs">
+                  <SelectValue placeholder="Verification" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="verified">Verified</SelectItem>
+                  <SelectItem value="unverified">Unverified</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {(status !== "all" || source !== "all" || cityFilter !== "all" || roleFilter !== "all" || verifiedFilter !== "all" || q) && (
+              <div className="ml-auto flex items-end">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setQ("");
+                    setStatus("all");
+                    setSource("all");
+                    setCityFilter("all");
+                    setRoleFilter("all");
+                    setVerifiedFilter("all");
+                    setPage(1);
+                  }}
+                  className="h-8 text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Clear all filters
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
 
         {selected.size > 0 && (
           <div className="flex flex-wrap items-center gap-2 border-b border-border/60 bg-primary/5 px-4 py-2 text-sm">
@@ -334,20 +452,17 @@ function WaitlistPage() {
                   />
                 </th>
                 <th className="p-3 font-medium">User</th>
+                <th className="p-3 font-medium">Role</th>
                 <th className="p-3 font-medium">City</th>
-                <th className="p-3 font-medium">Status</th>
-                <th className="p-3 font-medium">Verified</th>
-                <th className="p-3 font-medium">Source</th>
-                <th className="p-3 font-medium text-right">Refs</th>
                 <th className="p-3 font-medium">Joined</th>
-                <th className="p-3 w-10"></th>
+                <th className="p-3 w-10 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading &&
                 Array.from({ length: 6 }).map((_, i) => (
                   <tr key={i} className="border-t border-border/40">
-                    <td colSpan={9} className="p-3">
+                    <td colSpan={6} className="p-3">
                       <div className="h-8 animate-pulse rounded bg-muted/60" />
                     </td>
                   </tr>
@@ -368,34 +483,26 @@ function WaitlistPage() {
                             .join("")}
                         </div>
                         <div className="min-w-0">
-                          <div className="font-medium truncate max-w-[200px]">{u.name}</div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-medium truncate max-w-[200px]">{u.name}</span>
+                            {u.verified && (
+                              <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-600" title="Verified" />
+                            )}
+                          </div>
                           <div className="text-xs text-muted-foreground truncate max-w-[200px]">
                             {u.email}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="p-3 text-muted-foreground">{u.city}</td>
                     <td className="p-3">
-                      <StatusBadge status={u.status} />
+                      <RoleBadge role={u.role} />
                     </td>
-                    <td className="p-3">
-                      {u.verified ? (
-                        <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                      ) : (
-                        <XCircle className="h-4 w-4 text-muted-foreground" />
-                      )}
+                    <td className="p-3 text-muted-foreground font-medium">{u.city || "–"}</td>
+                    <td className="p-3 text-muted-foreground text-xs font-mono">
+                      {formatJoinedTimestamp(u.joinedAt)}
                     </td>
-                    <td className="p-3">
-                      <Badge variant="secondary" className="capitalize">
-                        {u.source}
-                      </Badge>
-                    </td>
-                    <td className="p-3 text-right font-semibold">{u.referrals}</td>
-                    <td className="p-3 text-muted-foreground text-xs">
-                      {new Date(u.joinedAt).toLocaleDateString()}
-                    </td>
-                    <td className="p-3">
+                    <td className="p-3 text-right">
                       <RowMenu user={u} onView={setView} onDelete={(id) => deleteUsers([id])} />
                     </td>
                   </tr>
@@ -557,7 +664,7 @@ function WaitlistPage() {
                 <Field label="Device">{view.device}</Field>
                 <Field label="Referrals">{view.referrals}</Field>
                 <Field label="Position">#{view.position}</Field>
-                <Field label="Joined">{new Date(view.joinedAt).toLocaleDateString()}</Field>
+                <Field label="Joined">{formatJoinedTimestamp(view.joinedAt)}</Field>
               </div>
               <div>
                 <Label className="text-xs">Tags</Label>
@@ -630,6 +737,32 @@ function Field({
       <div className={"mt-0.5 " + (className ?? "")}>{children}</div>
     </div>
   );
+}
+
+function RoleBadge({ role }: { role?: string }) {
+  const normalized = (role || "customer").toLowerCase();
+  const config: Record<string, { label: string; className: string }> = {
+    customer: { label: "Customer", className: "bg-blue-50 text-blue-700 border-blue-200" },
+    vendor: { label: "Vendor", className: "bg-purple-50 text-purple-700 border-purple-200" },
+    artisan: { label: "Artisan", className: "bg-amber-50 text-amber-800 border-amber-200" },
+    rider: { label: "Rider", className: "bg-emerald-50 text-emerald-800 border-emerald-200" },
+  };
+  const item = config[normalized] || config.customer;
+  return (
+    <Badge variant="outline" className={`font-semibold capitalize text-[11px] ${item.className}`}>
+      {item.label}
+    </Badge>
+  );
+}
+
+function formatJoinedTimestamp(dateStr: string): string {
+  if (!dateStr) return "–";
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return dateStr;
+  return date.toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 }
 
 function StatusBadge({ status }: { status: WaitlistUser["status"] }) {

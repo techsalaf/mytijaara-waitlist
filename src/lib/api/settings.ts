@@ -113,6 +113,10 @@ export const settingsApi = {
   purgeCache: () =>
     apiCall<CachePurgeResult>("/settings/cache/purge", { method: "POST", timeoutMs: 30000 }),
 
+  /** Reset workspace dev operation — force-deletes all waitlist entries, referrals, campaigns, etc. */
+  resetWorkspace: () =>
+    apiCall<{ message: string }>("/workspace/reset", { method: "POST", timeoutMs: 60000 }),
+
   apiKeys: {
     list: () => apiCall<ApiKeyRecord[]>("/settings/api-keys"),
     /** The plaintext `key` is returned once and never retrievable again. */

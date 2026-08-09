@@ -315,6 +315,36 @@ function TemplateSheet({
               {/* Merge variables reference */}
               <MergeVarsPanel />
 
+// Intelligent HTML <-> Plain Text conversion utilities
+function htmlToPlainText(html: string): string {
+  if (!html) return "";
+  let text = html;
+  text = text.replace(/<br\s*\/?>/gi, "\n");
+  text = text.replace(/<\/p>/gi, "\n\n");
+  text = text.replace(/<\/div>/gi, "\n");
+  text = text.replace(/<\/h[1-6]>/gi, "\n\n");
+  text = text.replace(/<\/li>/gi, "\n");
+  text = text.replace(/<li[^>]*>/gi, "• ");
+  text = text.replace(/<[^>]+>/g, "");
+  text = text.replace(/&nbsp;/g, " ");
+  text = text.replace(/&amp;/g, "&");
+  text = text.replace(/&lt;/g, "<");
+  text = text.replace(/&gt;/g, ">");
+  text = text.replace(/&quot;/g, '"');
+  return text.replace(/\n{3,}/g, "\n\n").trim();
+}
+
+function plainTextToHtml(text: string): string {
+  if (!text) return "";
+  const paragraphs = text
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  return paragraphs
+    .map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`)
+    .join("\n");
+}
+
               {/* HTML / plain-text tabs */}
               <Tabs defaultValue="html">
                 <div className="mb-2 flex items-center justify-between">
@@ -322,20 +352,45 @@ function TemplateSheet({
                     <TabsTrigger value="html">HTML</TabsTrigger>
                     <TabsTrigger value="text">Plain text</TabsTrigger>
                   </TabsList>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setPreviewOpen(true)}
-                    className="cursor-pointer"
-                  >
-                    <Eye className="mr-1.5 h-3.5 w-3.5" /> Preview
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (form.html) {
+                          field("text", htmlToPlainText(form.html));
+                          toast.success("Plain text updated from HTML");
+                        }
+                      }}
+                      className="cursor-pointer text-xs h-7 px-2"
+                      title="Generate plain-text fallback from HTML"
+                    >
+                      Sync from HTML
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setPreviewOpen(true)}
+                      className="cursor-pointer h-7 px-2"
+                    >
+                      <Eye className="mr-1.5 h-3.5 w-3.5" /> Preview
+                    </Button>
+                  </div>
                 </div>
                 <TabsContent value="html">
                   <Textarea
                     value={form.html ?? ""}
-                    onChange={(e) => field("html", e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setForm((prev) => ({
+                        ...prev,
+                        html: val,
+                        // Auto-generate plain text if text field is empty or unchanged
+                        text: !prev.text || prev.text === htmlToPlainText(prev.html ?? "") ? htmlToPlainText(val) : prev.text,
+                      }));
+                    }}
                     rows={20}
                     placeholder="<!DOCTYPE html>…"
                     className="font-mono text-xs"
@@ -349,12 +404,35 @@ function TemplateSheet({
                 <TabsContent value="text">
                   <Textarea
                     value={form.text ?? ""}
-                    onChange={(e) => field("text", e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setForm((prev) => ({
+                        ...prev,
+                        text: val,
+                        // Update HTML representation if HTML is currently empty
+                        html: !prev.html ? plainTextToHtml(val) : prev.html,
+                      }));
+                    }}
                     rows={20}
                     placeholder="Plain-text fallback for email clients that block HTML."
                     className="font-mono text-xs"
                     spellCheck={false}
                   />
+                  <div className="mt-1.5 flex items-center justify-between text-xs text-muted-foreground">
+                    <span>Plain-text version used when HTML is blocked by recipient email clients.</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (form.text) {
+                          field("html", plainTextToHtml(form.text));
+                          toast.success("HTML generated from plain text");
+                        }
+                      }}
+                      className="text-primary hover:underline text-xs"
+                    >
+                      Convert Plain Text to HTML
+                    </button>
+                  </div>
                 </TabsContent>
               </Tabs>
             </div>

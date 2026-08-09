@@ -133,6 +133,18 @@ class WaitlistController extends Controller
         ]);
     }
 
+    /** GET /waitlist/cities — distinct cities in waitlist. */
+    public function cities(): JsonResponse
+    {
+        $cities = WaitlistEntry::whereNotNull('city')
+            ->where('city', '!=', '')
+            ->distinct()
+            ->orderBy('city')
+            ->pluck('city');
+
+        return response()->json(['data' => $cities]);
+    }
+
     private function initials(string $name): string
     {
         $parts = explode(' ', trim($name));
@@ -143,9 +155,15 @@ class WaitlistController extends Controller
     }
 
     /** GET /waitlist/verify/:token — PUBLIC: confirm a signup's email. */
-    public function verify(string $token): JsonResponse
+    public function verify(Request $request, string $token): JsonResponse|\Illuminate\Http\RedirectResponse
     {
         $entry = WaitlistEntry::where('verification_token', $token)->first();
+
+        // Browser navigation: redirect to frontend verification page
+        if (! $request->wantsJson() && ! $request->ajax()) {
+            $frontend = rtrim((string) config('app.frontend_url', 'http://localhost:3000'), '/');
+            return redirect($frontend . '/verify-email?token=' . $token);
+        }
 
         if (! $entry) {
             throw ValidationException::withMessages([

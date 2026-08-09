@@ -23,6 +23,7 @@ export type WaitlistUser = {
   phone: string;
   city: string;
   state: string;
+  role?: WaitlistRole;
   status: WaitlistStatus;
   verified: boolean;
   referrals: number;

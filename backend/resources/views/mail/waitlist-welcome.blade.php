@@ -77,9 +77,14 @@
                 Move up the queue by sharing your link. Every friend who joins and
                 confirms their email pushes you higher.
               </p>
-              <p style="margin:0 0 24px;">
+              <p style="margin:0 0 8px;">
                 <a href="{{ $referralUrl }}" style="font-size:14px;color:#1f5c3a;word-break:break-all;">{{ $referralUrl }}</a>
               </p>
+              @if (!empty($benefitsUrl))
+                <p style="margin:0 0 24px;font-size:13px;color:#6b6b6b;">
+                  🎁 <a href="{{ $benefitsUrl }}" style="color:#1f5c3a;font-weight:600;text-decoration:underline;">See what you unlock at 10 referrals &rarr;</a>
+                </p>
+              @endif
 
               @if ($whatsappChannelUrl)
                 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px;border-top:1px solid #e8e2d5;padding-top:20px;">

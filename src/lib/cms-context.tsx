@@ -32,6 +32,8 @@ const DEFAULT_BRANDING: PublicBranding = {
   },
   iosAppUrl: "",
   androidAppUrl: "",
+  googleAnalyticsId: "",
+  metaPixelId: "",
 };
 
 type CmsContextValue = {

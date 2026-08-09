@@ -103,7 +103,8 @@ export function Footer() {
 
   const footerCms = useCmsData("footer", DEFAULT_FOOTER);
   // Social URLs and contact emails come from the Settings panel (branding), not cms_sections.
-  const { social, supportEmail, contactEmail, iosAppUrl, androidAppUrl } = useBranding();
+  const branding = useBranding();
+  const { social, supportEmail, contactEmail, phone, launchCity, address, iosAppUrl, androidAppUrl } = branding;
 
   const tagline = footerCms.tagline ?? DEFAULT_FOOTER.tagline;
   const columns =
@@ -127,6 +128,14 @@ export function Footer() {
           <div>
             <Logo />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">{tagline}</p>
+
+            {(phone || launchCity || address) && (
+              <div className="mt-3 text-xs text-muted-foreground space-y-1">
+                {launchCity && <div>📍 Launching first in <strong className="text-foreground font-semibold">{launchCity}</strong></div>}
+                {phone && <div>📞 {phone}</div>}
+                {address && <div>🏢 {address}</div>}
+              </div>
+            )}
 
             {/* Social icons */}
             {socials.length > 0 && (

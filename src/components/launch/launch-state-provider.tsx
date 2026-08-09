@@ -130,10 +130,18 @@ export function LaunchStateProvider({
   return <LaunchContext.Provider value={ctx}>{children}</LaunchContext.Provider>;
 }
 
+const DEFAULT_LAUNCH_CONTEXT: LaunchContextValue = {
+  config: DEFAULT_LAUNCH_CONFIG,
+  status: "pre_launch",
+  remaining: { days: 0, hours: 0, minutes: 0, seconds: 0, totalSeconds: 0, isPast: false },
+  now: Date.now(),
+  isLaunched: false,
+  showCountdown: true,
+  showWaitlist: true,
+  ready: true,
+};
+
 export function useLaunch(): LaunchContextValue {
   const ctx = useContext(LaunchContext);
-  if (!ctx) {
-    throw new Error("useLaunch must be used inside <LaunchStateProvider>");
-  }
-  return ctx;
+  return ctx ?? DEFAULT_LAUNCH_CONTEXT;
 }

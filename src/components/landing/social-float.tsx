@@ -30,7 +30,7 @@ export function SocialFloat() {
   );
 
   return (
-    <div ref={ref} className="fixed bottom-6 left-6 z-40 flex flex-col-reverse items-start gap-2">
+    <div ref={ref} className="fixed bottom-6 left-6 z-40 flex flex-col-reverse items-start gap-2 pointer-events-none">
       {/* Social links list — shown above the toggle button */}
       <div
         className="mb-2 flex flex-col gap-2"
@@ -54,7 +54,7 @@ export function SocialFloat() {
               rel="noopener noreferrer"
               aria-label={`MyTijaara on ${entry.label}`}
               tabIndex={open ? 0 : -1}
-              className="group flex items-center gap-2.5"
+              className="group flex items-center gap-2.5 pointer-events-auto"
               style={{
                 transitionDelay: open ? `${i * 40}ms` : "0ms",
                 transition: "opacity 0.18s ease, transform 0.18s ease",
@@ -80,7 +80,7 @@ export function SocialFloat() {
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? "Close social links" : "Open social links"}
         aria-expanded={open}
-        className="grid h-11 w-11 cursor-pointer place-items-center rounded-full border border-border bg-card/80 text-muted-foreground shadow-soft backdrop-blur-sm transition-all duration-150 hover:scale-105 hover:border-primary/40 hover:bg-primary hover:text-primary-foreground active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="grid h-11 w-11 cursor-pointer place-items-center rounded-full border border-border bg-card/80 text-muted-foreground shadow-soft backdrop-blur-sm transition-all duration-150 hover:scale-105 hover:border-primary/40 hover:bg-primary hover:text-primary-foreground active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary pointer-events-auto"
       >
         {open ? <X className="h-4 w-4" /> : <Share2 className="h-4 w-4" />}
       </button>

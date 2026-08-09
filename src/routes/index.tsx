@@ -80,6 +80,8 @@ export const Route = createFileRoute("/")({
       },
       iosAppUrl: "",
       androidAppUrl: "",
+      googleAnalyticsId: "",
+      metaPixelId: "",
     };
 
     return {

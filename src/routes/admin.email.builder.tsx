@@ -146,39 +146,68 @@ function Builder() {
         </Link>
       </Button>
 
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-bold">Create Campaign</h1>
+          <p className="text-sm text-muted-foreground">
+            Compose a broadcast or lifecycle email for your waitlist.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={saveDraft}
+            disabled={isSaving}
+            className="cursor-pointer"
+          >
+            Save as Draft
+          </Button>
+
+          {scheduleMode === "now" ? (
+            <Button onClick={sendNow} disabled={isSaving} className="cursor-pointer">
+              <Send className="mr-1.5 h-4 w-4" /> Send Now
+            </Button>
+          ) : (
+            <Button onClick={scheduleLater} disabled={isSaving} className="cursor-pointer">
+              <Calendar className="mr-1.5 h-4 w-4" /> Schedule Send
+            </Button>
+          )}
+        </div>
+      </div>
+
       <div className="grid gap-4 lg:grid-cols-[1fr_360px]">
         <SectionCard>
           <div className="mb-4 grid gap-3 sm:grid-cols-2">
             <div>
               <Label>Campaign name</Label>
-              <Input
-                ref={nameRef}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Welcome series #3"
-                className="mt-1.5"
-              />
+                <Input
+                  ref={nameRef}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Welcome series #3"
+                  className="mt-1.5"
+                />
+              </div>
+              <div>
+                <Label>Template</Label>
+                <Select
+                  value={templateId || "none"}
+                  onValueChange={(v) => void handleSelectTemplate(v)}
+                >
+                  <SelectTrigger className="mt-1.5">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No template</SelectItem>
+                    {templates.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <Label>Template</Label>
-              <Select
-                value={templateId || "none"}
-                onValueChange={(v) => setTemplateId(v === "none" ? "" : v)}
-              >
-                <SelectTrigger className="mt-1.5">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">No template</SelectItem>
-                  {templates.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>
-                      {t.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
 
           <div>
             <Label>Subject</Label>

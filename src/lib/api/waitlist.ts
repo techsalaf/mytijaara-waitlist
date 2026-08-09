@@ -49,9 +49,17 @@ export const waitlistApi = {
   list: (params?: WaitlistListParams) =>
     apiCall<WaitlistUser[]>(`/waitlist${toQuery(params)}`),
   count: () => apiCall<{ total: number }>("/waitlist/count", { public: true }),
+  avatars: () =>
+    apiCall<{ avatars: Array<{ name: string; initials: string }>; total: number }>(
+      "/waitlist/avatars",
+      { public: true },
+    ),
+  cities: () => apiCall<string[]>("/waitlist/cities"),
   get: (id: string) => apiCall<WaitlistUser | null>(`/waitlist/${id}`),
   create: (payload: WaitlistSignupPayload) =>
     apiCall<WaitlistUser>("/waitlist", { method: "POST", body: payload, public: true }),
+  verify: (token: string) =>
+    apiCall<WaitlistUser>(`/waitlist/verify/${token}`, { public: true }),
   update: (id: string, patch: Partial<WaitlistUser>) =>
     apiCall<WaitlistUser>(`/waitlist/${id}`, { method: "PATCH", body: patch }),
   remove: (ids: string[]) =>

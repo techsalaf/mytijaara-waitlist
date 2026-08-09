@@ -346,19 +346,11 @@ function WorkspaceResetCard() {
   const reset = async () => {
     setBusy(true);
     try {
-      const res = await fetch("/api/v1/workspace/reset", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: "Workspace reset failed" }));
-        throw new Error(err.error || "Workspace reset failed");
-      }
+      await settingsApi.resetWorkspace();
       toast.success("Workspace reset complete. All data cleared.");
       setConfirmOpen(false);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Workspace reset failed");
+      toast.error(settingsError(err, "Workspace reset failed."));
     } finally {
       setBusy(false);
     }

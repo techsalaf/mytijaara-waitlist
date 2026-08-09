@@ -62,14 +62,7 @@ class CmsController extends Controller
 
     public function update(Request $request, string $section): JsonResponse
     {
-        $row = CmsSection::firstOrNew(['section' => $section]);
-        if (! $row->exists) {
-            $row->section = $section;
-            $row->title = ucfirst(str_replace(['_', '-'], ' ', $section));
-            $row->order = 0;
-            $row->enabled = false;
-            $row->published = false;
-        }
+        $row = CmsSection::where('section', $section)->firstOrFail();
 
         $payload = $request->validate([
             'title' => ['sometimes', 'string', 'max:255'],

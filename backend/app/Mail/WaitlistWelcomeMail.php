@@ -48,16 +48,27 @@ class WaitlistWelcomeMail extends Mailable
         $branding = \App\Models\Setting::where('group', 'branding')->first();
 
         $whatsappChannelUrl = $integrations?->data['whatsappChannelUrl'] ?? null;
-        $logoUrl = $branding?->data['logoUrl'] ?? null;
+        $rawLogoUrl = $branding?->data['logoUrl'] ?? null;
         $siteName = $branding?->data['siteName'] ?? 'MyTijaara';
+
+        // Ensure logoUrl is an absolute email-compatible URL
+        $logoUrl = null;
+        if ($rawLogoUrl) {
+            if (str_starts_with($rawLogoUrl, 'http://') || str_starts_with($rawLogoUrl, 'https://')) {
+                $logoUrl = $rawLogoUrl;
+            } else {
+                $logoUrl = $site . '/' . ltrim($rawLogoUrl, '/');
+            }
+        }
 
         return new Content(view: 'mail.waitlist-welcome', with: [
             'name'           => $this->entry->name,
             'role'           => $this->entry->role ?? 'customer',
             'position'       => $this->entry->position,
             'referralUrl'    => $site.'/?ref='.$this->entry->referral_code,
+            'benefitsUrl'    => $site.'/referral-rewards',
             'verifyUrl'      => $this->entry->verification_token
-                ? $api.'/api/v1/waitlist/verify/'.$this->entry->verification_token
+                ? $site.'/verify-email?token='.$this->entry->verification_token
                 : null,
             'unsubscribeUrl' => $site.'/unsubscribe?email='.urlencode($this->entry->email),
             'whatsappChannelUrl' => $whatsappChannelUrl,

@@ -17,6 +17,7 @@ class WaitlistEntryResource extends JsonResource
             'phone' => (string) ($this->phone ?? ''),
             'city' => (string) ($this->city ?? ''),
             'state' => (string) ($this->state ?? ''),
+            'role' => (string) ($this->role ?? 'customer'),
             'status' => $this->status,
             'verified' => (bool) $this->verified,
             'referrals' => (int) $this->referrals,

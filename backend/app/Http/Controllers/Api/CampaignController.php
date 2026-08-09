@@ -134,10 +134,27 @@ class CampaignController extends Controller
             ];
         }
 
+        // Dynamic city segments from real waitlist records
+        $cities = \App\Models\WaitlistEntry::whereNotNull('city')
+            ->where('city', '!=', '')
+            ->distinct()
+            ->orderBy('city')
+            ->pluck('city');
+
+        foreach ($cities as $city) {
+            $rules = ['city' => $city];
+            $presets[] = [
+                'value' => 'city:' . $city,
+                'label' => 'City: ' . $city,
+                'rules' => $rules,
+                'reach' => CampaignSegment::reach($rules),
+            ];
+        }
+
         return response()->json(['data' => $presets]);
     }
 
-    /** POST /campaigns/:id/send — queue the campaign for delivery. */
+    /** POST /campaigns/:id/send — queue or send the campaign for delivery. */
     public function send(string $id): JsonResponse
     {
         $campaign = EmailCampaign::where('public_id', $id)->firstOrFail();
@@ -147,7 +164,13 @@ class CampaignController extends Controller
         }
 
         $campaign->update(['status' => 'sending']);
-        SendCampaignJob::dispatch($campaign->id);
+
+        // In local environment or sync queue, process synchronously so it sends immediately
+        if (config('queue.default') === 'sync' || app()->environment('local')) {
+            SendCampaignJob::dispatchSync($campaign->id);
+        } else {
+            SendCampaignJob::dispatch($campaign->id);
+        }
 
         return response()->json(['data' => new CampaignResource($campaign->fresh('template'))]);
     }

@@ -47,67 +47,95 @@ class SendCampaignJob implements ShouldQueue
             return;
         }
 
-        // Use the mail server the admin configured, not the one in .env.
-        SmtpConfig::apply();
+        try {
+            // Use the mail server the admin configured, not the one in .env.
+            SmtpConfig::apply();
 
-        $unsubscribed = Unsubscribe::pluck('email')->flip();
+            $unsubscribed = Unsubscribe::pluck('email')->flip();
 
-        $sent = 0;
-        $skipped = 0;
-        $this->recipients($campaign)->chunkById(200, function ($entries) use ($campaign, $unsubscribed, &$sent, &$skipped) {
-            foreach ($entries as $entry) {
-                if ($unsubscribed->has($entry->email) || $entry->status === 'unsubscribed') {
-                    $skipped++;
+            $sent = 0;
+            $skipped = 0;
+            $failedCount = 0;
 
-                    continue;
+            $this->recipients($campaign)->chunkById(200, function ($entries) use ($campaign, $unsubscribed, &$sent, &$skipped, &$failedCount) {
+                foreach ($entries as $entry) {
+                    if ($unsubscribed->has($entry->email) || $entry->status === 'unsubscribed') {
+                        $skipped++;
+
+                        continue;
+                    }
+
+                    try {
+                        Mail::to($entry->email)->send(new CampaignMail($campaign, $entry));
+                        EmailEvent::create([
+                            'campaign_id' => $campaign->id,
+                            'waitlist_entry_id' => $entry->id,
+                            'email' => $entry->email,
+                            'type' => 'sent',
+                        ]);
+                        $sent++;
+                    } catch (\Throwable $e) {
+                        $failedCount++;
+                        EmailEvent::create([
+                            'campaign_id' => $campaign->id,
+                            'waitlist_entry_id' => $entry->id,
+                            'email' => $entry->email,
+                            'type' => 'bounce',
+                        ]);
+                        $campaign->increment('bounces');
+                        Log::warning('campaign mail send failed', [
+                            'campaign' => $campaign->public_id,
+                            'email' => $entry->email,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
                 }
+            });
 
-                try {
-                    Mail::to($entry->email)->send(new CampaignMail($campaign, $entry));
-                    EmailEvent::create([
-                        'campaign_id' => $campaign->id,
-                        'waitlist_entry_id' => $entry->id,
-                        'email' => $entry->email,
-                        'type' => 'sent',
-                    ]);
-                    $sent++;
-                } catch (\Throwable $e) {
-                    EmailEvent::create([
-                        'campaign_id' => $campaign->id,
-                        'waitlist_entry_id' => $entry->id,
-                        'email' => $entry->email,
-                        'type' => 'bounce',
-                    ]);
-                    $campaign->increment('bounces');
-                }
+            // Nobody was reachable: return the campaign to draft so segment can be fixed
+            if ($sent === 0) {
+                $status = $failedCount > 0 ? 'failed' : 'draft';
+                $campaign->update(['status' => $status]);
+                Log::warning('campaign completed with no successful deliveries', [
+                    'campaign' => $campaign->public_id,
+                    'status' => $status,
+                    'suppressed' => $skipped,
+                    'failed' => $failedCount,
+                ]);
+
+                return;
             }
-        });
 
-        // Nobody was reachable: return the campaign to draft so the segment can
-        // be fixed and the run retried, instead of stranding it in `sent`.
-        if ($sent === 0) {
-            $campaign->update(['status' => 'draft']);
-            Log::warning('campaign matched no deliverable recipients', [
-                'campaign' => $campaign->public_id,
-                'suppressed' => $skipped,
+            $finalStatus = ($failedCount > 0) ? 'partially_sent' : 'sent';
+            $campaign->update([
+                'status' => $finalStatus,
+                'sent' => $campaign->sent + $sent,
+                'recipients' => $campaign->recipients + $sent,
+                'sent_at' => now(),
             ]);
-
-            return;
+        } catch (\Throwable $e) {
+            Log::error('SendCampaignJob exception', [
+                'campaign' => $this->campaignId,
+                'error' => $e->getMessage(),
+            ]);
+            $campaign->update(['status' => 'failed']);
+            throw $e;
         }
+    }
 
-        $campaign->update([
-            'status' => 'sent',
-            'sent' => $campaign->sent + $sent,
-            'recipients' => $campaign->recipients + $sent,
-            'sent_at' => now(),
-        ]);
+    /**
+     * Handle job failure after all retries are exhausted.
+     */
+    public function failed(\Throwable $exception): void
+    {
+        $campaign = EmailCampaign::find($this->campaignId);
+        if ($campaign && $campaign->status === 'sending') {
+            $campaign->update(['status' => 'failed']);
+        }
     }
 
     /**
      * Build the recipient query from the campaign segment rules.
-     *
-     * Delegated to `CampaignSegment` so the estimated reach in the builder and
-     * the rows actually mailed here can never drift apart.
      */
     private function recipients(EmailCampaign $campaign)
     {

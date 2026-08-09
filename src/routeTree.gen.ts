@@ -16,7 +16,9 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CareersRouteImport } from './routes/careers'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ReferralRewardsRouteImport } from './routes/referral-rewards'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAuditLogsRouteImport } from './routes/admin.audit-logs'
@@ -107,9 +109,19 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReferralRewardsRoute = ReferralRewardsRouteImport.update({
+  id: '/referral-rewards',
+  path: '/referral-rewards',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyEmailRoute = VerifyEmailRouteImport.update({
+  id: '/verify-email',
+  path: '/verify-email',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -394,7 +406,9 @@ export interface FileRoutesByFullPath {
   '/careers': typeof CareersRoute
   '/cookies': typeof CookiesRoute
   '/privacy': typeof PrivacyRoute
+  '/referral-rewards': typeof ReferralRewardsRoute
   '/terms': typeof TermsRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-logs': typeof AdminAuditLogsRoute
   '/admin/cms': typeof AdminCmsRouteWithChildren
@@ -457,7 +471,9 @@ export interface FileRoutesByTo {
   '/careers': typeof CareersRoute
   '/cookies': typeof CookiesRoute
   '/privacy': typeof PrivacyRoute
+  '/referral-rewards': typeof ReferralRewardsRoute
   '/terms': typeof TermsRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-logs': typeof AdminAuditLogsRoute
   '/admin/media': typeof AdminMediaRoute
@@ -518,7 +534,9 @@ export interface FileRoutesById {
   '/careers': typeof CareersRoute
   '/cookies': typeof CookiesRoute
   '/privacy': typeof PrivacyRoute
+  '/referral-rewards': typeof ReferralRewardsRoute
   '/terms': typeof TermsRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-logs': typeof AdminAuditLogsRoute
   '/admin/cms': typeof AdminCmsRouteWithChildren
@@ -584,7 +602,9 @@ export interface FileRouteTypes {
     | '/careers'
     | '/cookies'
     | '/privacy'
+    | '/referral-rewards'
     | '/terms'
+    | '/verify-email'
     | '/admin/analytics'
     | '/admin/audit-logs'
     | '/admin/cms'
@@ -647,7 +667,9 @@ export interface FileRouteTypes {
     | '/careers'
     | '/cookies'
     | '/privacy'
+    | '/referral-rewards'
     | '/terms'
+    | '/verify-email'
     | '/admin/analytics'
     | '/admin/audit-logs'
     | '/admin/media'
@@ -707,7 +729,9 @@ export interface FileRouteTypes {
     | '/careers'
     | '/cookies'
     | '/privacy'
+    | '/referral-rewards'
     | '/terms'
+    | '/verify-email'
     | '/admin/analytics'
     | '/admin/audit-logs'
     | '/admin/cms'
@@ -772,7 +796,9 @@ export interface RootRouteChildren {
   CareersRoute: typeof CareersRoute
   CookiesRoute: typeof CookiesRoute
   PrivacyRoute: typeof PrivacyRoute
+  ReferralRewardsRoute: typeof ReferralRewardsRoute
   TermsRoute: typeof TermsRoute
+  VerifyEmailRoute: typeof VerifyEmailRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -826,11 +852,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/referral-rewards': {
+      id: '/referral-rewards'
+      path: '/referral-rewards'
+      fullPath: '/referral-rewards'
+      preLoaderRoute: typeof ReferralRewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/terms': {
       id: '/terms'
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify-email': {
+      id: '/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof VerifyEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -1406,7 +1446,9 @@ const rootRouteChildren: RootRouteChildren = {
   CareersRoute: CareersRoute,
   CookiesRoute: CookiesRoute,
   PrivacyRoute: PrivacyRoute,
+  ReferralRewardsRoute: ReferralRewardsRoute,
   TermsRoute: TermsRoute,
+  VerifyEmailRoute: VerifyEmailRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
