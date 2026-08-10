@@ -4,10 +4,8 @@ import { settingsApi } from "@/lib/api/settings";
 import type { CmsSection } from "@/lib/api";
 import type { PublicBranding } from "@/lib/api/settings";
 import { normalizeLaunchConfig } from "@/lib/launch/config";
-import { CmsProvider } from "@/lib/cms-context";
 import { LaunchStateProvider } from "@/components/launch/launch-state-provider";
-import { Nav } from "@/components/landing/nav";
-import { Footer } from "@/components/landing/footer";
+import { PublicLayout } from "@/components/landing/public-layout";
 
 export const Route = createFileRoute("/cookies")({
   loader: async () => {
@@ -33,11 +31,9 @@ function CookiesPage() {
   const { launchConfig, serverNow, cms, branding } = Route.useLoaderData();
   return (
     <LaunchStateProvider initialConfig={launchConfig} initialNow={serverNow}>
-      <CmsProvider sections={cms} faqs={[]} testimonials={[]} branding={branding}>
-        <div className="min-h-screen bg-background text-foreground">
-          <Nav />
-          <main className="mx-auto max-w-3xl px-4 py-24 sm:px-6 sm:py-32">
-            <LegalHeader title="Cookie Policy" updated="1 August 2026" />
+      <PublicLayout cmsData={cms} branding={branding}>
+        <main className="mx-auto max-w-3xl px-4 py-24 sm:px-6 sm:py-32">
+          <LegalHeader title="Cookie Policy" updated="1 August 2026" />
             <Section title="1. What are cookies?">
               <p>Cookies are small text files stored on your device when you visit a website. They help us recognise you, remember your preferences, and understand how you use MyTijaara.</p>
             </Section>
@@ -92,10 +88,8 @@ function CookiesPage() {
             <Section title="6. Contact">
               <p>Questions about cookies? Email <a href="mailto:privacy@mytijaara.com" className="text-primary hover:underline">privacy@mytijaara.com</a>.</p>
             </Section>
-          </main>
-          <Footer />
-        </div>
-      </CmsProvider>
+        </main>
+      </PublicLayout>
     </LaunchStateProvider>
   );
 }

@@ -4,10 +4,8 @@ import { settingsApi } from "@/lib/api/settings";
 import type { CmsSection } from "@/lib/api";
 import type { PublicBranding } from "@/lib/api/settings";
 import { normalizeLaunchConfig } from "@/lib/launch/config";
-import { CmsProvider } from "@/lib/cms-context";
 import { LaunchStateProvider } from "@/components/launch/launch-state-provider";
-import { Nav } from "@/components/landing/nav";
-import { Footer } from "@/components/landing/footer";
+import { PublicLayout } from "@/components/landing/public-layout";
 
 export const Route = createFileRoute("/terms")({
   loader: async () => {
@@ -33,11 +31,9 @@ function TermsPage() {
   const { launchConfig, serverNow, cms, branding } = Route.useLoaderData();
   return (
     <LaunchStateProvider initialConfig={launchConfig} initialNow={serverNow}>
-      <CmsProvider sections={cms} faqs={[]} testimonials={[]} branding={branding}>
-        <div className="min-h-screen bg-background text-foreground">
-          <Nav />
-          <main className="mx-auto max-w-3xl px-4 py-24 sm:px-6 sm:py-32">
-            <LegalHeader title="Terms of Service" updated="1 August 2026" />
+      <PublicLayout cmsData={cms} branding={branding}>
+        <main className="mx-auto max-w-3xl px-4 py-24 sm:px-6 sm:py-32">
+          <LegalHeader title="Terms of Service" updated="1 August 2026" />
             <Section title="1. Acceptance">
               <p>By accessing or using MyTijaara, you agree to these Terms. If you disagree, do not use the platform. MyTijaara Ltd reserves the right to update these Terms; continued use after notice constitutes acceptance.</p>
             </Section>
@@ -83,10 +79,8 @@ function TermsPage() {
             <Section title="11. Contact">
               <p>MyTijaara Ltd, Lagos, Nigeria. Email: <a href="mailto:legal@mytijaara.com" className="text-primary hover:underline">legal@mytijaara.com</a>.</p>
             </Section>
-          </main>
-          <Footer />
-        </div>
-      </CmsProvider>
+        </main>
+      </PublicLayout>
     </LaunchStateProvider>
   );
 }

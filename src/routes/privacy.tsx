@@ -4,10 +4,8 @@ import { settingsApi } from "@/lib/api/settings";
 import type { CmsSection } from "@/lib/api";
 import type { PublicBranding } from "@/lib/api/settings";
 import { normalizeLaunchConfig } from "@/lib/launch/config";
-import { CmsProvider } from "@/lib/cms-context";
 import { LaunchStateProvider } from "@/components/launch/launch-state-provider";
-import { Nav } from "@/components/landing/nav";
-import { Footer } from "@/components/landing/footer";
+import { PublicLayout } from "@/components/landing/public-layout";
 
 export const Route = createFileRoute("/privacy")({
   loader: async () => {
@@ -33,7 +31,7 @@ function PrivacyPage() {
   const { launchConfig, serverNow, cms, branding } = Route.useLoaderData();
   return (
     <LaunchStateProvider initialConfig={launchConfig} initialNow={serverNow}>
-      <PublicLayout cmsData={cms}>
+      <PublicLayout cmsData={cms} branding={branding}>
         <main className="mx-auto max-w-3xl px-4 py-24 sm:px-6 sm:py-32">
           <LegalHeader title="Privacy Policy" updated="1 August 2026" />
           <Section title="1. Who we are">

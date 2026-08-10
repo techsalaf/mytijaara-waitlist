@@ -21,8 +21,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { ROLE_REWARDS, getRoleReward, type WaitlistRole } from "@/lib/referrals/rewards";
-import { Nav } from "@/components/landing/nav";
-import { Footer } from "@/components/landing/footer";
+import { PublicLayout } from "@/components/landing/public-layout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -88,8 +87,7 @@ function ReferralRewardsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Nav />
+    <PublicLayout>
 
       <main className="pt-24 pb-16">
         {/* Hero Section */}
@@ -282,7 +280,6 @@ function ReferralRewardsPage() {
         </section>
       </main>
 
-      <Footer />
-    </div>
+    </PublicLayout>
   );
 }

@@ -73,7 +73,7 @@ export function PostSignupModal({ open, data, onClose }: PostSignupModalProps) {
   );
   const twitterUrl = `https://twitter.com/intent/tweet?text=${twitterText}`;
 
-  const communityChannelUrl = social.whatsappChannel || social.telegram || social.whatsapp || "https://whatsapp.com/channel";
+  const communityChannelUrl = social.whatsapp || social.telegram || "https://whatsapp.com/channel";
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
