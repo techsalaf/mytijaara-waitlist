@@ -1,10 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { serverGet } from "@/lib/api";
 import type { CmsSection } from "@/lib/api";
-import { CmsProvider } from "@/lib/cms-context";
-import { Nav } from "@/components/landing/nav";
-import { Footer } from "@/components/landing/footer";
-import { ScrollToTop } from "@/components/landing/scroll-to-top";
+import { PublicLayout } from "@/components/landing/public-layout";
 import { Careers } from "@/components/careers/careers";
 
 export const Route = createFileRoute("/careers")({
@@ -13,19 +10,20 @@ export const Route = createFileRoute("/careers")({
     const cmsData = (cmsRaw as { data: Record<string, CmsSection> })?.data ?? {};
     return { cmsData, serverNow: Date.now() };
   },
+  head: () => ({
+    meta: [
+      { title: "Careers — MyTijaara | Join Our Team" },
+      { name: "description", content: "Build the future of everyday commerce, tech, and logistics in Nigeria with MyTijaara." },
+    ],
+  }),
   component: CareersPage,
 });
 
 function CareersPage() {
   const { cmsData } = Route.useLoaderData();
   return (
-    <CmsProvider sections={cmsData} faqs={[]} testimonials={[]}>
-      <div className="min-h-screen bg-background text-foreground">
-        <Nav />
-        <Careers />
-        <Footer />
-        <ScrollToTop />
-      </div>
-    </CmsProvider>
+    <PublicLayout cmsData={cmsData}>
+      <Careers />
+    </PublicLayout>
   );
 }

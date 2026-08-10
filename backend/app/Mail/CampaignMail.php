@@ -39,6 +39,7 @@ class CampaignMail extends Mailable
         }
 
         $unsubscribeUrl = $site . '/unsubscribe?email=' . urlencode($this->entry->email);
+        $trackingPixelUrl = $site . '/api/v1/track/open/' . $this->campaign->public_id . '?e=' . urlencode($this->entry->email);
 
         // Personalise the stored HTML with tokens.
         $body = strtr((string) $this->campaign->html, [
@@ -47,6 +48,9 @@ class CampaignMail extends Mailable
             '{{email}}' => e($this->entry->email),
             '{{unsubscribe}}' => $unsubscribeUrl,
         ]);
+
+        // Append tracking pixel
+        $body .= '<img src="' . $trackingPixelUrl . '" width="1" height="1" style="display:none;width:1px;height:1px;" alt="" />';
 
         return new Content(view: 'mail.campaign', with: [
             'subject' => $this->campaign->subject,

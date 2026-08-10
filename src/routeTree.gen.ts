@@ -63,6 +63,7 @@ import { Route as AdminReferralsIndexRouteImport } from './routes/admin.referral
 import { Route as AdminReferralsIdRouteImport } from './routes/admin.referrals.$id'
 import { Route as AdminReferralsAnalyticsRouteImport } from './routes/admin.referrals.analytics'
 import { Route as AdminReferralsLeaderboardRouteImport } from './routes/admin.referrals.leaderboard'
+import { Route as AdminRolesIndexRouteImport } from './routes/admin.roles.index'
 import { Route as AdminRolesIdRouteImport } from './routes/admin.roles.$id'
 import { Route as AdminSettingsIndexRouteImport } from './routes/admin.settings.index'
 import { Route as AdminSettingsApiKeysRouteImport } from './routes/admin.settings.api-keys'
@@ -72,6 +73,7 @@ import { Route as AdminSettingsSeoRouteImport } from './routes/admin.settings.se
 import { Route as AdminSettingsSmtpRouteImport } from './routes/admin.settings.smtp'
 import { Route as AdminSettingsSocialRouteImport } from './routes/admin.settings.social'
 import { Route as AdminSettingsSystemRouteImport } from './routes/admin.settings.system'
+import { Route as AdminUsersIndexRouteImport } from './routes/admin.users.index'
 import { Route as AdminUsersIdRouteImport } from './routes/admin.users.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -346,6 +348,11 @@ const AdminReferralsLeaderboardRoute =
     path: '/leaderboard',
     getParentRoute: () => AdminReferralsRoute,
   } as any)
+const AdminRolesIndexRoute = AdminRolesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRolesRoute,
+} as any)
 const AdminRolesIdRoute = AdminRolesIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -391,6 +398,11 @@ const AdminSettingsSystemRoute = AdminSettingsSystemRouteImport.update({
   id: '/system',
   path: '/system',
   getParentRoute: () => AdminSettingsRoute,
+} as any)
+const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminUsersRoute,
 } as any)
 const AdminUsersIdRoute = AdminUsersIdRouteImport.update({
   id: '/$id',
@@ -462,7 +474,9 @@ export interface FileRoutesByFullPath {
   '/admin/cms/': typeof AdminCmsIndexRoute
   '/admin/email/': typeof AdminEmailIndexRoute
   '/admin/referrals/': typeof AdminReferralsIndexRoute
+  '/admin/roles/': typeof AdminRolesIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
+  '/admin/users/': typeof AdminUsersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -479,9 +493,7 @@ export interface FileRoutesByTo {
   '/admin/media': typeof AdminMediaRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/profile': typeof AdminProfileRoute
-  '/admin/roles': typeof AdminRolesRouteWithChildren
   '/admin/system-health': typeof AdminSystemHealthRoute
-  '/admin/users': typeof AdminUsersRouteWithChildren
   '/admin/waitlist': typeof AdminWaitlistRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
@@ -523,7 +535,9 @@ export interface FileRoutesByTo {
   '/admin/cms': typeof AdminCmsIndexRoute
   '/admin/email': typeof AdminEmailIndexRoute
   '/admin/referrals': typeof AdminReferralsIndexRoute
+  '/admin/roles': typeof AdminRolesIndexRoute
   '/admin/settings': typeof AdminSettingsIndexRoute
+  '/admin/users': typeof AdminUsersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -590,7 +604,9 @@ export interface FileRoutesById {
   '/admin/cms/': typeof AdminCmsIndexRoute
   '/admin/email/': typeof AdminEmailIndexRoute
   '/admin/referrals/': typeof AdminReferralsIndexRoute
+  '/admin/roles/': typeof AdminRolesIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
+  '/admin/users/': typeof AdminUsersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -658,7 +674,9 @@ export interface FileRouteTypes {
     | '/admin/cms/'
     | '/admin/email/'
     | '/admin/referrals/'
+    | '/admin/roles/'
     | '/admin/settings/'
+    | '/admin/users/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -675,9 +693,7 @@ export interface FileRouteTypes {
     | '/admin/media'
     | '/admin/notifications'
     | '/admin/profile'
-    | '/admin/roles'
     | '/admin/system-health'
-    | '/admin/users'
     | '/admin/waitlist'
     | '/auth/forgot-password'
     | '/auth/login'
@@ -719,7 +735,9 @@ export interface FileRouteTypes {
     | '/admin/cms'
     | '/admin/email'
     | '/admin/referrals'
+    | '/admin/roles'
     | '/admin/settings'
+    | '/admin/users'
   id:
     | '__root__'
     | '/'
@@ -785,7 +803,9 @@ export interface FileRouteTypes {
     | '/admin/cms/'
     | '/admin/email/'
     | '/admin/referrals/'
+    | '/admin/roles/'
     | '/admin/settings/'
+    | '/admin/users/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1181,6 +1201,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReferralsLeaderboardRouteImport
       parentRoute: typeof AdminReferralsRoute
     }
+    '/admin/roles/': {
+      id: '/admin/roles/'
+      path: '/'
+      fullPath: '/admin/roles/'
+      preLoaderRoute: typeof AdminRolesIndexRouteImport
+      parentRoute: typeof AdminRolesRoute
+    }
     '/admin/roles/$id': {
       id: '/admin/roles/$id'
       path: '/$id'
@@ -1243,6 +1270,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/settings/system'
       preLoaderRoute: typeof AdminSettingsSystemRouteImport
       parentRoute: typeof AdminSettingsRoute
+    }
+    '/admin/users/': {
+      id: '/admin/users/'
+      path: '/'
+      fullPath: '/admin/users/'
+      preLoaderRoute: typeof AdminUsersIndexRouteImport
+      parentRoute: typeof AdminUsersRoute
     }
     '/admin/users/$id': {
       id: '/admin/users/$id'
@@ -1338,10 +1372,12 @@ const AdminReferralsRouteWithChildren = AdminReferralsRoute._addFileChildren(
 
 interface AdminRolesRouteChildren {
   AdminRolesIdRoute: typeof AdminRolesIdRoute
+  AdminRolesIndexRoute: typeof AdminRolesIndexRoute
 }
 
 const AdminRolesRouteChildren: AdminRolesRouteChildren = {
   AdminRolesIdRoute: AdminRolesIdRoute,
+  AdminRolesIndexRoute: AdminRolesIndexRoute,
 }
 
 const AdminRolesRouteWithChildren = AdminRolesRoute._addFileChildren(
@@ -1376,10 +1412,12 @@ const AdminSettingsRouteWithChildren = AdminSettingsRoute._addFileChildren(
 
 interface AdminUsersRouteChildren {
   AdminUsersIdRoute: typeof AdminUsersIdRoute
+  AdminUsersIndexRoute: typeof AdminUsersIndexRoute
 }
 
 const AdminUsersRouteChildren: AdminUsersRouteChildren = {
   AdminUsersIdRoute: AdminUsersIdRoute,
+  AdminUsersIndexRoute: AdminUsersIndexRoute,
 }
 
 const AdminUsersRouteWithChildren = AdminUsersRoute._addFileChildren(

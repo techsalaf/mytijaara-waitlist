@@ -36,6 +36,16 @@ export function Nav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Check if current page is the homepage
+  const isHomepage = typeof window !== "undefined" ? window.location.pathname === "/" : true;
+  const getHref = (target: string) => {
+    if (!target) return "/";
+    if (target.startsWith("http") || target.startsWith("mailto:") || target.startsWith("tel:")) return target;
+    if (target.startsWith("/")) return target;
+    if (target.startsWith("#")) return isHomepage ? target : `/${target}`;
+    return target;
+  };
+
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       {/*
@@ -52,14 +62,14 @@ export function Nav() {
             scrolled ? "glass shadow-soft" : ""
           }`}
         >
-          <a href="#top" aria-label="MyTijaara home">
+          <a href="/" aria-label="MyTijaara home">
             <Logo />
           </a>
           <nav className="hidden items-center gap-8 md:flex" aria-label="Primary">
             {links.map((l) => (
               <a
                 key={l.href}
-                href={l.href}
+                href={getHref(l.href)}
                 className="text-sm font-medium text-foreground/75 transition-colors hover:text-foreground"
               >
                 {l.label}
@@ -68,7 +78,7 @@ export function Nav() {
           </nav>
           <div className="hidden items-center gap-3 md:flex">
             <a
-              href={cta.href}
+              href={getHref(cta.href)}
               onClick={() => trackEvent("cta_click", { label: cta.label, location: "nav" })}
               className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-soft transition-transform hover:scale-[1.03]"
             >
@@ -90,7 +100,7 @@ export function Nav() {
               {links.map((l) => (
                 <a
                   key={l.href}
-                  href={l.href}
+                  href={getHref(l.href)}
                   onClick={() => setOpen(false)}
                   className="rounded-lg px-3 py-2.5 text-sm font-medium text-foreground/80 hover:bg-primary-soft"
                 >
@@ -98,7 +108,7 @@ export function Nav() {
                 </a>
               ))}
               <a
-                href={cta.href}
+                href={getHref(cta.href)}
                 onClick={() => { setOpen(false); trackEvent("cta_click", { label: cta.label, location: "nav_mobile" }); }}
                 className="mt-2 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground"
               >

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 import { waitlistApi } from "@/lib/api";
@@ -12,6 +12,7 @@ import {
   type WaitlistSignupInput,
   type WaitlistSignupData,
 } from "@/lib/schemas/waitlist";
+import { PostSignupModal, type WaitlistSuccessData } from "./post-signup-modal";
 
 const ROLE_LABELS: Record<(typeof WAITLIST_ROLES)[number], string> = {
   customer: "I'm a customer",
@@ -37,14 +38,15 @@ function useReferralCode() {
 
 export function WaitlistForm() {
   const referralCode = useReferralCode();
-  const [submittedCity, setSubmittedCity] = useState<string | null>(null);
-  const [position, setPosition] = useState<number | null>(null);
+  const [successData, setSuccessData] = useState<WaitlistSuccessData | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const {
     register,
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<WaitlistSignupInput, unknown, WaitlistSignupData>({
     resolver: zodResolver(waitlistSignupSchema),
@@ -69,7 +71,13 @@ export function WaitlistForm() {
   const onSubmit = handleSubmit(async (data) => {
     // Honeypot: silently drop bot submissions.
     if (data.website) {
-      setSubmittedCity(data.city);
+      setSuccessData({
+        publicId: "wl_bot",
+        name: data.name,
+        email: data.email,
+        city: data.city,
+      });
+      setModalOpen(true);
       return;
     }
     try {
@@ -84,9 +92,24 @@ export function WaitlistForm() {
         consent: data.consent,
         website: data.website,
       });
-      setSubmittedCity(data.city);
-      setPosition(res.data.position ?? null);
+
+      const entry = res.data;
+      setSuccessData({
+        publicId: entry.id,
+        name: entry.name,
+        email: entry.email,
+        city: entry.city,
+        role: entry.role,
+        referralCode: entry.referralCode,
+        position: entry.position,
+      });
+      setModalOpen(true);
       toast.success("You're on the list! 🎉");
+
+      // Notify window to refresh counters / avatars across the landing page
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("waitlist:updated"));
+      }
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Something went wrong. Please try again.";
@@ -95,22 +118,19 @@ export function WaitlistForm() {
     }
   });
 
-  if (submittedCity) {
-    return (
-      <div className="mt-10 rounded-2xl border border-primary-foreground/20 bg-primary-foreground/10 p-6 text-center">
-        <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-gold-gradient text-gold-foreground">
-          <Check className="h-6 w-6" />
-        </div>
-        <p className="mt-4 font-display text-xl font-bold">You're on the list! 🎉</p>
-        <p className="mt-2 text-sm text-primary-foreground/80">
-          We'll message you as soon as MyTijaara launches in {submittedCity}.
-        </p>
-        {position !== null && (
-          <p className="mt-1 text-xs text-primary-foreground/70">You're #{position} in line.</p>
-        )}
-      </div>
-    );
-  }
+  const handleModalClose = () => {
+    setModalOpen(false);
+    reset({
+      name: "",
+      email: "",
+      phone: "",
+      city: undefined,
+      role: "customer",
+      referralCode: referralCode || "",
+      consent: false as unknown as true,
+      website: "",
+    });
+  };
 
   return (
     <form onSubmit={onSubmit} className="mt-10 space-y-4 text-left" noValidate>
@@ -241,6 +261,8 @@ export function WaitlistForm() {
       <p className="text-center text-xs text-primary-foreground/60">
         No spam. Just a launch update when we're live near you.
       </p>
+
+      <PostSignupModal open={modalOpen} data={successData} onClose={handleModalClose} />
     </form>
   );
 }

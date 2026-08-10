@@ -26,6 +26,7 @@ import { AiAssistant } from "@/components/landing/ai-assistant";
 import { ScrollToTop } from "@/components/landing/scroll-to-top";
 import { SocialFloat } from "@/components/landing/social-float";
 import { Particles } from "@/components/landing/particles";
+import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
 
 export const Route = createFileRoute("/")({
   /**
@@ -189,32 +190,34 @@ function Landing() {
         surfaceColor={branding.surfaceColor}
       />
       <CmsProvider sections={cms} faqs={faqs} testimonials={testimonials} branding={branding}>
-        {announcement?.enabled && (
-          <AnnouncementBar text={announcement.text ?? ""} href={announcement.href ?? "#waitlist"} />
-        )}
-        <Particles />
-        <div className="min-h-screen bg-background text-foreground">
-          <Nav />
-          <main>
-            <Hero />
-            <TrustedBy />
-            <LaunchCountdown />
-            <Moments />
-            <Services />
-            <Why />
-            <How />
-            <InsideTheApp />
-            <BuiltForNigerians />
-            <Partners />
-            <WaitlistSection />
-            <FAQ />
-          </main>
-          <Footer />
-        </div>
-        {/* Floating UI — outside the scrollable content div, still inside providers */}
-        <AiAssistant />
-        <ScrollToTop />
-        <SocialFloat />
+        <AnalyticsProvider>
+          {announcement?.enabled && (
+            <AnnouncementBar text={announcement.text ?? ""} href={announcement.href ?? "#waitlist"} />
+          )}
+          <Particles />
+          <div className="min-h-screen bg-background text-foreground">
+            <Nav />
+            <main>
+              <Hero />
+              <TrustedBy />
+              <LaunchCountdown />
+              <Moments />
+              <Services />
+              <Why />
+              <How />
+              <InsideTheApp />
+              <BuiltForNigerians />
+              <Partners />
+              <WaitlistSection />
+              <FAQ />
+            </main>
+            <Footer />
+          </div>
+          {/* Floating UI — outside the scrollable content div, still inside providers */}
+          <AiAssistant />
+          <ScrollToTop />
+          <SocialFloat />
+        </AnalyticsProvider>
       </CmsProvider>
     </LaunchStateProvider>
   );

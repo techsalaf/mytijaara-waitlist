@@ -39,7 +39,7 @@ class RoleController extends Controller
     /** GET /roles/:id — a role plus the permissions it holds. */
     public function show(string $id): JsonResponse
     {
-        $role = Role::with('permissions')->findOrFail($this->pk($id));
+        $role = $this->resolveRole($id);
         $role->loadCount('permissions');
         $role->users_count = (int) DB::table('model_has_roles')
             ->where('role_id', $role->id)
@@ -116,7 +116,7 @@ class RoleController extends Controller
      */
     public function update(Request $request, string $id): JsonResponse
     {
-        $role = Role::findOrFail($this->pk($id));
+        $role = $this->resolveRole($id);
 
         $data = $request->validate([
             'name' => ['sometimes', 'string', 'max:120'],
@@ -152,7 +152,7 @@ class RoleController extends Controller
     /** DELETE /roles/:id — refuses to delete the seeded base roles. */
     public function destroy(Request $request, string $id): JsonResponse
     {
-        $role = Role::findOrFail($this->pk($id));
+        $role = $this->resolveRole($id);
 
         if (array_key_exists($role->name, RoleMeta::LABELS)) {
             return response()->json(['message' => 'Built-in roles cannot be deleted.'], 422);
@@ -172,8 +172,15 @@ class RoleController extends Controller
         return Permission::whereIn('name', $names)->pluck('name')->all();
     }
 
-    private function pk(string $id): int
+    private function resolveRole(string $id): Role
     {
-        return (int) preg_replace('/\D/', '', $id);
+        $numericId = (int) preg_replace('/\D/', '', $id);
+        if ($numericId > 0) {
+            $role = Role::with('permissions')->find($numericId);
+            if ($role) {
+                return $role;
+            }
+        }
+        return Role::with('permissions')->where('name', $id)->firstOrFail();
     }
 }
