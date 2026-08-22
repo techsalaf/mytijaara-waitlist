@@ -228,7 +228,7 @@ class SystemHealth
     /**
      * Pending and failed job counts plus the age of the oldest pending job.
      *
-     * @return array{pending:int,failed:int,oldestPendingSeconds:int|null}
+     * @return array{pending:int,failed:int,oldestPendingSeconds:int|null, jobs:array<int,array<string,mixed>>}
      */
     private static function queueDepth(): array
     {
@@ -238,14 +238,35 @@ class SystemHealth
             // `available_at` is a unix timestamp on the database queue driver.
             $oldest = DB::table('jobs')->min('available_at');
 
+            // Get actual pending jobs for display (limit to 20 for performance)
+            $jobs = DB::table('jobs')
+                ->orderBy('available_at')
+                ->limit(20)
+                ->get(['id', 'queue', 'payload', 'attempts', 'reserved_at', 'available_at', 'created_at'])
+                ->map(function ($job) {
+                    $payload = json_decode($job->payload, true);
+                    $jobName = $payload['displayName'] ?? ($payload['job'] ?? 'Unknown');
+                    return [
+                        'id' => (int) $job->id,
+                        'queue' => $job->queue,
+                        'name' => $jobName,
+                        'attempts' => (int) $job->attempts,
+                        'reservedAt' => $job->reserved_at,
+                        'availableAt' => (int) $job->available_at,
+                        'createdAt' => (int) $job->created_at,
+                    ];
+                })
+                ->all();
+
             return [
                 'pending' => (int) $pending,
                 'failed' => (int) $failed,
                 'oldestPendingSeconds' => $oldest === null ? null : max(0, time() - (int) $oldest),
+                'jobs' => $jobs,
             ];
         } catch (\Throwable) {
             // A non-database queue driver has no tables to read.
-            return ['pending' => 0, 'failed' => 0, 'oldestPendingSeconds' => null];
+            return ['pending' => 0, 'failed' => 0, 'oldestPendingSeconds' => null, 'jobs' => []];
         }
     }
 

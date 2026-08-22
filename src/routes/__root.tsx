@@ -87,8 +87,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Order food, groceries and pharmacy items, book trusted artisans, send packages, rent cars and shop from businesses around you — all from one app built for Nigerians." },
       { property: "og:description", content: "Order food, groceries and pharmacy items, book trusted artisans, send packages, rent cars and shop from businesses around you — all from one app built for Nigerians." },
       { name: "twitter:description", content: "Order food, groceries and pharmacy items, book trusted artisans, send packages, rent cars and shop from businesses around you — all from one app built for Nigerians." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/6ab89f84-682a-467c-82b7-37ad959cee06/id-preview-9dfcd870--569c5ee9-1530-4e82-a4f3-8367bf5c3a2a.lovable.app-1784766551197.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/6ab89f84-682a-467c-82b7-37ad959cee06/id-preview-9dfcd870--569c5ee9-1530-4e82-a4f3-8367bf5c3a2a.lovable.app-1784766551197.png" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:type", content: "website" },
     ],

@@ -133,7 +133,7 @@ export function LaunchStateProvider({
 const DEFAULT_LAUNCH_CONTEXT: LaunchContextValue = {
   config: DEFAULT_LAUNCH_CONFIG,
   status: "pre_launch",
-  remaining: { days: 0, hours: 0, minutes: 0, seconds: 0, totalSeconds: 0, isPast: false },
+  remaining: { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0, isPast: false },
   now: Date.now(),
   isLaunched: false,
   showCountdown: true,

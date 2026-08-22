@@ -486,7 +486,7 @@ function WaitlistPage() {
                           <div className="flex items-center gap-1.5">
                             <span className="font-medium truncate max-w-[200px]">{u.name}</span>
                             {u.verified && (
-                              <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-600" title="Verified" />
+                              <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-600" aria-label="Verified" />
                             )}
                           </div>
                           <div className="text-xs text-muted-foreground truncate max-w-[200px]">

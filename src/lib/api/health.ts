@@ -9,6 +9,17 @@ export type HealthCheck = {
   detail: string;
 };
 
+/** A single queued job from the jobs table. */
+export type QueuedJob = {
+  id: number;
+  queue: string;
+  payload: Record<string, unknown>;
+  attempts: number;
+  reservedAt: number | null;
+  availableAt: number;
+  createdAt: number;
+};
+
 export type SystemHealth = {
   status: "ok" | "degraded" | "down";
   checkedAt: string;
@@ -18,6 +29,7 @@ export type SystemHealth = {
     pending: number;
     failed: number;
     oldestPendingSeconds: number | null;
+    jobs: QueuedJob[];
   };
   errors: {
     lastHour: number;

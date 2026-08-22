@@ -24,7 +24,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { healthApi, type HealthCheck, type HealthSample, type SystemHealth } from "@/lib/api";
+import { healthApi, type HealthCheck, type HealthSample, type SystemHealth, type QueuedJob } from "@/lib/api";
 
 export const Route = createFileRoute("/admin/system-health")({
   head: () => ({
@@ -271,7 +271,7 @@ function HealthPage() {
 
       <div className="grid gap-4 lg:grid-cols-2">
         <SectionCard title="Queue" description="Read from the jobs and failed_jobs tables.">
-          <dl className="grid grid-cols-3 gap-4 text-sm">
+          <dl className="grid grid-cols-3 gap-4 text-sm mb-4">
             <div>
               <dt className="text-xs text-muted-foreground">Pending</dt>
               <dd className="text-2xl font-semibold">{health.queue.pending}</dd>
@@ -295,6 +295,24 @@ function HealthPage() {
               </dd>
             </div>
           </dl>
+
+          {health.queue.jobs.length > 0 && (
+            <div className="mt-4 border-t border-border/60 pt-4">
+              <div className="text-xs font-semibold mb-2">Pending Jobs (top 20)</div>
+              <div className="space-y-1">
+                {health.queue.jobs.map((job: QueuedJob) => (
+                  <div key={job.id} className="flex justify-between items-center text-xs p-2 rounded hover:bg-muted/50">
+                    <span className="font-mono text-muted-foreground w-16">{job.id}</span>
+                    <span className="flex-1 truncate px-2">{(job.payload.displayName as string) || job.queue}</span>
+                    <Badge variant="outline" className="text-[10px]">
+                      {job.attempts} attempts
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {health.queue.failed > 0 && (
             <p className="mt-3 text-xs text-muted-foreground">
               Retry them with <code>php artisan queue:retry all</code>.

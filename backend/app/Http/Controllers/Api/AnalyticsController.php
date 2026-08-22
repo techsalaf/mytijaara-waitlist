@@ -23,6 +23,8 @@ class AnalyticsController extends Controller
         'twitter' => ['name' => 'Twitter/X', 'color' => '#1DA1F2'],
         'tiktok' => ['name' => 'TikTok', 'color' => '#000000'],
         'facebook' => ['name' => 'Facebook', 'color' => '#1877F2'],
+        'whatsapp' => ['name' => 'WhatsApp', 'color' => '#25D366'],
+        'telegram' => ['name' => 'Telegram', 'color' => '#0088CC'],
         'direct' => ['name' => 'Direct', 'color' => '#64748b'],
     ];
 
@@ -152,15 +154,29 @@ class AnalyticsController extends Controller
     public function trafficSources(Request $request): JsonResponse
     {
         $days = $this->windowDays($request);
-        $q = WaitlistEntry::query();
-        if ($days > 0) {
-            $q->where('created_at', '>=', now()->subDays($days));
+        $since = $days > 0 ? now()->subDays($days) : null;
+
+        // Use AnalyticsEvent pageviews with UTM/referrer for real traffic sources
+        $q = AnalyticsEvent::where('type', 'pageview');
+        if ($since) {
+            $q->where('created_at', '>=', $since);
         }
-        $counts = $q->select('source', DB::raw('COUNT(*) as c'))->groupBy('source')->pluck('c', 'source');
-        $total = max(1, $counts->sum());
+
+        // Get counts by utm_source, then fall back to referrer domain, then 'direct'
+        $counts = $q->select('utm_source', 'utm_medium', 'referrer', DB::raw('COUNT(*) as c'))
+            ->groupBy('utm_source', 'utm_medium', 'referrer')
+            ->get();
+
+        $total = max(1, $counts->sum('c'));
+
+        $sourceCounts = [];
+        foreach ($counts as $row) {
+            $source = $this->classifySource($row->utm_source, $row->utm_medium, $row->referrer);
+            $sourceCounts[$source] = ($sourceCounts[$source] ?? 0) + $row->c;
+        }
 
         $agg = [];
-        foreach ($counts as $source => $c) {
+        foreach ($sourceCounts as $source => $c) {
             $meta = self::SOURCE_COLORS[$source] ?? ['name' => ucfirst((string) $source), 'color' => '#64748b'];
             $name = $meta['name'];
             $agg[$name] ??= ['name' => $name, 'value' => 0, 'color' => $meta['color']];
@@ -173,6 +189,44 @@ class AnalyticsController extends Controller
         usort($out, fn ($a, $b) => $b['value'] <=> $a['value']);
 
         return response()->json(['data' => $out]);
+    }
+
+    /**
+     * Classify a visit into a traffic source based on UTM params and referrer.
+     */
+    private function classifySource(?string $utmSource, ?string $utmMedium, ?string $referrer): string
+    {
+        $utmSource = strtolower((string) $utmSource);
+        $utmMedium = strtolower((string) $utmMedium);
+
+        // UTM source takes priority
+        if ($utmSource) {
+            return match ($utmSource) {
+                'google', 'bing', 'yahoo', 'duckduckgo', 'search' => 'organic',
+                'facebook', 'fb', 'instagram', 'ig', 'twitter', 'x', 'tiktok', 'linkedin', 'ln', 'youtube', 'yt' => $utmSource,
+                'referral', 'email', 'newsletter' => $utmSource,
+                default => $utmSource,
+            };
+        }
+
+        // Fallback to referrer domain
+        if ($referrer) {
+            $host = parse_url($referrer, PHP_URL_HOST) ?? '';
+            $host = strtolower($host);
+            if (str_contains($host, 'google.')) return 'organic';
+            if (str_contains($host, 'bing.')) return 'organic';
+            if (str_contains($host, 'facebook.') || str_contains($host, 'fb.')) return 'facebook';
+            if (str_contains($host, 'instagram.')) return 'instagram';
+            if (str_contains($host, 'twitter.') || str_contains($host, 't.co') || str_contains($host, 'x.com')) return 'twitter';
+            if (str_contains($host, 'tiktok.')) return 'tiktok';
+            if (str_contains($host, 'linkedin.')) return 'linkedin';
+            if (str_contains($host, 'youtube.')) return 'youtube';
+            if (str_contains($host, 'whatsapp.')) return 'whatsapp';
+            if (str_contains($host, 't.me') || str_contains($host, 'telegram.')) return 'telegram';
+            return 'referral';
+        }
+
+        return 'direct';
     }
 
     /**

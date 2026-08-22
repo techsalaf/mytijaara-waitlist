@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import { ROLE_REWARDS, getRoleReward, type WaitlistRole } from "@/lib/referrals/rewards";
 import { PublicLayout } from "@/components/landing/public-layout";
+import { settingsApi } from "@/lib/api/settings";
+import type { PublicBranding } from "@/lib/api/settings";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -35,6 +37,11 @@ export const Route = createFileRoute("/referral-rewards")({
       { name: "description", content: "Invite friends to MyTijaara and unlock exclusive rewards based on your role: Customer, Vendor, Artisan, or Rider. 10 referrals unlocks top-tier perks!" },
     ],
   }),
+  loader: async () => {
+    const brandingResult = await settingsApi.publicSettings().catch(() => null);
+    const branding: PublicBranding | undefined = (brandingResult as { data: PublicBranding } | null)?.data;
+    return { branding };
+  },
   component: ReferralRewardsPage,
 });
 
@@ -86,8 +93,10 @@ function ReferralRewardsPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const { branding } = Route.useLoaderData();
+
   return (
-    <PublicLayout>
+    <PublicLayout branding={branding}>
 
       <main className="pt-24 pb-16">
         {/* Hero Section */}
@@ -271,9 +280,9 @@ function ReferralRewardsPage() {
             </p>
             <div className="mt-6">
               <Button asChild size="lg" className="bg-gold text-foreground hover:bg-gold/90 font-bold px-8">
-                <Link to="/#waitlist">
+                <a href="/#waitlist">
                   Join the Waitlist Now <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
+                </a>
               </Button>
             </div>
           </div>

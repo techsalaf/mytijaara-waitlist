@@ -29,10 +29,22 @@ function randId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
+function getUtm(name: string): string | null {
+  if (typeof window === "undefined") return null;
+  const params = new URLSearchParams(window.location.search);
+  return params.get(name) || params.get(name.replace("utm_", "")) || null;
+}
+
 async function send(payload: TrackPayload) {
   try {
     const visitorId = getOrCreate("mytijaara_vid", randId);
     const sessionId = getOrCreate("mytijaara_sid", randId);
+
+    // Extract UTM parameters
+    const utm_source = getUtm("utm_source");
+    const utm_medium = getUtm("utm_medium");
+    const utm_campaign = getUtm("utm_campaign");
+
     await apiCall("/events", {
       method: "POST",
       public: true,
@@ -42,6 +54,9 @@ async function send(payload: TrackPayload) {
         sessionId,
         path: typeof window !== "undefined" ? window.location.pathname : "/",
         referrer: typeof document !== "undefined" ? document.referrer : "",
+        utm_source,
+        utm_medium,
+        utm_campaign,
         meta: payload.meta,
       },
     });

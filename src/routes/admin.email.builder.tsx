@@ -30,8 +30,16 @@ import {
   Type,
 } from "lucide-react";
 import { toast } from "sonner";
-import { campaignsApi, templatesApi } from "@/lib/api";
-import type { CampaignSegment, EmailTemplate } from "@/lib/types";
+import { campaignsApi, templatesApi, waitlistApi } from "@/lib/api";
+import type { CampaignSegment, EmailTemplate, WaitlistUser } from "@/lib/types";
+import {
+  Search,
+  UserPlus,
+  UserMinus,
+  UserCheck,
+  X,
+  Loader2 as Loader2Icon,
+} from "lucide-react";
 
 export const Route = createFileRoute("/admin/email/builder")({
   component: Builder,
@@ -53,6 +61,13 @@ function Builder() {
   const [isSaving, setIsSaving] = useState(false);
   const [editorMode, setEditorMode] = useState<"edit" | "preview">("edit");
 
+  // Individual waitlist selection state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<WaitlistUser[]>([]);
+  const [selectedIndividuals, setSelectedIndividuals] = useState<WaitlistUser[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showIndividualSelector, setShowIndividualSelector] = useState(false);
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
 
@@ -66,6 +81,47 @@ function Builder() {
       campaignsApi.segments().then((r) => setSegments(r.data)),
     ]);
   }, []);
+
+  const searchWaitlist = async (query: string) => {
+    if (!query.trim() || query.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    setIsSearching(true);
+    try {
+      const res = await waitlistApi.list({ search: query.trim(), per_page: 10 });
+      setSearchResults(res.data);
+    } catch (err) {
+      toast.error("Failed to search waitlist");
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    // Debounce search
+    const timeout = setTimeout(() => searchWaitlist(query), 300);
+    return () => clearTimeout(timeout);
+  };
+
+  const addIndividual = (user: WaitlistUser) => {
+    setSelectedIndividuals((prev) => {
+      if (prev.some((u) => u.id === user.id)) return prev;
+      return [...prev, user];
+    });
+    setSearchQuery("");
+    setSearchResults([]);
+  };
+
+  const removeIndividual = (userId: string) => {
+    setSelectedIndividuals((prev) => prev.filter((u) => u.id !== userId));
+  };
+
+  const clearIndividuals = () => {
+    setSelectedIndividuals([]);
+  };
 
   const handleSelectTemplate = async (selectedId: string) => {
     if (selectedId === "none" || !selectedId) {
@@ -137,15 +193,29 @@ function Builder() {
     return `${escapedPreheader}${formattedBody}`;
   };
 
-  const campaignPayload = (status: "draft" | "sending" | "scheduled") => ({
-    name: name.trim() || "Untitled campaign",
-    subject: subject.trim() || "(no subject)",
-    html: buildHtml(),
-    status,
-    template: templateId || null,
-    segment: segments.find((s) => s.value === segmentValue)?.rules ?? null,
-    scheduledAt: status === "scheduled" ? scheduledAt || null : null,
-  });
+  const campaignPayload = (status: "draft" | "sending" | "scheduled") => {
+    const baseSegment = segments.find((s) => s.value === segmentValue)?.rules ?? null;
+
+    // If individuals are selected, add them to the segment rules
+    let finalSegment = baseSegment;
+    if (selectedIndividuals.length > 0) {
+      finalSegment = {
+        ...baseSegment,
+        ids: selectedIndividuals.map((u) => u.id),
+        emails: selectedIndividuals.map((u) => u.email),
+      };
+    }
+
+    return {
+      name: name.trim() || "Untitled campaign",
+      subject: subject.trim() || "(no subject)",
+      html: buildHtml(),
+      status,
+      template: templateId || null,
+      segment: finalSegment,
+      scheduledAt: status === "scheduled" ? scheduledAt || null : null,
+    };
+  };
 
   const saveDraft = async () => {
     setIsSaving(true);
@@ -483,6 +553,127 @@ function Builder() {
                 </>
               ) : (
                 <div className="mt-1 text-muted-foreground">Calculating reach…</div>
+              )}
+            </div>
+          </SectionCard>
+
+          {/* Individual Recipients Selector */}
+          <SectionCard title="Individual Recipients" description="Add specific waitlisters by name or email">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowIndividualSelector(!showIndividualSelector)}
+                  className="cursor-pointer"
+                >
+                  {showIndividualSelector ? <UserMinus className="mr-1.5 h-3.5 w-3.5" /> : <UserPlus className="mr-1.5 h-3.5 w-3.5" />}
+                  {showIndividualSelector ? "Hide Search" : "Add Individual Recipients"}
+                </Button>
+                {selectedIndividuals.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearIndividuals}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <X className="mr-1.5 h-3.5 w-3.5" /> Clear All
+                  </Button>
+                )}
+              </div>
+
+              {showIndividualSelector && (
+                <div className="space-y-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      value={searchQuery}
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                      placeholder="Search by name or email…"
+                      className="pl-10"
+                    />
+                    {isSearching && <Loader2Icon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />}
+                  </div>
+
+                  {searchResults.length > 0 && (
+                    <div className="max-h-60 overflow-y-auto space-y-1 border border-border/60 rounded-lg p-2">
+                      {searchResults.map((user) => {
+                        const isSelected = selectedIndividuals.some((u) => u.id === user.id);
+                        return (
+                          <div
+                            key={user.id}
+                            className={`flex items-center justify-between gap-2 p-2 rounded-md transition-colors ${
+                              isSelected ? "bg-primary/10" : "hover:bg-muted/50"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <div className="grid h-8 w-8 place-items-center rounded-full bg-primary/10 text-primary text-xs font-medium">
+                                {user.name.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium truncate">{user.name}</p>
+                                <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                              </div>
+                            </div>
+                            {isSelected ? (
+                              <UserCheck className="h-5 w-5 text-primary flex-shrink-0" />
+                            ) : (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => addIndividual(user)}
+                                className="h-7 px-2 flex-shrink-0"
+                              >
+                                Add
+                              </Button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {searchQuery.length >= 2 && !isSearching && searchResults.length === 0 && (
+                    <p className="text-xs text-muted-foreground text-center py-2">No waitlisters found matching "{searchQuery}"</p>
+                  )}
+
+                  {searchQuery.length < 2 && !isSearching && !searchResults.length && (
+                    <p className="text-xs text-muted-foreground text-center py-2">Type at least 2 characters to search</p>
+                  )}
+                </div>
+              )}
+
+              {selectedIndividuals.length > 0 && (
+                <div className="border-t border-border/60 pt-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium">Selected ({selectedIndividuals.length})</span>
+                    <Badge variant="secondary" className="text-xs">
+                      {selectedIndividuals.length} individual{selectedIndividuals.length !== 1 ? "s" : ""}
+                    </Badge>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto">
+                    {selectedIndividuals.map((user) => (
+                      <span
+                        key={user.id}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary px-2.5 py-1 text-xs font-medium"
+                      >
+                        {user.name}
+                        <button
+                          type="button"
+                          onClick={() => removeIndividual(user.id)}
+                          className="text-primary hover:text-primary/70"
+                          aria-label={`Remove ${user.name}`}
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    These individuals will be included in the campaign regardless of the segment selection above.
+                  </p>
+                </div>
               )}
             </div>
           </SectionCard>

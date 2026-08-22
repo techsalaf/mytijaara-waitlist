@@ -35,6 +35,7 @@ export type WaitlistUser = {
   joinedAt: string;
   lastActive: string;
   position: number;
+  referralCode?: string;
 };
 
 export type ReferralLeaderboardEntry = WaitlistUser & {

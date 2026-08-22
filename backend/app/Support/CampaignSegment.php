@@ -67,6 +67,13 @@ class CampaignSegment
         if (! empty($segment['hasReferrals'])) {
             $query->where('referrals', '>', 0);
         }
+        if (! empty($segment['ids']) && is_array($segment['ids'])) {
+            $query->whereIn('public_id', $segment['ids'])
+                  ->orWhereIn('id', $segment['ids']);
+        }
+        if (! empty($segment['emails']) && is_array($segment['emails'])) {
+            $query->whereIn('email', $segment['emails']);
+        }
 
         return $query;
     }

@@ -80,7 +80,7 @@ function VerifyEmailPage() {
       .finally(() => setLoading(false));
   }, [token]);
 
-  const referralUrl = user ? `${window.location.origin}/?ref=${user.referral_code || user.id}` : "";
+  const referralUrl = user ? `${window.location.origin}/?ref=${user.referralCode || user.id}` : "";
 
   const copyLink = () => {
     if (!referralUrl) return;

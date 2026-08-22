@@ -188,6 +188,7 @@ export type TimeRemaining = {
   minutes: number;
   seconds: number;
   total: number;
+  isPast: boolean;
 };
 
 export function getTimeRemaining(
@@ -196,12 +197,14 @@ export function getTimeRemaining(
 ): TimeRemaining {
   const target = new Date(launchDateTime).getTime();
   const total = Math.max(0, (Number.isNaN(target) ? now : target) - now);
+  const isPast = now >= target && !Number.isNaN(target);
   return {
     days: Math.floor(total / DAY_MS),
     hours: Math.floor((total / (60 * 60 * 1000)) % 24),
     minutes: Math.floor((total / (60 * 1000)) % 60),
     seconds: Math.floor((total / 1000) % 60),
     total,
+    isPast,
   };
 }
 

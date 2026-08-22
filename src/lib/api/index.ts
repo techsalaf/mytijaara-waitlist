@@ -69,4 +69,4 @@ export type {
 } from "./settings";
 
 export { healthApi } from "./health";
-export type { SystemHealth, HealthCheck, HealthSample } from "./health";
+export type { SystemHealth, HealthCheck, HealthSample, QueuedJob } from "./health";

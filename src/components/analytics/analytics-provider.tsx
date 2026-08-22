@@ -1,13 +1,15 @@
 import { useEffect, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { useBranding } from "@/lib/cms-context";
+import { trackEvent } from "@/lib/analytics/track";
+import { referralsApi } from "@/lib/api";
 
 declare global {
   interface Window {
     dataLayer?: unknown[];
     gtag?: (...args: unknown[]) => void;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    fbq?: (...args: any[]) => void;
+    fbq?: ((...args: any[]) => void) & { queue?: any[]; callMethod?: (...args: any[]) => any; loaded?: boolean; version?: string; push?: (...args: any[]) => void };
     _fbq?: unknown;
   }
 }
@@ -18,6 +20,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
 
   const gaLoaded = useRef(false);
   const fbLoaded = useRef(false);
+  const referralVisitTracked = useRef(false);
 
   // Initialize GA
   useEffect(() => {
@@ -75,16 +78,27 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
       };
       document.head.appendChild(script);
 
-      window.fbq("init", metaPixelId);
+      if (window.fbq && typeof window.fbq === "function") {
+        window.fbq("init", metaPixelId);
+      }
       fbLoaded.current = true;
     } catch (err) {
       console.warn("[Analytics] Meta Pixel initialization failed:", err);
     }
   }, [metaPixelId]);
 
-  // Track SPA route changes as pageviews
+  
+  // Track SPA route changes as pageviews + backend pageview tracking
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    // Extract UTM params from current URL for this pageview event
+    const utm_source = (new URLSearchParams(window.location.search)).get("utm_source") || (new URLSearchParams(window.location.search)).get("source") || null;
+    const utm_medium = (new URLSearchParams(window.location.search)).get("utm_medium") || null;
+    const utm_campaign = (new URLSearchParams(window.location.search)).get("utm_campaign") || null;
+
+    // Track pageview to backend with UTM params
+    trackEvent("pageview", { path: location, utm_source, utm_medium, utm_campaign });
 
     if (googleAnalyticsId && window.gtag) {
       try {
@@ -102,6 +116,20 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
       }
     }
   }, [location, googleAnalyticsId, metaPixelId]);
+
+  // Track referral visits once on mount
+  useEffect(() => {
+    if (typeof window === "undefined" || referralVisitTracked.current) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const refCode = params.get("ref");
+    const utmSource = params.get("utm_source") || params.get("source");
+
+    if (refCode) {
+      void referralsApi.visit(refCode, utmSource ?? undefined);
+      referralVisitTracked.current = true;
+    }
+  }, []);
 
   return <>{children}</>;
 }

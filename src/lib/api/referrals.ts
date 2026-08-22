@@ -72,4 +72,8 @@ export const referralsApi = {
       body: { ids, note: note ?? null },
       timeoutMs: 60000, // one mail per referrer
     }),
+
+  /** POST /referrals/visit — PUBLIC: record a referral-link click with UTM. */
+  visit: (code: string, utm_source?: string) =>
+    apiCall<{ valid: boolean }>(`/referrals/visit${toQuery({ code, utm_source })}`),
 };
