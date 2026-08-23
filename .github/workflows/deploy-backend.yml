@@ -1,11 +1,9 @@
-name: Deploy Laravel Backend
+name: Deploy Application
 
 on:
   push:
     branches:
       - main
-    paths:
-      - "backend/**"
 
 jobs:
   detect:
@@ -26,16 +24,16 @@ jobs:
 
       - id: changes
         run: |
-          CHANGED=$(git diff --name-only HEAD^ HEAD)
+          CHANGED=$(git diff --name-only HEAD^ HEAD || git diff --name-only HEAD || echo "")
 
           echo "Changed files:"
           echo "$CHANGED"
 
           composer=false
           migrate=false
-          config=false
-          routes=false
-          views=false
+          config=true
+          routes=true
+          views=true
           queue=false
 
           while IFS= read -r file; do
@@ -47,18 +45,6 @@ jobs:
 
               backend/database/migrations/*)
                 migrate=true
-                ;;
-
-              backend/config/*|backend/bootstrap/*)
-                config=true
-                ;;
-
-              backend/routes/*)
-                routes=true
-                ;;
-
-              backend/resources/views/*)
-                views=true
                 ;;
 
               backend/app/Jobs/*|backend/app/Listeners/*)
@@ -127,7 +113,7 @@ jobs:
 
             cd "$APP"
 
-            php artisan storage:link
+            php artisan storage:link || true
 
             if [ "$COMPOSER" = "true" ]; then
               echo "Running Composer..."
@@ -137,6 +123,8 @@ jobs:
                 --optimize-autoloader \
                 --no-interaction
             fi
+
+            php artisan optimize:clear || true
 
             if [ "$RUN_CONFIG" = "true" ]; then
               php artisan config:cache

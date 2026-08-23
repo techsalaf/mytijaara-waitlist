@@ -43,8 +43,8 @@ class SendScheduledCampaigns extends Command
                 continue;
             }
 
-            SendCampaignJob::dispatch($campaign->id);
-            $this->info("Queued {$campaign->public_id} ({$campaign->name}).");
+            SendCampaignJob::dispatchSync($campaign->id);
+            $this->info("Processed {$campaign->public_id} ({$campaign->name}).");
         }
 
         if ($due->isEmpty()) {

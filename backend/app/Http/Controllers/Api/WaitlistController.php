@@ -40,8 +40,11 @@ class WaitlistController extends Controller
             'direction' => ['nullable', Rule::in(['asc', 'desc'])],
         ]);
 
-        $query = $this->filtered($request)->with('referredBy');
+        $baseQuery = $this->filtered($request);
+        $totalVerified = (clone $baseQuery)->where('verified', true)->count();
+        $totalAvgReferrals = (float) (clone $baseQuery)->avg('referrals');
 
+        $query = $baseQuery->with('referredBy');
         $sort = $request->input('sort', 'created_at');
         $allowedSorts = ['created_at', 'name', 'email', 'city', 'referrals', 'position', 'status'];
         if (! in_array($sort, $allowedSorts, true)) {
@@ -51,9 +54,6 @@ class WaitlistController extends Controller
 
         $perPage = (int) $request->input('per_page', 25);
         $page = $query->paginate($perPage);
-
-        $totalVerified = (clone $query)->where('verified', true)->count();
-        $totalAvgReferrals = (float) (clone $query)->avg('referrals');
 
         return response()->json([
             'data' => WaitlistEntryResource::collection($page->items()),

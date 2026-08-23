@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Share2, X } from "lucide-react";
-import { useBranding } from "@/lib/cms-context";
+import { useBranding, useCmsSectionState } from "@/lib/cms-context";
 import { SOCIAL_ICON_MAP, SOCIAL_PLATFORMS } from "./social-icons";
 
 /**
@@ -11,7 +11,10 @@ import { SOCIAL_ICON_MAP, SOCIAL_PLATFORMS } from "./social-icons";
 export function SocialFloat() {
   const [open, setOpen] = useState(false);
   const { social } = useBranding();
+  const { enabled } = useCmsSectionState("social", { enabled: true });
   const ref = useRef<HTMLDivElement>(null);
+
+  if (!enabled) return null;
 
   useEffect(() => {
     if (!open) return;

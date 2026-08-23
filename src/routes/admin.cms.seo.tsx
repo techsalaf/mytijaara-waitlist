@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { SectionCard } from "@/components/admin/ui-bits";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Loader2, Save } from "lucide-react";
+import { Image as ImageIcon, Loader2, Save, Upload } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useCmsSection } from "@/lib/hooks/useCmsSection";
+import { MediaPickerModal } from "@/components/admin/media-picker-modal";
 
 type SeoData = {
   title?: string;
@@ -39,6 +41,7 @@ function SeoEditor() {
     "seo",
     defaultSeoData,
   );
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
@@ -115,12 +118,33 @@ function SeoEditor() {
             />
           </div>
           <div>
-            <Label>OG Image URL</Label>
-            <Input
-              value={data.ogImage ?? ""}
-              onChange={(e) => setData({ ...data, ogImage: e.target.value })}
-              className="mt-1.5"
-            />
+            <Label>OG Image</Label>
+            <div className="mt-1.5 space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  value={data.ogImage ?? ""}
+                  onChange={(e) => setData({ ...data, ogImage: e.target.value })}
+                  placeholder="https://example.com/og-image.png"
+                />
+                <Button variant="outline" onClick={() => setPickerOpen(true)}>
+                  <ImageIcon className="mr-2 h-4 w-4" />
+                  Media Library
+                </Button>
+              </div>
+
+              {data.ogImage ? (
+                <div className="relative aspect-[1200/630] max-h-40 overflow-hidden rounded-lg border border-border bg-muted/20 flex items-center justify-center">
+                  <img
+                    src={data.ogImage}
+                    alt="OG Social Preview"
+                    className="h-full w-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                </div>
+              ) : null}
+            </div>
           </div>
           <div>
             <Label>Twitter handle</Label>
@@ -132,6 +156,13 @@ function SeoEditor() {
           </div>
         </div>
       </SectionCard>
+
+      <MediaPickerModal
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        onSelect={(url) => setData({ ...data, ogImage: url })}
+        title="Select Social Preview Image (OG Image)"
+      />
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 import { Reveal } from "./reveal";
-import { useFaqs, useCmsData } from "@/lib/cms-context";
+import { useFaqs, useCmsSectionState } from "@/lib/cms-context";
 import { trackEvent } from "@/lib/analytics/track";
 
 const HARDCODED_FAQS = [
@@ -23,7 +23,8 @@ const DEFAULT_FAQ: FaqCmsData = {
 export function FAQ() {
   const [open, setOpen] = useState<number | null>(0);
   const dbFaqs = useFaqs();
-  const cms = useCmsData("faqs", DEFAULT_FAQ);
+  const { data: cms, enabled } = useCmsSectionState("faqs", DEFAULT_FAQ);
+  if (!enabled) return null;
   const FAQS = dbFaqs.length > 0
     ? dbFaqs.map((f) => ({ q: f.question, a: f.answer }))
     : HARDCODED_FAQS;

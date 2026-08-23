@@ -1,10 +1,22 @@
 import { Coffee, Sun, Sunset, Moon } from "lucide-react";
-
 import { Reveal } from "./reveal";
 import morningImg from "@/assets/moment-morning.jpg";
 import afternoonImg from "@/assets/moment-afternoon.jpg";
 import eveningImg from "@/assets/moment-evening.jpg";
 import nightImg from "@/assets/moment-night.jpg";
+import { useCmsSectionState } from "@/lib/cms-context";
+
+type MomentsCmsData = {
+  badge?: string;
+  heading?: string;
+  subheading?: string;
+};
+
+const DEFAULT_MOMENTS: MomentsCmsData = {
+  badge: "Everyday moments",
+  heading: "A day with MyTijaara.",
+  subheading: "From your first cup to your last errand — MyTijaara moves with you.",
+};
 
 const MOMENTS = [
   {
@@ -30,19 +42,22 @@ const MOMENTS = [
 ];
 
 export function Moments() {
+  const { data: cms, enabled } = useCmsSectionState("moments", DEFAULT_MOMENTS);
+  if (!enabled) return null;
+
   return (
     <section id="moments" className="relative py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
           <Reveal>
             <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-primary">
-              Everyday moments
+              {cms.badge ?? DEFAULT_MOMENTS.badge}
             </span>
             <h2 className="mt-5 font-display text-4xl font-bold tracking-tight sm:text-5xl">
-              A day with MyTijaara.
+              {cms.heading ?? DEFAULT_MOMENTS.heading}
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
-              From your first cup to your last errand — MyTijaara moves with you.
+              {cms.subheading ?? DEFAULT_MOMENTS.subheading}
             </p>
           </Reveal>
         </div>

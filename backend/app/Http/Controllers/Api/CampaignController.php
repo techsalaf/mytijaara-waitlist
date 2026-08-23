@@ -154,7 +154,7 @@ class CampaignController extends Controller
         return response()->json(['data' => $presets]);
     }
 
-    /** POST /campaigns/:id/send — queue or send the campaign for delivery. */
+    /** POST /campaigns/:id/send — send the campaign for immediate delivery. */
     public function send(string $id): JsonResponse
     {
         $campaign = EmailCampaign::where('public_id', $id)->firstOrFail();
@@ -165,11 +165,16 @@ class CampaignController extends Controller
 
         $campaign->update(['status' => 'sending']);
 
-        // In local environment or sync queue, process synchronously so it sends immediately
-        if (config('queue.default') === 'sync' || app()->environment('local')) {
+        // Dispatch synchronously so it sends immediately even on shared hosting without a daemon worker
+        try {
             SendCampaignJob::dispatchSync($campaign->id);
-        } else {
-            SendCampaignJob::dispatch($campaign->id);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Synchronous campaign send error', [
+                'campaign_id' => $campaign->id,
+                'error' => $e->getMessage(),
+            ]);
+            $campaign->update(['status' => 'failed']);
+            throw $e;
         }
 
         return response()->json(['data' => new CampaignResource($campaign->fresh('template'))]);

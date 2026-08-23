@@ -204,7 +204,7 @@ export function InsideTheApp() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-background py-24 sm:py-32">
+    <section id="download" className="relative overflow-hidden bg-background py-24 sm:py-32">
       <div className="pointer-events-none absolute inset-0 bg-hero-gradient opacity-40" />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">

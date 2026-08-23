@@ -224,9 +224,11 @@ function BrandColors({
 function Landing() {
   const { launchConfig, serverNow, cms, faqs, testimonials, branding } = Route.useLoaderData();
 
-  const announcement = cms["announcement"]?.data as
+  const announcementSec = cms["announcement"];
+  const announcementData = announcementSec?.data as
     | { enabled?: boolean; text?: string; href?: string }
     | undefined;
+  const showAnnouncement = announcementSec?.enabled !== false && announcementData?.enabled !== false && Boolean(announcementData?.text);
 
   return (
     <LaunchStateProvider initialConfig={launchConfig} initialNow={serverNow}>
@@ -239,8 +241,8 @@ function Landing() {
       />
       <CmsProvider sections={cms} faqs={faqs} testimonials={testimonials} branding={branding}>
         <AnalyticsProvider>
-          {announcement?.enabled && (
-            <AnnouncementBar text={announcement.text ?? ""} href={announcement.href ?? "#waitlist"} />
+          {showAnnouncement && (
+            <AnnouncementBar text={announcementData?.text ?? ""} href={announcementData?.href ?? "#waitlist"} />
           )}
           <Particles />
           <div className="min-h-screen bg-background text-foreground">

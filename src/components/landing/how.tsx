@@ -1,5 +1,5 @@
 import { Reveal } from "./reveal";
-import { useCmsData } from "@/lib/cms-context";
+import { useCmsSectionState } from "@/lib/cms-context";
 
 type HowStep = { step?: number; n?: string; title: string; body?: string; description?: string };
 type HowCmsData = { heading?: string; steps?: HowStep[] };
@@ -15,7 +15,8 @@ const DEFAULT: HowCmsData = {
 };
 
 export function How() {
-  const cms = useCmsData("how", DEFAULT);
+  const { data: cms, enabled } = useCmsSectionState("how", DEFAULT);
+  if (!enabled) return null;
   const steps = cms.steps && cms.steps.length > 0 ? cms.steps : DEFAULT.steps!;
 
   return (

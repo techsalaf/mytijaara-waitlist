@@ -64,7 +64,8 @@ const PARTNERS = [
 export function Partners() {
   // Partner CTAs point at the waitlist pre-launch, the download section after.
   const primary = usePrimaryCta();
-  const cms = useCmsData("partners", DEFAULT_PARTNERS);
+  const { data: cms, enabled } = useCmsSectionState("partners", DEFAULT_PARTNERS);
+  if (!enabled) return null;
 
   return (
     <section id="partners" className="relative overflow-hidden bg-surface py-24 sm:py-32">

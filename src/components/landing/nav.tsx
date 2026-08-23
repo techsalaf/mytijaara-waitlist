@@ -4,7 +4,7 @@ import { ArrowRight, Download, Menu, X } from "lucide-react";
 import { Logo } from "./logo";
 import { usePrimaryCta } from "@/components/launch/launch-cta";
 import { LaunchTicker } from "@/components/launch/launch-ticker";
-import { useCmsData } from "@/lib/cms-context";
+import { useCmsSectionState } from "@/lib/cms-context";
 import { trackEvent } from "@/lib/analytics/track";
 
 type NavLink = { href: string; label: string };
@@ -26,7 +26,8 @@ export function Nav() {
   // Flips from "Join the waitlist" to "Download App" automatically at launch.
   const cta = usePrimaryCta();
   const CtaIcon = cta.download ? Download : ArrowRight;
-  const cms = useCmsData("navigation", DEFAULT_NAV);
+  const { data: cms, enabled } = useCmsSectionState("navigation", DEFAULT_NAV);
+  if (!enabled) return null;
   const links = cms.links && cms.links.length > 0 ? cms.links : DEFAULT_NAV.links!;
 
   useEffect(() => {

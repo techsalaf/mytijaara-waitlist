@@ -15,7 +15,7 @@ import { WaitlistCount } from "./waitlist-count";
 import { AvatarCluster } from "./avatar-cluster";
 import { usePrimaryCta } from "@/components/launch/launch-cta";
 import { useLaunch } from "@/components/launch/launch-state-provider";
-import { useCmsData } from "@/lib/cms-context";
+import { useCmsSectionState } from "@/lib/cms-context";
 import heroImg from "@/assets/hero-illustration.png";
 import { trackEvent } from "@/lib/analytics/track";
 
@@ -66,7 +66,9 @@ export function Hero() {
   const cta = usePrimaryCta();
   const { isLaunched, showWaitlist } = useLaunch();
   const CtaIcon = cta.download ? Download : ArrowRight;
-  const cms = useCmsData("hero", DEFAULT_HERO as HeroCmsData);
+  const { data: cms, enabled } = useCmsSectionState("hero", DEFAULT_HERO as HeroCmsData);
+
+  if (!enabled) return null;
 
   const eyebrow = isLaunched
     ? ((DEFAULT_HERO as HeroCmsData & { eyebrowLive?: string }).eyebrowLive ?? "Built for Nigerians — Now live")

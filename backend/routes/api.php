@@ -53,6 +53,10 @@ Route::get('/track/open/{campaign}', [EmailTrackingController::class, 'open']);
 Route::get('/track/click/{campaign}', [EmailTrackingController::class, 'click']);
 Route::post('/webhooks/email', [EmailTrackingController::class, 'webhook']);
 Route::post('/unsubscribe', [EmailTrackingController::class, 'unsubscribe']);
+Route::get('/cron/run', function () {
+    \Illuminate\Support\Facades\Artisan::call('campaigns:send-due');
+    return response()->json(['status' => 'ok', 'output' => trim(\Illuminate\Support\Facades\Artisan::output())]);
+});
 
 // Public read of published CMS content for the landing page.
 Route::get('/settings/public', [SettingsController::class, 'publicSettings']);
