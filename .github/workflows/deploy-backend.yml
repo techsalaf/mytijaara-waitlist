@@ -1,9 +1,11 @@
-name: Deploy Application
+name: Deploy Laravel Backend
 
 on:
   push:
     branches:
       - main
+    paths:
+      - "backend/**"
 
 jobs:
   detect:
