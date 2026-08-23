@@ -77,6 +77,8 @@ function WaitlistPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [totalCount, setTotalCount] = useState(0);
+  const [totalVerifiedCount, setTotalVerifiedCount] = useState<number | null>(null);
+  const [globalAvgReferrals, setGlobalAvgReferrals] = useState<number | null>(null);
   const [view, setView] = useState<WaitlistUser | null>(null);
   const [addOpen, setAddOpen] = useState(false);
 
@@ -106,6 +108,12 @@ function WaitlistPage() {
       setTotalCount(
         typeof response.meta?.total === "number" ? response.meta.total : response.data.length,
       );
+      if (typeof (response.meta as Record<string, unknown> | undefined)?.total_verified === "number") {
+        setTotalVerifiedCount((response.meta as Record<string, unknown>).total_verified as number);
+      }
+      if (typeof (response.meta as Record<string, unknown> | undefined)?.avg_referrals === "number") {
+        setGlobalAvgReferrals((response.meta as Record<string, unknown>).avg_referrals as number);
+      }
     } catch (error) {
       console.error("Failed to load waitlist:", error);
       setRows([]);
@@ -213,7 +221,12 @@ function WaitlistPage() {
   };
 
   const total = totalCount || 1;
-  const verified = rows.filter((u) => u.verified).length;
+  const verified = totalVerifiedCount !== null ? totalVerifiedCount : rows.filter((u) => u.verified).length;
+  const avgRef = globalAvgReferrals !== null
+    ? globalAvgReferrals.toFixed(1)
+    : rows.length
+      ? (rows.reduce((s, u) => s + u.referrals, 0) / rows.length).toFixed(1)
+      : "0";
 
   return (
     <div className="space-y-6">
@@ -243,11 +256,7 @@ function WaitlistPage() {
         />
         <StatCard
           label="Avg referrals"
-          value={
-            rows.length
-              ? (rows.reduce((s, u) => s + u.referrals, 0) / rows.length).toFixed(1)
-              : "0"
-          }
+          value={avgRef}
           icon={Award}
         />
         <StatCard label="Conversion" value="–" delta={0} icon={Percent} />

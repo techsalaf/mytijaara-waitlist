@@ -13,7 +13,7 @@ export type HealthCheck = {
 export type QueuedJob = {
   id: number;
   queue: string;
-  payload: Record<string, unknown>;
+  name: string;
   attempts: number;
   reservedAt: number | null;
   availableAt: number;

@@ -52,10 +52,15 @@ class WaitlistController extends Controller
         $perPage = (int) $request->input('per_page', 25);
         $page = $query->paginate($perPage);
 
+        $totalVerified = (clone $query)->where('verified', true)->count();
+        $totalAvgReferrals = (float) (clone $query)->avg('referrals');
+
         return response()->json([
             'data' => WaitlistEntryResource::collection($page->items()),
             'meta' => [
                 'total' => $page->total(),
+                'total_verified' => $totalVerified,
+                'avg_referrals' => round($totalAvgReferrals, 1),
                 'current_page' => $page->currentPage(),
                 'last_page' => $page->lastPage(),
                 'per_page' => $page->perPage(),

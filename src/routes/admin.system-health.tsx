@@ -296,17 +296,20 @@ function HealthPage() {
             </div>
           </dl>
 
-          {health.queue.jobs.length > 0 && (
+          {health.queue.jobs && health.queue.jobs.length > 0 && (
             <div className="mt-4 border-t border-border/60 pt-4">
-              <div className="text-xs font-semibold mb-2">Pending Jobs (top 20)</div>
-              <div className="space-y-1">
+              <div className="text-xs font-semibold mb-2">Pending Jobs ({health.queue.jobs.length})</div>
+              <div className="space-y-1 max-h-48 overflow-y-auto">
                 {health.queue.jobs.map((job: QueuedJob) => (
-                  <div key={job.id} className="flex justify-between items-center text-xs p-2 rounded hover:bg-muted/50">
-                    <span className="font-mono text-muted-foreground w-16">{job.id}</span>
-                    <span className="flex-1 truncate px-2">{(job.payload.displayName as string) || job.queue}</span>
-                    <Badge variant="outline" className="text-[10px]">
-                      {job.attempts} attempts
-                    </Badge>
+                  <div key={job.id} className="flex justify-between items-center text-xs p-2 rounded hover:bg-muted/50 border border-border/30">
+                    <span className="font-mono text-muted-foreground w-12 shrink-0">#{job.id}</span>
+                    <span className="flex-1 truncate px-2 font-medium">{job.name || job.queue}</span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="text-[10px] text-muted-foreground font-mono">{job.queue}</span>
+                      <Badge variant="outline" className="text-[10px]">
+                        {job.attempts} att
+                      </Badge>
+                    </div>
                   </div>
                 ))}
               </div>

@@ -47,6 +47,24 @@ class CampaignSegment
     {
         $query = WaitlistEntry::query()->whereNotNull('email');
 
+        // If specific individual IDs or emails are provided without other segment criteria,
+        // or if they are specified alongside:
+        $hasIndividualIds = ! empty($segment['ids']) && is_array($segment['ids']);
+        $hasIndividualEmails = ! empty($segment['emails']) && is_array($segment['emails']);
+
+        if (! empty($segment['only_individuals'])) {
+            // Target ONLY the selected individual recipients
+            return $query->where(function ($q) use ($segment, $hasIndividualIds, $hasIndividualEmails) {
+                if ($hasIndividualIds) {
+                    $q->whereIn('public_id', $segment['ids'])
+                      ->orWhereIn('id', $segment['ids']);
+                }
+                if ($hasIndividualEmails) {
+                    $q->orWhereIn('email', $segment['emails']);
+                }
+            });
+        }
+
         if (! empty($segment['status'])) {
             $query->where('status', $segment['status']);
         }
@@ -67,12 +85,16 @@ class CampaignSegment
         if (! empty($segment['hasReferrals'])) {
             $query->where('referrals', '>', 0);
         }
-        if (! empty($segment['ids']) && is_array($segment['ids'])) {
-            $query->whereIn('public_id', $segment['ids'])
-                  ->orWhereIn('id', $segment['ids']);
-        }
-        if (! empty($segment['emails']) && is_array($segment['emails'])) {
-            $query->whereIn('email', $segment['emails']);
+        if ($hasIndividualIds || $hasIndividualEmails) {
+            $query->orWhere(function ($q) use ($segment, $hasIndividualIds, $hasIndividualEmails) {
+                if ($hasIndividualIds) {
+                    $q->whereIn('public_id', $segment['ids'])
+                      ->orWhereIn('id', $segment['ids']);
+                }
+                if ($hasIndividualEmails) {
+                    $q->orWhereIn('email', $segment['emails']);
+                }
+            });
         }
 
         return $query;

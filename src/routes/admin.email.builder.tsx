@@ -72,7 +72,9 @@ function Builder() {
   const nameRef = useRef<HTMLInputElement>(null);
 
   // Selected segment's live reach count
-  const reach = segments.find((s) => s.value === segmentValue)?.reach ?? null;
+  const reach = segmentValue === "none"
+    ? selectedIndividuals.length
+    : (segments.find((s) => s.value === segmentValue)?.reach ?? null);
 
   useEffect(() => {
     nameRef.current?.focus();
@@ -194,16 +196,27 @@ function Builder() {
   };
 
   const campaignPayload = (status: "draft" | "sending" | "scheduled") => {
-    const baseSegment = segments.find((s) => s.value === segmentValue)?.rules ?? null;
+    const isNoneSegment = segmentValue === "none";
+    const baseSegment = isNoneSegment
+      ? null
+      : (segments.find((s) => s.value === segmentValue)?.rules ?? null);
 
     // If individuals are selected, add them to the segment rules
-    let finalSegment = baseSegment;
+    let finalSegment: Record<string, unknown> | null = baseSegment;
     if (selectedIndividuals.length > 0) {
-      finalSegment = {
-        ...baseSegment,
-        ids: selectedIndividuals.map((u) => u.id),
-        emails: selectedIndividuals.map((u) => u.email),
-      };
+      if (isNoneSegment) {
+        finalSegment = {
+          only_individuals: true,
+          ids: selectedIndividuals.map((u) => u.id),
+          emails: selectedIndividuals.map((u) => u.email),
+        };
+      } else {
+        finalSegment = {
+          ...baseSegment,
+          ids: selectedIndividuals.map((u) => u.id),
+          emails: selectedIndividuals.map((u) => u.email),
+        };
+      }
     }
 
     return {
@@ -235,6 +248,10 @@ function Builder() {
       toast.error("Campaign name and subject are required before sending.");
       return;
     }
+    if (segmentValue === "none" && selectedIndividuals.length === 0) {
+      toast.error("Select at least one individual recipient or an audience segment.");
+      return;
+    }
     setIsSaving(true);
     try {
       const r = await campaignsApi.create(campaignPayload("draft"));
@@ -255,6 +272,10 @@ function Builder() {
     }
     if (!name.trim() || !subject.trim()) {
       toast.error("Campaign name and subject are required.");
+      return;
+    }
+    if (segmentValue === "none" && selectedIndividuals.length === 0) {
+      toast.error("Select at least one individual recipient or an audience segment.");
       return;
     }
     setIsSaving(true);
@@ -530,6 +551,7 @@ function Builder() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="none">No Preset (Individual Recipients Only)</SelectItem>
                 {segments.length === 0 ? (
                   <SelectItem value="all">Loading…</SelectItem>
                 ) : (

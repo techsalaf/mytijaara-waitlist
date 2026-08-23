@@ -50,7 +50,16 @@ export const Route = createFileRoute("/")({
 
     const cmsData = (cmsRaw as { data: Record<string, CmsSection> })?.data ?? {};
     const seoSection = cmsData["seo"]?.data as
-      | { title?: string; description?: string; ogImage?: string; keywords?: string }
+      | {
+          title?: string;
+          description?: string;
+          canonicalUrl?: string;
+          keywords?: string;
+          ogTitle?: string;
+          ogDescription?: string;
+          ogImage?: string;
+          twitterHandle?: string;
+        }
       | undefined;
 
     const branding: PublicBranding = (brandingResult as { data: PublicBranding } | null)?.data ?? {
@@ -85,6 +94,16 @@ export const Route = createFileRoute("/")({
       metaPixelId: "",
     };
 
+    const rawOgImage = seoSection?.ogImage || branding.ogImageUrl || "/og-image.png";
+    const canonicalUrl = seoSection?.canonicalUrl || "https://mytijaara.com";
+
+    // Ensure ogImage is an absolute URL for WhatsApp / social crawler previews
+    let ogImageUrl = rawOgImage;
+    if (rawOgImage && !rawOgImage.startsWith("http://") && !rawOgImage.startsWith("https://")) {
+      const base = canonicalUrl.replace(/\/$/, "");
+      ogImageUrl = `${base}/${rawOgImage.replace(/^\//, "")}`;
+    }
+
     return {
       launchConfig: normalizeLaunchConfig(launchRaw),
       serverNow: Date.now(),
@@ -94,7 +113,12 @@ export const Route = createFileRoute("/")({
       branding,
       _seoTitle: seoSection?.title,
       _seoDescription: seoSection?.description,
-      _seoOgImage: seoSection?.ogImage || branding.ogImageUrl,
+      _seoKeywords: seoSection?.keywords,
+      _seoCanonicalUrl: canonicalUrl,
+      _seoOgTitle: seoSection?.ogTitle || seoSection?.title,
+      _seoOgDescription: seoSection?.ogDescription || seoSection?.description,
+      _seoOgImage: ogImageUrl,
+      _seoTwitterHandle: seoSection?.twitterHandle,
       _faviconUrl: branding.faviconUrl,
     };
   },
@@ -106,28 +130,52 @@ export const Route = createFileRoute("/")({
     const d = loaderData as typeof loaderData & {
       _seoTitle?: string;
       _seoDescription?: string;
+      _seoKeywords?: string;
+      _seoCanonicalUrl?: string;
+      _seoOgTitle?: string;
+      _seoOgDescription?: string;
       _seoOgImage?: string;
+      _seoTwitterHandle?: string;
       _faviconUrl?: string;
     };
 
     const title = d._seoTitle || DEFAULT_TITLE;
     const description = d._seoDescription || DEFAULT_DESC;
+    const keywords = d._seoKeywords || "nigeria, super app, food delivery, groceries, pharmacy, artisans, logistics, car rental";
+    const ogTitle = d._seoOgTitle || title;
+    const ogDescription = d._seoOgDescription || description;
     const ogImage = d._seoOgImage;
+    const canonicalUrl = d._seoCanonicalUrl;
+    const twitterHandle = d._seoTwitterHandle;
     const faviconUrl = d._faviconUrl;
 
     return {
       meta: [
         { title },
         { name: "description", content: description },
-        { property: "og:title", content: title },
-        { property: "og:description", content: description },
+        { name: "keywords", content: keywords },
+        { property: "og:title", content: ogTitle },
+        { property: "og:description", content: ogDescription },
         { property: "og:type", content: "website" },
-        ...(ogImage ? [{ property: "og:image", content: ogImage }] : []),
+        { property: "og:site_name", content: "MyTijaara" },
+        ...(canonicalUrl ? [{ property: "og:url", content: canonicalUrl }] : []),
+        ...(ogImage
+          ? [
+              { property: "og:image", content: ogImage },
+              { property: "og:image:secure_url", content: ogImage },
+              { property: "og:image:width", content: "1200" },
+              { property: "og:image:height", content: "630" },
+              { property: "og:image:type", content: "image/png" },
+            ]
+          : []),
         { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: title },
-        { name: "twitter:description", content: description },
+        { name: "twitter:title", content: ogTitle },
+        { name: "twitter:description", content: ogDescription },
+        ...(twitterHandle ? [{ name: "twitter:site", content: twitterHandle }, { name: "twitter:creator", content: twitterHandle }] : []),
+        ...(ogImage ? [{ name: "twitter:image", content: ogImage }] : []),
       ],
       links: [
+        ...(canonicalUrl ? [{ rel: "canonical", href: canonicalUrl }] : []),
         ...(faviconUrl
           ? [{ rel: "icon", href: faviconUrl }]
           : [{ rel: "icon", href: "/favicon.ico" }]),

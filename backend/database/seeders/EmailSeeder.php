@@ -34,6 +34,31 @@ class EmailSeeder extends Seeder
         foreach ($templates as $t) {
             EmailTemplate::firstOrCreate(['public_id' => $t['public_id']], $t);
         }
+
+        $campaigns = [
+            ['public_id' => 'cmp_001', 'name' => 'Welcome to MyTijaara', 'status' => 'sent', 'subject' => "You're on the list! Here's what's next 🎉", 'sent' => 1847, 'recipients' => 1847, 'opens' => 890, 'clicks' => 234, 'sent_at' => '2026-07-18', 'template' => 'tpl_1'],
+            ['public_id' => 'cmp_002', 'name' => 'Early Access Invite — Lagos', 'status' => 'sent', 'subject' => "Lagos, you're first. Try MyTijaara today.", 'sent' => 892, 'recipients' => 892, 'opens' => 512, 'clicks' => 187, 'sent_at' => '2026-07-14', 'template' => 'tpl_3'],
+            ['public_id' => 'cmp_003', 'name' => 'Referral Bonus Reminder', 'status' => 'scheduled', 'subject' => '3 friends away from your ₦5,000 bonus', 'sent' => 0, 'recipients' => 0, 'opens' => 0, 'clicks' => 0, 'scheduled_at' => '2026-07-26', 'template' => 'tpl_2'],
+            ['public_id' => 'cmp_004', 'name' => 'Product Update — August', 'status' => 'draft', 'subject' => 'New: Book artisans in seconds', 'sent' => 0, 'recipients' => 0, 'opens' => 0, 'clicks' => 0, 'template' => 'tpl_5'],
+            ['public_id' => 'cmp_005', 'name' => 'Vendor Onboarding Series', 'status' => 'sent', 'subject' => 'Grow your business with MyTijaara', 'sent' => 342, 'recipients' => 342, 'opens' => 198, 'clicks' => 76, 'sent_at' => '2026-07-10', 'template' => 'tpl_4'],
+        ];
+        foreach ($campaigns as $c) {
+            $templateId = EmailTemplate::where('public_id', $c['template'])->value('id');
+            EmailCampaign::firstOrCreate(['public_id' => $c['public_id']], [
+                'name' => $c['name'],
+                'subject' => $c['subject'],
+                'html' => '<p>'.$c['name'].'</p>',
+                'status' => $c['status'],
+                'template_id' => $templateId,
+                'recipients' => $c['recipients'],
+                'sent' => $c['sent'],
+                'opens' => $c['opens'],
+                'clicks' => $c['clicks'],
+                'bounces' => 0,
+                'scheduled_at' => $c['scheduled_at'] ?? null,
+                'sent_at' => $c['sent_at'] ?? null,
+            ]);
+        }
     }
 
     private function referralBonusHtml(): string
@@ -526,32 +551,5 @@ HTML;
 </body>
 </html>
 HTML;
-    }
-}
-
-        $campaigns = [
-            ['public_id' => 'cmp_001', 'name' => 'Welcome to MyTijaara', 'status' => 'sent', 'subject' => "You're on the list! Here's what's next 🎉", 'sent' => 1847, 'recipients' => 1847, 'opens' => 890, 'clicks' => 234, 'sent_at' => '2026-07-18', 'template' => 'tpl_1'],
-            ['public_id' => 'cmp_002', 'name' => 'Early Access Invite — Lagos', 'status' => 'sent', 'subject' => "Lagos, you're first. Try MyTijaara today.", 'sent' => 892, 'recipients' => 892, 'opens' => 512, 'clicks' => 187, 'sent_at' => '2026-07-14', 'template' => 'tpl_3'],
-            ['public_id' => 'cmp_003', 'name' => 'Referral Bonus Reminder', 'status' => 'scheduled', 'subject' => '3 friends away from your ₦5,000 bonus', 'sent' => 0, 'recipients' => 0, 'opens' => 0, 'clicks' => 0, 'scheduled_at' => '2026-07-26', 'template' => 'tpl_2'],
-            ['public_id' => 'cmp_004', 'name' => 'Product Update — August', 'status' => 'draft', 'subject' => 'New: Book artisans in seconds', 'sent' => 0, 'recipients' => 0, 'opens' => 0, 'clicks' => 0, 'template' => 'tpl_5'],
-            ['public_id' => 'cmp_005', 'name' => 'Vendor Onboarding Series', 'status' => 'sent', 'subject' => 'Grow your business with MyTijaara', 'sent' => 342, 'recipients' => 342, 'opens' => 198, 'clicks' => 76, 'sent_at' => '2026-07-10', 'template' => 'tpl_4'],
-        ];
-        foreach ($campaigns as $c) {
-            $templateId = EmailTemplate::where('public_id', $c['template'])->value('id');
-            EmailCampaign::firstOrCreate(['public_id' => $c['public_id']], [
-                'name' => $c['name'],
-                'subject' => $c['subject'],
-                'html' => '<p>'.$c['name'].'</p>',
-                'status' => $c['status'],
-                'template_id' => $templateId,
-                'recipients' => $c['recipients'],
-                'sent' => $c['sent'],
-                'opens' => $c['opens'],
-                'clicks' => $c['clicks'],
-                'bounces' => 0,
-                'scheduled_at' => $c['scheduled_at'] ?? null,
-                'sent_at' => $c['sent_at'] ?? null,
-            ]);
-        }
     }
 }
