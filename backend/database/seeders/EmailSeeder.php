@@ -32,7 +32,9 @@ class EmailSeeder extends Seeder
             ['public_id' => 'tpl_6', 'name' => 'Password Reset', 'category' => 'transactional', 'thumbnail' => 'reset', 'subject' => 'Reset your password', 'html' => $this->passwordResetHtml(), 'text' => 'You requested a password reset for your MyTijaara account. Reset your password at {{ $resetLink }}. If you didn\'t request this, please ignore this email.'],
         ];
         foreach ($templates as $t) {
-            EmailTemplate::firstOrCreate(['public_id' => $t['public_id']], $t);
+            $data = $t;
+            unset($data['public_id']);
+            EmailTemplate::withTrashed()->updateOrCreate(['public_id' => $t['public_id']], $data);
         }
 
         $campaigns = [
@@ -43,8 +45,8 @@ class EmailSeeder extends Seeder
             ['public_id' => 'cmp_005', 'name' => 'Vendor Onboarding Series', 'status' => 'sent', 'subject' => 'Grow your business with MyTijaara', 'sent' => 342, 'recipients' => 342, 'opens' => 198, 'clicks' => 76, 'sent_at' => '2026-07-10', 'template' => 'tpl_4'],
         ];
         foreach ($campaigns as $c) {
-            $templateId = EmailTemplate::where('public_id', $c['template'])->value('id');
-            EmailCampaign::firstOrCreate(['public_id' => $c['public_id']], [
+            $templateId = EmailTemplate::withTrashed()->where('public_id', $c['template'])->value('id');
+            EmailCampaign::withTrashed()->updateOrCreate(['public_id' => $c['public_id']], [
                 'name' => $c['name'],
                 'subject' => $c['subject'],
                 'html' => '<p>'.$c['name'].'</p>',
