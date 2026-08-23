@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 import { Reveal } from "./reveal";
-import { useCmsSectionState } from "@/lib/cms-context";
+import { useCmsData } from "@/lib/cms-context";
 
 // Icons are code — they can't be stored in the DB. Map by position so an
 // admin can reorder or reword items without losing the visual icons.
@@ -36,8 +36,8 @@ const DEFAULT: ServicesCmsData = {
 };
 
 export function Services() {
-  const { data: cms, enabled } = useCmsSectionState("services", DEFAULT);
-  if (!enabled) return null;
+  const cms = useCmsData("services", DEFAULT);
+  if (!cms) return null;
   const items = (cms.items && cms.items.length > 0 ? cms.items : DEFAULT.items!);
 
   return (

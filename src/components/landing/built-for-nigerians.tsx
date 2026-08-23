@@ -1,7 +1,7 @@
 import { Check } from "lucide-react";
 
 import { Reveal } from "./reveal";
-import { useCmsSectionState } from "@/lib/cms-context";
+import { useCmsData } from "@/lib/cms-context";
 
 const NG_CARDS = [
   { title: "Suya night", emoji: "🍢", bg: "bg-[oklch(0.94_0.06_70)]", fg: "text-[oklch(0.45_0.15_45)]" },
@@ -24,8 +24,8 @@ const DEFAULT: BfnCmsData = {
 };
 
 export function BuiltForNigerians() {
-  const { data: cms, enabled } = useCmsSectionState("built_for_nigerians", DEFAULT);
-  if (!enabled) return null;
+  const cms = useCmsData("built_for_nigerians", DEFAULT);
+  if (!cms) return null;
   const points = cms.points && cms.points.length > 0 ? cms.points : DEFAULT.points!;
 
   return (

@@ -1,7 +1,7 @@
 import { Sparkles, MapPin, Shield, Clock } from "lucide-react";
 
 import { Reveal } from "./reveal";
-import { useCmsSectionState } from "@/lib/cms-context";
+import { useCmsData } from "@/lib/cms-context";
 
 const ICONS = [Sparkles, MapPin, Shield, Clock];
 
@@ -20,8 +20,8 @@ const DEFAULT: WhyCmsData = {
 };
 
 export function Why() {
-  const { data: cms, enabled } = useCmsSectionState("why", DEFAULT);
-  if (!enabled) return null;
+  const cms = useCmsData("why", DEFAULT);
+  if (!cms) return null;
   const points = cms.points && cms.points.length > 0 ? cms.points : DEFAULT.points!;
 
   return (

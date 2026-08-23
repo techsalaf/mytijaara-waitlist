@@ -115,8 +115,8 @@ function AppStoreBadge({
 
 export function Footer() {
   const { isLaunched } = useLaunch();
-  const { data: footerCms, enabled } = useCmsSectionState("footer", DEFAULT_FOOTER);
-  if (!enabled) return null;
+  const footerCms = useCmsData("footer", DEFAULT_FOOTER);
+  if (!footerCms) return null;
   const branding = useBranding();
   const { social, supportEmail, contactEmail, phone, launchCity, address, iosAppUrl, androidAppUrl } = branding;
 

@@ -4,7 +4,7 @@ import morningImg from "@/assets/moment-morning.jpg";
 import afternoonImg from "@/assets/moment-afternoon.jpg";
 import eveningImg from "@/assets/moment-evening.jpg";
 import nightImg from "@/assets/moment-night.jpg";
-import { useCmsSectionState } from "@/lib/cms-context";
+import { useCmsData } from "@/lib/cms-context";
 
 type MomentsCmsData = {
   badge?: string;
@@ -42,8 +42,8 @@ const MOMENTS = [
 ];
 
 export function Moments() {
-  const { data: cms, enabled } = useCmsSectionState("moments", DEFAULT_MOMENTS);
-  if (!enabled) return null;
+  const cms = useCmsData("moments", DEFAULT_MOMENTS);
+  if (!cms) return null;
 
   return (
     <section id="moments" className="relative py-24 sm:py-32">

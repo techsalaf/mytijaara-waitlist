@@ -124,6 +124,7 @@ function ScreenModal({ screen, onClose }: { screen: Screen | null; onClose: () =
 
 export function InsideTheApp() {
   const cms = useCmsData("inside_the_app", DEFAULT_INSIDE);
+  if (!cms) return null;
   const trackRef = useRef<HTMLDivElement | null>(null);
   const offsetRef = useRef(0);
   const halfWidthRef = useRef(0);

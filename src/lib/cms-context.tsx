@@ -71,39 +71,26 @@ export function CmsProvider({
 }
 
 /**
- * Read a CMS section's data with a typed fallback. When the section doesn't
- * exist or has no data, returns the fallback. Use this in every landing
- * component so the page renders with hardcoded defaults when the DB is empty,
- * but respects admin edits when the section is populated.
+ * Read a CMS section's data with a typed fallback. When the section is disabled
+ * (or omitted because enabled=false), returns `null` so the component can hide.
+ * When the section exists and is enabled, returns merged data.
  */
 export function useCmsData<T extends Record<string, unknown>>(
   section: string,
   fallback: T,
-): T {
-  const { sections } = useContext(CmsContext);
-  const s = sections[section];
-  if (!s?.data || Object.keys(s.data).length === 0) return fallback;
-  return { ...fallback, ...s.data } as T;
-}
-
-/**
- * Read a CMS section's data along with its `enabled` visibility state.
- * If `enabled` is false (or section was omitted because enabled=false),
- * landing page components should render `null` (hide).
- */
-export function useCmsSectionState<T extends Record<string, unknown>>(
-  section: string,
-  fallback: T,
-): { data: T; enabled: boolean } {
+): T | null {
   const { sections } = useContext(CmsContext);
   const s = sections[section];
   const hasLoadedSections = sections && Object.keys(sections).length > 0;
   if (!s) {
     // If cms sections map is loaded but this key is absent, backend excluded it because enabled=false
-    return { data: fallback, enabled: !hasLoadedSections };
+    return hasLoadedSections ? null : fallback;
   }
-  const data = !s.data || Object.keys(s.data).length === 0 ? fallback : ({ ...fallback, ...s.data } as T);
-  return { data, enabled: s.enabled !== false };
+  if (s.enabled === false) {
+    return null;
+  }
+  if (!s.data || Object.keys(s.data).length === 0) return fallback;
+  return { ...fallback, ...s.data } as T;
 }
 
 /** Read the public branding settings (logo URL, favicon, site name). */
