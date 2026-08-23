@@ -41,14 +41,14 @@ export const Route = createFileRoute("/")({
   loader: async () => {
     const [launchRaw, cmsRaw, faqsRaw, testimonialsRaw, brandingResult] = await Promise.all([
       serverGet<unknown>("/launch-config"),
-      serverGet<{ data: Record<string, CmsSection> }>("/cms"),
-      serverGet<{ data: Faq[] }>("/content/faqs"),
-      serverGet<{ data: Testimonial[] }>("/content/testimonials"),
+      serverGet<Record<string, CmsSection>>("/cms"),
+      serverGet<Faq[]>("/content/faqs"),
+      serverGet<Testimonial[]>("/content/testimonials"),
       // Branding endpoint may not be deployed yet — degrade gracefully.
       settingsApi.publicSettings().catch(() => null),
     ]);
 
-    const cmsData = (cmsRaw as { data: Record<string, CmsSection> })?.data ?? {};
+    const cmsData = (cmsRaw as Record<string, CmsSection>) ?? {};
     const seoSection = cmsData["seo"]?.data as
       | {
           title?: string;
@@ -108,8 +108,8 @@ export const Route = createFileRoute("/")({
       launchConfig: normalizeLaunchConfig(launchRaw),
       serverNow: Date.now(),
       cms: cmsData,
-      faqs: (faqsRaw as { data: Faq[] })?.data ?? [],
-      testimonials: (testimonialsRaw as { data: Testimonial[] })?.data ?? [],
+      faqs: (faqsRaw as Faq[]) ?? [],
+      testimonials: (testimonialsRaw as Testimonial[]) ?? [],
       branding,
       _seoTitle: seoSection?.title,
       _seoDescription: seoSection?.description,

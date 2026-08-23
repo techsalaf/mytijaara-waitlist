@@ -11,10 +11,10 @@ export const Route = createFileRoute("/cookies")({
   loader: async () => {
     const [launchRaw, cmsRaw, brandingResult] = await Promise.all([
       serverGet<unknown>("/launch-config"),
-      serverGet<{ data: Record<string, CmsSection> }>("/cms"),
+      serverGet<Record<string, CmsSection>>("/cms"),
       settingsApi.publicSettings().catch(() => null),
     ]);
-    const cms = (cmsRaw as { data: Record<string, CmsSection> })?.data ?? {};
+    const cms = (cmsRaw as Record<string, CmsSection>) ?? {};
     const branding = (brandingResult as { data: PublicBranding } | null)?.data;
     return { launchConfig: normalizeLaunchConfig(launchRaw), serverNow: Date.now(), cms, branding };
   },

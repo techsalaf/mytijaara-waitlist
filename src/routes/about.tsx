@@ -9,10 +9,10 @@ import { About } from "@/components/about/about";
 export const Route = createFileRoute("/about")({
   loader: async () => {
     const [cmsRaw, brandingResult] = await Promise.all([
-      serverGet<{ data: Record<string, CmsSection> }>("/cms"),
+      serverGet<Record<string, CmsSection>>("/cms"),
       settingsApi.publicSettings().catch(() => null),
     ]);
-    const cmsData = (cmsRaw as { data: Record<string, CmsSection> })?.data ?? {};
+    const cmsData = (cmsRaw as Record<string, CmsSection>) ?? {};
     const branding: PublicBranding | undefined = (brandingResult as { data: PublicBranding } | null)?.data;
     return { cmsData, branding, serverNow: Date.now() };
   },
