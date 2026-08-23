@@ -118,6 +118,7 @@ export function Footer() {
   const footerCms = useCmsData("footer", DEFAULT_FOOTER);
   if (!footerCms) return null;
   const branding = useBranding();
+  const year = new Date().getFullYear();
   const { social, supportEmail, contactEmail, phone, launchCity, address, iosAppUrl, androidAppUrl } = branding;
 
   const tagline = footerCms.tagline ?? DEFAULT_FOOTER.tagline;
