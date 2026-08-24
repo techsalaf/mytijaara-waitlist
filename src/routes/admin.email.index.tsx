@@ -130,21 +130,21 @@ function EmailCampaigns() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground">
+              <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border/60">
                 <tr>
-                  <th className="pb-2 font-medium">Campaign</th>
-                  <th className="pb-2 font-medium">Status</th>
-                  <th className="pb-2 font-medium text-right">Sent</th>
-                  <th className="pb-2 font-medium text-right">Open %</th>
-                  <th className="pb-2 font-medium text-right">Click %</th>
-                  <th className="pb-2 font-medium">Date</th>
-                  <th className="pb-2 font-medium" />
+                  <th className="pb-3 pr-4 font-medium">Campaign</th>
+                  <th className="pb-3 px-3 font-medium">Status</th>
+                  <th className="pb-3 px-3 font-medium text-right">Sent</th>
+                  <th className="pb-3 px-3 font-medium text-right">Open %</th>
+                  <th className="pb-3 px-3 font-medium text-right">Click %</th>
+                  <th className="pb-3 pl-4 pr-3 font-medium">Date</th>
+                  <th className="pb-3 pl-2 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {campaigns.map((c) => (
-                  <tr key={c.id} className="border-t border-border/40">
-                    <td className="py-3">
+                  <tr key={c.id} className="border-t border-border/40 hover:bg-muted/30 transition-colors">
+                    <td className="py-3.5 pr-4">
                       <Link to="/admin/email/$id" params={{ id: c.id }} className="block">
                         <div className="font-medium hover:text-primary">{c.name}</div>
                         <div className="max-w-md truncate text-xs text-muted-foreground">
@@ -152,22 +152,22 @@ function EmailCampaigns() {
                         </div>
                       </Link>
                     </td>
-                    <td className="py-3">
+                    <td className="py-3.5 px-3">
                       <Badge className={STATUS_CLASS[c.status] ?? STATUS_CLASS.draft}>
                         {c.status}
                       </Badge>
                     </td>
-                    <td className="py-3 text-right">{c.sent.toLocaleString()}</td>
-                    <td className="py-3 text-right">
+                    <td className="py-3.5 px-3 text-right font-mono text-xs">{c.sent.toLocaleString()}</td>
+                    <td className="py-3.5 px-3 text-right font-mono text-xs">
                       {c.sent ? `${c.openRate.toFixed(1)}%` : "—"}
                     </td>
-                    <td className="py-3 text-right">
+                    <td className="py-3.5 px-3 text-right font-mono text-xs">
                       {c.sent ? `${c.clickRate.toFixed(1)}%` : "—"}
                     </td>
-                    <td className="py-3 text-xs text-muted-foreground">
+                    <td className="py-3.5 pl-4 pr-3 text-xs text-muted-foreground whitespace-nowrap">
                       {c.sentAt ?? c.scheduledAt ?? "—"}
                     </td>
-                    <td className="py-3">
+                    <td className="py-3.5 pl-2 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <Button
                           variant="ghost"
