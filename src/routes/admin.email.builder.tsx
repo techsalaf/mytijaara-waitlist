@@ -137,15 +137,10 @@ function Builder() {
       if (t) {
         if (t.name) setName(t.name);
         if (t.subject) setSubject(t.subject);
-        if (t.text) {
+        if (t.html) {
+          setBody(t.html);
+        } else if (t.text) {
           setBody(t.text);
-        } else if (t.html) {
-          const cleanText = t.html
-            .replace(/<br\s*\/?>/gi, "\n")
-            .replace(/<\/p>/gi, "\n\n")
-            .replace(/<[^>]+>/g, "")
-            .trim();
-          setBody(cleanText);
         }
         toast.success(`Prefilled campaign with template "${t.name}".`);
       }
@@ -179,13 +174,18 @@ function Builder() {
   };
 
   const buildHtml = () => {
+    const isFullHtml = body.includes("<html") || body.includes("<!DOCTYPE");
+    if (isFullHtml) {
+      return body;
+    }
+
     const escapedPreheader = preheader
       ? `<p style="color:#666666;font-size:13px;margin:0 0 16px;">${preheader}</p>`
       : "";
 
     // Convert newlines to formatted paragraph blocks if body is raw text
     let formattedBody = body;
-    if (!body.includes("<p>") && !body.includes("<div>")) {
+    if (!body.includes("<p>") && !body.includes("<div>") && !body.includes("<table")) {
       formattedBody = body
         .split("\n\n")
         .map((para) => `<p style="margin:0 0 16px;line-height:1.6;">${para.replace(/\n/g, "<br>")}</p>`)
@@ -494,6 +494,17 @@ function Builder() {
                   rows={16}
                   className="rounded-none border-0 font-mono text-sm focus-visible:ring-0 p-4"
                 />
+              ) : body.includes("<html") || body.includes("<!DOCTYPE") || body.includes("<table") ? (
+                <div className="bg-white">
+                  <div className="px-6 py-2.5 bg-muted/40 text-xs text-muted-foreground border-b font-mono">
+                    Subject: {subject || "(no subject)"}
+                  </div>
+                  <iframe
+                    title="email-preview"
+                    srcDoc={buildHtml()}
+                    className="w-full min-h-[520px] border-0 bg-white"
+                  />
+                </div>
               ) : (
                 <div className="p-6 bg-white min-h-[350px] text-sm text-foreground">
                   <div className="text-xs text-muted-foreground border-b pb-2 mb-4 font-mono">

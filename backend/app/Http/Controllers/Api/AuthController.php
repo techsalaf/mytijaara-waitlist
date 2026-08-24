@@ -289,10 +289,22 @@ class AuthController extends Controller
      */
     public function startTwoFactor(Request $request): JsonResponse
     {
-        $setup = TwoFactor::begin($request->user());
-        Audit::record($request, 'profile.2fa-started', $request->user()->email);
+        try {
+            $setup = TwoFactor::begin($request->user());
+            Audit::record($request, 'profile.2fa-started', $request->user()->email);
 
-        return response()->json(['data' => $setup]);
+            return response()->json(['data' => $setup]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('startTwoFactor failed', [
+                'user' => $request->user()?->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'message' => 'Could not initialize two-factor authentication: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /** POST /auth/two-factor/confirm — finish enrolment with a real code. */

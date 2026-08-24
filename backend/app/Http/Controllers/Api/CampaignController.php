@@ -85,7 +85,11 @@ class CampaignController extends Controller
     /** DELETE /campaigns/:id */
     public function destroy(string $id): JsonResponse
     {
-        EmailCampaign::where('public_id', $id)->firstOrFail()->delete();
+        $campaign = EmailCampaign::withTrashed()->where('public_id', $id)->firstOrFail();
+
+        // Delete associated email events to reset analytics
+        EmailEvent::where('campaign_id', $campaign->id)->delete();
+        $campaign->forceDelete();
 
         return response()->json(['data' => ['deleted' => true]]);
     }

@@ -35,19 +35,16 @@ class EmailCampaign extends Model
 
     /**
      * Next free `cmp_NNN` public id.
-     *
-     * Counts `withTrashed()` so a soft-deleted campaign cannot hand its id to a
-     * new row, and still probes in a loop because the count alone is not unique
-     * once anything has been hard-deleted.
+     * Finds the lowest available sequence number starting from 1.
      */
     public static function nextPublicId(): string
     {
-        $n = static::withTrashed()->count() + 1;
+        $existing = static::pluck('public_id')->toArray();
+        $n = 1;
+        while (in_array('cmp_' . str_pad((string) $n, 3, '0', STR_PAD_LEFT), $existing, true)) {
+            $n++;
+        }
 
-        do {
-            $id = 'cmp_'.str_pad((string) $n++, 3, '0', STR_PAD_LEFT);
-        } while (static::withTrashed()->where('public_id', $id)->exists());
-
-        return $id;
+        return 'cmp_' . str_pad((string) $n, 3, '0', STR_PAD_LEFT);
     }
 }

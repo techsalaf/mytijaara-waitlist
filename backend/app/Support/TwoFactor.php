@@ -191,9 +191,14 @@ class TwoFactor
     /** Inline SVG so the client never has to fetch the QR from a third party. */
     private static function qrSvg(string $url): string
     {
-        $writer = new Writer(new ImageRenderer(new RendererStyle(220, 0), new SvgImageBackEnd));
+        try {
+            $writer = new Writer(new ImageRenderer(new RendererStyle(220, 0), new SvgImageBackEnd));
 
-        return $writer->writeString($url);
+            return $writer->writeString($url);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('TwoFactor QR SVG generation error: ' . $e->getMessage());
+            return '';
+        }
     }
 
     private static function issuer(): string

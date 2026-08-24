@@ -38,8 +38,9 @@ class CampaignMail extends Mailable
             }
         }
 
+        $apiUrl = rtrim((string) config('app.url'), '/');
         $unsubscribeUrl = $site . '/unsubscribe?email=' . urlencode($this->entry->email);
-        $trackingPixelUrl = $site . '/api/v1/track/open/' . $this->campaign->public_id . '?e=' . urlencode($this->entry->email);
+        $trackingPixelUrl = $apiUrl . '/api/v1/track/open/' . $this->campaign->public_id . '?e=' . urlencode($this->entry->email);
         $referralUrl = $site . '/?ref=' . ($this->entry->referral_code ?? '');
         $verifyUrl = $site . '/verify-email?token=' . ($this->entry->verification_token ?? '');
 
@@ -65,8 +66,28 @@ class CampaignMail extends Mailable
             '{{reset_link}}' => $site . '/auth/reset-password?token=sample',
         ]);
 
-        // Append tracking pixel
-        $body .= '<img src="' . $trackingPixelUrl . '" width="1" height="1" style="display:none;width:1px;height:1px;" alt="" />';
+        // Wrap external links for click tracking (excluding unsubscribe)
+        $clickTrackerBase = $apiUrl . '/api/v1/track/click/' . $this->campaign->public_id . '?e=' . urlencode($this->entry->email) . '&url=';
+        $body = preg_replace_callback(
+            '/<a\s+([^>]*?)href=["\'](https?:\/\/[^"\']+)["\']([^>]*)>/i',
+            function ($matches) use ($clickTrackerBase, $unsubscribeUrl) {
+                $url = $matches[2];
+                if (str_contains($url, 'unsubscribe') || $url === $unsubscribeUrl || str_contains($url, '/track/')) {
+                    return $matches[0];
+                }
+                $wrapped = $clickTrackerBase . urlencode($url);
+                return '<a ' . $matches[1] . 'href="' . $wrapped . '"' . $matches[3] . '>';
+            },
+            $body
+        );
+
+        // Append tracking pixel before </body> or at the end
+        $pixelTag = '<img src="' . $trackingPixelUrl . '" width="1" height="1" style="display:none;width:1px;height:1px;" alt="" />';
+        if (str_contains($body, '</body>')) {
+            $body = str_replace('</body>', $pixelTag . '</body>', $body);
+        } else {
+            $body .= $pixelTag;
+        }
 
         if (str_contains($body, '<html') || str_contains($body, '<!DOCTYPE')) {
             return new Content(htmlString: $body);
