@@ -29,11 +29,6 @@ class TwoFactor
     /** Clock drift tolerance, in 30-second windows either side of now. */
     private const WINDOW = 1;
 
-    private static function engine(): Google2FA
-    {
-        return new Google2FA;
-    }
-
     /**
      * Start enrolment: fresh secret, fresh recovery codes, not yet confirmed.
      *
@@ -41,9 +36,7 @@ class TwoFactor
      */
     public static function begin(User $user): array
     {
-        $engine = self::engine();
-        $secret = $engine->generateSecretKey();
-
+        $secret = self::generateSecret();
         $plainCodes = self::generateRecoveryCodes();
 
         $user->forceFill([
@@ -56,7 +49,7 @@ class TwoFactor
             'two_factor_confirmed_at' => null,
         ])->save();
 
-        $url = $engine->getQRCodeUrl(self::issuer(), $user->email, $secret);
+        $url = self::getOtpauthUrl(self::issuer(), $user->email, $secret);
 
         return [
             'secret' => $secret,
@@ -147,12 +140,88 @@ class TwoFactor
             return false;
         }
 
-        try {
-            return (bool) self::engine()->verifyKey($secret, $digits, self::WINDOW);
-        } catch (\Throwable) {
-            // A malformed stored secret must read as "wrong code", not a 500.
-            return false;
+        return self::verifyTotpKey($secret, $digits, self::WINDOW);
+    }
+
+    private static function generateSecret(): string
+    {
+        if (class_exists(Google2FA::class)) {
+            try {
+                return (new Google2FA)->generateSecretKey();
+            } catch (\Throwable) {}
         }
+
+        $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+        $secret = '';
+        for ($i = 0; $i < 32; $i++) {
+            $secret .= $chars[random_int(0, 31)];
+        }
+
+        return $secret;
+    }
+
+    private static function getOtpauthUrl(string $issuer, string $email, string $secret): string
+    {
+        if (class_exists(Google2FA::class)) {
+            try {
+                return (new Google2FA)->getQRCodeUrl($issuer, $email, $secret);
+            } catch (\Throwable) {}
+        }
+
+        return 'otpauth://totp/' . rawurlencode($issuer) . ':' . rawurlencode($email) . '?secret=' . $secret . '&issuer=' . rawurlencode($issuer);
+    }
+
+    private static function verifyTotpKey(string $secret, string $code, int $window = 1): bool
+    {
+        if (class_exists(Google2FA::class)) {
+            try {
+                return (bool) (new Google2FA)->verifyKey($secret, $code, $window);
+            } catch (\Throwable) {}
+        }
+
+        $currentTimeSlice = (int) floor(time() / 30);
+        for ($i = -$window; $i <= $window; $i++) {
+            $calculated = self::calculateTotp($secret, $currentTimeSlice + $i);
+            if (hash_equals($calculated, $code)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static function base32Decode(string $secret): string
+    {
+        $base32chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+        $base32charsFlipped = array_flip(str_split($base32chars));
+        $cleanSecret = strtoupper(preg_replace('/[^A-Z2-7]/', '', $secret) ?? '');
+        $buffer = 0;
+        $bufferSize = 0;
+        $result = '';
+        for ($i = 0; $i < strlen($cleanSecret); $i++) {
+            $val = $base32charsFlipped[$cleanSecret[$i]] ?? 0;
+            $buffer = ($buffer << 5) | $val;
+            $bufferSize += 5;
+            if ($bufferSize >= 8) {
+                $bufferSize -= 8;
+                $result .= chr(($buffer >> $bufferSize) & 0xFF);
+            }
+        }
+
+        return $result;
+    }
+
+    private static function calculateTotp(string $secret, int $timeSlice): string
+    {
+        $key = self::base32Decode($secret);
+        $time = chr(0).chr(0).chr(0).chr(0).pack('N*', $timeSlice);
+        $hmac = hash_hmac('sha1', $time, $key, true);
+        $offset = ord(substr($hmac, -1)) & 0x0F;
+        $hashPart = substr($hmac, $offset, 4);
+        $value = unpack('N', $hashPart)[1] & 0x7FFFFFFF;
+        $modulo = 10 ** 6;
+
+        return str_pad((string) ($value % $modulo), 6, '0', STR_PAD_LEFT);
     }
 
     private static function consumeRecoveryCode(User $user, string $code): bool

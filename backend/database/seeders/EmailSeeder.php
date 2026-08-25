@@ -104,11 +104,14 @@ class EmailSeeder extends Seeder
       <td align="center">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e8e2d5;box-shadow:0 4px 12px rgba(0,0,0,0.04);">
           <tr>
-            <td style="background:#004a28;padding:22px 28px;">
+            <td style="background:#004a28;padding:20px 28px;">
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background:#d4a017;border-radius:8px;padding:6px 12px;font-weight:bold;color:#004a28;font-size:16px;">M</td>
-                  <td style="padding-left:12px;color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.3px;">MyTijaara</td>
+                  <td>
+                    <a href="https://mytijaara.com" style="text-decoration:none;display:inline-block;">
+                      <img src="{{logoUrl}}" alt="{{siteName}}" height="36" style="height:36px;max-height:40px;width:auto;border:0;display:block;" />
+                    </a>
+                  </td>
                 </tr>
               </table>
             </td>
@@ -143,10 +146,32 @@ class EmailSeeder extends Seeder
                 <p style="margin:0 0 12px;font-size:14px;line-height:1.5;color:#555555;">
                   Share your unique referral link with friends, family, and colleagues. You'll jump the queue and earn <strong>₦500</strong> for every verified signup!
                 </p>
-                <div style="background:#faf8f3;border:1px dashed #d4a017;padding:12px 16px;border-radius:8px;font-size:13px;word-break:break-all;color:#004a28;font-weight:600;">
+                <div style="background:#faf8f3;border:1px dashed #d4a017;padding:12px 16px;border-radius:8px;font-size:13px;word-break:break-all;color:#004a28;font-weight:600;margin-bottom:12px;">
                   {{referralUrl}}
                 </div>
+                <p style="margin:0 0 18px;">
+                  <a href="https://mytijaara.com/referral-rewards" style="font-size:14px;color:#004a28;font-weight:600;text-decoration:underline;">See what you unlock at 10 referrals &rarr;</a>
+                </p>
               </div>
+
+              <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:18px 20px;margin-top:20px;">
+                <h4 style="margin:0 0 6px;font-size:15px;color:#166534;font-weight:700;">Stay in the loop</h4>
+                <p style="margin:0 0 14px;font-size:13.5px;line-height:1.5;color:#15803d;">
+                  Join our official WhatsApp channel for launch updates, exclusive previews, and early access offers.
+                </p>
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="background:#25D366;border-radius:8px;">
+                      <a href="https://whatsapp.com/channel/0029VaXXXXX" style="display:inline-block;padding:11px 22px;color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;letter-spacing:-0.2px;">💬 Join WhatsApp Channel</a>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              <p style="margin:24px 0 0;font-size:14px;line-height:1.6;color:#555555;">
+                See you at launch,<br>
+                <strong>The MyTijaara team</strong>
+              </p>
             </td>
           </tr>
           <tr>
@@ -180,11 +205,14 @@ HTML;
       <td align="center">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e8e2d5;box-shadow:0 4px 12px rgba(0,0,0,0.04);">
           <tr>
-            <td style="background:#004a28;padding:22px 28px;">
+            <td style="background:#004a28;padding:20px 28px;">
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background:#d4a017;border-radius:8px;padding:6px 12px;font-weight:bold;color:#004a28;font-size:16px;">M</td>
-                  <td style="padding-left:12px;color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.3px;">MyTijaara</td>
+                  <td>
+                    <a href="https://mytijaara.com" style="text-decoration:none;display:inline-block;">
+                      <img src="{{logoUrl}}" alt="{{siteName}}" height="36" style="height:36px;max-height:40px;width:auto;border:0;display:block;" />
+                    </a>
+                  </td>
                 </tr>
               </table>
             </td>
@@ -255,11 +283,14 @@ HTML;
       <td align="center">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e8e2d5;box-shadow:0 4px 12px rgba(0,0,0,0.04);">
           <tr>
-            <td style="background:#004a28;padding:22px 28px;">
+            <td style="background:#004a28;padding:20px 28px;">
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background:#d4a017;border-radius:8px;padding:6px 12px;font-weight:bold;color:#004a28;font-size:16px;">M</td>
-                  <td style="padding-left:12px;color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.3px;">MyTijaara</td>
+                  <td>
+                    <a href="https://mytijaara.com" style="text-decoration:none;display:inline-block;">
+                      <img src="{{logoUrl}}" alt="{{siteName}}" height="36" style="height:36px;max-height:40px;width:auto;border:0;display:block;" />
+                    </a>
+                  </td>
                 </tr>
               </table>
             </td>
@@ -327,11 +358,14 @@ HTML;
       <td align="center">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e8e2d5;box-shadow:0 4px 12px rgba(0,0,0,0.04);">
           <tr>
-            <td style="background:#004a28;padding:22px 28px;">
+            <td style="background:#004a28;padding:20px 28px;">
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background:#d4a017;border-radius:8px;padding:6px 12px;font-weight:bold;color:#004a28;font-size:16px;">M</td>
-                  <td style="padding-left:12px;color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.3px;">MyTijaara for Partners</td>
+                  <td>
+                    <a href="https://mytijaara.com" style="text-decoration:none;display:inline-block;">
+                      <img src="{{logoUrl}}" alt="{{siteName}}" height="36" style="height:36px;max-height:40px;width:auto;border:0;display:block;" />
+                    </a>
+                  </td>
                 </tr>
               </table>
             </td>
@@ -396,11 +430,14 @@ HTML;
       <td align="center">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e8e2d5;box-shadow:0 4px 12px rgba(0,0,0,0.04);">
           <tr>
-            <td style="background:#004a28;padding:22px 28px;">
+            <td style="background:#004a28;padding:20px 28px;">
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background:#d4a017;border-radius:8px;padding:6px 12px;font-weight:bold;color:#004a28;font-size:16px;">M</td>
-                  <td style="padding-left:12px;color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.3px;">MyTijaara Product Update</td>
+                  <td>
+                    <a href="https://mytijaara.com" style="text-decoration:none;display:inline-block;">
+                      <img src="{{logoUrl}}" alt="{{siteName}}" height="36" style="height:36px;max-height:40px;width:auto;border:0;display:block;" />
+                    </a>
+                  </td>
                 </tr>
               </table>
             </td>
@@ -474,11 +511,14 @@ HTML;
       <td align="center">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e8e2d5;box-shadow:0 4px 12px rgba(0,0,0,0.04);">
           <tr>
-            <td style="background:#004a28;padding:22px 28px;">
+            <td style="background:#004a28;padding:20px 28px;">
               <table role="presentation" cellpadding="0" cellspacing="0">
                 <tr>
-                  <td style="background:#d4a017;border-radius:8px;padding:6px 12px;font-weight:bold;color:#004a28;font-size:16px;">M</td>
-                  <td style="padding-left:12px;color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.3px;">MyTijaara Security</td>
+                  <td>
+                    <a href="https://mytijaara.com" style="text-decoration:none;display:inline-block;">
+                      <img src="{{logoUrl}}" alt="{{siteName}}" height="36" style="height:36px;max-height:40px;width:auto;border:0;display:block;" />
+                    </a>
+                  </td>
                 </tr>
               </table>
             </td>

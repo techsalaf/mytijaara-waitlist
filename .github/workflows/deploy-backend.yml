@@ -117,13 +117,13 @@ jobs:
 
             php artisan storage:link || true
 
-            if [ "$COMPOSER" = "true" ]; then
+            if [ "$COMPOSER" = "true" ] || [ ! -d "vendor/pragmarx" ]; then
               echo "Running Composer..."
               php ~/composer.phar install \
                 --no-dev \
                 --prefer-dist \
                 --optimize-autoloader \
-                --no-interaction
+                --no-interaction || composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction || true
             fi
 
             php artisan optimize:clear || true

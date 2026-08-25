@@ -26,10 +26,10 @@ class CampaignMail extends Mailable
         $site = rtrim((string) config('app.frontend_url', config('app.url')), '/');
         $branding = \App\Models\Setting::where('group', 'branding')->first();
 
-        $rawLogoUrl = $branding?->data['logoUrl'] ?? null;
+        $rawLogoUrl = $branding?->data['logoUrl'] ?? $branding?->data['logo'] ?? null;
         $siteName = $branding?->data['siteName'] ?? 'MyTijaara';
 
-        $logoUrl = null;
+        $logoUrl = 'https://mytijaara.com/logo.png';
         if ($rawLogoUrl) {
             if (str_starts_with($rawLogoUrl, 'http://') || str_starts_with($rawLogoUrl, 'https://')) {
                 $logoUrl = $rawLogoUrl;
@@ -56,6 +56,8 @@ class CampaignMail extends Mailable
             '{{referral_url}}' => $referralUrl,
             '{{verifyUrl}}' => $verifyUrl,
             '{{verify_url}}' => $verifyUrl,
+            '{{logoUrl}}' => $logoUrl,
+            '{{logo_url}}' => $logoUrl,
             '{{siteName}}' => e($siteName),
             '{{site_name}}' => e($siteName),
             '{{unsubscribe}}' => $unsubscribeUrl,

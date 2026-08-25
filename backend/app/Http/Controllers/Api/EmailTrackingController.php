@@ -42,7 +42,7 @@ class EmailTrackingController extends Controller
     }
 
     /** GET /track/click/:campaign — record a click then redirect to the target url. */
-    public function click(Request $request, string $campaign): Response
+    public function click(Request $request, string $campaign): \Symfony\Component\HttpFoundation\Response
     {
         $url = (string) $request->query('url', config('app.frontend_url', config('app.url')));
         $c = EmailCampaign::where('public_id', $campaign)->first();

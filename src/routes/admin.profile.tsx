@@ -35,6 +35,7 @@ import {
   Sun,
 } from "lucide-react";
 import { toast } from "sonner";
+import { getStoredTheme, setTheme, type Theme } from "@/lib/theme";
 import { authApi } from "@/lib/api";
 import { MediaPickerModal } from "@/components/admin/media-picker-modal";
 import { ApiError } from "@/lib/api/client";
