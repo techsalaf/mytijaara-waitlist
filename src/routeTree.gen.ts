@@ -14,7 +14,11 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CareersRouteImport } from './routes/careers'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as DownloadRouteImport } from './routes/download'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ReferralRewardsRouteImport } from './routes/referral-rewards'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -40,6 +44,7 @@ import { Route as AuthSessionExpiredRouteImport } from './routes/auth.session-ex
 import { Route as AdminCmsIndexRouteImport } from './routes/admin.cms.index'
 import { Route as AdminCmsAnnouncementRouteImport } from './routes/admin.cms.announcement'
 import { Route as AdminCmsBuiltForNigeriansRouteImport } from './routes/admin.cms.built-for-nigerians'
+import { Route as AdminCmsDownloadRouteImport } from './routes/admin.cms.download'
 import { Route as AdminCmsFaqsRouteImport } from './routes/admin.cms.faqs'
 import { Route as AdminCmsFeaturesRouteImport } from './routes/admin.cms.features'
 import { Route as AdminCmsFooterRouteImport } from './routes/admin.cms.footer'
@@ -101,9 +106,29 @@ const CareersRoute = CareersRouteImport.update({
   path: '/careers',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CookiesRoute = CookiesRouteImport.update({
   id: '/cookies',
   path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DownloadRoute = DownloadRouteImport.update({
+  id: '/download',
+  path: '/download',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PartnersRoute = PartnersRouteImport.update({
+  id: '/partners',
+  path: '/partners',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -232,6 +257,11 @@ const AdminCmsBuiltForNigeriansRoute =
     path: '/built-for-nigerians',
     getParentRoute: () => AdminCmsRoute,
   } as any)
+const AdminCmsDownloadRoute = AdminCmsDownloadRouteImport.update({
+  id: '/download',
+  path: '/download',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
 const AdminCmsFaqsRoute = AdminCmsFaqsRouteImport.update({
   id: '/faqs',
   path: '/faqs',
@@ -416,7 +446,11 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/careers': typeof CareersRoute
+  '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
+  '/download': typeof DownloadRoute
+  '/faq': typeof FaqRoute
+  '/partners': typeof PartnersRoute
   '/privacy': typeof PrivacyRoute
   '/referral-rewards': typeof ReferralRewardsRoute
   '/terms': typeof TermsRoute
@@ -441,6 +475,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/admin/cms/announcement': typeof AdminCmsAnnouncementRoute
   '/admin/cms/built-for-nigerians': typeof AdminCmsBuiltForNigeriansRoute
+  '/admin/cms/download': typeof AdminCmsDownloadRoute
   '/admin/cms/faqs': typeof AdminCmsFaqsRoute
   '/admin/cms/features': typeof AdminCmsFeaturesRoute
   '/admin/cms/footer': typeof AdminCmsFooterRoute
@@ -483,7 +518,11 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRouteWithChildren
   '/careers': typeof CareersRoute
+  '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
+  '/download': typeof DownloadRoute
+  '/faq': typeof FaqRoute
+  '/partners': typeof PartnersRoute
   '/privacy': typeof PrivacyRoute
   '/referral-rewards': typeof ReferralRewardsRoute
   '/terms': typeof TermsRoute
@@ -502,6 +541,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/admin/cms/announcement': typeof AdminCmsAnnouncementRoute
   '/admin/cms/built-for-nigerians': typeof AdminCmsBuiltForNigeriansRoute
+  '/admin/cms/download': typeof AdminCmsDownloadRoute
   '/admin/cms/faqs': typeof AdminCmsFaqsRoute
   '/admin/cms/features': typeof AdminCmsFeaturesRoute
   '/admin/cms/footer': typeof AdminCmsFooterRoute
@@ -546,7 +586,11 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/careers': typeof CareersRoute
+  '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
+  '/download': typeof DownloadRoute
+  '/faq': typeof FaqRoute
+  '/partners': typeof PartnersRoute
   '/privacy': typeof PrivacyRoute
   '/referral-rewards': typeof ReferralRewardsRoute
   '/terms': typeof TermsRoute
@@ -571,6 +615,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/admin/cms/announcement': typeof AdminCmsAnnouncementRoute
   '/admin/cms/built-for-nigerians': typeof AdminCmsBuiltForNigeriansRoute
+  '/admin/cms/download': typeof AdminCmsDownloadRoute
   '/admin/cms/faqs': typeof AdminCmsFaqsRoute
   '/admin/cms/features': typeof AdminCmsFeaturesRoute
   '/admin/cms/footer': typeof AdminCmsFooterRoute
@@ -616,7 +661,11 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/careers'
+    | '/contact'
     | '/cookies'
+    | '/download'
+    | '/faq'
+    | '/partners'
     | '/privacy'
     | '/referral-rewards'
     | '/terms'
@@ -641,6 +690,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/cms/announcement'
     | '/admin/cms/built-for-nigerians'
+    | '/admin/cms/download'
     | '/admin/cms/faqs'
     | '/admin/cms/features'
     | '/admin/cms/footer'
@@ -683,7 +733,11 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/careers'
+    | '/contact'
     | '/cookies'
+    | '/download'
+    | '/faq'
+    | '/partners'
     | '/privacy'
     | '/referral-rewards'
     | '/terms'
@@ -702,6 +756,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/cms/announcement'
     | '/admin/cms/built-for-nigerians'
+    | '/admin/cms/download'
     | '/admin/cms/faqs'
     | '/admin/cms/features'
     | '/admin/cms/footer'
@@ -745,7 +800,11 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/careers'
+    | '/contact'
     | '/cookies'
+    | '/download'
+    | '/faq'
+    | '/partners'
     | '/privacy'
     | '/referral-rewards'
     | '/terms'
@@ -770,6 +829,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/admin/cms/announcement'
     | '/admin/cms/built-for-nigerians'
+    | '/admin/cms/download'
     | '/admin/cms/faqs'
     | '/admin/cms/features'
     | '/admin/cms/footer'
@@ -814,7 +874,11 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   CareersRoute: typeof CareersRoute
+  ContactRoute: typeof ContactRoute
   CookiesRoute: typeof CookiesRoute
+  DownloadRoute: typeof DownloadRoute
+  FaqRoute: typeof FaqRoute
+  PartnersRoute: typeof PartnersRoute
   PrivacyRoute: typeof PrivacyRoute
   ReferralRewardsRoute: typeof ReferralRewardsRoute
   TermsRoute: typeof TermsRoute
@@ -858,11 +922,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CareersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cookies': {
       id: '/cookies'
       path: '/cookies'
       fullPath: '/cookies'
       preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/download': {
+      id: '/download'
+      path: '/download'
+      fullPath: '/download'
+      preLoaderRoute: typeof DownloadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/partners': {
+      id: '/partners'
+      path: '/partners'
+      fullPath: '/partners'
+      preLoaderRoute: typeof PartnersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -1038,6 +1130,13 @@ declare module '@tanstack/react-router' {
       path: '/built-for-nigerians'
       fullPath: '/admin/cms/built-for-nigerians'
       preLoaderRoute: typeof AdminCmsBuiltForNigeriansRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/cms/download': {
+      id: '/admin/cms/download'
+      path: '/download'
+      fullPath: '/admin/cms/download'
+      preLoaderRoute: typeof AdminCmsDownloadRouteImport
       parentRoute: typeof AdminCmsRoute
     }
     '/admin/cms/faqs': {
@@ -1291,6 +1390,7 @@ declare module '@tanstack/react-router' {
 interface AdminCmsRouteChildren {
   AdminCmsAnnouncementRoute: typeof AdminCmsAnnouncementRoute
   AdminCmsBuiltForNigeriansRoute: typeof AdminCmsBuiltForNigeriansRoute
+  AdminCmsDownloadRoute: typeof AdminCmsDownloadRoute
   AdminCmsFaqsRoute: typeof AdminCmsFaqsRoute
   AdminCmsFeaturesRoute: typeof AdminCmsFeaturesRoute
   AdminCmsFooterRoute: typeof AdminCmsFooterRoute
@@ -1310,6 +1410,7 @@ interface AdminCmsRouteChildren {
 const AdminCmsRouteChildren: AdminCmsRouteChildren = {
   AdminCmsAnnouncementRoute: AdminCmsAnnouncementRoute,
   AdminCmsBuiltForNigeriansRoute: AdminCmsBuiltForNigeriansRoute,
+  AdminCmsDownloadRoute: AdminCmsDownloadRoute,
   AdminCmsFaqsRoute: AdminCmsFaqsRoute,
   AdminCmsFeaturesRoute: AdminCmsFeaturesRoute,
   AdminCmsFooterRoute: AdminCmsFooterRoute,
@@ -1482,7 +1583,11 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
   CareersRoute: CareersRoute,
+  ContactRoute: ContactRoute,
   CookiesRoute: CookiesRoute,
+  DownloadRoute: DownloadRoute,
+  FaqRoute: FaqRoute,
+  PartnersRoute: PartnersRoute,
   PrivacyRoute: PrivacyRoute,
   ReferralRewardsRoute: ReferralRewardsRoute,
   TermsRoute: TermsRoute,

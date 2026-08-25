@@ -1,12 +1,12 @@
 <?php
 
-use Database\Seeders\EmailSeeder;
+use Database\Seeders\CmsSectionSeeder;
 use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration
 {
     /**
-     * Re-seed email templates to apply dynamic real logo and new welcome email content.
+     * Seed the download section in CMS.
      */
     public function up(): void
     {
@@ -14,11 +14,11 @@ return new class extends Migration
             return;
         }
 
-        (new EmailSeeder)->run();
+        (new CmsSectionSeeder)->run();
     }
 
     public function down(): void
     {
-        // No-op: templates remain preserved.
+        // No-op
     }
 };

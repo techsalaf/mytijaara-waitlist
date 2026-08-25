@@ -97,9 +97,22 @@ function PrivacyPage() {
 function LegalHeader({ title, updated }: { title: string; updated: string }) {
   return (
     <div className="mb-12 border-b border-border pb-8">
-      <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-primary">
-        Legal
-      </span>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-primary">
+            Legal & Compliance
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[10px] font-bold text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-300">
+            NDPR 2019 Compliant
+          </span>
+        </div>
+        <button
+          onClick={() => window.print()}
+          className="rounded-full border border-border bg-card px-3.5 py-1 text-xs font-semibold text-foreground hover:bg-muted/50 transition-colors"
+        >
+          Print Document
+        </button>
+      </div>
       <h1 className="mt-4 font-display text-4xl font-bold tracking-tight sm:text-5xl">{title}</h1>
       <p className="mt-3 text-sm text-muted-foreground">Last updated: {updated}</p>
     </div>

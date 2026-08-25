@@ -81,14 +81,12 @@ export function useCmsData<T extends Record<string, unknown>>(
 ): T | null {
   const { sections } = useContext(CmsContext);
   const s = sections[section];
-  const hasLoadedSections = sections && Object.keys(sections).length > 0;
-  if (!s) {
-    // If cms sections map is loaded but this key is absent, backend excluded it because enabled=false
-    return hasLoadedSections ? null : fallback;
-  }
-  if (s.enabled === false) {
+  // Section explicitly disabled — honour the backend's choice
+  if (s && s.enabled === false) {
     return null;
   }
+  // Section absent or not yet loaded — use fallback
+  if (!s) return fallback;
   if (!s.data || Object.keys(s.data).length === 0) return fallback;
   return { ...fallback, ...s.data } as T;
 }

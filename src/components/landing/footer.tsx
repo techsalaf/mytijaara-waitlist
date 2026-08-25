@@ -35,30 +35,33 @@ const DEFAULT_FOOTER: FooterCmsData = {
     {
       h: "Product",
       links: [
-        { label: "Everyday moments", href: "#moments" },
-        { label: "What you can do", href: "#services" },
-        { label: "How it works", href: "#how" },
-        { label: "FAQ", href: "#faq" },
+        { label: "Download App", href: "/download" },
+        { label: "Everyday moments", href: "/#moments" },
+        { label: "What you can do", href: "/#services" },
+        { label: "How it works", href: "/#how" },
+        { label: "Help & FAQ", href: "/faq" },
         { label: "Referral Perks", href: "/referral-rewards" },
       ],
     },
     {
       h: "Partners",
       links: [
-        { label: "Vendors", href: "#partners" },
-        { label: "Riders", href: "#partners" },
-        { label: "Artisans", href: "#partners" },
-        { label: "Contact sales", href: "mailto:hello@mytijaara.com" },
+        { label: "Partner Overview", href: "/partners" },
+        { label: "Vendor Portal", href: "https://dashboard.mytijaara.com" },
+        { label: "Delivery Fleet", href: "https://dashboard.mytijaara.com" },
+        { label: "Artisan Directory", href: "/partners" },
+        { label: "Contact Inquiries", href: "/contact" },
       ],
     },
     {
       h: "Company",
       links: [
-        { label: "About", href: "/about" },
+        { label: "About Us", href: "/about" },
         { label: "Careers", href: "/careers" },
-        { label: "Privacy policy", href: "/privacy" },
-        { label: "Terms of service", href: "/terms" },
-        { label: "Cookie policy", href: "/cookies" },
+        { label: "Contact & Support", href: "/contact" },
+        { label: "Privacy Policy", href: "/privacy" },
+        { label: "Terms of Service", href: "/terms" },
+        { label: "Cookie Policy", href: "/cookies" },
       ],
     },
   ],
@@ -107,18 +110,18 @@ function AppStoreBadge({
   }
 
   return (
-    <div title={`${label} app coming soon`} aria-label={`${label} — coming soon`}>
+    <a href="/download" title={`${label} app — visit download page`} aria-label={`${label} — download page`}>
       {inner}
-    </div>
+    </a>
   );
 }
 
 export function Footer() {
-  const { isLaunched } = useLaunch();
+  const { isLaunched, now } = useLaunch();
   const footerCms = useCmsData("footer", DEFAULT_FOOTER);
   if (!footerCms) return null;
   const branding = useBranding();
-  const year = new Date().getFullYear();
+  const year = new Date(now).getFullYear();
   const { social, supportEmail, contactEmail, phone, launchCity, address, iosAppUrl, androidAppUrl } = branding;
 
   const tagline = footerCms.tagline ?? DEFAULT_FOOTER.tagline;

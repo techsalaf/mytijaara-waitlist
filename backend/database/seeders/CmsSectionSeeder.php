@@ -170,6 +170,47 @@ class CmsSectionSeeder extends Seeder
             'ogImage' => '/og-image.png',
             'twitterHandle' => '@mytijaara',
         ]],
+        ['section' => 'download', 'title' => 'Download App', 'order' => 15, 'data' => [
+            'badge' => 'Get the App',
+            'heading' => 'Experience MyTijaara on your device',
+            'subheading' => 'Order food, shop groceries & pharmacy items, book artisans, send parcels, and rent cars — all in one super app built for Nigeria.',
+            'playStore' => [
+                'enabled' => true,
+                'comingSoon' => false,
+                'url' => 'https://play.google.com/store/apps/details?id=com.mytijaara.app',
+                'label' => 'Google Play',
+            ],
+            'appStore' => [
+                'enabled' => true,
+                'comingSoon' => true,
+                'url' => 'https://apps.apple.com/app/mytijaara/id000000000',
+                'label' => 'App Store',
+            ],
+            'webApp' => [
+                'enabled' => true,
+                'url' => 'https://app.mytijaara.com',
+                'label' => 'Order Online (Web App)',
+                'description' => 'No installation required — browse menus, buy essentials, and order services directly in your browser.',
+            ],
+            'vendorPartner' => [
+                'enabled' => true,
+                'url' => 'https://dashboard.mytijaara.com',
+                'label' => 'Partner with us as a Vendor',
+                'description' => 'Sell food, groceries, pharmacy or retail products to thousands of customers.',
+            ],
+            'riderPartner' => [
+                'enabled' => true,
+                'url' => 'https://dashboard.mytijaara.com',
+                'label' => 'Earn with us as a Delivery Rider',
+                'description' => 'Flexible hours, prompt payouts, and guaranteed orders across your city.',
+            ],
+            'features' => [
+                ['icon' => 'Zap', 'title' => 'Lightning-fast Orders', 'desc' => 'Order food, essentials, and groceries delivered in minutes.'],
+                ['icon' => 'ShieldCheck', 'title' => '100% Escrow Protection', 'desc' => 'Your payments are held safe until your delivery is confirmed.'],
+                ['icon' => 'Wrench', 'title' => 'Vetted Local Artisans', 'desc' => 'Book plumbers, electricians, carpenters, and technicians on demand.'],
+                ['icon' => 'Sparkles', 'title' => 'Cashback & Referral Perks', 'desc' => 'Earn ₦500 on every friend you invite who completes an order.'],
+            ],
+        ]],
     ];
 
     public function run(): void

@@ -88,9 +88,17 @@ function TermsPage() {
 function LegalHeader({ title, updated }: { title: string; updated: string }) {
   return (
     <div className="mb-12 border-b border-border pb-8">
-      <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-primary">
-        Legal
-      </span>
+      <div className="flex items-center justify-between">
+        <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-primary">
+          Terms & Agreements
+        </span>
+        <button
+          onClick={() => window.print()}
+          className="rounded-full border border-border bg-card px-3.5 py-1 text-xs font-semibold text-foreground hover:bg-muted/50 transition-colors"
+        >
+          Print Document
+        </button>
+      </div>
       <h1 className="mt-4 font-display text-4xl font-bold tracking-tight sm:text-5xl">{title}</h1>
       <p className="mt-3 text-sm text-muted-foreground">Last updated: {updated}</p>
     </div>

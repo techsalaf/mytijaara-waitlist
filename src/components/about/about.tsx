@@ -1,6 +1,8 @@
 import { Reveal } from "@/components/landing/reveal";
 import { useCmsData } from "@/lib/cms-context";
-import { Users, Target, Heart, Zap } from "lucide-react";
+import { Users, Target, Heart, Zap, ShieldCheck, MapPin, Building2, Store, Bike, Award, Sparkles, ArrowRight } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Badge } from "@/components/ui/badge";
 
 type Value = { icon?: string; title: string; description?: string; body?: string };
 type TeamMember = { name: string; role: string; bio?: string };
@@ -11,33 +13,63 @@ type AboutCmsData = {
   team?: { heading?: string; members?: TeamMember[] };
 };
 
-const ICONS = [Users, Target, Heart, Zap];
+const ICONS = [Users, Target, Heart, Zap, ShieldCheck, Award];
 
 const DEFAULT: AboutCmsData = {
   hero: {
-    heading: "We're building the everything app for Nigeria.",
-    subheading: "One platform that handles all your daily needs — food, groceries, rides, artisans, and more. Simple. Fast. Built for Nigerians by Nigerians.",
+    heading: "We're building the everyday super app Nigeria deserves.",
+    subheading:
+      "One single platform that unifies daily commerce, meals, groceries, pharmacies, trusted artisans, parcels, and transport — built for how Nigerians live, order, and pay.",
   },
   mission: {
-    heading: "Our mission",
-    body: "MyTijaara exists to make everyday life easier for Nigerians. We believe you shouldn't need five different apps to get through your day. From ordering lunch to booking a plumber, it should all be in one place — reliable, fast, and designed for how we actually live.",
+    heading: "Our Mission & Commitment",
+    body:
+      "MyTijaara exists to eliminate friction from everyday commerce across Nigeria. We believe you shouldn't need five different apps and endless WhatsApp chats to manage your day. From ordering hot lunch to booking an emergency plumber, every transaction should be fast, reliable, transparent, and protected by escrow.",
   },
   values: {
-    heading: "What drives us",
+    heading: "What drives everything we build",
     items: [
-      { title: "Built for Nigerians", body: "Every feature is designed with Nigerian cities, neighborhoods, and lifestyles in mind." },
-      { title: "Simplicity first", body: "One app. One account. No confusion. Everything you need without the clutter." },
-      { title: "Trust and safety", body: "Every vendor, rider, and artisan is vetted. Every transaction is secure. Your peace of mind matters." },
-      { title: "Speed that counts", body: "From ordering to delivery, we respect your time. Real-time tracking. No surprises." },
+      {
+        title: "Deeply Local, Proudly Nigerian",
+        body: "Engineered specifically for Nigerian cities, market streets, and real-world logistics challenges — not an imported copy.",
+      },
+      {
+        title: "100% Escrow Trust",
+        body: "Buyers only release payment upon verified delivery; vendors and artisans receive guaranteed, prompt payouts.",
+      },
+      {
+        title: "Empowering Local Micro-Merchants",
+        body: "Giving local bukaterias, pharmacy stores, and neighbourhood artisans world-class digital tools to expand their sales.",
+      },
+      {
+        title: "Speed & Real-time Transparency",
+        body: "GPS live dispatch, clear naira pricing with zero surprise charges, and responsive 24/7 in-country human support.",
+      },
     ],
   },
   team: {
-    heading: "Meet the team",
+    heading: "Built by a passionate Nigerian team",
     members: [
-      { name: "Coming soon", role: "Leadership team profiles will be added here.", bio: "Check back soon." },
+      { name: "Executive Leadership", role: "Product, Engineering & Operations", bio: "Former founders and operators building infrastructure for everyday African trade." },
+      { name: "Merchant Support Network", role: "Merchant & Artisan Operations", bio: "On-the-ground support teams working hand-in-hand with local traders across Nigerian markets." },
+      { name: "Logistics Dispatch Fleet", role: "Last-Mile Delivery Network", bio: "Dedicated courier partners ensuring secure, rapid package transport across every mapped zone." },
     ],
   },
 };
+
+const STATS = [
+  { label: "Planned City Zones", value: "12+", desc: "Lagos, Abuja, Ibadan, PH & more" },
+  { label: "Target Delivery Time", value: "< 35 mins", desc: "Express neighborhood dispatch" },
+  { label: "Escrow Protection", value: "100%", desc: "Automated payment safety" },
+  { label: "Everyday Services", value: "6-in-1", desc: "Food, stores, artisans, parcels & rides" },
+];
+
+const CITIES = [
+  { name: "Lagos", status: "Launch Phase 1", zones: "Ikeja, Lekki, Victoria Island, Yaba, Surulere" },
+  { name: "Abuja (FCT)", status: "Launch Phase 1", zones: "Maitama, Wuse 2, Garki, Jabi, Gwarinpa" },
+  { name: "Ibadan", status: "Launch Phase 2", zones: "Bodija, Ring Road, Jericho, Samonda" },
+  { name: "Port Harcourt", status: "Launch Phase 2", zones: "GRA Phase 2, Peter Odili, Trans-Amadi" },
+];
 
 export function About() {
   const cms = useCmsData("about", DEFAULT);
@@ -49,18 +81,22 @@ export function About() {
   const valueItems = values.items && values.items.length > 0 ? values.items : DEFAULT.values!.items!;
 
   return (
-    <main>
+    <main className="min-h-screen">
       {/* Hero */}
       <section className="relative overflow-hidden bg-primary-gradient py-24 text-primary-foreground sm:py-32">
         <div className="pointer-events-none absolute -left-40 top-1/2 h-[500px] w-[500px] -translate-y-1/2 rounded-full bg-gold opacity-15 blur-3xl" />
-        <div className="pointer-events-none absolute -right-40 top-10 h-[400px] w-[400px] rounded-full bg-primary-foreground/5 blur-3xl" />
+        <div className="pointer-events-none absolute -right-40 top-10 h-[400px] w-[400px] rounded-full bg-primary-foreground/10 blur-3xl" />
         <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6">
           <Reveal>
-            <h1 className="font-display text-5xl font-bold tracking-tight sm:text-6xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/15 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gold">
+              <Sparkles className="h-3.5 w-3.5" />
+              About MyTijaara
+            </div>
+            <h1 className="mt-5 font-display text-4xl font-extrabold tracking-tight sm:text-6xl">
               {hero.heading}
             </h1>
             {hero.subheading && (
-              <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-primary-foreground/90">
+              <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-primary-foreground/90 sm:text-xl">
                 {hero.subheading}
               </p>
             )}
@@ -68,42 +104,65 @@ export function About() {
         </div>
       </section>
 
-      {/* Mission */}
+      {/* Impact Stats Strip */}
+      <section className="relative -mt-10 mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {STATS.map((stat, i) => (
+            <Reveal key={stat.label} delay={i * 60}>
+              <div className="rounded-3xl border border-border/80 bg-card p-6 text-center shadow-soft transition-all duration-300 hover:shadow-elegant">
+                <div className="font-display text-3xl font-black text-primary">{stat.value}</div>
+                <div className="mt-1 text-sm font-bold text-foreground">{stat.label}</div>
+                <div className="mt-0.5 text-xs text-muted-foreground">{stat.desc}</div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      {/* Mission & Vision */}
       <section className="bg-background py-20 sm:py-28">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6">
           <Reveal>
-            <h2 className="text-center font-display text-3xl font-bold sm:text-4xl">
-              {mission.heading}
-            </h2>
-            <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
-              {mission.body}
-            </p>
+            <div className="rounded-3xl border border-primary/20 bg-primary/5 p-8 sm:p-12 text-center">
+              <Badge className="bg-primary text-primary-foreground font-bold mb-3">Our Core Purpose</Badge>
+              <h2 className="font-display text-3xl font-bold sm:text-4xl text-foreground">
+                {mission.heading}
+              </h2>
+              <p className="mt-6 text-base sm:text-lg leading-relaxed text-muted-foreground">
+                {mission.body}
+              </p>
+            </div>
           </Reveal>
         </div>
       </section>
 
-      {/* Values */}
+      {/* Values & Principles */}
       <section className="bg-surface py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <Reveal>
-            <h2 className="text-center font-display text-3xl font-bold sm:text-4xl">
-              {values.heading}
-            </h2>
+            <div className="text-center">
+              <Badge variant="outline" className="border-primary/30 bg-primary/5 text-primary text-xs font-semibold px-3 py-1">
+                Our Values
+              </Badge>
+              <h2 className="mt-3 font-display text-3xl font-bold sm:text-4xl text-foreground">
+                {values.heading}
+              </h2>
+            </div>
           </Reveal>
           <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {valueItems.slice(0, 4).map((v, i) => {
+            {valueItems.map((v, i) => {
               const Icon = ICONS[i % ICONS.length];
               const body = v.description ?? v.body ?? "";
               return (
                 <Reveal key={v.title} delay={i * 50}>
-                  <div className="group h-full rounded-3xl border border-border bg-card p-7 transition-all duration-300 hover:-translate-y-2 hover:border-primary/30 hover:shadow-elegant">
-                    <div className="grid h-12 w-12 place-items-center rounded-2xl bg-primary-soft transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/20">
-                      <Icon className="h-6 w-6 text-primary transition-transform duration-300 group-hover:rotate-6" />
+                  <div className="group h-full rounded-3xl border border-border bg-card p-7 transition-all duration-300 hover:-translate-y-2 hover:border-primary/40 hover:shadow-elegant">
+                    <div className="grid h-12 w-12 place-items-center rounded-2xl bg-primary/10 text-primary transition-all duration-300 group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground">
+                      <Icon className="h-6 w-6" />
                     </div>
-                    <h3 className="mt-6 font-display text-lg font-bold transition-colors duration-200 group-hover:text-primary">
+                    <h3 className="mt-6 font-display text-lg font-bold text-foreground group-hover:text-primary transition-colors">
                       {v.title}
                     </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground transition-colors duration-200 group-hover:text-foreground/80">
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                       {body}
                     </p>
                   </div>
@@ -114,36 +173,73 @@ export function About() {
         </div>
       </section>
 
-      {/* Team */}
+      {/* Coverage & City Expansion Roadmap */}
       <section className="bg-background py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <Reveal>
-            <h2 className="text-center font-display text-3xl font-bold sm:text-4xl">
-              {team.heading}
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="text-center">
+            <Badge variant="outline" className="border-primary/30 bg-primary/5 text-primary text-xs font-semibold px-3 py-1">
+              Rollout Roadmap
+            </Badge>
+            <h2 className="mt-3 font-display text-3xl font-bold sm:text-4xl text-foreground">
+              Starting in Nigeria's Largest Hubs
             </h2>
-          </Reveal>
-          <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {team.members && team.members.length > 0 ? (
-              team.members.map((m, i) => (
-                <Reveal key={m.name} delay={i * 60}>
-                  <div className="rounded-3xl border border-border bg-card p-6 text-center transition-all duration-300 hover:border-primary/30 hover:shadow-elegant">
-                    <div className="mx-auto h-24 w-24 rounded-full bg-gradient-to-br from-primary/20 to-primary/10" />
-                    <h3 className="mt-4 font-display text-lg font-bold">{m.name}</h3>
-                    <p className="text-sm text-primary">{m.role}</p>
-                    {m.bio && <p className="mt-2 text-sm text-muted-foreground">{m.bio}</p>}
+            <p className="mx-auto mt-3 max-w-2xl text-base text-muted-foreground">
+              Mapping trusted neighborhood suppliers and artisan networks city by city.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-6 sm:grid-cols-2">
+            {CITIES.map((c, i) => (
+              <Reveal key={c.name} delay={i * 60}>
+                <div className="flex items-start gap-4 rounded-3xl border border-border/70 bg-card p-6 transition-all hover:border-primary/30 hover:shadow-soft">
+                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-emerald-500/10 text-emerald-700">
+                    <MapPin className="h-5 w-5" />
                   </div>
-                </Reveal>
-              ))
-            ) : (
-              <Reveal>
-                <div className="col-span-full rounded-3xl border border-border bg-card p-8 text-center">
-                  <p className="text-muted-foreground">Team profiles coming soon.</p>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-display text-lg font-bold text-foreground">{c.name}</h3>
+                      <Badge variant="secondary" className="text-[10px] font-bold">
+                        {c.status}
+                      </Badge>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      <strong className="text-foreground">Key Zones:</strong> {c.zones}
+                    </p>
+                  </div>
                 </div>
               </Reveal>
-            )}
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Footer Section */}
+      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+        <div className="relative overflow-hidden rounded-3xl bg-primary-gradient px-8 py-12 text-primary-foreground sm:px-16 text-center">
+          <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full bg-gold/20 blur-3xl" />
+          <h2 className="font-display text-3xl font-extrabold sm:text-4xl">
+            Be part of the new way Nigeria trades
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-base text-primary-foreground/90">
+            Download the app, order online, or sign up your store or delivery motorcycle today.
+          </p>
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <Link
+              to="/download"
+              className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-bold text-slate-950 shadow-xl transition-all hover:scale-105 hover:bg-gold"
+            >
+              Download MyTijaara <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              to="/referral-rewards"
+              className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-7 py-3.5 text-sm font-bold text-white transition-all hover:bg-white/20"
+            >
+              Referral Rewards & Cashbacks
+            </Link>
           </div>
         </div>
       </section>
     </main>
   );
 }
+

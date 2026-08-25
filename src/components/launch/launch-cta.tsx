@@ -16,7 +16,7 @@ export function usePrimaryCta(): LaunchCta & { download: boolean } {
   const { config, isLaunched, showWaitlist } = useLaunch();
 
   if (isLaunched || !showWaitlist) {
-    return { label: "Download App", href: "#download", download: true };
+    return { label: "Download App", href: "/download", download: true };
   }
   return { ...config.primaryCTA, download: false };
 }
