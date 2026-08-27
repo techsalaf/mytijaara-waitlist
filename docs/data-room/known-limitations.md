@@ -148,3 +148,32 @@ tree or a schema change.
 - **No storage encryption at rest** beyond whatever the host filesystem provides.
 - **The eval lane needs an authenticated `claude` CLI.** See
   [../../evals/data-room/README.md](../../evals/data-room/README.md).
+
+## 13. `pnpm lint` cannot pass on a `core.autocrlf=true` checkout
+
+Not a data room limitation, but it will look like one the first time someone
+runs the frontend lint over this work.
+
+This checkout has `git config core.autocrlf` set to `true`, so git stores LF and
+writes CRLF into the working tree. The ESLint config ends with
+`eslint-plugin-prettier/recommended`, and prettier is configured for LF, so the
+rule reports `Delete ␍` on every line of every file git has touched. Linting
+two unrelated pre-existing directories produced 1506 problems on that basis
+alone.
+
+`pnpm lint` is therefore red on this machine independently of any change, and
+`eslint --fix` across the tree would rewrite every file in the repository. The
+data room work was linted by path instead:
+
+```bash
+npx eslint src/components/dataroom src/lib/dataroom src/routes/dataroom.tsx
+```
+
+That reports 0 errors and 2 `react-refresh/only-export-components` warnings, a
+warning class already present six times in `src/lib/cms-context.tsx` and
+`src/components/admin`.
+
+The permanent fix is a repository decision, not a data room one: either set
+`core.autocrlf=input` and normalize once with a `.gitattributes` `* text=auto
+eol=lf`, or set prettier's `endOfLine` to `auto`. Both touch every file, so
+neither belongs in a feature commit.

@@ -66,6 +66,29 @@ cd backend && php artisan config:cache && php artisan route:cache
 Any change to a `DATA_ROOM_*` value requires `config:cache` again, or the old
 value stays live.
 
+## Frontend build
+
+```bash
+pnpm install && pnpm build
+```
+
+`package.json` pins `@tanstack/router-core` to `1.171.16` as a direct
+dependency even though no source file imports it. Do not remove it. Under
+pnpm's default strict layout only direct dependencies get a link in the top
+level of `node_modules`, and the SSR chunk that nitro generates imports
+`@tanstack/router-core/ssr/server` by bare specifier. Without the link that
+specifier resolves to a path that does not exist and rolldown fails the build
+with `[MISSING_EXPORT] "disposeSsrResponseDetached" is not exported by
+"../../../node_modules/@tanstack/router-core/dist/esm/ssr/server.js"`, plus the
+same for `waitForRequest`. The exports are present in the package; the file the
+bundler was pointed at is not.
+
+The version is exact rather than a range because it has to match what
+`@tanstack/start-server-core` resolves for itself. That package declares
+`"@tanstack/router-core": "1.171.16"` with no range. A caret here would let a
+later install float the top-level copy to a different version than the one
+nitro's chunk was built against, which puts the same failure back.
+
 ## Storage directory
 
 ```bash
