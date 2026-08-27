@@ -6,6 +6,11 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CampaignController;
 use App\Http\Controllers\Api\CmsController;
 use App\Http\Controllers\Api\ContentController;
+use App\Http\Controllers\Api\DataRoom\AdminDataRoomController;
+use App\Http\Controllers\Api\DataRoom\AdminDataRoomDocumentController;
+use App\Http\Controllers\Api\DataRoom\AdminDataRoomFolderController;
+use App\Http\Controllers\Api\DataRoom\AdminDataRoomGrantController;
+use App\Http\Controllers\Api\DataRoom\AdminDataRoomTemplateController;
 use App\Http\Controllers\Api\EmailTrackingController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\HealthController;
@@ -56,6 +61,32 @@ Route::post('/unsubscribe', [EmailTrackingController::class, 'unsubscribe']);
 Route::get('/cron/run', function () {
     \Illuminate\Support\Facades\Artisan::call('campaigns:send-due');
     return response()->json(['status' => 'ok', 'output' => trim(\Illuminate\Support\Facades\Artisan::output())]);
+});
+
+// ---------------------------------------------------------------------------
+// Virtual Data Room (VDR) — Public / Visitor Auth & Workspace
+//
+// A completely separate authentication domain from the admin panel below. These
+// routes never touch `auth:sanctum`, and DataRoomAuthenticate never consults a
+// Sanctum token, so an admin session grants nothing here and a visitor token
+// grants nothing there. Security does not depend on these paths being obscure.
+// ---------------------------------------------------------------------------
+Route::get('/dataroom/gate', [\App\Http\Controllers\Api\DataRoom\DataRoomVisitorAuthController::class, 'gate']);
+Route::post('/dataroom/authenticate', [\App\Http\Controllers\Api\DataRoom\DataRoomVisitorAuthController::class, 'authenticate']);
+Route::post('/dataroom/logout', [\App\Http\Controllers\Api\DataRoom\DataRoomVisitorAuthController::class, 'logout']);
+
+Route::middleware([\App\Http\Middleware\DataRoomAuthenticate::class])->prefix('dataroom')->group(function () {
+    Route::get('/me', [\App\Http\Controllers\Api\DataRoom\DataRoomVisitorAuthController::class, 'me']);
+    Route::get('/dashboard', [\App\Http\Controllers\Api\DataRoom\DataRoomWorkspaceController::class, 'dashboard']);
+    Route::get('/folders', [\App\Http\Controllers\Api\DataRoom\DataRoomWorkspaceController::class, 'folders']);
+    Route::get('/search', [\App\Http\Controllers\Api\DataRoom\DataRoomWorkspaceController::class, 'search']);
+    Route::get('/activity', [\App\Http\Controllers\Api\DataRoom\DataRoomWorkspaceController::class, 'activity']);
+    Route::post('/acknowledge', [\App\Http\Controllers\Api\DataRoom\DataRoomWorkspaceController::class, 'acknowledge']);
+    // Fixed suffixes are declared before the bare `{uuid}` so neither
+    // "preview" nor "download" can be captured as a document identifier.
+    Route::get('/documents/{uuid}/preview', [\App\Http\Controllers\Api\DataRoom\DataRoomWorkspaceController::class, 'preview']);
+    Route::get('/documents/{uuid}/download', [\App\Http\Controllers\Api\DataRoom\DataRoomWorkspaceController::class, 'download']);
+    Route::get('/documents/{uuid}', [\App\Http\Controllers\Api\DataRoom\DataRoomWorkspaceController::class, 'show']);
 });
 
 // Public read of published CMS content for the landing page.
@@ -226,4 +257,59 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Workspace reset — destructive dev operation, requires highest permission.
     Route::post('/workspace/reset', [WorkspaceController::class, 'reset'])->middleware('permission:settings.edit-general');
+
+    // -----------------------------------------------------------------------
+    // Virtual Data Room administration.
+    //
+    // Gated per endpoint, not per group, so reading the room does not imply
+    // issuing access to it. `data-room.manage-settings` and `data-room.delete`
+    // are withheld from the ordinary `admin` role in RoleSeeder, which is what
+    // keeps the security policy and hard deletes with super_admin.
+    // -----------------------------------------------------------------------
+    Route::prefix('admin/dataroom')->group(function () {
+        Route::get('/overview', [AdminDataRoomController::class, 'overview'])->middleware('permission:data-room.view');
+        Route::get('/analytics', [AdminDataRoomController::class, 'analytics'])->middleware('permission:data-room.view-activity');
+        Route::get('/audit-logs', [AdminDataRoomController::class, 'auditLogs'])->middleware('permission:data-room.view-activity');
+        Route::get('/settings', [AdminDataRoomController::class, 'settings'])->middleware('permission:data-room.view');
+        Route::patch('/settings', [AdminDataRoomController::class, 'updateSettings'])->middleware('permission:data-room.manage-settings');
+        Route::post('/emergency', [AdminDataRoomController::class, 'emergency'])->middleware('permission:data-room.manage-settings');
+
+        // Folders
+        Route::get('/folders', [AdminDataRoomFolderController::class, 'index'])->middleware('permission:data-room.view');
+        Route::post('/folders/reorder', [AdminDataRoomFolderController::class, 'reorder'])->middleware('permission:data-room.manage-documents');
+        Route::post('/folders', [AdminDataRoomFolderController::class, 'store'])->middleware('permission:data-room.manage-documents');
+        Route::patch('/folders/{id}', [AdminDataRoomFolderController::class, 'update'])->middleware('permission:data-room.manage-documents');
+        Route::delete('/folders/{id}', [AdminDataRoomFolderController::class, 'destroy'])->middleware('permission:data-room.manage-documents');
+
+        // Documents. Uploading is its own permission, separate from editing
+        // metadata, because putting new bytes in the room is a different act.
+        Route::get('/documents', [AdminDataRoomDocumentController::class, 'index'])->middleware('permission:data-room.view');
+        Route::post('/documents', [AdminDataRoomDocumentController::class, 'store'])->middleware('permission:data-room.upload');
+        Route::get('/documents/{id}', [AdminDataRoomDocumentController::class, 'show'])->middleware('permission:data-room.view');
+        Route::get('/documents/{id}/preview', [AdminDataRoomDocumentController::class, 'preview'])->middleware('permission:data-room.view');
+        Route::patch('/documents/{id}', [AdminDataRoomDocumentController::class, 'update'])->middleware('permission:data-room.manage-documents');
+        Route::post('/documents/{id}/versions', [AdminDataRoomDocumentController::class, 'storeVersion'])->middleware('permission:data-room.upload');
+        Route::post('/documents/{id}/restore', [AdminDataRoomDocumentController::class, 'restore'])->middleware('permission:data-room.manage-documents');
+        // Soft delete needs manage-documents; `?purge=1` also destroys bytes,
+        // so the route carries the stricter data-room.delete gate.
+        Route::delete('/documents/{id}', [AdminDataRoomDocumentController::class, 'destroy'])->middleware('permission:data-room.delete');
+
+        // Access grants — the authorization surface.
+        Route::get('/grants', [AdminDataRoomGrantController::class, 'index'])->middleware('permission:data-room.manage-access');
+        Route::get('/grants/durations', [AdminDataRoomGrantController::class, 'durations'])->middleware('permission:data-room.manage-access');
+        Route::post('/grants', [AdminDataRoomGrantController::class, 'store'])->middleware('permission:data-room.manage-access');
+        Route::get('/grants/{id}', [AdminDataRoomGrantController::class, 'show'])->middleware('permission:data-room.manage-access');
+        Route::patch('/grants/{id}', [AdminDataRoomGrantController::class, 'update'])->middleware('permission:data-room.manage-access');
+        Route::post('/grants/{id}/status', [AdminDataRoomGrantController::class, 'status'])->middleware('permission:data-room.manage-access');
+        Route::post('/grants/{id}/extend', [AdminDataRoomGrantController::class, 'extend'])->middleware('permission:data-room.manage-access');
+        Route::post('/grants/{id}/regenerate', [AdminDataRoomGrantController::class, 'regenerate'])->middleware('permission:data-room.manage-access');
+        Route::delete('/grants/{id}', [AdminDataRoomGrantController::class, 'destroy'])->middleware('permission:data-room.manage-access');
+        Route::get('/permission-matrix', [AdminDataRoomGrantController::class, 'matrix'])->middleware('permission:data-room.manage-access');
+
+        // Saved templates
+        Route::get('/templates', [AdminDataRoomTemplateController::class, 'index'])->middleware('permission:data-room.manage-access');
+        Route::post('/templates', [AdminDataRoomTemplateController::class, 'store'])->middleware('permission:data-room.manage-access');
+        Route::patch('/templates/{id}', [AdminDataRoomTemplateController::class, 'update'])->middleware('permission:data-room.manage-access');
+        Route::delete('/templates/{id}', [AdminDataRoomTemplateController::class, 'destroy'])->middleware('permission:data-room.manage-access');
+    });
 });

@@ -11,7 +11,7 @@ class RoleSeeder extends Seeder
 {
     /**
      * Permission groups mirror src/lib/mock-data.ts `permissionGroups`.
-     * Total = 42, which matches the "Super Admin — 42 permissions" mock.
+     * Base set = 42; the `data-room` group adds 7 for the Virtual Data Room = 49.
      */
     public const GROUPS = [
         'waitlist' => ['view', 'create', 'edit', 'delete', 'export', 'bulk-actions'],
@@ -23,6 +23,9 @@ class RoleSeeder extends Seeder
         'users' => ['view', 'invite', 'edit', 'delete'],
         'roles' => ['view', 'create', 'edit', 'delete', 'assign'],
         'settings' => ['view', 'edit-general', 'edit-integrations', 'edit-api-keys'],
+        // Virtual Data Room. Deliberately its own group so no existing role
+        // inherits data room access by side effect of an unrelated permission.
+        'data-room' => ['view', 'upload', 'manage-documents', 'manage-access', 'view-activity', 'manage-settings', 'delete'],
     ];
 
     public function run(): void
@@ -40,7 +43,7 @@ class RoleSeeder extends Seeder
 
         // Role => permission set. Counts match the mock `roles` array.
         $superAdmin = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
-        $superAdmin->syncPermissions($all); // 42
+        $superAdmin->syncPermissions($all); // 49
 
         $admin = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
         $admin->syncPermissions(array_values(array_filter($all, fn ($p) => ! in_array($p, [
@@ -48,7 +51,10 @@ class RoleSeeder extends Seeder
             'users.delete', 'referrals.adjust-points',
             'settings.edit-integrations', 'media.manage-folders',
             'email.delete', 'waitlist.delete', 'cms.publish',
-        ], true)))); // 32
+            // Data room: admins can run day-to-day diligence operations but
+            // cannot change global security policy or hard-delete documents.
+            'data-room.manage-settings', 'data-room.delete',
+        ], true)))); // 37
 
         $marketing = Role::firstOrCreate(['name' => 'marketing', 'guard_name' => 'web']);
         $marketing->syncPermissions([

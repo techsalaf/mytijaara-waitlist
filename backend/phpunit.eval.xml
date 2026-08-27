@@ -1,27 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+    The eval lane's capture step.
+
+    Separate from phpunit.xml so the gate lane (`artisan test`) never runs it and
+    stays deterministic, local and free. This config only produces the payload
+    corpus under evals/data-room/captures/; the judging happens in
+    evals/data-room/run.php, which shells out to local Claude Code.
+-->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
          colors="true"
 >
     <testsuites>
-        <testsuite name="Unit">
-            <directory>tests/Unit</directory>
+        <testsuite name="Eval">
+            <directory>tests/Eval</directory>
         </testsuite>
-        <testsuite name="Feature">
-            <directory>tests/Feature</directory>
-        </testsuite>
-        <!--
-            tests/Eval is deliberately absent. The eval lane runs from its own
-            config (phpunit.eval.xml) so `artisan test` and the pre-commit gate
-            stay deterministic, local and free.
-        -->
     </testsuites>
-    <source>
-        <include>
-            <directory>app</directory>
-        </include>
-    </source>
     <php>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_KEY" value="base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="/>

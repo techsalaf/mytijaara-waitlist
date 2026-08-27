@@ -28,6 +28,13 @@ dist-ssr
 backend/.phpunit.result.cache
 .phpunit.result.cache
 
+# Eval lane artefacts. Both are generated: the corpus by the capture step, the
+# verdicts by the judge. Committing them would churn on every run (the corpus
+# carries a fresh session token each time) and would let a stale corpus be
+# mistaken for the current API. Re-capture instead.
+evals/*/captures/
+evals/*/results/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

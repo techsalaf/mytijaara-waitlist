@@ -58,7 +58,7 @@ class RoleController extends Controller
         foreach (RoleSeeder::GROUPS as $group => $items) {
             $groups[] = [
                 'group' => $group,
-                'label' => Str::title(str_replace('_', ' ', $group)),
+                'label' => Str::title(str_replace(['_', '-'], ' ', $group)),
                 'permissions' => array_map(fn ($item) => [
                     'key' => "{$group}.{$item}",
                     'label' => Str::title(str_replace('-', ' ', $item)),

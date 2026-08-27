@@ -47,6 +47,18 @@ return [
             'report' => false,
         ],
 
+        // Virtual Data Room private storage. Never served statically, never
+        // symlinked into public/. Files leave this disk only through
+        // DataRoomWorkspaceController after full authorization checks.
+        'dataroom' => [
+            'driver' => 'local',
+            'root' => env('DATA_ROOM_STORAGE_ROOT', storage_path('app/dataroom')),
+            'serve' => false,
+            'visibility' => 'private',
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
