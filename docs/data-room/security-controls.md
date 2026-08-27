@@ -56,16 +56,21 @@ confirmation phrase or the request is rejected 422.
 
 | Action | Phrase | Effect |
 | --- | --- | --- |
-| `lock_room` | `LOCK ENTIRE DATA ROOM` | `emergency_lockdown = true`. Every request 403 before the token is read |
-| `unlock_room` | | clears the flag |
+| `lock_room` | `LOCK DATA ROOM` | `emergency_lockdown = true` **and** every session deleted. Every request 403 before the token is read |
+| `unlock_room` | `UNLOCK DATA ROOM` | clears the flag |
 | `revoke_all_sessions` | `REVOKE ALL SESSIONS` | deletes every `dataroom_sessions` row |
 | `disable_all_downloads` | `DISABLE ALL DOWNLOADS` | `downloads_enabled = false` |
-| `enable_all_downloads` | | restores it |
-| `disable_all_grants` | `DISABLE ALL ACCESS GRANTS` | suspends every active grant |
+| `enable_all_downloads` | `ENABLE ALL DOWNLOADS` | restores it |
+| `disable_all_grants` | `DISABLE ALL ACCESS GRANTS` | suspends every active grant and deletes every session |
 
-Audited as `emergency_lockdown`, `emergency_disabled_all_downloads`,
-`emergency_disabled_all_grants`. Nothing here is cached, so each takes effect on
-the next request rather than at the end of a TTL.
+The phrase is compared with `hash_equals` after a trim. Lockdown destroys
+sessions too, because a lockdown that leaves live sessions running is not a
+lockdown.
+
+Audited as `emergency_lockdown`, `emergency_revoked_all_sessions`,
+`emergency_disabled_all_downloads`, `emergency_disabled_all_grants`. Nothing here
+is cached, so each takes effect on the next request rather than at the end of a
+TTL.
 
 ## Two-layer policy
 

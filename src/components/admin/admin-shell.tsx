@@ -14,6 +14,7 @@ import {
   ScrollText,
   HeartPulse,
   UserCircle2,
+  Vault,
   ChevronDown,
   Search,
   LogOut,
@@ -73,6 +74,14 @@ const nav: NavGroup[] = [
     items: [
       { label: "CMS", to: "/admin/cms", icon: FileText },
       { label: "Media Library", to: "/admin/media", icon: ImageIcon },
+    ],
+  },
+  {
+    label: "Fundraising",
+    items: [
+      // Administers the investor data room. The visitor side at /dataroom is
+      // deliberately unlinked from anywhere in the app, including from here.
+      { label: "Data Room", to: "/admin/data-room", icon: Vault },
     ],
   },
   {

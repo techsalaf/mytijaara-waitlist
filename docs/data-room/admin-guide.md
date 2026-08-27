@@ -193,22 +193,33 @@ always-logged list, so it cannot be switched off and then worked around.
 | Setting | Effect |
 | --- | --- |
 | Enabled | false takes the room offline for everyone |
-| Global PIN enabled / hash | optional shared barrier. See below |
+| Global PIN enabled / PIN | send the PIN in plaintext over HTTPS; it is bcrypt-hashed before storage and never returned. Turning the switch off clears the stored hash rather than leaving a stale secret at rest |
 | Default access duration (days) | prefills the wizard |
 | Session timeout (minutes) | idle clock |
 | Max failed attempts | throttle ceiling |
 | Downloads enabled | gate 1 of 4. One write disables every download in the room |
 | Watermark enabled | ANDed with the deployment config |
 | Audit logging enabled | does not cover administrative actions |
-| Emergency lockdown | see below |
+
+Emergency lockdown is not a settings field. It moves only through
+`POST /emergency` with its confirmation phrase, so it cannot be toggled by a
+stray PATCH.
+
+The response also carries an `environment` block showing what
+`config/dataroom.php` allows, so you can see when the deployment is overriding
+what you set here: the idle-timeout ceiling, the absolute TTL, whether the PIN is
+pinned by an environment variable, whether malware scanning is provisioned, and
+which disk is in use.
 
 Every one of these is a floor, not a ceiling. `config/dataroom.php` sets the
 maximum the deployment allows and you can only tighten it. If you set the session
 timeout to 120 minutes and the config says 30, 30 wins.
 
 The PIN is a barrier, not a factor. Everyone admitted shares it, so it identifies
-nobody. Generate the hash with `php artisan dataroom:hash-pin`. A PIN switch turned
-on with no hash configured is treated as no PIN rather than as an open door.
+nobody. Set it here, or pin it at the deployment level with
+`php artisan dataroom:hash-pin` and `DATA_ROOM_MASTER_PIN_HASH`, in which case the
+environment value wins and this screen cannot change it. A PIN switch turned on
+with no hash configured is treated as no PIN rather than as an open door.
 
 ## Emergency controls
 
@@ -216,10 +227,12 @@ on with no hash configured is treated as no PIN rather than as an open door.
 
 | Action | Phrase | What it does |
 | --- | --- | --- |
-| Lock entire data room | `LOCK ENTIRE DATA ROOM` | every request 403 before the token is even read |
+| Lock the data room | `LOCK DATA ROOM` | every request 403 before the token is even read, and every live session destroyed |
+| Unlock it again | `UNLOCK DATA ROOM` | clears the flag |
 | Revoke all active sessions | `REVOKE ALL SESSIONS` | every session row deleted. Grants still valid, everyone re-authenticates |
 | Disable all downloads | `DISABLE ALL DOWNLOADS` | reading continues, no bytes leave as attachments |
-| Disable all access grants | `DISABLE ALL ACCESS GRANTS` | every active grant suspended. Reversible per grant |
+| Enable all downloads | `ENABLE ALL DOWNLOADS` | restores the room-wide switch |
+| Disable all access grants | `DISABLE ALL ACCESS GRANTS` | every active grant suspended and every session destroyed. Reversible per grant |
 
 Use lockdown when you do not yet know what happened. Use revoke-all-sessions when
 you believe a token leaked but the codes are fine. Use disable-all-downloads when a

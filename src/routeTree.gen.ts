@@ -16,6 +16,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CareersRouteImport } from './routes/careers'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CookiesRouteImport } from './routes/cookies'
+import { Route as DataroomRouteImport } from './routes/dataroom'
 import { Route as DownloadRouteImport } from './routes/download'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as PartnersRouteImport } from './routes/partners'
@@ -41,6 +42,8 @@ import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-pas
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AuthSessionExpiredRouteImport } from './routes/auth.session-expired'
+import { Route as DataroomIndexRouteImport } from './routes/dataroom.index'
+import { Route as DataroomWorkspaceRouteImport } from './routes/dataroom.workspace'
 import { Route as AdminCmsIndexRouteImport } from './routes/admin.cms.index'
 import { Route as AdminCmsAnnouncementRouteImport } from './routes/admin.cms.announcement'
 import { Route as AdminCmsBuiltForNigeriansRouteImport } from './routes/admin.cms.built-for-nigerians'
@@ -80,6 +83,10 @@ import { Route as AdminSettingsSocialRouteImport } from './routes/admin.settings
 import { Route as AdminSettingsSystemRouteImport } from './routes/admin.settings.system'
 import { Route as AdminUsersIndexRouteImport } from './routes/admin.users.index'
 import { Route as AdminUsersIdRouteImport } from './routes/admin.users.$id'
+import { Route as DataroomWorkspaceIndexRouteImport } from './routes/dataroom.workspace.index'
+import { Route as DataroomWorkspaceActivityRouteImport } from './routes/dataroom.workspace.activity'
+import { Route as DataroomWorkspaceSearchRouteImport } from './routes/dataroom.workspace.search'
+import { Route as DataroomWorkspaceDocumentsUuidRouteImport } from './routes/dataroom.workspace.documents.$uuid'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -114,6 +121,11 @@ const ContactRoute = ContactRouteImport.update({
 const CookiesRoute = CookiesRouteImport.update({
   id: '/cookies',
   path: '/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DataroomRoute = DataroomRouteImport.update({
+  id: '/dataroom',
+  path: '/dataroom',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DownloadRoute = DownloadRouteImport.update({
@@ -240,6 +252,16 @@ const AuthSessionExpiredRoute = AuthSessionExpiredRouteImport.update({
   id: '/session-expired',
   path: '/session-expired',
   getParentRoute: () => AuthRoute,
+} as any)
+const DataroomIndexRoute = DataroomIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DataroomRoute,
+} as any)
+const DataroomWorkspaceRoute = DataroomWorkspaceRouteImport.update({
+  id: '/workspace',
+  path: '/workspace',
+  getParentRoute: () => DataroomRoute,
 } as any)
 const AdminCmsIndexRoute = AdminCmsIndexRouteImport.update({
   id: '/',
@@ -439,6 +461,28 @@ const AdminUsersIdRoute = AdminUsersIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AdminUsersRoute,
 } as any)
+const DataroomWorkspaceIndexRoute = DataroomWorkspaceIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DataroomWorkspaceRoute,
+} as any)
+const DataroomWorkspaceActivityRoute =
+  DataroomWorkspaceActivityRouteImport.update({
+    id: '/activity',
+    path: '/activity',
+    getParentRoute: () => DataroomWorkspaceRoute,
+  } as any)
+const DataroomWorkspaceSearchRoute = DataroomWorkspaceSearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => DataroomWorkspaceRoute,
+} as any)
+const DataroomWorkspaceDocumentsUuidRoute =
+  DataroomWorkspaceDocumentsUuidRouteImport.update({
+    id: '/documents/$uuid',
+    path: '/documents/$uuid',
+    getParentRoute: () => DataroomWorkspaceRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -448,6 +492,7 @@ export interface FileRoutesByFullPath {
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
+  '/dataroom': typeof DataroomRouteWithChildren
   '/download': typeof DownloadRoute
   '/faq': typeof FaqRoute
   '/partners': typeof PartnersRoute
@@ -472,7 +517,9 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/session-expired': typeof AuthSessionExpiredRoute
+  '/dataroom/workspace': typeof DataroomWorkspaceRouteWithChildren
   '/admin/': typeof AdminIndexRoute
+  '/dataroom/': typeof DataroomIndexRoute
   '/admin/cms/announcement': typeof AdminCmsAnnouncementRoute
   '/admin/cms/built-for-nigerians': typeof AdminCmsBuiltForNigeriansRoute
   '/admin/cms/download': typeof AdminCmsDownloadRoute
@@ -506,12 +553,16 @@ export interface FileRoutesByFullPath {
   '/admin/settings/social': typeof AdminSettingsSocialRoute
   '/admin/settings/system': typeof AdminSettingsSystemRoute
   '/admin/users/$id': typeof AdminUsersIdRoute
+  '/dataroom/workspace/activity': typeof DataroomWorkspaceActivityRoute
+  '/dataroom/workspace/search': typeof DataroomWorkspaceSearchRoute
   '/admin/cms/': typeof AdminCmsIndexRoute
   '/admin/email/': typeof AdminEmailIndexRoute
   '/admin/referrals/': typeof AdminReferralsIndexRoute
   '/admin/roles/': typeof AdminRolesIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
+  '/dataroom/workspace/': typeof DataroomWorkspaceIndexRoute
+  '/dataroom/workspace/documents/$uuid': typeof DataroomWorkspaceDocumentsUuidRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -539,6 +590,7 @@ export interface FileRoutesByTo {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/session-expired': typeof AuthSessionExpiredRoute
   '/admin': typeof AdminIndexRoute
+  '/dataroom': typeof DataroomIndexRoute
   '/admin/cms/announcement': typeof AdminCmsAnnouncementRoute
   '/admin/cms/built-for-nigerians': typeof AdminCmsBuiltForNigeriansRoute
   '/admin/cms/download': typeof AdminCmsDownloadRoute
@@ -572,12 +624,16 @@ export interface FileRoutesByTo {
   '/admin/settings/social': typeof AdminSettingsSocialRoute
   '/admin/settings/system': typeof AdminSettingsSystemRoute
   '/admin/users/$id': typeof AdminUsersIdRoute
+  '/dataroom/workspace/activity': typeof DataroomWorkspaceActivityRoute
+  '/dataroom/workspace/search': typeof DataroomWorkspaceSearchRoute
   '/admin/cms': typeof AdminCmsIndexRoute
   '/admin/email': typeof AdminEmailIndexRoute
   '/admin/referrals': typeof AdminReferralsIndexRoute
   '/admin/roles': typeof AdminRolesIndexRoute
   '/admin/settings': typeof AdminSettingsIndexRoute
   '/admin/users': typeof AdminUsersIndexRoute
+  '/dataroom/workspace': typeof DataroomWorkspaceIndexRoute
+  '/dataroom/workspace/documents/$uuid': typeof DataroomWorkspaceDocumentsUuidRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -588,6 +644,7 @@ export interface FileRoutesById {
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
+  '/dataroom': typeof DataroomRouteWithChildren
   '/download': typeof DownloadRoute
   '/faq': typeof FaqRoute
   '/partners': typeof PartnersRoute
@@ -612,7 +669,9 @@ export interface FileRoutesById {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/session-expired': typeof AuthSessionExpiredRoute
+  '/dataroom/workspace': typeof DataroomWorkspaceRouteWithChildren
   '/admin/': typeof AdminIndexRoute
+  '/dataroom/': typeof DataroomIndexRoute
   '/admin/cms/announcement': typeof AdminCmsAnnouncementRoute
   '/admin/cms/built-for-nigerians': typeof AdminCmsBuiltForNigeriansRoute
   '/admin/cms/download': typeof AdminCmsDownloadRoute
@@ -646,12 +705,16 @@ export interface FileRoutesById {
   '/admin/settings/social': typeof AdminSettingsSocialRoute
   '/admin/settings/system': typeof AdminSettingsSystemRoute
   '/admin/users/$id': typeof AdminUsersIdRoute
+  '/dataroom/workspace/activity': typeof DataroomWorkspaceActivityRoute
+  '/dataroom/workspace/search': typeof DataroomWorkspaceSearchRoute
   '/admin/cms/': typeof AdminCmsIndexRoute
   '/admin/email/': typeof AdminEmailIndexRoute
   '/admin/referrals/': typeof AdminReferralsIndexRoute
   '/admin/roles/': typeof AdminRolesIndexRoute
   '/admin/settings/': typeof AdminSettingsIndexRoute
   '/admin/users/': typeof AdminUsersIndexRoute
+  '/dataroom/workspace/': typeof DataroomWorkspaceIndexRoute
+  '/dataroom/workspace/documents/$uuid': typeof DataroomWorkspaceDocumentsUuidRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -663,6 +726,7 @@ export interface FileRouteTypes {
     | '/careers'
     | '/contact'
     | '/cookies'
+    | '/dataroom'
     | '/download'
     | '/faq'
     | '/partners'
@@ -687,7 +751,9 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/session-expired'
+    | '/dataroom/workspace'
     | '/admin/'
+    | '/dataroom/'
     | '/admin/cms/announcement'
     | '/admin/cms/built-for-nigerians'
     | '/admin/cms/download'
@@ -721,12 +787,16 @@ export interface FileRouteTypes {
     | '/admin/settings/social'
     | '/admin/settings/system'
     | '/admin/users/$id'
+    | '/dataroom/workspace/activity'
+    | '/dataroom/workspace/search'
     | '/admin/cms/'
     | '/admin/email/'
     | '/admin/referrals/'
     | '/admin/roles/'
     | '/admin/settings/'
     | '/admin/users/'
+    | '/dataroom/workspace/'
+    | '/dataroom/workspace/documents/$uuid'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -754,6 +824,7 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/auth/session-expired'
     | '/admin'
+    | '/dataroom'
     | '/admin/cms/announcement'
     | '/admin/cms/built-for-nigerians'
     | '/admin/cms/download'
@@ -787,12 +858,16 @@ export interface FileRouteTypes {
     | '/admin/settings/social'
     | '/admin/settings/system'
     | '/admin/users/$id'
+    | '/dataroom/workspace/activity'
+    | '/dataroom/workspace/search'
     | '/admin/cms'
     | '/admin/email'
     | '/admin/referrals'
     | '/admin/roles'
     | '/admin/settings'
     | '/admin/users'
+    | '/dataroom/workspace'
+    | '/dataroom/workspace/documents/$uuid'
   id:
     | '__root__'
     | '/'
@@ -802,6 +877,7 @@ export interface FileRouteTypes {
     | '/careers'
     | '/contact'
     | '/cookies'
+    | '/dataroom'
     | '/download'
     | '/faq'
     | '/partners'
@@ -826,7 +902,9 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/session-expired'
+    | '/dataroom/workspace'
     | '/admin/'
+    | '/dataroom/'
     | '/admin/cms/announcement'
     | '/admin/cms/built-for-nigerians'
     | '/admin/cms/download'
@@ -860,12 +938,16 @@ export interface FileRouteTypes {
     | '/admin/settings/social'
     | '/admin/settings/system'
     | '/admin/users/$id'
+    | '/dataroom/workspace/activity'
+    | '/dataroom/workspace/search'
     | '/admin/cms/'
     | '/admin/email/'
     | '/admin/referrals/'
     | '/admin/roles/'
     | '/admin/settings/'
     | '/admin/users/'
+    | '/dataroom/workspace/'
+    | '/dataroom/workspace/documents/$uuid'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -876,6 +958,7 @@ export interface RootRouteChildren {
   CareersRoute: typeof CareersRoute
   ContactRoute: typeof ContactRoute
   CookiesRoute: typeof CookiesRoute
+  DataroomRoute: typeof DataroomRouteWithChildren
   DownloadRoute: typeof DownloadRoute
   FaqRoute: typeof FaqRoute
   PartnersRoute: typeof PartnersRoute
@@ -934,6 +1017,13 @@ declare module '@tanstack/react-router' {
       path: '/cookies'
       fullPath: '/cookies'
       preLoaderRoute: typeof CookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dataroom': {
+      id: '/dataroom'
+      path: '/dataroom'
+      fullPath: '/dataroom'
+      preLoaderRoute: typeof DataroomRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/download': {
@@ -1110,6 +1200,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/session-expired'
       preLoaderRoute: typeof AuthSessionExpiredRouteImport
       parentRoute: typeof AuthRoute
+    }
+    '/dataroom/': {
+      id: '/dataroom/'
+      path: '/'
+      fullPath: '/dataroom/'
+      preLoaderRoute: typeof DataroomIndexRouteImport
+      parentRoute: typeof DataroomRoute
+    }
+    '/dataroom/workspace': {
+      id: '/dataroom/workspace'
+      path: '/workspace'
+      fullPath: '/dataroom/workspace'
+      preLoaderRoute: typeof DataroomWorkspaceRouteImport
+      parentRoute: typeof DataroomRoute
     }
     '/admin/cms/': {
       id: '/admin/cms/'
@@ -1384,6 +1488,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersIdRouteImport
       parentRoute: typeof AdminUsersRoute
     }
+    '/dataroom/workspace/': {
+      id: '/dataroom/workspace/'
+      path: '/'
+      fullPath: '/dataroom/workspace/'
+      preLoaderRoute: typeof DataroomWorkspaceIndexRouteImport
+      parentRoute: typeof DataroomWorkspaceRoute
+    }
+    '/dataroom/workspace/activity': {
+      id: '/dataroom/workspace/activity'
+      path: '/activity'
+      fullPath: '/dataroom/workspace/activity'
+      preLoaderRoute: typeof DataroomWorkspaceActivityRouteImport
+      parentRoute: typeof DataroomWorkspaceRoute
+    }
+    '/dataroom/workspace/search': {
+      id: '/dataroom/workspace/search'
+      path: '/search'
+      fullPath: '/dataroom/workspace/search'
+      preLoaderRoute: typeof DataroomWorkspaceSearchRouteImport
+      parentRoute: typeof DataroomWorkspaceRoute
+    }
+    '/dataroom/workspace/documents/$uuid': {
+      id: '/dataroom/workspace/documents/$uuid'
+      path: '/documents/$uuid'
+      fullPath: '/dataroom/workspace/documents/$uuid'
+      preLoaderRoute: typeof DataroomWorkspaceDocumentsUuidRouteImport
+      parentRoute: typeof DataroomWorkspaceRoute
+    }
   }
 }
 
@@ -1577,6 +1709,37 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
+interface DataroomWorkspaceRouteChildren {
+  DataroomWorkspaceActivityRoute: typeof DataroomWorkspaceActivityRoute
+  DataroomWorkspaceSearchRoute: typeof DataroomWorkspaceSearchRoute
+  DataroomWorkspaceIndexRoute: typeof DataroomWorkspaceIndexRoute
+  DataroomWorkspaceDocumentsUuidRoute: typeof DataroomWorkspaceDocumentsUuidRoute
+}
+
+const DataroomWorkspaceRouteChildren: DataroomWorkspaceRouteChildren = {
+  DataroomWorkspaceActivityRoute: DataroomWorkspaceActivityRoute,
+  DataroomWorkspaceSearchRoute: DataroomWorkspaceSearchRoute,
+  DataroomWorkspaceIndexRoute: DataroomWorkspaceIndexRoute,
+  DataroomWorkspaceDocumentsUuidRoute: DataroomWorkspaceDocumentsUuidRoute,
+}
+
+const DataroomWorkspaceRouteWithChildren =
+  DataroomWorkspaceRoute._addFileChildren(DataroomWorkspaceRouteChildren)
+
+interface DataroomRouteChildren {
+  DataroomWorkspaceRoute: typeof DataroomWorkspaceRouteWithChildren
+  DataroomIndexRoute: typeof DataroomIndexRoute
+}
+
+const DataroomRouteChildren: DataroomRouteChildren = {
+  DataroomWorkspaceRoute: DataroomWorkspaceRouteWithChildren,
+  DataroomIndexRoute: DataroomIndexRoute,
+}
+
+const DataroomRouteWithChildren = DataroomRoute._addFileChildren(
+  DataroomRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -1585,6 +1748,7 @@ const rootRouteChildren: RootRouteChildren = {
   CareersRoute: CareersRoute,
   ContactRoute: ContactRoute,
   CookiesRoute: CookiesRoute,
+  DataroomRoute: DataroomRouteWithChildren,
   DownloadRoute: DownloadRoute,
   FaqRoute: FaqRoute,
   PartnersRoute: PartnersRoute,

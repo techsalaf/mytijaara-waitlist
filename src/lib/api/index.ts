@@ -70,3 +70,58 @@ export type {
 
 export { healthApi } from "./health";
 export type { SystemHealth, HealthCheck, HealthSample, QueuedJob } from "./health";
+
+// Data room. The visitor client has its own transport and its own token
+// namespace on purpose; see the docblock in `./dataroom`.
+export {
+  dataRoomApi,
+  getDataRoomToken,
+  setDataRoomToken,
+  clearDataRoomToken,
+} from "./dataroom";
+export type {
+  DataRoomGate,
+  DataRoomSessionInfo,
+  DataRoomVisitor,
+  DataRoomAuthResult,
+  DataRoomMe,
+  DataRoomDocumentCard,
+  DataRoomDocumentDetail,
+  DataRoomFolderCard,
+  DataRoomDashboard,
+  DataRoomActivityRow,
+} from "./dataroom";
+
+export { dataRoomAdminApi, DATA_ROOM_EMERGENCY_PHRASES } from "./dataroom-admin";
+export type {
+  DataRoomPolicySnapshot,
+  DataRoomOverview,
+  DataRoomAnalytics,
+  DataRoomAuditRow,
+  DataRoomAuditPage,
+  DataRoomAuditParams,
+  DataRoomAdminFolder,
+  DataRoomAdminDocument,
+  DataRoomAdminDocumentDetail,
+  DataRoomDocumentVersionRow,
+  DataRoomDocumentMetadataPatch,
+  DataRoomDocumentStatus,
+  DataRoomConfidentiality,
+  DataRoomAdminGrant,
+  DataRoomGrantDetail,
+  DataRoomGrantStatus,
+  DataRoomGrantDuration,
+  DataRoomGrantInput,
+  DataRoomGrantPatch,
+  DataRoomGrantScope,
+  DataRoomGrantCreated,
+  DataRoomGrantRegenerated,
+  DataRoomDurationOptions,
+  DataRoomMatrixCell,
+  DataRoomPermissionMatrix,
+  DataRoomAccessTemplate,
+  DataRoomTemplateInput,
+  DataRoomSettingsPatch,
+  DataRoomEmergencyAction,
+  DataRoomEmergencyResult,
+} from "./dataroom-admin";
