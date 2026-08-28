@@ -8,13 +8,16 @@
  * phrase typed for one action cannot confirm a different one.
  *
  * `LoadState`'s 403 branch is pinned too. A 403 rendered as a retryable error
- * sends the operator round a loop that can never succeed.
+ * sends the operator round a loop that can never succeed. `loadState` is pinned
+ * separately on the one property the component cannot have: it is null when
+ * there is nothing to show, so a tab can branch on it. Branching on the element
+ * instead is what blanked five admin tabs in production.
  */
 
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { ConfirmationModal, LoadState, StatusPill } from "./bits";
+import { ConfirmationModal, LoadState, StatusPill, loadState } from "./bits";
 import { grantStatusView } from "@/lib/dataroom/admin-format";
 
 function renderModal(overrides: Partial<Parameters<typeof ConfirmationModal>[0]> = {}) {
@@ -152,6 +155,53 @@ describe("LoadState", () => {
   it("renders nothing once there is data to show", () => {
     const { container } = render(<LoadState loading={false} error={null} label="anything" />);
     expect(container).toBeEmptyDOMElement();
+  });
+});
+
+describe("loadState", () => {
+  // This is the whole reason the function exists next to the component: a tab
+  // that swaps its body for the state has to be able to ask "is there a state?",
+  // and `<LoadState … />` answers yes even when it would render nothing.
+  it("returns null when there is nothing to say", () => {
+    expect(loadState({ loading: false, error: null, label: "anything" })).toBeNull();
+  });
+
+  it("returns an element while loading", () => {
+    expect(loadState({ loading: true, error: null, label: "the audit log" })).not.toBeNull();
+  });
+
+  it("returns an element for a 403", () => {
+    expect(
+      loadState({
+        loading: false,
+        error: "This action is unauthorized.",
+        forbidden: true,
+        label: "the settings",
+      }),
+    ).not.toBeNull();
+  });
+
+  it("returns an element for an ordinary failure", () => {
+    expect(
+      loadState({ loading: false, error: "Network request failed.", label: "the grants" }),
+    ).not.toBeNull();
+  });
+
+  it("prefers the loading panel over an error left over from the last attempt", () => {
+    // `useResource` keeps `error` set while a retry is in flight, so a reload
+    // after a failure must not paint the failure again.
+    render(
+      <>
+        {loadState({
+          loading: true,
+          error: "Network request failed.",
+          onRetry: vi.fn(),
+          label: "the grants",
+        })}
+      </>,
+    );
+    expect(screen.getByRole("status")).toHaveTextContent("Loading the grants…");
+    expect(screen.queryByRole("button", { name: "Try again" })).not.toBeInTheDocument();
   });
 });
 

@@ -12,7 +12,7 @@ import { useCallback } from "react";
 import { RefreshCw } from "lucide-react";
 import { SectionCard } from "@/components/admin/ui-bits";
 import { Button } from "@/components/ui/button";
-import { LoadState } from "@/components/admin/dataroom/bits";
+import { loadState } from "@/components/admin/dataroom/bits";
 import { useResource } from "@/components/admin/dataroom/use-resource";
 import { PermissionMatrix } from "@/components/admin/dataroom/permission-matrix";
 import { dataRoomAdminApi } from "@/lib/api/dataroom-admin";
@@ -25,15 +25,13 @@ function DataRoomMatrixRoute() {
   const load = useCallback(async () => (await dataRoomAdminApi.permissionMatrix()).data, []);
   const res = useResource(load, "Could not load the permission matrix.");
 
-  const state = (
-    <LoadState
-      loading={res.loading}
-      error={res.error}
-      forbidden={res.forbidden}
-      onRetry={() => void res.reload()}
-      label="the permission matrix"
-    />
-  );
+  const state = loadState({
+    loading: res.loading,
+    error: res.error,
+    forbidden: res.forbidden,
+    onRetry: () => void res.reload(),
+    label: "the permission matrix",
+  });
   if (state || !res.data) return state;
 
   return (

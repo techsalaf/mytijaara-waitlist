@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { ConfirmationModal, LoadState } from "@/components/admin/dataroom/bits";
+import { ConfirmationModal, loadState } from "@/components/admin/dataroom/bits";
 import { errorMessage, useResource } from "@/components/admin/dataroom/use-resource";
 import { dataRoomAdminApi, DATA_ROOM_EMERGENCY_PHRASES } from "@/lib/api/dataroom-admin";
 import type {
@@ -135,15 +135,13 @@ function DataRoomSettingsRoute() {
     if (res.data) setForm(formFrom(res.data));
   }, [res.data]);
 
-  const state = (
-    <LoadState
-      loading={res.loading}
-      error={res.error}
-      forbidden={res.forbidden}
-      onRetry={() => void res.reload()}
-      label="the data room settings"
-    />
-  );
+  const state = loadState({
+    loading: res.loading,
+    error: res.error,
+    forbidden: res.forbidden,
+    onRetry: () => void res.reload(),
+    label: "the data room settings",
+  });
   if (state || !res.data || !form) return state;
 
   const policy = res.data;

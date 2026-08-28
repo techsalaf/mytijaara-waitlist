@@ -252,3 +252,56 @@ One consequence of the MySQL-only guard: that repair migration emits no DDL unde
 data room migration the gate cannot measure. Its column widths are copied from
 the create migration, which is measured; changing one without the other puts a
 repaired database and a clean install out of step.
+
+## 15. Nothing had ever mounted an admin tab
+
+Fixed, recorded because the shape of the gap is the point.
+
+Every data-driven tab under `/admin/data-room` built its loading panel as JSX and
+then tested the element:
+
+```tsx
+const state = (
+  <LoadState loading={res.loading} error={res.error} label="the documents" />
+);
+if (state || !res.data) return state;
+```
+
+A JSX element is a plain object, so `state ||` is always true and the function
+always returned there. `LoadState` renders `null` once loading finishes, so
+Overview, Documents, Access grants, Permission matrix and Settings each painted
+an empty panel under the tab strip in production, on every load, for every
+operator. Activity composed the same component correctly and was never affected.
+
+Three test lanes were green while that shipped. Unit tests covered
+`LoadState` itself. The PHPUnit suite covered every admin endpoint the tabs call.
+The eval suite scored operator-facing copy. None of them mounted a route
+component, so the one thing broken was the one thing nobody looked at.
+
+The fix is a value, not a component:
+[`loadState()`](../../src/components/admin/dataroom/bits.tsx) returns
+`React.ReactElement | null`, so `if (state || !res.data) return state` means what
+it reads like. `LoadState` stays as a one-line wrapper for the callers that place
+it above their content unconditionally.
+
+Two tests hold the class closed from opposite directions:
+
+- [`src/routes/admin.data-room.tabs.test.tsx`](../../src/routes/admin.data-room.tabs.test.tsx)
+  mounts all six real route components against a mocked `dataRoomAdminApi` and
+  asserts on text only the success path can produce, plus the 403, 500 and
+  still-loading panels. Route components are not exported, so it reaches them
+  through `Route.options.component` with `createFileRoute` mocked.
+- [`src/routes/admin.data-room.guard.test.ts`](../../src/routes/admin.data-room.guard.test.ts)
+  reads every `src/routes/admin.data-room*.tsx` as text, collects each name bound
+  to a parenthesised JSX element, and fails if the file then branches on that
+  name. This covers a tab that has no render test yet, which is what a seventh
+  tab added next month will be.
+
+Both were confirmed to fail against the original code before being committed.
+
+The residual limitation is that the render tests mock the API client, so they
+prove the components paint given a well-formed envelope. They do not prove the
+envelope the Laravel controllers actually return matches the TypeScript types.
+That seam is still only covered by the two sides agreeing on
+[`src/lib/api/dataroom-admin.ts`](../../src/lib/api/dataroom-admin.ts) by hand.
+

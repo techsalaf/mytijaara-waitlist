@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { SectionCard, StatCard } from "@/components/admin/ui-bits";
 import { Button } from "@/components/ui/button";
-import { DetailRow, LoadState } from "@/components/admin/dataroom/bits";
+import { DetailRow, loadState } from "@/components/admin/dataroom/bits";
 import { useResource } from "@/components/admin/dataroom/use-resource";
 import { dataRoomAdminApi } from "@/lib/api/dataroom-admin";
 import { formatBytes } from "@/lib/dataroom/format";
@@ -37,15 +37,13 @@ function DataRoomOverview() {
   const load = useCallback(async () => (await dataRoomAdminApi.overview()).data, []);
   const overview = useResource(load, "Could not load the data room overview.");
 
-  const state = (
-    <LoadState
-      loading={overview.loading}
-      error={overview.error}
-      forbidden={overview.forbidden}
-      onRetry={() => void overview.reload()}
-      label="the data room overview"
-    />
-  );
+  const state = loadState({
+    loading: overview.loading,
+    error: overview.error,
+    forbidden: overview.forbidden,
+    onRetry: () => void overview.reload(),
+    label: "the data room overview",
+  });
   if (state || !overview.data) return state;
 
   const data = overview.data;

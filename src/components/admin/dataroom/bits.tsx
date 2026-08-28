@@ -176,27 +176,34 @@ export function ConfirmationModal({
   );
 }
 
-/**
- * Loading, permission and failure states for a tab.
- *
- * A 403 gets its own copy because it is not an error the operator can retry
- * their way out of: the role is missing a `data-room.*` permission and a
- * super administrator has to grant it. Returns null once there is something to
- * render, so a caller can place it above the real content.
- */
-export function LoadState({
-  loading,
-  error,
-  forbidden,
-  onRetry,
-  label,
-}: {
+export type LoadStateProps = {
   loading: boolean;
   error: string | null;
   forbidden?: boolean;
   onRetry?: () => void;
   label: string;
-}) {
+};
+
+/**
+ * The same three states as `LoadState`, as a value instead of an element.
+ *
+ * A tab that has to swap its whole body for the state needs to test whether
+ * there is a state at all, and `<LoadState … />` cannot answer that: a JSX
+ * element is an object, so it is truthy even when the component would render
+ * nothing. Every tab that wrote `const state = (<LoadState … />)` and then
+ * `if (state || !res.data) return state` therefore returned unconditionally and
+ * painted a blank panel forever. Call this instead and branch on null.
+ *
+ * Enforced by `admin.data-room.guard.test.ts`, which fails the build if a tab
+ * goes back to branching on an element.
+ */
+export function loadState({
+  loading,
+  error,
+  forbidden,
+  onRetry,
+  label,
+}: LoadStateProps): React.ReactElement | null {
   if (loading) {
     return (
       <div className="flex items-center gap-2 rounded-2xl border border-border/60 bg-card px-5 py-8 text-sm text-muted-foreground">
@@ -229,4 +236,17 @@ export function LoadState({
     );
   }
   return null;
+}
+
+/**
+ * Loading, permission and failure states for a tab, as a component.
+ *
+ * A 403 gets its own copy because it is not an error the operator can retry
+ * their way out of: the role is missing a `data-room.*` permission and a
+ * super administrator has to grant it. Renders nothing once there is real
+ * content, so a caller can place it above that content unconditionally. A
+ * caller that needs to *replace* its body wants `loadState` instead.
+ */
+export function LoadState(props: LoadStateProps) {
+  return loadState(props);
 }

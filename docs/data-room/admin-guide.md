@@ -263,6 +263,12 @@ that needs `data-room.delete`.
 - A grant's stored `status` column can read `active` while the API reports
   `expired`. `effectiveStatus()` is the truth; the column is authoritative only for
   `revoked` and `suspended`.
+- If a tab renders the heading and the tab strip with nothing under it, the browser
+  is running an old frontend bundle. That symptom was a real defect until
+  2026-08-28 ([known-limitations.md](known-limitations.md#15-nothing-had-ever-mounted-an-admin-tab));
+  after that build it means the static bundle on the host is stale. Hard-reload,
+  then rebuild and redeploy. It is never a permissions problem: a missing
+  `data-room.*` permission prints "Your role does not include this permission".
 
 ## Weekly routine
 

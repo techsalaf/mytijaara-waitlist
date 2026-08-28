@@ -50,7 +50,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ConfirmationModal, LoadState, StatusPill } from "@/components/admin/dataroom/bits";
+import { ConfirmationModal, StatusPill, loadState } from "@/components/admin/dataroom/bits";
 import { errorMessage, useResource } from "@/components/admin/dataroom/use-resource";
 import {
   DocumentUploadModal,
@@ -132,15 +132,13 @@ function DataRoomDocumentsRoute() {
   );
   const documents = res.data?.documents ?? [];
 
-  const state = (
-    <LoadState
-      loading={res.loading}
-      error={res.error}
-      forbidden={res.forbidden}
-      onRetry={() => void res.reload()}
-      label="the documents"
-    />
-  );
+  const state = loadState({
+    loading: res.loading,
+    error: res.error,
+    forbidden: res.forbidden,
+    onRetry: () => void res.reload(),
+    label: "the documents",
+  });
   if (state || !res.data) return state;
 
   async function run(key: string, work: () => Promise<void>, success: string) {

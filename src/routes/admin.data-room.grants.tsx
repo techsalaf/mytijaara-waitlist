@@ -27,7 +27,7 @@ import {
 import {
   ConfirmationModal,
   DetailRow,
-  LoadState,
+  loadState,
   StatusPill,
 } from "@/components/admin/dataroom/bits";
 import { errorMessage, useResource } from "@/components/admin/dataroom/use-resource";
@@ -118,15 +118,13 @@ function DataRoomGrantsRoute() {
   const [busy, setBusy] = useState(false);
   const [detailId, setDetailId] = useState<number | null>(null);
 
-  const state = (
-    <LoadState
-      loading={res.loading}
-      error={res.error}
-      forbidden={res.forbidden}
-      onRetry={() => void res.reload()}
-      label="the access grants"
-    />
-  );
+  const state = loadState({
+    loading: res.loading,
+    error: res.error,
+    forbidden: res.forbidden,
+    onRetry: () => void res.reload(),
+    label: "the access grants",
+  });
   if (state || !res.data) return state;
 
   const data = res.data;
