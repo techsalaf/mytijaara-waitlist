@@ -25,6 +25,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectGuestsTo(fn (Request $request) => null);
         $middleware->use([\Illuminate\Http\Middleware\HandleCors::class]);
 
+        // Outermost, so it also decorates the 401 and 403 the exception handler
+        // renders for /api/*/admin/dataroom. The middleware scopes itself by path;
+        // see its docblock for why route middleware cannot do this job.
+        $middleware->prepend(\App\Http\Middleware\DataRoomAdminNoStore::class);
+
         $middleware->alias([
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,

@@ -28,6 +28,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAuditLogsRouteImport } from './routes/admin.audit-logs'
 import { Route as AdminCmsRouteImport } from './routes/admin.cms'
+import { Route as AdminDataRoomRouteImport } from './routes/admin.data-room'
 import { Route as AdminEmailRouteImport } from './routes/admin.email'
 import { Route as AdminMediaRouteImport } from './routes/admin.media'
 import { Route as AdminNotificationsRouteImport } from './routes/admin.notifications'
@@ -61,6 +62,12 @@ import { Route as AdminCmsSocialRouteImport } from './routes/admin.cms.social'
 import { Route as AdminCmsStatisticsRouteImport } from './routes/admin.cms.statistics'
 import { Route as AdminCmsTestimonialsRouteImport } from './routes/admin.cms.testimonials'
 import { Route as AdminCmsWhyRouteImport } from './routes/admin.cms.why'
+import { Route as AdminDataRoomIndexRouteImport } from './routes/admin.data-room.index'
+import { Route as AdminDataRoomActivityRouteImport } from './routes/admin.data-room.activity'
+import { Route as AdminDataRoomDocumentsRouteImport } from './routes/admin.data-room.documents'
+import { Route as AdminDataRoomGrantsRouteImport } from './routes/admin.data-room.grants'
+import { Route as AdminDataRoomMatrixRouteImport } from './routes/admin.data-room.matrix'
+import { Route as AdminDataRoomSettingsRouteImport } from './routes/admin.data-room.settings'
 import { Route as AdminEmailIndexRouteImport } from './routes/admin.email.index'
 import { Route as AdminEmailIdRouteImport } from './routes/admin.email.$id'
 import { Route as AdminEmailBuilderRouteImport } from './routes/admin.email.builder'
@@ -181,6 +188,11 @@ const AdminAuditLogsRoute = AdminAuditLogsRouteImport.update({
 const AdminCmsRoute = AdminCmsRouteImport.update({
   id: '/cms',
   path: '/cms',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminDataRoomRoute = AdminDataRoomRouteImport.update({
+  id: '/data-room',
+  path: '/data-room',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminEmailRoute = AdminEmailRouteImport.update({
@@ -349,6 +361,36 @@ const AdminCmsWhyRoute = AdminCmsWhyRouteImport.update({
   path: '/why',
   getParentRoute: () => AdminCmsRoute,
 } as any)
+const AdminDataRoomIndexRoute = AdminDataRoomIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminDataRoomRoute,
+} as any)
+const AdminDataRoomActivityRoute = AdminDataRoomActivityRouteImport.update({
+  id: '/activity',
+  path: '/activity',
+  getParentRoute: () => AdminDataRoomRoute,
+} as any)
+const AdminDataRoomDocumentsRoute = AdminDataRoomDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => AdminDataRoomRoute,
+} as any)
+const AdminDataRoomGrantsRoute = AdminDataRoomGrantsRouteImport.update({
+  id: '/grants',
+  path: '/grants',
+  getParentRoute: () => AdminDataRoomRoute,
+} as any)
+const AdminDataRoomMatrixRoute = AdminDataRoomMatrixRouteImport.update({
+  id: '/matrix',
+  path: '/matrix',
+  getParentRoute: () => AdminDataRoomRoute,
+} as any)
+const AdminDataRoomSettingsRoute = AdminDataRoomSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminDataRoomRoute,
+} as any)
 const AdminEmailIndexRoute = AdminEmailIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -503,6 +545,7 @@ export interface FileRoutesByFullPath {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-logs': typeof AdminAuditLogsRoute
   '/admin/cms': typeof AdminCmsRouteWithChildren
+  '/admin/data-room': typeof AdminDataRoomRouteWithChildren
   '/admin/email': typeof AdminEmailRouteWithChildren
   '/admin/media': typeof AdminMediaRoute
   '/admin/notifications': typeof AdminNotificationsRoute
@@ -536,6 +579,11 @@ export interface FileRoutesByFullPath {
   '/admin/cms/statistics': typeof AdminCmsStatisticsRoute
   '/admin/cms/testimonials': typeof AdminCmsTestimonialsRoute
   '/admin/cms/why': typeof AdminCmsWhyRoute
+  '/admin/data-room/activity': typeof AdminDataRoomActivityRoute
+  '/admin/data-room/documents': typeof AdminDataRoomDocumentsRoute
+  '/admin/data-room/grants': typeof AdminDataRoomGrantsRoute
+  '/admin/data-room/matrix': typeof AdminDataRoomMatrixRoute
+  '/admin/data-room/settings': typeof AdminDataRoomSettingsRoute
   '/admin/email/$id': typeof AdminEmailIdRoute
   '/admin/email/builder': typeof AdminEmailBuilderRoute
   '/admin/email/drafts': typeof AdminEmailDraftsRoute
@@ -556,6 +604,7 @@ export interface FileRoutesByFullPath {
   '/dataroom/workspace/activity': typeof DataroomWorkspaceActivityRoute
   '/dataroom/workspace/search': typeof DataroomWorkspaceSearchRoute
   '/admin/cms/': typeof AdminCmsIndexRoute
+  '/admin/data-room/': typeof AdminDataRoomIndexRoute
   '/admin/email/': typeof AdminEmailIndexRoute
   '/admin/referrals/': typeof AdminReferralsIndexRoute
   '/admin/roles/': typeof AdminRolesIndexRoute
@@ -607,6 +656,11 @@ export interface FileRoutesByTo {
   '/admin/cms/statistics': typeof AdminCmsStatisticsRoute
   '/admin/cms/testimonials': typeof AdminCmsTestimonialsRoute
   '/admin/cms/why': typeof AdminCmsWhyRoute
+  '/admin/data-room/activity': typeof AdminDataRoomActivityRoute
+  '/admin/data-room/documents': typeof AdminDataRoomDocumentsRoute
+  '/admin/data-room/grants': typeof AdminDataRoomGrantsRoute
+  '/admin/data-room/matrix': typeof AdminDataRoomMatrixRoute
+  '/admin/data-room/settings': typeof AdminDataRoomSettingsRoute
   '/admin/email/$id': typeof AdminEmailIdRoute
   '/admin/email/builder': typeof AdminEmailBuilderRoute
   '/admin/email/drafts': typeof AdminEmailDraftsRoute
@@ -627,6 +681,7 @@ export interface FileRoutesByTo {
   '/dataroom/workspace/activity': typeof DataroomWorkspaceActivityRoute
   '/dataroom/workspace/search': typeof DataroomWorkspaceSearchRoute
   '/admin/cms': typeof AdminCmsIndexRoute
+  '/admin/data-room': typeof AdminDataRoomIndexRoute
   '/admin/email': typeof AdminEmailIndexRoute
   '/admin/referrals': typeof AdminReferralsIndexRoute
   '/admin/roles': typeof AdminRolesIndexRoute
@@ -655,6 +710,7 @@ export interface FileRoutesById {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-logs': typeof AdminAuditLogsRoute
   '/admin/cms': typeof AdminCmsRouteWithChildren
+  '/admin/data-room': typeof AdminDataRoomRouteWithChildren
   '/admin/email': typeof AdminEmailRouteWithChildren
   '/admin/media': typeof AdminMediaRoute
   '/admin/notifications': typeof AdminNotificationsRoute
@@ -688,6 +744,11 @@ export interface FileRoutesById {
   '/admin/cms/statistics': typeof AdminCmsStatisticsRoute
   '/admin/cms/testimonials': typeof AdminCmsTestimonialsRoute
   '/admin/cms/why': typeof AdminCmsWhyRoute
+  '/admin/data-room/activity': typeof AdminDataRoomActivityRoute
+  '/admin/data-room/documents': typeof AdminDataRoomDocumentsRoute
+  '/admin/data-room/grants': typeof AdminDataRoomGrantsRoute
+  '/admin/data-room/matrix': typeof AdminDataRoomMatrixRoute
+  '/admin/data-room/settings': typeof AdminDataRoomSettingsRoute
   '/admin/email/$id': typeof AdminEmailIdRoute
   '/admin/email/builder': typeof AdminEmailBuilderRoute
   '/admin/email/drafts': typeof AdminEmailDraftsRoute
@@ -708,6 +769,7 @@ export interface FileRoutesById {
   '/dataroom/workspace/activity': typeof DataroomWorkspaceActivityRoute
   '/dataroom/workspace/search': typeof DataroomWorkspaceSearchRoute
   '/admin/cms/': typeof AdminCmsIndexRoute
+  '/admin/data-room/': typeof AdminDataRoomIndexRoute
   '/admin/email/': typeof AdminEmailIndexRoute
   '/admin/referrals/': typeof AdminReferralsIndexRoute
   '/admin/roles/': typeof AdminRolesIndexRoute
@@ -737,6 +799,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/audit-logs'
     | '/admin/cms'
+    | '/admin/data-room'
     | '/admin/email'
     | '/admin/media'
     | '/admin/notifications'
@@ -770,6 +833,11 @@ export interface FileRouteTypes {
     | '/admin/cms/statistics'
     | '/admin/cms/testimonials'
     | '/admin/cms/why'
+    | '/admin/data-room/activity'
+    | '/admin/data-room/documents'
+    | '/admin/data-room/grants'
+    | '/admin/data-room/matrix'
+    | '/admin/data-room/settings'
     | '/admin/email/$id'
     | '/admin/email/builder'
     | '/admin/email/drafts'
@@ -790,6 +858,7 @@ export interface FileRouteTypes {
     | '/dataroom/workspace/activity'
     | '/dataroom/workspace/search'
     | '/admin/cms/'
+    | '/admin/data-room/'
     | '/admin/email/'
     | '/admin/referrals/'
     | '/admin/roles/'
@@ -841,6 +910,11 @@ export interface FileRouteTypes {
     | '/admin/cms/statistics'
     | '/admin/cms/testimonials'
     | '/admin/cms/why'
+    | '/admin/data-room/activity'
+    | '/admin/data-room/documents'
+    | '/admin/data-room/grants'
+    | '/admin/data-room/matrix'
+    | '/admin/data-room/settings'
     | '/admin/email/$id'
     | '/admin/email/builder'
     | '/admin/email/drafts'
@@ -861,6 +935,7 @@ export interface FileRouteTypes {
     | '/dataroom/workspace/activity'
     | '/dataroom/workspace/search'
     | '/admin/cms'
+    | '/admin/data-room'
     | '/admin/email'
     | '/admin/referrals'
     | '/admin/roles'
@@ -888,6 +963,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/audit-logs'
     | '/admin/cms'
+    | '/admin/data-room'
     | '/admin/email'
     | '/admin/media'
     | '/admin/notifications'
@@ -921,6 +997,11 @@ export interface FileRouteTypes {
     | '/admin/cms/statistics'
     | '/admin/cms/testimonials'
     | '/admin/cms/why'
+    | '/admin/data-room/activity'
+    | '/admin/data-room/documents'
+    | '/admin/data-room/grants'
+    | '/admin/data-room/matrix'
+    | '/admin/data-room/settings'
     | '/admin/email/$id'
     | '/admin/email/builder'
     | '/admin/email/drafts'
@@ -941,6 +1022,7 @@ export interface FileRouteTypes {
     | '/dataroom/workspace/activity'
     | '/dataroom/workspace/search'
     | '/admin/cms/'
+    | '/admin/data-room/'
     | '/admin/email/'
     | '/admin/referrals/'
     | '/admin/roles/'
@@ -1101,6 +1183,13 @@ declare module '@tanstack/react-router' {
       path: '/cms'
       fullPath: '/admin/cms'
       preLoaderRoute: typeof AdminCmsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/data-room': {
+      id: '/admin/data-room'
+      path: '/data-room'
+      fullPath: '/admin/data-room'
+      preLoaderRoute: typeof AdminDataRoomRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/email': {
@@ -1334,6 +1423,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCmsWhyRouteImport
       parentRoute: typeof AdminCmsRoute
     }
+    '/admin/data-room/': {
+      id: '/admin/data-room/'
+      path: '/'
+      fullPath: '/admin/data-room/'
+      preLoaderRoute: typeof AdminDataRoomIndexRouteImport
+      parentRoute: typeof AdminDataRoomRoute
+    }
+    '/admin/data-room/activity': {
+      id: '/admin/data-room/activity'
+      path: '/activity'
+      fullPath: '/admin/data-room/activity'
+      preLoaderRoute: typeof AdminDataRoomActivityRouteImport
+      parentRoute: typeof AdminDataRoomRoute
+    }
+    '/admin/data-room/documents': {
+      id: '/admin/data-room/documents'
+      path: '/documents'
+      fullPath: '/admin/data-room/documents'
+      preLoaderRoute: typeof AdminDataRoomDocumentsRouteImport
+      parentRoute: typeof AdminDataRoomRoute
+    }
+    '/admin/data-room/grants': {
+      id: '/admin/data-room/grants'
+      path: '/grants'
+      fullPath: '/admin/data-room/grants'
+      preLoaderRoute: typeof AdminDataRoomGrantsRouteImport
+      parentRoute: typeof AdminDataRoomRoute
+    }
+    '/admin/data-room/matrix': {
+      id: '/admin/data-room/matrix'
+      path: '/matrix'
+      fullPath: '/admin/data-room/matrix'
+      preLoaderRoute: typeof AdminDataRoomMatrixRouteImport
+      parentRoute: typeof AdminDataRoomRoute
+    }
+    '/admin/data-room/settings': {
+      id: '/admin/data-room/settings'
+      path: '/settings'
+      fullPath: '/admin/data-room/settings'
+      preLoaderRoute: typeof AdminDataRoomSettingsRouteImport
+      parentRoute: typeof AdminDataRoomRoute
+    }
     '/admin/email/': {
       id: '/admin/email/'
       path: '/'
@@ -1563,6 +1694,28 @@ const AdminCmsRouteWithChildren = AdminCmsRoute._addFileChildren(
   AdminCmsRouteChildren,
 )
 
+interface AdminDataRoomRouteChildren {
+  AdminDataRoomActivityRoute: typeof AdminDataRoomActivityRoute
+  AdminDataRoomDocumentsRoute: typeof AdminDataRoomDocumentsRoute
+  AdminDataRoomGrantsRoute: typeof AdminDataRoomGrantsRoute
+  AdminDataRoomMatrixRoute: typeof AdminDataRoomMatrixRoute
+  AdminDataRoomSettingsRoute: typeof AdminDataRoomSettingsRoute
+  AdminDataRoomIndexRoute: typeof AdminDataRoomIndexRoute
+}
+
+const AdminDataRoomRouteChildren: AdminDataRoomRouteChildren = {
+  AdminDataRoomActivityRoute: AdminDataRoomActivityRoute,
+  AdminDataRoomDocumentsRoute: AdminDataRoomDocumentsRoute,
+  AdminDataRoomGrantsRoute: AdminDataRoomGrantsRoute,
+  AdminDataRoomMatrixRoute: AdminDataRoomMatrixRoute,
+  AdminDataRoomSettingsRoute: AdminDataRoomSettingsRoute,
+  AdminDataRoomIndexRoute: AdminDataRoomIndexRoute,
+}
+
+const AdminDataRoomRouteWithChildren = AdminDataRoomRoute._addFileChildren(
+  AdminDataRoomRouteChildren,
+)
+
 interface AdminEmailRouteChildren {
   AdminEmailIdRoute: typeof AdminEmailIdRoute
   AdminEmailBuilderRoute: typeof AdminEmailBuilderRoute
@@ -1661,6 +1814,7 @@ interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminAuditLogsRoute: typeof AdminAuditLogsRoute
   AdminCmsRoute: typeof AdminCmsRouteWithChildren
+  AdminDataRoomRoute: typeof AdminDataRoomRouteWithChildren
   AdminEmailRoute: typeof AdminEmailRouteWithChildren
   AdminMediaRoute: typeof AdminMediaRoute
   AdminNotificationsRoute: typeof AdminNotificationsRoute
@@ -1678,6 +1832,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminAuditLogsRoute: AdminAuditLogsRoute,
   AdminCmsRoute: AdminCmsRouteWithChildren,
+  AdminDataRoomRoute: AdminDataRoomRouteWithChildren,
   AdminEmailRoute: AdminEmailRouteWithChildren,
   AdminMediaRoute: AdminMediaRoute,
   AdminNotificationsRoute: AdminNotificationsRoute,

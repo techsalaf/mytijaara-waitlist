@@ -32,6 +32,7 @@ that exists in the branch.
 | Stack trace disclosure | Forced JSON error envelope in `bootstrap/app.php`; the disk is configured `throw => false, report => false` so a missing file is a controlled 404 | |
 | Search-engine indexing | `X-Robots-Tag: noindex, nofollow, noarchive` on every data room response, set by the middleware | `DataRoomAuthenticate` |
 | Cached confidential response | `Cache-Control: private, no-store, max-age=0, must-revalidate` and `Pragma: no-cache` | same |
+| Cached or indexed admin payload | The admin API runs under `auth:sanctum`, not `DataRoomAuthenticate`, so it has its own posture middleware. `private, no-store, max-age=0` and `noindex, nofollow, noarchive` on every `api/*/admin/dataroom` response, including the 401 and 403. Prepended globally rather than attached to the route group, because `Illuminate\Pipeline\Pipeline` renders an exception in the pipe enclosing a route middleware, so route middleware never sees a refusal | `DataRoomAdminNoStore` |
 | Admin over-reach | Seven Spatie permissions gated per endpoint. `admin` is withheld `data-room.manage-settings` and `data-room.delete` | `RoleSeeder.php:56` |
 | Audit tampering | Administrative actions are on the always-logged list, so an admin cannot switch off audit logging and then act unobserved | `AdminDataRoomController.php:286` |
 | Secret leakage into logs | No code, token, hash or PIN is ever written to `dataroom_audit_logs`. `details` carries classifications (`unknown email`, `code mismatch`, `status: revoked`) | `database-schema.md` |

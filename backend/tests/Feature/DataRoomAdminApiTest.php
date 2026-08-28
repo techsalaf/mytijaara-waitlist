@@ -6,13 +6,13 @@ use App\Models\DataRoomAccessGrant;
 use App\Models\DataRoomAuditLog;
 use App\Models\DataRoomDocument;
 use App\Models\DataRoomDocumentVersion;
-use App\Models\DataRoomSession;
 use App\Models\DataRoomSetting;
 use App\Services\DataRoom\DataRoomAuthorizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Concerns\BuildsDataRoom;
 use Tests\TestCase;
@@ -131,6 +131,76 @@ class DataRoomAdminApiTest extends TestCase
         $this->getJson($this->admin.'/overview')->assertOk();
         $this->getJson($this->admin.'/analytics')->assertOk();
         $this->patchJson($this->admin.'/settings', ['downloads_enabled' => true])->assertOk();
+    }
+
+    // -- caching and indexing posture --------------------------------------
+
+    /**
+     * Every admin payload is unstorable and unindexable.
+     *
+     * These responses carry visitor names, email addresses, organizations, grant
+     * scope and document metadata. Symfony's default for a JSON response is
+     * `no-cache, private`, which still permits a shared cache to store the body,
+     * so the group needs its own posture. Asserted on a refusal as well as on a
+     * success, because a 401 and a 403 are the responses a proxy is most likely
+     * to be willing to keep.
+     */
+    public function test_every_admin_response_is_unstorable_and_unindexable(): void
+    {
+        $paths = ['/overview', '/settings', '/grants', '/documents', '/folders', '/permission-matrix', '/audit-logs'];
+
+        foreach ($paths as $path) {
+            $this->assertPosture($this->getJson($this->admin.$path)->assertStatus(401), 'unauthenticated '.$path);
+        }
+
+        $this->actingAsRole('admin');
+        $this->assertPosture($this->patchJson($this->admin.'/settings', ['downloads_enabled' => false])->assertStatus(403), 'forbidden write');
+
+        $this->actingAsRole('super_admin');
+        foreach ($paths as $path) {
+            $this->assertPosture($this->getJson($this->admin.$path)->assertOk(), $path);
+        }
+
+        $this->assertPosture(
+            $this->postJson($this->admin.'/grants', $this->grantPayload())->assertStatus(201),
+            'grant creation'
+        );
+    }
+
+    public function test_a_streamed_admin_response_keeps_its_own_cache_header(): void
+    {
+        Storage::fake('dataroom');
+        config(['dataroom.storage_disk' => 'dataroom']);
+        $this->actingAsRole('super_admin');
+
+        $id = $this->post($this->admin.'/documents', [
+            'file' => $this->pdfUpload(),
+            'title' => 'Financial Model',
+            'confidentiality_level' => 'confidential',
+        ], ['Accept' => 'application/json'])->assertStatus(201)->json('data.id');
+
+        // The preview controller sets this deliberately on the bytes it sends.
+        // Overwriting a controller's own choice from middleware would be the wrong
+        // precedence, so the middleware only fills a gap.
+        $response = $this->get($this->admin."/documents/{$id}/preview")->assertOk();
+
+        // Symfony re-serializes the directives in its own order, so the value is
+        // read directive by directive rather than compared as a string. What is
+        // being pinned is that `max-age=0` survived, which is the controller's
+        // choice and not the middleware's default.
+        $this->assertTrue($response->headers->hasCacheControlDirective('no-store'));
+        $this->assertTrue($response->headers->hasCacheControlDirective('private'));
+        $this->assertSame('0', (string) $response->headers->getCacheControlDirective('max-age'));
+        $this->assertSame('noindex, nofollow, noarchive', $response->headers->get('X-Robots-Tag'));
+    }
+
+    private function assertPosture(TestResponse $response, string $label): void
+    {
+        $cacheControl = (string) $response->headers->get('Cache-Control');
+
+        $this->assertStringContainsString('no-store', $cacheControl, $label);
+        $this->assertStringContainsString('private', $cacheControl, $label);
+        $this->assertSame('noindex, nofollow, noarchive', $response->headers->get('X-Robots-Tag'), $label);
     }
 
     // -- grant creation ----------------------------------------------------

@@ -28,6 +28,8 @@ class DataRoomEvalRunnerTest extends TestCase
 
     private string $corpus;
 
+    private string $operatorCorpus;
+
     private string $results;
 
     protected function setUp(): void
@@ -44,6 +46,7 @@ class DataRoomEvalRunnerTest extends TestCase
         // quietly break.
         $this->results = sys_get_temp_dir().'/vdr-eval-test-'.getmypid().'-'.uniqid();
         $this->corpus = $this->results.'/corpus.json';
+        $this->operatorCorpus = $this->results.'/corpus-operator.json';
 
         if (! is_dir($this->results)) {
             mkdir($this->results, 0777, true);
@@ -51,22 +54,39 @@ class DataRoomEvalRunnerTest extends TestCase
 
         // A two-case fixture corpus. The runner is being tested, not the API, so
         // the payloads only need the shape the judge prompt reads.
+        $visitorSide = [
+            [
+                'name' => 'auth.unknown_email',
+                'status' => 401,
+                'headers' => ['Cache-Control' => 'no-store, private', 'X-Robots-Tag' => null],
+                'body' => ['message' => 'We could not verify those details.'],
+            ],
+            [
+                'name' => 'visitor.dashboard',
+                'status' => 200,
+                'headers' => ['Cache-Control' => 'no-store, private', 'X-Robots-Tag' => null],
+                'body' => ['data' => ['documents' => 2]],
+            ],
+        ];
+
         file_put_contents($this->corpus, json_encode([
             'capturedAt' => now()->toIso8601String(),
-            'cases' => [
+            'cases' => $visitorSide,
+        ], JSON_PRETTY_PRINT));
+
+        // The same corpus plus one operator case. Dimension 4 is scored only on
+        // `admin.*`, so it needs its own fixture rather than being bolted onto the
+        // two-case one and shifting every existing count by a third.
+        file_put_contents($this->operatorCorpus, json_encode([
+            'capturedAt' => now()->toIso8601String(),
+            'cases' => array_merge($visitorSide, [
                 [
-                    'name' => 'auth.unknown_email',
-                    'status' => 401,
-                    'headers' => ['Cache-Control' => 'no-store, private', 'X-Robots-Tag' => null],
-                    'body' => ['message' => 'We could not verify those details.'],
-                ],
-                [
-                    'name' => 'visitor.dashboard',
+                    'name' => 'admin.grant_show',
                     'status' => 200,
-                    'headers' => ['Cache-Control' => 'no-store, private', 'X-Robots-Tag' => null],
-                    'body' => ['data' => ['documents' => 2]],
+                    'headers' => ['Cache-Control' => 'private, no-store, max-age=0', 'X-Robots-Tag' => 'noindex, nofollow, noarchive'],
+                    'body' => ['data' => ['grant' => ['id' => 7, 'codeHint' => '92QX']]],
                 ],
-            ],
+            ]),
         ], JSON_PRETTY_PRINT));
     }
 
@@ -175,14 +195,87 @@ class DataRoomEvalRunnerTest extends TestCase
 
     public function test_the_dry_run_calls_no_judge_and_labels_each_audience(): void
     {
-        [$code, $output] = $this->runner('clean', ['--dry-run']);
+        [$code, $output] = $this->runner('clean', ['--dry-run', '--corpus='.$this->operatorCorpus]);
 
         $this->assertSame(0, $code, $output);
         $this->assertStringContainsString('auth.unknown_email                 audience=outsider', $output);
         $this->assertStringContainsString('visitor.dashboard                  audience=visitor', $output);
+        $this->assertStringContainsString('admin.grant_show                   audience=operator', $output);
         // Nothing was judged, so nothing may have been scored or written.
         $this->assertStringNotContainsString('PASS', $output);
         $this->assertFileDoesNotExist($this->results.'/latest.json');
+    }
+
+    public function test_dimension_four_is_scored_only_on_operator_cases(): void
+    {
+        [$code, $output] = $this->runner('clean', ['--corpus='.$this->operatorCorpus]);
+
+        $this->assertSame(0, $code, $output);
+
+        $report = $this->report();
+        $this->assertSame(3, $report['total']);
+        // One of three cases is an operator case, so exactly one was scored on
+        // dimension 4. The other two are not counted, which is the difference
+        // between "not applicable" and "passed".
+        $this->assertSame(1, $report['operator']['scored']);
+        $this->assertSame(1.0, $report['operator']['rate']);
+        $this->assertTrue($report['passed']);
+
+        $verdicts = $this->verdicts();
+        $this->assertSame('pass', $verdicts['admin.grant_show']['operator']['verdict']);
+        $this->assertSame('n/a', $verdicts['auth.unknown_email']['operator']['verdict']);
+        $this->assertSame('n/a', $verdicts['visitor.dashboard']['operator']['verdict']);
+    }
+
+    public function test_one_operator_failure_fails_the_whole_lane(): void
+    {
+        // A plaintext access code handed back on a read. Everything else in the
+        // corpus is clean, so this proves dimension 4 is absolute and is ANDed in
+        // rather than averaged with the other three.
+        [$code, $output] = $this->runner('operator', ['--corpus='.$this->operatorCorpus]);
+
+        $this->assertSame(1, $code, $output);
+        $this->assertStringContainsString('OPERATOR', $output);
+        $this->assertStringContainsString('O1', $output);
+        $this->assertStringContainsString('MTJ-8F4K-92QX', $output);
+
+        $report = $this->report();
+        $this->assertSame(['admin.grant_show'], $report['operator']['failures']);
+        $this->assertSame(0.0, $report['operator']['rate']);
+        $this->assertSame(1.0, $report['leakage']['rate']);
+        $this->assertSame(1.0, $report['headers']['rate']);
+        $this->assertSame(1.0, $report['copy']['rate']);
+        $this->assertFalse($report['passed']);
+    }
+
+    public function test_a_judge_cannot_excuse_itself_from_dimension_four(): void
+    {
+        // The judge reports n/a on an admin case, which would mean the strictest
+        // dimension is skipped exactly where it applies. The runner decides
+        // applicability from the case name, so this is a failure, not a skip.
+        [$code, $output] = $this->runner('opnullify', ['--corpus='.$this->operatorCorpus]);
+
+        $this->assertSame(1, $code, $output);
+
+        $report = $this->report();
+        $this->assertSame(1, $report['operator']['scored']);
+        $this->assertSame(['admin.grant_show'], $report['operator']['failures']);
+        $this->assertFalse($report['passed']);
+    }
+
+    public function test_a_corpus_with_no_operator_cases_still_passes(): void
+    {
+        // The shape of `--case=auth.something`: nothing to score on dimension 4 is
+        // not a broken capture. The capture step's own corpus-size assertion is
+        // what guarantees the admin surface is present in a full run.
+        [$code, $output] = $this->runner('clean');
+
+        $this->assertSame(0, $code, $output);
+
+        $report = $this->report();
+        $this->assertSame(0, $report['operator']['scored']);
+        $this->assertSame(1.0, $report['operator']['rate']);
+        $this->assertTrue($report['passed']);
     }
 
     public function test_a_missing_corpus_is_an_error_not_an_empty_pass(): void
@@ -240,10 +333,31 @@ class DataRoomEvalRunnerTest extends TestCase
 
         // json_encode writes 1.0 as `1`, so the rates come back as ints. Cast them
         // once here rather than loosening every assertion below.
-        foreach (['leakage', 'headers', 'copy'] as $dimension) {
+        foreach (['leakage', 'headers', 'copy', 'operator'] as $dimension) {
             $report[$dimension]['rate'] = (float) $report[$dimension]['rate'];
         }
 
         return $report;
+    }
+
+    /**
+     * The per-case verdicts from the same result file, keyed by case name.
+     *
+     * @return array<string,array<string,mixed>>
+     */
+    private function verdicts(): array
+    {
+        $this->assertFileExists($this->results.'/latest.json');
+
+        $written = json_decode((string) file_get_contents($this->results.'/latest.json'), true);
+        $keyed = [];
+
+        foreach ($written['verdicts'] as $name => $verdict) {
+            // The file may key by name already or carry a list; both are accepted
+            // so this helper does not encode a shape the runner is free to change.
+            $keyed[is_string($name) ? $name : ($verdict['case'] ?? '')] = $verdict;
+        }
+
+        return $keyed;
     }
 }

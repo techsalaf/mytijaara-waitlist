@@ -265,6 +265,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // issuing access to it. `data-room.manage-settings` and `data-room.delete`
     // are withheld from the ordinary `admin` role in RoleSeeder, which is what
     // keeps the security policy and hard deletes with super_admin.
+    //
+    // The caching and indexing posture for this group is applied globally by
+    // App\Http\Middleware\DataRoomAdminNoStore, which is prepended in
+    // bootstrap/app.php so it also covers the 401 and 403 the exception handler
+    // renders. Authorization stays on each individual route.
     // -----------------------------------------------------------------------
     Route::prefix('admin/dataroom')->group(function () {
         Route::get('/overview', [AdminDataRoomController::class, 'overview'])->middleware('permission:data-room.view');

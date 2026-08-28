@@ -27,9 +27,10 @@ const CAPTURES = ROOT.'/captures';
 const RESULTS = ROOT.'/results';
 const RUBRIC = ROOT.'/rubric.md';
 
-/** From rubric.md. Leakage and headers are absolute; copy is an average. */
+/** From rubric.md. Leakage, headers and operator discipline are absolute; copy is an average. */
 const THRESHOLD_LEAKAGE = 1.0;
 const THRESHOLD_HEADERS = 1.0;
+const THRESHOLD_OPERATOR = 1.0;
 const THRESHOLD_COPY = 0.85;
 
 /** A judge that hangs must not hang the lane. Seconds per case. */
@@ -100,9 +101,17 @@ function main(array $argv): int
  * The rubric's L1 (no existence disclosure) applies to outsiders and L4 (nothing
  * past the boundary) applies to visitors, so the judge has to be told which one
  * it is looking at. Everything reachable without a token is an outsider case.
+ *
+ * `operator` is the third audience: an authenticated administrator at
+ * /admin/data-room. An operator is allowed to know which investors exist, so L1
+ * and L5 do not apply to them, and dimension 4 applies only to them.
  */
 function audienceOf(string $name): string
 {
+    if (str_starts_with($name, 'admin.')) {
+        return 'operator';
+    }
+
     // auth.success is the transition. The token in it is legitimate precisely
     // because the caller just proved ownership, so it is judged as a visitor
     // payload, not as something an outsider obtained.
@@ -245,12 +254,17 @@ function parseVerdict(string $name, string $out, string $err): array
             'leakage' => ['verdict' => 'fail', 'violated' => null, 'evidence' => null],
             'copy' => ['score' => 0, 'applicable' => false, 'note' => null],
             'headers' => ['verdict' => 'fail', 'evidence' => null],
+            'operator' => ['verdict' => audienceOf($name) === 'operator' ? 'fail' : 'n/a', 'violated' => null, 'evidence' => null],
             'notes' => 'The judge returned no parseable verdict.',
             'judgeError' => trim($err) !== '' ? trim($err) : trim($out),
         ];
     }
     // Normalized so score() never has to guard for a missing key. An absent
     // dimension counts as a failure of that dimension, for the same reason.
+    //
+    // Whether dimension 4 applies is decided here from the case name, not from
+    // what the judge claimed: a judge that marked an admin case `n/a` would
+    // otherwise be able to excuse itself from the strictest dimension.
     return [
         'case' => $name,
         'leakage' => [
@@ -267,6 +281,13 @@ function parseVerdict(string $name, string $out, string $err): array
             'verdict' => ($json['headers']['verdict'] ?? '') === 'pass' ? 'pass' : 'fail',
             'evidence' => $json['headers']['evidence'] ?? null,
         ],
+        'operator' => audienceOf($name) !== 'operator'
+            ? ['verdict' => 'n/a', 'violated' => null, 'evidence' => null]
+            : [
+                'verdict' => ($json['operator']['verdict'] ?? '') === 'pass' ? 'pass' : 'fail',
+                'violated' => $json['operator']['violated'] ?? null,
+                'evidence' => $json['operator']['evidence'] ?? null,
+            ],
         'notes' => $json['notes'] ?? null,
         'judgeError' => null,
     ];
@@ -355,6 +376,8 @@ function score(array $verdicts, array $cases): array
     $total = count($cases);
     $leakFails = [];
     $headerFails = [];
+    $operatorFails = [];
+    $operatorScored = 0;
     $copyScores = [];
     $missing = [];
 
@@ -373,6 +396,12 @@ function score(array $verdicts, array $cases): array
         if ($v['headers']['verdict'] !== 'pass') {
             $headerFails[] = $name;
         }
+        if (($v['operator']['verdict'] ?? 'n/a') !== 'n/a') {
+            $operatorScored++;
+            if ($v['operator']['verdict'] !== 'pass') {
+                $operatorFails[] = $name;
+            }
+        }
         if ($v['copy']['applicable']) {
             $copyScores[] = max(0, min(4, $v['copy']['score']));
         }
@@ -382,16 +411,30 @@ function score(array $verdicts, array $cases): array
     // A corpus with no readable prose at all would divide by zero. That is a
     // broken capture step, so it scores zero rather than a vacuous 1.0.
     $copyRate = $copyScores !== [] ? (array_sum($copyScores) / count($copyScores)) / 4 : 0.0;
+    // Dimension 4 is different: a corpus with no operator cases is the normal
+    // shape of `--case=auth.something`, not a broken capture, so an empty set
+    // passes. The capture step's own corpus-size assertion is what guarantees
+    // the admin surface is present in a full run.
+    $operatorRate = $operatorScored > 0
+        ? ($operatorScored - count($operatorFails)) / $operatorScored
+        : 1.0;
 
     return [
         'total' => $total,
         'missing' => $missing,
         'leakage' => ['rate' => $leakageRate, 'threshold' => THRESHOLD_LEAKAGE, 'failures' => $leakFails],
         'headers' => ['rate' => $headerRate, 'threshold' => THRESHOLD_HEADERS, 'failures' => $headerFails],
+        'operator' => [
+            'rate' => $operatorRate,
+            'threshold' => THRESHOLD_OPERATOR,
+            'failures' => $operatorFails,
+            'scored' => $operatorScored,
+        ],
         'copy' => ['rate' => $copyRate, 'threshold' => THRESHOLD_COPY, 'scored' => count($copyScores)],
         'passed' => $missing === []
             && $leakageRate >= THRESHOLD_LEAKAGE
             && $headerRate >= THRESHOLD_HEADERS
+            && $operatorRate >= THRESHOLD_OPERATOR
             && $copyRate >= THRESHOLD_COPY,
     ];
 }
@@ -420,6 +463,8 @@ function printReport(array $report, array $verdicts, bool $verbose): void
         bar($report['leakage']['rate']), pct($report['leakage']['rate']), (int) (THRESHOLD_LEAKAGE * 100)));
     line(sprintf('  headers  %s  %s  (threshold %d%%)',
         bar($report['headers']['rate']), pct($report['headers']['rate']), (int) (THRESHOLD_HEADERS * 100)));
+    line(sprintf('  operator %s  %s  (threshold %d%%, %d case(s) scored)',
+        bar($report['operator']['rate']), pct($report['operator']['rate']), (int) (THRESHOLD_OPERATOR * 100), $report['operator']['scored']));
     line(sprintf('  copy     %s  %s  (threshold %d%%, %d case(s) scored)',
         bar($report['copy']['rate']), pct($report['copy']['rate']), (int) (THRESHOLD_COPY * 100), $report['copy']['scored']));
     line('');
@@ -445,13 +490,25 @@ function printReport(array $report, array $verdicts, bool $verbose): void
         line(sprintf('  HEADERS  %s  %s', $name, trim((string) ($verdicts[$name]['headers']['evidence'] ?? '?'))));
     }
 
+    foreach ($report['operator']['failures'] as $name) {
+        $v = $verdicts[$name];
+        line(sprintf('  OPERATOR %s  %s', $name, $v['operator']['violated'] ?? '?'));
+        if (($v['operator']['evidence'] ?? null) !== null) {
+            line('             evidence: '.trim((string) $v['operator']['evidence']));
+        }
+        if (($v['judgeError'] ?? null) !== null) {
+            line('             judge stderr: '.substr(trim((string) $v['judgeError']), 0, 400));
+        }
+    }
+
     if ($verbose) {
         line('');
         foreach ($verdicts as $name => $v) {
-            line(sprintf('  %-34s leak=%-4s hdr=%-4s copy=%s  %s',
+            line(sprintf('  %-34s leak=%-4s hdr=%-4s op=%-4s copy=%s  %s',
                 $name,
                 $v['leakage']['verdict'],
                 $v['headers']['verdict'],
+                $v['operator']['verdict'] ?? 'n/a',
                 $v['copy']['applicable'] ? $v['copy']['score'].'/4' : ' n/a',
                 trim((string) ($v['copy']['note'] ?? $v['notes'] ?? ''))));
         }
@@ -470,6 +527,9 @@ function oneLineOutcome(array $v): string
     }
     if ($v['headers']['verdict'] !== 'pass') {
         return 'HEADERS';
+    }
+    if (($v['operator']['verdict'] ?? 'n/a') === 'fail') {
+        return 'OPERATOR '.($v['operator']['violated'] ?? '?');
     }
 
     return $v['copy']['applicable'] ? 'ok  copy '.$v['copy']['score'].'/4' : 'ok';
