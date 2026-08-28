@@ -4,12 +4,30 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/**
+ * Two things about the index names below are deliberate.
+ *
+ * MySQL caps an identifier at 64 characters. Laravel's auto-generated name is
+ * `{table}_{col}_{col}_{type}`, which on `dataroom_access_grant_documents` comes
+ * out at 66 and aborts the migration with SQLSTATE[42000] 1059. SQLite has no
+ * such cap, so the test suite never saw it and only a MySQL deployment did.
+ * Every compound index on a `dataroom_access_grant_*` table therefore carries an
+ * explicit short name. MigrationMysqlCompatibilityTest now enforces the 64-char
+ * ceiling against the MySQL grammar on every migration in the repo, so this
+ * class of failure cannot reach a deployment again.
+ *
+ * The `hasTable` / `hasIndex` guards exist because the first MySQL run died
+ * part-way through: DDL is not transactional in MySQL, so tables 1 to 6 were
+ * created and the migration was never recorded as run. Guarding each step lets
+ * the same migration finish on that half-built database without dropping
+ * anything, and behaves identically on a clean one.
+ */
 return new class extends Migration
 {
     public function up(): void
     {
         // 1. Data Room Settings
-        Schema::create('dataroom_settings', function (Blueprint $table) {
+        $this->create('dataroom_settings', function (Blueprint $table) {
             $table->id();
             $table->boolean('enabled')->default(true);
             $table->boolean('global_pin_enabled')->default(false);
@@ -25,7 +43,7 @@ return new class extends Migration
         });
 
         // 2. Folders / Categories
-        Schema::create('dataroom_folders', function (Blueprint $table) {
+        $this->create('dataroom_folders', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('slug')->unique();
@@ -35,7 +53,7 @@ return new class extends Migration
         });
 
         // 3. Documents
-        Schema::create('dataroom_documents', function (Blueprint $table) {
+        $this->create('dataroom_documents', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
             $table->foreignId('folder_id')->nullable()->constrained('dataroom_folders')->nullOnDelete();
@@ -66,7 +84,7 @@ return new class extends Migration
         });
 
         // 4. Document Versions
-        Schema::create('dataroom_document_versions', function (Blueprint $table) {
+        $this->create('dataroom_document_versions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('document_id')->constrained('dataroom_documents')->cascadeOnDelete();
             $table->string('version');
@@ -80,7 +98,7 @@ return new class extends Migration
         });
 
         // 5. Access Grants (Visitors)
-        Schema::create('dataroom_access_grants', function (Blueprint $table) {
+        $this->create('dataroom_access_grants', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
             $table->string('visitor_name');
@@ -115,7 +133,7 @@ return new class extends Migration
         // `can_download` / `can_print` are the per-grant-per-document overrides
         // from the permission matrix. Effective download permission is the AND
         // of the global setting, the grant flag, the document flag and this row.
-        Schema::create('dataroom_access_grant_documents', function (Blueprint $table) {
+        $this->create('dataroom_access_grant_documents', function (Blueprint $table) {
             $table->id();
             $table->foreignId('access_grant_id')->constrained('dataroom_access_grants')->cascadeOnDelete();
             $table->foreignId('document_id')->constrained('dataroom_documents')->cascadeOnDelete();
@@ -123,38 +141,44 @@ return new class extends Migration
             $table->boolean('can_print')->default(false);
             $table->timestamps();
 
-            $table->unique(['access_grant_id', 'document_id']);
+            $table->unique(['access_grant_id', 'document_id'], 'dr_agd_grant_document_unique');
         });
 
         // 7. Junction: Access Grant <-> Folders
-        Schema::create('dataroom_access_grant_folders', function (Blueprint $table) {
+        $this->create('dataroom_access_grant_folders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('access_grant_id')->constrained('dataroom_access_grants')->cascadeOnDelete();
             $table->foreignId('folder_id')->constrained('dataroom_folders')->cascadeOnDelete();
             $table->boolean('can_download')->default(true);
             $table->timestamps();
 
-            $table->unique(['access_grant_id', 'folder_id']);
+            $table->unique(['access_grant_id', 'folder_id'], 'dr_agf_grant_folder_unique');
         });
 
         // 8. Visitor Sessions
         // Two independent clocks: `expires_at` is the idle timeout, refreshed on
         // each request; `absolute_expires_at` is a hard ceiling that activity
         // cannot extend. A session dies at whichever comes first.
-        Schema::create('dataroom_sessions', function (Blueprint $table) {
+        $this->create('dataroom_sessions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('access_grant_id')->constrained('dataroom_access_grants')->cascadeOnDelete();
             $table->string('token_hash', 64)->unique();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
-            $table->timestamp('expires_at');
-            $table->timestamp('absolute_expires_at');
-            $table->timestamp('last_active_at');
+            // dateTime, not timestamp. MySQL auto-assigns an implicit default to
+            // the first TIMESTAMP column in a table and leaves the rest with a
+            // zero-date default, which strict mode rejects outright
+            // (SQLSTATE[42000] 1067). DATETIME NOT NULL with no default is
+            // legal. Laravel casts both to Carbon, so nothing above the schema
+            // can tell the difference. Also sidesteps the 2038 ceiling.
+            $table->dateTime('expires_at');
+            $table->dateTime('absolute_expires_at');
+            $table->dateTime('last_active_at');
             $table->timestamps();
         });
 
         // 9. Audit Logs
-        Schema::create('dataroom_audit_logs', function (Blueprint $table) {
+        $this->create('dataroom_audit_logs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('access_grant_id')->nullable()->constrained('dataroom_access_grants')->nullOnDelete();
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
@@ -171,7 +195,7 @@ return new class extends Migration
         });
 
         // 10. Document Views & Downloads Tracking
-        Schema::create('dataroom_document_views', function (Blueprint $table) {
+        $this->create('dataroom_document_views', function (Blueprint $table) {
             $table->id();
             $table->foreignId('document_id')->constrained('dataroom_documents')->cascadeOnDelete();
             $table->foreignId('access_grant_id')->constrained('dataroom_access_grants')->cascadeOnDelete();
@@ -184,7 +208,7 @@ return new class extends Migration
 
         // 11. Access templates / bundles. A saved permission set an admin can
         // apply when issuing a grant (e.g. "VC Investor", "Bank Partner").
-        Schema::create('dataroom_access_templates', function (Blueprint $table) {
+        $this->create('dataroom_access_templates', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
             $table->text('description')->nullable();
@@ -195,6 +219,41 @@ return new class extends Migration
             $table->json('folder_ids')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
+        });
+
+        // Heal step. On a deployment where the first attempt created the
+        // junction table and then died on the over-long index name, `create()`
+        // above skips the table and the unique would never land. Adding it here
+        // is a no-op on a clean database, where `create()` already made it.
+        $this->ensureUnique('dataroom_access_grant_documents', ['access_grant_id', 'document_id'], 'dr_agd_grant_document_unique');
+        $this->ensureUnique('dataroom_access_grant_folders', ['access_grant_id', 'folder_id'], 'dr_agf_grant_folder_unique');
+    }
+
+    /**
+     * Create a table only if it is absent.
+     *
+     * A partly applied migration is not recorded in the `migrations` table, so
+     * the operator's only options are to re-run it or to drop tables by hand.
+     * This makes re-running the correct answer.
+     */
+    private function create(string $table, Closure $definition): void
+    {
+        if (! Schema::hasTable($table)) {
+            Schema::create($table, $definition);
+        }
+    }
+
+    /**
+     * @param  list<string>  $columns
+     */
+    private function ensureUnique(string $table, array $columns, string $name): void
+    {
+        if (! Schema::hasTable($table) || Schema::hasIndex($table, $name)) {
+            return;
+        }
+
+        Schema::table($table, function (Blueprint $blueprint) use ($columns, $name) {
+            $blueprint->unique($columns, $name);
         });
     }
 

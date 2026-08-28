@@ -177,3 +177,46 @@ The permanent fix is a repository decision, not a data room one: either set
 `core.autocrlf=input` and normalize once with a `.gitattributes` `* text=auto
 eol=lf`, or set prettier's `endOfLine` to `auto`. Both touch every file, so
 neither belongs in a feature commit.
+
+## 14. The gate suite runs on SQLite; production runs on MySQL
+
+The PHPUnit suite uses `DB_CONNECTION=sqlite` with `:memory:`, which keeps the
+gate lane free and under a minute. SQLite is more permissive than MySQL about
+DDL, so a migration can be green on every one of the 311 tests and still be
+rejected by the production database.
+
+That happened twice on the first MySQL deployment of
+`2026_08_27_000001_create_dataroom_tables`:
+
+1. `SQLSTATE[42000] 1059` — Laravel's auto-generated index name
+   `dataroom_access_grant_documents_access_grant_id_document_id_unique` is 66
+   characters and MySQL caps an identifier at 64. SQLite has no cap.
+2. `SQLSTATE[42000] 1067` — `dataroom_sessions` declared three `NOT NULL`
+   `TIMESTAMP` columns. MySQL auto-assigns `DEFAULT CURRENT_TIMESTAMP` to the
+   first one only and leaves the rest with an implicit zero-date default, which
+   strict mode rejects. SQLite accepts all three.
+
+Both are now caught offline by
+[`backend/tests/Feature/MigrationMysqlCompatibilityTest.php`](../../backend/tests/Feature/MigrationMysqlCompatibilityTest.php),
+which registers a MySQL connection it never dials, runs every migration in the
+repo through `Connection::pretend()` so the MySQL grammar emits the DDL without
+executing it, and then asserts two properties of that SQL: no identifier exceeds
+64 characters, and no `NOT NULL TIMESTAMP` lacks a default. It costs about three
+seconds and needs no MySQL server.
+
+The residual limitation is that the check is a static read of the emitted SQL,
+not an execution of it. It catches these two failure classes and any future one
+expressible as a pattern in the DDL. It does not catch a MySQL rejection that
+depends on server state, row data, engine, or `sql_mode` — a row-size overflow,
+a collation conflict on an existing table, or a foreign key against a column of
+a mismatched type. A pre-deployment `php artisan migrate --pretend` against the
+real MySQL instance remains worth running, and is in
+[deployment.md](deployment.md).
+
+Because DDL is not transactional in MySQL, the first failure left the production
+database half-built with the migration unrecorded. Every `Schema::create` in the
+data room migration is now wrapped in a `hasTable` guard, and the two junction
+uniques are re-checked after the creates, so re-running `php artisan migrate` on
+a half-applied database completes it without dropping anything and behaves
+identically on a clean one. That recovery path was verified against a real
+MySQL 8 database that had been left partly migrated by failure 2.

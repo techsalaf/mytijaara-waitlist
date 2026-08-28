@@ -42,6 +42,48 @@ cd backend && composer install --no-dev --optimize-autoloader
 cd backend && php artisan migrate
 ```
 
+Before that, on a database you cannot afford to half-build, check what MySQL is
+about to be asked to do without asking it:
+
+```bash
+cd backend && php artisan migrate --pretend
+```
+
+`MigrationMysqlCompatibilityTest` already asserts offline that no emitted
+identifier exceeds 64 characters and no `NOT NULL TIMESTAMP` lacks a default,
+which are the two failures that reached the first production run. `--pretend`
+against the real instance is the second layer for the failure classes a static
+read of the DDL cannot see. See
+[known-limitations.md](known-limitations.md#14-the-gate-suite-runs-on-sqlite-production-runs-on-mysql).
+
+### If `migrate` fails part-way
+
+MySQL DDL is not transactional, so a migration that dies mid-way leaves the
+tables it already created in place and is never recorded in the `migrations`
+table. Do not drop anything and do not edit the `migrations` table by hand. Pull
+the fix and re-run:
+
+```bash
+cd backend && php artisan migrate --force
+```
+
+Every `Schema::create` in `2026_08_27_000001_create_dataroom_tables` is guarded
+by `Schema::hasTable`, and the two junction uniques are re-checked after the
+creates, so the second run finishes the tables the first run did not reach and is
+a no-op on the ones it did. Verify:
+
+```bash
+cd backend && php artisan migrate:status | grep dataroom
+```
+
+Expect `Ran`. Then confirm all eleven tables exist:
+
+```bash
+cd backend && php artisan tinker --execute="echo count(DB::select('show tables like \"dataroom%\"'));"
+```
+
+Expect `11`.
+
 ```bash
 cd backend && php artisan db:seed --class=DataRoomSeeder
 ```
