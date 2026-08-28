@@ -142,7 +142,7 @@ table accumulates rows for sessions nobody returns to. Noted in
 | `user_id` | nullable. Set for administrative actions. |
 | `visitor_email` | denormalized so a deleted grant's trail stays readable. |
 | `action` | e.g. `authenticated`, `authentication_failed`, `viewed_document`, `downloaded_document`, `access_denied`, `session_expired`, `emergency_lockdown`. |
-| `target_type` / `target_id` | `nullableMorphs`. Document, Folder, AccessGrant or Setting. |
+| `target_type` / `target_id` | `varchar(96)` plus a bigint, indexed as `dr_audit_target_index`. Document, Folder, AccessGrant or Setting. Not `nullableMorphs`, whose 255-character type column made a 1031-byte key that MySQL rejected. See [known-limitations.md](known-limitations.md#14-the-gate-suite-runs-on-sqlite-production-runs-on-mysql). |
 | `details` | free text. This is where the real reason for a generic 401 lives. |
 | `ip_address`, `user_agent` | |
 

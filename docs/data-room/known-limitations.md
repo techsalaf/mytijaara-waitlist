@@ -195,28 +195,60 @@ That happened twice on the first MySQL deployment of
    `TIMESTAMP` columns. MySQL auto-assigns `DEFAULT CURRENT_TIMESTAMP` to the
    first one only and leaves the rest with an implicit zero-date default, which
    strict mode rejects. SQLite accepts all three.
+3. `SQLSTATE[42000] 1071` — "Specified key was too long; max key length is 1000
+   bytes" on `dataroom_audit_logs`. `nullableMorphs('target')` writes
+   `target_type varchar(255)` and indexes it beside a bigint, which is a
+   1031-byte key in utf8mb4. SQLite has no key length limit at all.
 
-Both are now caught offline by
+All three are now caught offline by
 [`backend/tests/Feature/MigrationMysqlCompatibilityTest.php`](../../backend/tests/Feature/MigrationMysqlCompatibilityTest.php),
 which registers a MySQL connection it never dials, runs every migration in the
 repo through `Connection::pretend()` so the MySQL grammar emits the DDL without
-executing it, and then asserts two properties of that SQL: no identifier exceeds
-64 characters, and no `NOT NULL TIMESTAMP` lacks a default. It costs about three
-seconds and needs no MySQL server.
+executing it, and then asserts three properties of that SQL: no identifier
+exceeds 64 characters, no `NOT NULL TIMESTAMP` lacks a default, and no
+`dataroom_*` index key exceeds 767 bytes. It costs about three seconds and needs
+no MySQL server.
 
-The residual limitation is that the check is a static read of the emitted SQL,
-not an execution of it. It catches these two failure classes and any future one
-expressible as a pattern in the DDL. It does not catch a MySQL rejection that
-depends on server state, row data, engine, or `sql_mode` — a row-size overflow,
-a collation conflict on an existing table, or a foreign key against a column of
-a mismatched type. A pre-deployment `php artisan migrate --pretend` against the
-real MySQL instance remains worth running, and is in
+767 rather than the 1000 the deployment reported, because the byte budget
+depends on the engine and row format the host chose, which this codebase does not
+get to pick: InnoDB with COMPACT or REDUNDANT rows stops at 767, MyISAM and Aria
+at 1000, InnoDB with DYNAMIC or COMPRESSED at 3072. Sizing every data room index
+to the smallest of the three makes the schema portable across all of them. That
+is why every indexed string column in the data room carries an explicit length
+instead of Laravel's 255 default: `slug` and `visitor_email` at 191, `name` at
+150, `action` at 64, `target_type` at 96. A companion test asserts the values
+still fit — the longest audit action is 32 characters, the longest morph target
+class 34.
+
+The key-budget check is scoped to `dataroom_*`. The rest of the repo predates the
+gate and is already deployed and working, so narrowing those keys would be a
+separate migration with its own data risk rather than a side effect of adding a
+test.
+
+The residual limitation is that all three checks are a static read of the emitted
+SQL, not an execution of it. They catch these three failure classes and any
+future one expressible as a pattern in the DDL. They do not catch a MySQL
+rejection that depends on server state, row data, or `sql_mode` — a row-size
+overflow, a collation conflict on an existing table, or a foreign key against a
+column of a mismatched type. A pre-deployment `php artisan migrate --pretend`
+against the real MySQL instance remains worth running, and is in
 [deployment.md](deployment.md).
 
-Because DDL is not transactional in MySQL, the first failure left the production
-database half-built with the migration unrecorded. Every `Schema::create` in the
-data room migration is now wrapped in a `hasTable` guard, and the two junction
-uniques are re-checked after the creates, so re-running `php artisan migrate` on
-a half-applied database completes it without dropping anything and behaves
-identically on a clean one. That recovery path was verified against a real
-MySQL 8 database that had been left partly migrated by failure 2.
+Because DDL is not transactional in MySQL, each failure left the production
+database half-built with the migration unrecorded. Two things make re-running the
+correct recovery. Every `Schema::create` in the data room migration is wrapped in
+a `hasTable` guard and the two junction uniques are re-checked after the creates,
+so a half-applied database completes without dropping anything. And
+`2026_08_28_000001_narrow_dataroom_indexed_columns` repairs a database that was
+built by the wide definitions: it shrinks the five columns, adds the three
+`dataroom_audit_logs` indexes that could not land, and drops the superseded
+`nullableMorphs` index on any database where that one did succeed. It refuses
+rather than truncates if a row is too long for the narrower column, it is MySQL
+only, and it is idempotent. Both paths were verified against a real MySQL 8
+database left partly migrated by failure 2 and then by failure 3.
+
+One consequence of the MySQL-only guard: that repair migration emits no DDL under
+`pretend()`, because its `hasTable` checks return false there. So it is the one
+data room migration the gate cannot measure. Its column widths are copied from
+the create migration, which is measured; changing one without the other puts a
+repaired database and a clean install out of step.

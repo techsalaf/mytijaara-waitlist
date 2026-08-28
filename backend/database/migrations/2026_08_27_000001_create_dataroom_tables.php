@@ -21,6 +21,17 @@ use Illuminate\Support\Facades\Schema;
  * created and the migration was never recorded as run. Guarding each step lets
  * the same migration finish on that half-built database without dropping
  * anything, and behaves identically on a clean one.
+ *
+ * Every indexed string column carries an explicit length rather than taking
+ * Laravel's 255 default. A utf8mb4 `varchar(255)` costs 1022 bytes in an index
+ * key, and the smallest key budget a live MySQL will hand out is 767 bytes
+ * (InnoDB, COMPACT row format); MyISAM and Aria stop at 1000. The third
+ * deployment failure was exactly this: SQLSTATE[42000] 1071 "Specified key was
+ * too long; max key length is 1000 bytes" on `dataroom_audit_logs`, where
+ * `nullableMorphs('target')` indexed a `varchar(255)` beside a bigint. Every
+ * dataroom index is now sized to fit inside 767 bytes, and
+ * MigrationMysqlCompatibilityTest computes each key's byte width from the MySQL
+ * DDL and fails the build if one grows past that.
  */
 return new class extends Migration
 {
@@ -46,7 +57,10 @@ return new class extends Migration
         $this->create('dataroom_folders', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('slug')->unique();
+            // 191 rather than 255: this column is uniquely indexed, and a
+            // utf8mb4 varchar(255) key is 1022 bytes, over every engine's
+            // budget. 191 * 4 + 1 = 765, which fits InnoDB COMPACT's 767.
+            $table->string('slug', 191)->unique();
             $table->text('description')->nullable();
             $table->integer('sort_order')->default(0);
             $table->timestamps();
@@ -102,7 +116,10 @@ return new class extends Migration
             $table->id();
             $table->uuid('uuid')->unique();
             $table->string('visitor_name');
-            $table->string('visitor_email');
+            // Indexed below; 191 keeps the key inside 767 bytes. RFC 5321 caps
+            // a full address at 254 characters, but nothing in this system
+            // issues a grant to an address anywhere near that.
+            $table->string('visitor_email', 191);
             $table->string('organization')->nullable();
             $table->string('role_title')->default('Investor');
             $table->string('access_code_hash'); // bcrypt of the plaintext code
@@ -182,14 +199,25 @@ return new class extends Migration
             $table->id();
             $table->foreignId('access_grant_id')->nullable()->constrained('dataroom_access_grants')->nullOnDelete();
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->string('visitor_email')->nullable();
-            $table->string('action'); // authenticated, viewed_document, downloaded_document, access_denied, revoked, etc.
-            $table->nullableMorphs('target'); // Document, Folder, AccessGrant
+            $table->string('visitor_email', 191)->nullable();
+            // Indexed with created_at below. Action names are short verbs
+            // (`authenticated`, `downloaded_document`, `access_denied`), so 64
+            // is generous and the composite key lands at 262 bytes.
+            $table->string('action', 64);
+            // Not nullableMorphs(). That helper writes `varchar(255)` for the
+            // type and indexes it next to a bigint, which is a 1031-byte key:
+            // MySQL rejected it outright with SQLSTATE[42000] 1071 on the
+            // production deployment. The longest value this column ever holds is
+            // `App\Models\DataRoom\DataRoomAccessGrant` at 39 characters, so 96
+            // is ample and the key costs 395 bytes.
+            $table->string('target_type', 96)->nullable();
+            $table->unsignedBigInteger('target_id')->nullable();
             $table->text('details')->nullable();
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->timestamps();
 
+            $table->index(['target_type', 'target_id'], 'dr_audit_target_index');
             $table->index(['action', 'created_at']);
             $table->index(['access_grant_id', 'created_at']);
         });
@@ -210,7 +238,8 @@ return new class extends Migration
         // apply when issuing a grant (e.g. "VC Investor", "Bank Partner").
         $this->create('dataroom_access_templates', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            // Uniquely indexed, so length is explicit. 150 * 4 + 1 = 601 bytes.
+            $table->string('name', 150)->unique();
             $table->text('description')->nullable();
             $table->boolean('all_documents_access')->default(false);
             $table->boolean('downloads_permitted')->default(true);

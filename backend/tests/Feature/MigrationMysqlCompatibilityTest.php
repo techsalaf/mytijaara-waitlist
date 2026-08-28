@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\DataRoomAuditLog;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Schema;
@@ -34,6 +35,20 @@ class MigrationMysqlCompatibilityTest extends TestCase
 {
     /** MySQL's hard ceiling on table, column, index and constraint names. */
     private const MYSQL_MAX_IDENTIFIER = 64;
+
+    /**
+     * The smallest index key budget a live MySQL will hand out.
+     *
+     * InnoDB with the COMPACT or REDUNDANT row format stops at 767 bytes;
+     * DYNAMIC and COMPRESSED allow 3072; MyISAM and Aria allow 1000. The
+     * deployment that broke reported 1000. Sizing to the smallest of the three
+     * makes the schema independent of the engine and row format a host happens
+     * to default to, which is not something this codebase gets to choose.
+     */
+    private const MYSQL_MAX_INDEX_KEY_BYTES = 767;
+
+    /** Tables this gate sizes. See test_no_dataroom_index_exceeds_the_key_budget. */
+    private const GATED_TABLE_PREFIX = 'dataroom_';
 
     private const PROBE = 'mysql_identifier_probe';
 
@@ -113,6 +128,135 @@ class MigrationMysqlCompatibilityTest extends TestCase
             "MySQL rejects a NOT NULL timestamp with no default. Use dateTime() or useCurrent().\n"
             .implode("\n", array_unique($offenders)),
         );
+    }
+
+    /**
+     * The third MySQL-only failure, and the one that cost a second deployment.
+     *
+     * `nullableMorphs('target')` on `dataroom_audit_logs` wrote a
+     * `varchar(255)` type column and indexed it beside a bigint. In utf8mb4 that
+     * key is 1031 bytes and MySQL refused it with SQLSTATE[42000] 1071
+     * "Specified key was too long; max key length is 1000 bytes". SQLite has no
+     * key length limit at all, so 311 tests stayed green.
+     *
+     * The budget checked here is 767, not 1000, because the engine and row
+     * format of the host database are not ours to pick. Sizing to the smallest
+     * of the three real limits makes the schema portable across all of them.
+     *
+     * Scoped to `dataroom_*`. The rest of the repo predates this gate and is
+     * already deployed and working on the live database; narrowing those keys is
+     * a separate migration with its own data risk, not a silent side effect of
+     * adding a test.
+     */
+    public function test_no_dataroom_index_exceeds_the_key_budget(): void
+    {
+        $offenders = [];
+
+        foreach ($this->statementsPerMigration() as $migration => $statements) {
+            foreach ($this->indexKeysIn($statements) as $key) {
+                if (! str_starts_with($key['table'], self::GATED_TABLE_PREFIX)) {
+                    continue;
+                }
+
+                if ($key['bytes'] <= self::MYSQL_MAX_INDEX_KEY_BYTES) {
+                    continue;
+                }
+
+                $offenders[] = sprintf(
+                    '%s: %s.%s (%s) is %d bytes (max %d)',
+                    $migration,
+                    $key['table'],
+                    $key['name'],
+                    implode(', ', $key['columns']),
+                    $key['bytes'],
+                    self::MYSQL_MAX_INDEX_KEY_BYTES,
+                );
+            }
+        }
+
+        $this->assertSame(
+            [],
+            array_values(array_unique($offenders)),
+            "An index key is wider than MySQL's smallest budget. Give the indexed "
+            ."string column an explicit shorter length.\n"
+            .implode("\n", array_unique($offenders)),
+        );
+    }
+
+    /**
+     * Guards the guard above. If the DDL parser ever stops recognising indexes
+     * it would report an empty offender set and pass forever, so pin the two
+     * keys whose widths are known and deliberate.
+     */
+    public function test_the_key_budget_parser_measures_real_indexes(): void
+    {
+        $keys = [];
+
+        foreach ($this->statementsPerMigration() as $migration => $statements) {
+            if (! str_contains($migration, 'create_dataroom_tables')) {
+                continue;
+            }
+
+            foreach ($this->indexKeysIn($statements) as $key) {
+                $keys[$key['table'].'.'.$key['name']] = $key['bytes'];
+            }
+        }
+
+        // target_type varchar(96) utf8mb4 = 386, +1 nullable, +8 bigint = 395.
+        $this->assertSame(395, $keys['dataroom_audit_logs.dr_audit_target_index'] ?? null);
+        // slug varchar(191) utf8mb4 = 765, the deliberate ceiling.
+        $this->assertSame(765, $keys['dataroom_folders.dataroom_folders_slug_unique'] ?? null);
+    }
+
+    /**
+     * The other half of narrowing a column: the values still have to fit.
+     *
+     * `dataroom_audit_logs.action` is 64 characters and `target_type` is 96, so
+     * a future action name or a moved model class could start silently
+     * truncating, or throwing 1265 under strict mode. The longest action today
+     * is `emergency_disabled_all_downloads` at 32; the longest morph target is
+     * `App\Models\DataRoomDocumentVersion` at 34.
+     *
+     * The action scan reads literal arguments to `record()`, so an action built
+     * at runtime from a variable would escape it. Nothing in the data room does
+     * that, and the assertion on ALWAYS_LOGGED covers the security-critical set
+     * exactly.
+     */
+    public function test_audit_values_still_fit_the_narrowed_columns(): void
+    {
+        $actions = DataRoomAuditLog::ALWAYS_LOGGED;
+
+        foreach ($this->dataRoomSources() as $source) {
+            preg_match_all(
+                '/record\(\s*[^,]+,\s*[^,]+,\s*\'([a-z0-9_]+)\'/',
+                (string) file_get_contents($source),
+                $matches,
+            );
+
+            $actions = array_merge($actions, $matches[1] ?? []);
+        }
+
+        $actions = array_values(array_unique($actions));
+
+        $this->assertNotEmpty($actions, 'No audit action literals were found, so this test proves nothing.');
+
+        foreach ($actions as $action) {
+            $this->assertLessThanOrEqual(
+                64,
+                mb_strlen($action),
+                "Audit action '{$action}' does not fit dataroom_audit_logs.action (64).",
+            );
+        }
+
+        foreach (glob(app_path('Models/DataRoom*.php')) ?: [] as $model) {
+            $class = 'App\\Models\\'.basename($model, '.php');
+
+            $this->assertLessThanOrEqual(
+                96,
+                mb_strlen($class),
+                "Morph target '{$class}' does not fit dataroom_audit_logs.target_type (96).",
+            );
+        }
     }
 
     /**
@@ -279,6 +423,23 @@ class MigrationMysqlCompatibilityTest extends TestCase
         return self::$probe = ['statements' => $captured, 'unanalysable' => $unanalysable];
     }
 
+    /**
+     * Every PHP file that can write an audit row.
+     *
+     * @return list<string>
+     */
+    private function dataRoomSources(): array
+    {
+        $files = array_merge(
+            glob(app_path('Models/DataRoom*.php')) ?: [],
+            glob(app_path('Services/DataRoom/*.php')) ?: [],
+            glob(app_path('Http/Controllers/Api/DataRoom/*.php')) ?: [],
+            glob(app_path('Http/Middleware/DataRoom*.php')) ?: [],
+        );
+
+        return array_values($files);
+    }
+
     /** @return list<string> */
     private function migrationFiles(): array
     {
@@ -333,5 +494,169 @@ class MigrationMysqlCompatibilityTest extends TestCase
         }
 
         return array_values(array_unique($offenders));
+    }
+
+    /**
+     * Every index key one migration declares, measured in bytes.
+     *
+     * Two passes over the same statement list. The first records each column's
+     * declared type, from `create table` bodies and from `alter table ... add`.
+     * The second finds every index and sums the widths of its columns. An index
+     * naming a column the first pass never saw is skipped rather than guessed
+     * at: it belongs to a table another migration created.
+     *
+     * Foreign keys are ignored. They index the referencing column, which is
+     * always a bigint here, and never approach the budget.
+     *
+     * @param  list<string>  $statements
+     * @return list<array{table: string, name: string, columns: list<string>, bytes: int}>
+     */
+    private function indexKeysIn(array $statements): array
+    {
+        $columns = [];
+
+        foreach ($statements as $sql) {
+            if (preg_match('/^create table `([^`]+)` \((.*)\)[^)]*$/is', trim($sql), $m)) {
+                foreach ($this->splitTopLevel($m[2]) as $fragment) {
+                    if (preg_match('/^`([^`]+)`\s+(.+)$/s', trim($fragment), $c)) {
+                        $columns[$m[1]][$c[1]] = $c[2];
+                    }
+                }
+
+                continue;
+            }
+
+            if (preg_match('/^alter table `([^`]+)` add `([^`]+)`\s+(.+)$/is', trim($sql), $m)) {
+                $columns[$m[1]][$m[2]] = $m[3];
+            }
+        }
+
+        $keys = [];
+
+        foreach ($statements as $sql) {
+            if (! preg_match('/^alter table `([^`]+)` add (?:unique|index|fulltext|spatial index) `([^`]+)`\((.+)\)$/is', trim($sql), $m)) {
+                continue;
+            }
+
+            preg_match_all('/`([^`]+)`/', $m[3], $found);
+            $named = $found[1] ?? [];
+            $bytes = 0;
+            $known = $named !== [];
+
+            foreach ($named as $column) {
+                $width = $this->keyBytes($columns[$m[1]][$column] ?? null);
+
+                if ($width === null) {
+                    $known = false;
+
+                    break;
+                }
+
+                $bytes += $width;
+            }
+
+            if (! $known) {
+                continue;
+            }
+
+            $keys[] = [
+                'table' => $m[1],
+                'name' => $m[2],
+                'columns' => array_values($named),
+                'bytes' => $bytes,
+            ];
+        }
+
+        return $keys;
+    }
+
+    /**
+     * The bytes one column contributes to an index key, or null when the type is
+     * not one this parser is prepared to claim a number for.
+     *
+     * Character types are counted at 4 bytes per character, which is utf8mb4 and
+     * is what `config/database.php` asks for. A varchar also stores its own
+     * length, one byte up to 255 characters and two beyond. A nullable column
+     * carries one extra byte for the null flag.
+     */
+    private function keyBytes(?string $definition): ?int
+    {
+        if ($definition === null) {
+            return null;
+        }
+
+        $definition = strtolower($definition);
+        $nullable = ! str_contains($definition, 'not null') ? 1 : 0;
+
+        $fixed = [
+            'bigint' => 8, 'int' => 4, 'mediumint' => 3, 'smallint' => 2, 'tinyint' => 1,
+            'double' => 8, 'float' => 4, 'datetime' => 5, 'timestamp' => 4, 'date' => 3,
+            'time' => 3, 'year' => 1, 'uuid' => 16,
+        ];
+
+        if (preg_match('/^varchar\((\d+)\)/', $definition, $m)) {
+            return ((int) $m[1]) * 4 + ((int) $m[1] > 255 ? 2 : 1) + $nullable;
+        }
+
+        if (preg_match('/^char\((\d+)\)/', $definition, $m)) {
+            return ((int) $m[1]) * 4 + $nullable;
+        }
+
+        if (str_starts_with($definition, 'enum(')) {
+            // One byte up to 255 members, two beyond. Nothing here is close.
+            return 2 + $nullable;
+        }
+
+        foreach ($fixed as $type => $width) {
+            if (preg_match('/^'.$type.'\b/', $definition)) {
+                return $width + $nullable;
+            }
+        }
+
+        // text, blob, json, geometry, decimal. None is indexed in this schema
+        // without a prefix length, and guessing a width would be worse than
+        // declining to measure.
+        return null;
+    }
+
+    /**
+     * Split a `create table` body on its top-level commas, so that
+     * `enum('a', 'b')` and `decimal(8, 2)` stay in one piece.
+     *
+     * @return list<string>
+     */
+    private function splitTopLevel(string $body): array
+    {
+        $parts = [];
+        $buffer = '';
+        $depth = 0;
+        $quoted = false;
+
+        foreach (str_split($body) as $character) {
+            if ($character === "'") {
+                $quoted = ! $quoted;
+            }
+
+            if (! $quoted) {
+                if ($character === '(') {
+                    $depth++;
+                } elseif ($character === ')') {
+                    $depth--;
+                } elseif ($character === ',' && $depth === 0) {
+                    $parts[] = $buffer;
+                    $buffer = '';
+
+                    continue;
+                }
+            }
+
+            $buffer .= $character;
+        }
+
+        if (trim($buffer) !== '') {
+            $parts[] = $buffer;
+        }
+
+        return $parts;
     }
 }

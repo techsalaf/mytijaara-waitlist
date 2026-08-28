@@ -50,10 +50,11 @@ cd backend && php artisan migrate --pretend
 ```
 
 `MigrationMysqlCompatibilityTest` already asserts offline that no emitted
-identifier exceeds 64 characters and no `NOT NULL TIMESTAMP` lacks a default,
-which are the two failures that reached the first production run. `--pretend`
-against the real instance is the second layer for the failure classes a static
-read of the DDL cannot see. See
+identifier exceeds 64 characters, that no `NOT NULL TIMESTAMP` lacks a default,
+and that no `dataroom_*` index key exceeds 767 bytes, which are the three
+failures that reached the first production runs. `--pretend` against the real
+instance is the second layer for the failure classes a static read of the DDL
+cannot see. See
 [known-limitations.md](known-limitations.md#14-the-gate-suite-runs-on-sqlite-production-runs-on-mysql).
 
 ### If `migrate` fails part-way
@@ -70,13 +71,21 @@ cd backend && php artisan migrate --force
 Every `Schema::create` in `2026_08_27_000001_create_dataroom_tables` is guarded
 by `Schema::hasTable`, and the two junction uniques are re-checked after the
 creates, so the second run finishes the tables the first run did not reach and is
-a no-op on the ones it did. Verify:
+a no-op on the ones it did.
+
+`2026_08_28_000001_narrow_dataroom_indexed_columns` then repairs a database that
+was already built by the earlier wide column definitions. It shrinks `slug`,
+`visitor_email`, `name`, `action` and `target_type`, adds the three
+`dataroom_audit_logs` indexes that the 1071 failure prevented, and drops the
+superseded `nullableMorphs` index where it did land. MySQL only, idempotent, and
+it aborts with a readable message naming the row rather than truncating one.
+Verify:
 
 ```bash
 cd backend && php artisan migrate:status | grep dataroom
 ```
 
-Expect `Ran`. Then confirm all eleven tables exist:
+Expect `Ran` twice. Then confirm all eleven tables exist:
 
 ```bash
 cd backend && php artisan tinker --execute="echo count(DB::select('show tables like \"dataroom%\"'));"
@@ -261,11 +270,14 @@ sudo systemctl reload php8.3-fpm
 
 ## Rollback
 
-The migration's `down()` drops all eleven tables in reverse dependency order and
-touches no pre-existing table:
+The create migration's `down()` drops all eleven tables in reverse dependency
+order and touches no pre-existing table. The repair migration's `down()` is a
+deliberate no-op, since there is no useful state to return to: widening the
+columns recreates the key-length failure, and the indexes it adds belong to the
+create migration. So rolling the data room back means rolling both back:
 
 ```bash
-cd backend && php artisan migrate:rollback --step=1
+cd backend && php artisan migrate:rollback --step=2
 ```
 
 That destroys every grant, session and audit row. Bytes under
