@@ -64,7 +64,7 @@ class EmailSeeder extends Seeder
                 'thumbnail' => 'update',
                 'subject' => "What's new on MyTijaara this month 🚀",
                 'html' => $this->productUpdateHtml(),
-                'text' => "Hi {{first_name}}, here is what's new on MyTijaara: One-tap artisan booking, expanded delivery coverage in Lagos & Abuja, and escrow-protected payments.",
+                'text' => "Hi {{first_name}}, here is what's new on MyTijaara: One-tap artisan booking, expanded delivery coverage in Ibadan & Lagos, and escrow-protected payments.",
             ],
 
             // tpl_6: Password Reset
@@ -451,7 +451,7 @@ HTML;
               <div style="background:#faf8f3;border:1px solid #e8e2d5;border-radius:10px;padding:18px 20px;margin-bottom:16px;">
                 <h4 style="margin:0 0 4px;font-size:15px;color:#004a28;">⚡ Expanded City Coverage</h4>
                 <p style="margin:0;font-size:14px;line-height:1.5;color:#555555;">
-                  We have mapped out over 250 verified merchant zones in Lagos, Abuja, and Port Harcourt for same-day express delivery.
+                  We have mapped out over 250 verified merchant zones across Ibadan, Lagos, Abuja (FCT), and Port Harcourt for same-day express delivery.
                 </p>
               </div>
               <div style="background:#faf8f3;border:1px solid #e8e2d5;border-radius:10px;padding:18px 20px;margin-bottom:16px;">

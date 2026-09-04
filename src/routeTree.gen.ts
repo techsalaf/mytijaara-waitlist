@@ -28,6 +28,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAuditLogsRouteImport } from './routes/admin.audit-logs'
 import { Route as AdminCmsRouteImport } from './routes/admin.cms'
+import { Route as AdminCronSetupRouteImport } from './routes/admin.cron-setup'
 import { Route as AdminDataRoomRouteImport } from './routes/admin.data-room'
 import { Route as AdminEmailRouteImport } from './routes/admin.email'
 import { Route as AdminMediaRouteImport } from './routes/admin.media'
@@ -188,6 +189,11 @@ const AdminAuditLogsRoute = AdminAuditLogsRouteImport.update({
 const AdminCmsRoute = AdminCmsRouteImport.update({
   id: '/cms',
   path: '/cms',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCronSetupRoute = AdminCronSetupRouteImport.update({
+  id: '/cron-setup',
+  path: '/cron-setup',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminDataRoomRoute = AdminDataRoomRouteImport.update({
@@ -545,6 +551,7 @@ export interface FileRoutesByFullPath {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-logs': typeof AdminAuditLogsRoute
   '/admin/cms': typeof AdminCmsRouteWithChildren
+  '/admin/cron-setup': typeof AdminCronSetupRoute
   '/admin/data-room': typeof AdminDataRoomRouteWithChildren
   '/admin/email': typeof AdminEmailRouteWithChildren
   '/admin/media': typeof AdminMediaRoute
@@ -629,6 +636,7 @@ export interface FileRoutesByTo {
   '/verify-email': typeof VerifyEmailRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-logs': typeof AdminAuditLogsRoute
+  '/admin/cron-setup': typeof AdminCronSetupRoute
   '/admin/media': typeof AdminMediaRoute
   '/admin/notifications': typeof AdminNotificationsRoute
   '/admin/profile': typeof AdminProfileRoute
@@ -710,6 +718,7 @@ export interface FileRoutesById {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-logs': typeof AdminAuditLogsRoute
   '/admin/cms': typeof AdminCmsRouteWithChildren
+  '/admin/cron-setup': typeof AdminCronSetupRoute
   '/admin/data-room': typeof AdminDataRoomRouteWithChildren
   '/admin/email': typeof AdminEmailRouteWithChildren
   '/admin/media': typeof AdminMediaRoute
@@ -799,6 +808,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/audit-logs'
     | '/admin/cms'
+    | '/admin/cron-setup'
     | '/admin/data-room'
     | '/admin/email'
     | '/admin/media'
@@ -883,6 +893,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/admin/analytics'
     | '/admin/audit-logs'
+    | '/admin/cron-setup'
     | '/admin/media'
     | '/admin/notifications'
     | '/admin/profile'
@@ -963,6 +974,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/audit-logs'
     | '/admin/cms'
+    | '/admin/cron-setup'
     | '/admin/data-room'
     | '/admin/email'
     | '/admin/media'
@@ -1183,6 +1195,13 @@ declare module '@tanstack/react-router' {
       path: '/cms'
       fullPath: '/admin/cms'
       preLoaderRoute: typeof AdminCmsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/cron-setup': {
+      id: '/admin/cron-setup'
+      path: '/cron-setup'
+      fullPath: '/admin/cron-setup'
+      preLoaderRoute: typeof AdminCronSetupRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/data-room': {
@@ -1814,6 +1833,7 @@ interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminAuditLogsRoute: typeof AdminAuditLogsRoute
   AdminCmsRoute: typeof AdminCmsRouteWithChildren
+  AdminCronSetupRoute: typeof AdminCronSetupRoute
   AdminDataRoomRoute: typeof AdminDataRoomRouteWithChildren
   AdminEmailRoute: typeof AdminEmailRouteWithChildren
   AdminMediaRoute: typeof AdminMediaRoute
@@ -1832,6 +1852,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminAuditLogsRoute: AdminAuditLogsRoute,
   AdminCmsRoute: AdminCmsRouteWithChildren,
+  AdminCronSetupRoute: AdminCronSetupRoute,
   AdminDataRoomRoute: AdminDataRoomRouteWithChildren,
   AdminEmailRoute: AdminEmailRouteWithChildren,
   AdminMediaRoute: AdminMediaRoute,

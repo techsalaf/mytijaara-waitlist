@@ -122,6 +122,14 @@ const DEPARTMENTS = ["All", "Engineering", "Product", "Operations", "Growth"];
 
 export function Careers() {
   const cms = useCmsData("careers", DEFAULT);
+  const [activeDept, setActiveDept] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Switched off from Admin -> CMS. Both `useState` calls sit above this line on
+  // purpose: an early return placed before a hook is what produces React's
+  // "rendered fewer hooks than expected" crash.
+  if (!cms) return null;
+
   const hero = cms.hero ?? DEFAULT.hero!;
   const culture = cms.culture ?? DEFAULT.culture!;
   const benefits = cms.benefits ?? DEFAULT.benefits!;
@@ -129,9 +137,6 @@ export function Careers() {
 
   const benefitItems = benefits.items && benefits.items.length > 0 ? benefits.items : DEFAULT.benefits!.items!;
   const openings = positions.openings && positions.openings.length > 0 ? positions.openings : DEFAULT.positions!.openings!;
-
-  const [activeDept, setActiveDept] = useState("All");
-  const [searchQuery, setSearchQuery] = useState("");
 
   const filteredOpenings = openings.filter((p) => {
     const matchesDept = activeDept === "All" || p.department.toLowerCase() === activeDept.toLowerCase();
@@ -144,7 +149,7 @@ export function Careers() {
   });
 
   return (
-    <main className="min-h-screen">
+    <div className="min-h-screen">
       {/* Hero */}
       <section className="relative overflow-hidden bg-primary-gradient py-24 text-primary-foreground sm:py-32">
         <div className="pointer-events-none absolute -left-40 top-1/2 h-[500px] w-[500px] -translate-y-1/2 rounded-full bg-gold opacity-15 blur-3xl" />
@@ -360,7 +365,7 @@ export function Careers() {
           </Reveal>
         </div>
       </section>
-    </main>
+    </div>
   );
 }
 

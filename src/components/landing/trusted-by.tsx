@@ -1,7 +1,7 @@
 import { Sparkles } from "lucide-react";
 import { useCmsData } from "@/lib/cms-context";
 
-type StatItem = { label: string; value: string };
+type StatItem = { label: string; value: string; enabled?: boolean };
 type StatsCmsData = { items?: StatItem[] };
 
 const HARDCODED_ITEMS = [
@@ -19,12 +19,20 @@ const DEFAULT: StatsCmsData = { items: [] };
 export function TrustedBy() {
   const cms = useCmsData("statistics", DEFAULT);
 
+  // Switched off from Admin -> CMS -> Statistics.
+  if (!cms) return null;
+
   // When the admin has populated statistics items, show "value label" per item.
-  // Fall back to the category-name marquee otherwise.
+  // Fall back to the category-name marquee otherwise. Each row's own Active
+  // switch (Admin → CMS → Statistics) is honoured here; it used to be written
+  // and then ignored, so switching one statistic off changed nothing on screen.
+  const rows = (cms.items ?? []).filter((s) => s.enabled !== false);
   const marqueeItems =
-    cms.items && cms.items.length > 0
-      ? cms.items.map((s) => `${s.value} ${s.label}`)
-      : HARDCODED_ITEMS;
+    cms.items && cms.items.length > 0 ? rows.map((s) => `${s.value} ${s.label}`) : HARDCODED_ITEMS;
+
+  // Every row switched off is a deliberate choice: render no marquee rather than
+  // an empty strip or the bundled category names.
+  if (marqueeItems.length === 0) return null;
 
   return (
     <section aria-label="Coming soon partners" className="border-y border-border/60 bg-surface py-8">

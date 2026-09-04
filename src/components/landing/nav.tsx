@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight, Download, Menu, X } from "lucide-react";
 
 import { Logo } from "./logo";
+import { AnnouncementBar, type AnnouncementStyle } from "./announcement-bar";
 import { usePrimaryCta } from "@/components/launch/launch-cta";
 import { LaunchTicker } from "@/components/launch/launch-ticker";
 import { useCmsData } from "@/lib/cms-context";
@@ -9,6 +10,13 @@ import { trackEvent } from "@/lib/analytics/track";
 
 type NavLink = { href: string; label: string };
 type NavCmsData = { links?: NavLink[] };
+type AnnouncementCmsData = {
+  enabled?: boolean;
+  text?: string;
+  href?: string;
+  label?: string;
+  style?: AnnouncementStyle;
+};
 
 const DEFAULT_NAV: NavCmsData = {
   links: [
@@ -27,15 +35,27 @@ export function Nav() {
   const cta = usePrimaryCta();
   const CtaIcon = cta.download ? Download : ArrowRight;
   const cms = useCmsData("navigation", DEFAULT_NAV);
-  if (!cms) return null;
-  const links = cms.links && cms.links.length > 0 ? cms.links : DEFAULT_NAV.links!;
+  const announcement = useCmsData<AnnouncementCmsData>("announcement", {});
 
+  // Every hook has to run before any early return. The `if (!cms) return null`
+  // guard used to sit above this effect, so the first render after an admin
+  // switched the navigation section off called fewer hooks than the previous
+  // render and React threw "Rendered fewer hooks than expected".
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  /**
+   * Switching the `navigation` section off hides the link list, not the whole
+   * header. The section owns the links and nothing else: the logo, the primary
+   * CTA, the launch ticker and the announcement strip are separate concerns, and
+   * dropping the entire `<header>` for one toggle left the site with no way back
+   * to the homepage and no launch ribbon.
+   */
+  const links = cms ? (cms.links && cms.links.length > 0 ? cms.links : DEFAULT_NAV.links!) : [];
 
   // Check if current page is the homepage
   const isHomepage = typeof window !== "undefined" ? window.location.pathname === "/" : true;
@@ -50,11 +70,21 @@ export function Nav() {
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       {/*
-        Full-bleed launch strip. It sits inside the fixed header rather than as
-        its own fixed element so that when it returns null (post-launch, or when
-        an admin turns the ticker off) the nav moves up on its own — no offset to
-        keep in sync and no leftover gap.
+        Announcement strip and launch ribbon both live inside the fixed header
+        rather than in page flow. The bar used to be rendered by the `/` route
+        above the page content, where the fixed header covered it, so an admin
+        could save announcement text and never see it. Stacking it here means it
+        is visible, it appears on every public page, and when it returns null the
+        nav slides up with no offset to keep in sync.
       */}
+      {announcement?.enabled !== false && announcement?.text ? (
+        <AnnouncementBar
+          text={announcement.text}
+          href={announcement.href ?? "#waitlist"}
+          label={announcement.label}
+          style={announcement.style ?? "primary"}
+        />
+      ) : null}
       <LaunchTicker />
       <div className={`transition-all ${scrolled ? "py-2" : "py-4"}`}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
@@ -66,6 +96,7 @@ export function Nav() {
           <a href="/" aria-label="MyTijaara home">
             <Logo />
           </a>
+          {links.length > 0 && (
           <nav className="hidden items-center gap-8 md:flex" aria-label="Primary">
             {links.map((l) => (
               <a
@@ -77,6 +108,7 @@ export function Nav() {
               </a>
             ))}
           </nav>
+          )}
           <div className="hidden items-center gap-3 md:flex">
             <a
               href={getHref(cta.href)}

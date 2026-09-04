@@ -22,6 +22,7 @@
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-soft: var(--primary-soft);
+  --color-primary-dark: var(--primary-dark);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -52,6 +53,9 @@
   --primary: oklch(0.36 0.09 156);
   --primary-foreground: oklch(0.99 0.005 100);
   --primary-soft: oklch(0.95 0.03 156);
+  /* Darkest of the three announcement-bar styles. Same hue as `--primary`,
+     dropped in lightness so white text keeps its contrast ratio. */
+  --primary-dark: oklch(0.24 0.06 156);
 
   /* Warm gold accent */
   --gold: oklch(0.78 0.13 82);
@@ -96,6 +100,7 @@
   --popover-foreground: oklch(0.97 0.01 100);
   --primary: oklch(0.72 0.15 156);
   --primary-foreground: oklch(0.14 0.02 156);
+  --primary-dark: oklch(0.18 0.04 156);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
 }

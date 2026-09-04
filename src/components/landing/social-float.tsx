@@ -15,8 +15,6 @@ export function SocialFloat() {
   const socialCms = useCmsData("social", {});
   const ref = useRef<HTMLDivElement>(null);
 
-  if (!socialCms) return null;
-
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
@@ -27,6 +25,10 @@ export function SocialFloat() {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
+
+  // Switched off from Admin -> CMS -> Social. Below `useEffect`: an early return
+  // above a hook changes hook order between renders and crashes React.
+  if (!socialCms) return null;
 
   // Build the ordered list, filtering out any platforms with no URL.
   const links = SOCIAL_PLATFORMS.map((id) => ({ id, href: social[id] })).filter(

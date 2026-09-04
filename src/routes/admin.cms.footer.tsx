@@ -14,19 +14,25 @@ type FooterColumn = {
   links?: { label?: string; href?: string }[];
 };
 
+/**
+ * The footer's contact info (email, phone, social links) comes from
+ * `branding` (Settings → Branding / Social), not from this section.
+ * `contactEmail` and `supportPhone` used to be stored here too but were never
+ * read by the footer component, so they are removed.
+ *
+ * `copyright` is the bottom-bar legal line. It is a template: `{year}` is
+ * replaced with the current year and `{heart}` with the heart icon, which is how
+ * the line stays editable without losing the brand mark.
+ */
 type FooterData = {
   tagline?: string;
   copyright?: string;
-  contactEmail?: string;
-  supportPhone?: string;
   columns?: FooterColumn[];
 };
 
 const defaultFooterData: FooterData = {
   tagline: "",
   copyright: "",
-  contactEmail: "",
-  supportPhone: "",
   columns: [],
 };
 
@@ -118,28 +124,25 @@ function FooterEditor() {
             />
           </div>
           <div>
-            <Label>Copyright</Label>
+            <Label>Bottom bar / copyright line</Label>
             <Input
               value={data.copyright ?? ""}
               onChange={(e) => setData({ ...data, copyright: e.target.value })}
+              placeholder="© {year} MyTijaara Ltd. Made with {heart} in Nigeria."
               className="mt-1.5"
             />
+            <p className="mt-1 text-xs text-muted-foreground">
+              <code className="rounded bg-muted px-1">{"{year}"}</code> becomes the current year and{" "}
+              <code className="rounded bg-muted px-1">{"{heart}"}</code> becomes the ♥ icon. Leave empty for the
+              default line.
+            </p>
           </div>
-          <div>
-            <Label>Contact email</Label>
-            <Input
-              value={data.contactEmail ?? ""}
-              onChange={(e) => setData({ ...data, contactEmail: e.target.value })}
-              className="mt-1.5"
-            />
-          </div>
-          <div>
-            <Label>Support phone</Label>
-            <Input
-              value={data.supportPhone ?? ""}
-              onChange={(e) => setData({ ...data, supportPhone: e.target.value })}
-              className="mt-1.5"
-            />
+          <div className="rounded-lg border border-dashed border-border/60 p-3">
+            <div className="text-sm font-medium">Contact details</div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Email, phone and social links are edited in Settings → Branding and Settings → Social.
+              They are shared with the announcement bar, the social widget, and the footer automatically.
+            </p>
           </div>
         </div>
       </SectionCard>

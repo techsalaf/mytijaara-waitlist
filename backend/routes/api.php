@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CampaignController;
 use App\Http\Controllers\Api\CmsController;
 use App\Http\Controllers\Api\ContentController;
+use App\Http\Controllers\Api\CronController;
 use App\Http\Controllers\Api\DataRoom\AdminDataRoomController;
 use App\Http\Controllers\Api\DataRoom\AdminDataRoomDocumentController;
 use App\Http\Controllers\Api\DataRoom\AdminDataRoomFolderController;
@@ -58,10 +59,12 @@ Route::get('/track/open/{campaign}', [EmailTrackingController::class, 'open']);
 Route::get('/track/click/{campaign}', [EmailTrackingController::class, 'click']);
 Route::post('/webhooks/email', [EmailTrackingController::class, 'webhook']);
 Route::post('/unsubscribe', [EmailTrackingController::class, 'unsubscribe']);
-Route::get('/cron/run', function () {
-    \Illuminate\Support\Facades\Artisan::call('campaigns:send-due');
-    return response()->json(['status' => 'ok', 'output' => trim(\Illuminate\Support\Facades\Artisan::output())]);
-});
+
+// The host's cron entry point. Not "public" in any useful sense: it is gated on
+// a shared secret and can only run the fixed allowlist in config/cron.php. It
+// lives out here because cPanel's cron cannot present a Sanctum token.
+Route::get('/cron/run', [CronController::class, 'run']);
+Route::post('/cron/run', [CronController::class, 'run']);
 
 // ---------------------------------------------------------------------------
 // Virtual Data Room (VDR) — Public / Visitor Auth & Workspace
@@ -244,6 +247,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // System health — live probes, gated behind settings read.
     Route::get('/system/health/history', [HealthController::class, 'history'])->middleware('permission:settings.view');
     Route::get('/system/health', [HealthController::class, 'show'])->middleware('permission:settings.view');
+
+    // Scheduled-task monitoring for /admin/cron-setup. Read is gated behind
+    // settings read; "Run now" needs write, because it sends real mail.
+    Route::get('/cron/status', [CronController::class, 'status'])->middleware('permission:settings.view');
+    Route::post('/cron/run-now', [CronController::class, 'runNow'])->middleware('permission:settings.edit-general');
 
     // Settings — read is broad, writes are gated per group.
     // Fixed segments come first so `api-keys` is never captured as `{group}`.

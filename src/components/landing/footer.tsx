@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import {
   MapPin,
   Phone,
@@ -24,13 +24,19 @@ type FooterLink = { label: string; href: string };
 type FooterColumn = { title?: string; h?: string; links?: FooterLink[]; l?: FooterLink[] };
 type FooterCmsData = {
   tagline?: string;
+  /**
+   * Bottom-bar legal line. Two tokens are substituted: `{year}` becomes the
+   * current year on the launch clock, `{heart}` becomes the heart icon. Stored
+   * in the CMS since the first seed and rendered by nothing until now — the
+   * bottom bar hardcoded the sentence, so editing this field did nothing.
+   */
   copyright?: string;
   columns?: FooterColumn[];
 };
 
 const DEFAULT_FOOTER: FooterCmsData = {
   tagline: "Everything you need, all in one place. Built for everyday life in Nigeria.",
-  copyright: "Made with love in Nigeria.",
+  copyright: "© {year} MyTijaara Ltd. Made with {heart} in Nigeria.",
   columns: [
     {
       h: "Product",
@@ -116,15 +122,47 @@ function AppStoreBadge({
   );
 }
 
+/**
+ * Renders the CMS copyright template.
+ *
+ * `{year}` is substituted with the launch-clock year so the line never goes
+ * stale, and `{heart}` with the icon so the brand line survives being editable.
+ * Rows seeded before the template existed held only the tail sentence
+ * ("Made with love in Nigeria."); a value with no `©` therefore keeps the
+ * standard prefix instead of silently dropping the copyright notice.
+ */
+function CopyrightLine({ template, year }: { template: string; year: number }) {
+  const line = template.includes("©") ? template : `© {year} MyTijaara Ltd. ${template}`;
+  const parts = line.split("{year}").join(String(year)).split("{heart}");
+
+  return (
+    <>
+      {parts.map((part, index) => (
+        <Fragment key={index}>
+          {part}
+          {index < parts.length - 1 ? (
+            <Heart className="mx-1 inline h-3.5 w-3.5 fill-red-500 text-red-500" aria-hidden />
+          ) : null}
+        </Fragment>
+      ))}
+    </>
+  );
+}
+
 export function Footer() {
   const { isLaunched, now } = useLaunch();
   const footerCms = useCmsData("footer", DEFAULT_FOOTER);
-  if (!footerCms) return null;
   const branding = useBranding();
+
+  // Switched off from Admin -> CMS -> Footer. Must stay below `useBranding`:
+  // an early return above a hook breaks hook order on the next render.
+  if (!footerCms) return null;
+
   const year = new Date(now).getFullYear();
   const { social, supportEmail, contactEmail, phone, launchCity, address, iosAppUrl, androidAppUrl } = branding;
 
   const tagline = footerCms.tagline ?? DEFAULT_FOOTER.tagline;
+  const copyright = footerCms.copyright?.trim() || DEFAULT_FOOTER.copyright!;
   const columns =
     footerCms.columns && footerCms.columns.length > 0
       ? footerCms.columns
@@ -390,8 +428,8 @@ export function Footer() {
           ───────────────────────────────────────────────────────────── */}
       <div className="border-t border-border/60 bg-card py-6 pb-28 sm:pb-8">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:px-6 text-center sm:text-left">
-          <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-            © {year} MyTijaara Ltd. Made with <Heart className="h-3.5 w-3.5 fill-red-500 text-red-500 inline" /> in Nigeria.
+          <p className="text-xs text-muted-foreground">
+            <CopyrightLine template={copyright} year={year} />
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">

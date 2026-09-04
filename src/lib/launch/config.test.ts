@@ -112,8 +112,22 @@ describe("humanizeRemaining and tickerText", () => {
     expect(humanizeRemaining(getTimeRemaining("2026-10-02T10:00:00+01:00", LAUNCH - MINUTE))).toBe("1 minute");
   });
 
-  it("never renders a bare zero, so the ribbon cannot read '0 to go'", () => {
-    expect(humanizeRemaining(getTimeRemaining("2026-10-02T10:00:00+01:00", LAUNCH))).toBe("0 seconds");
+  it("never renders '0 seconds', the string the broken ticker showed", () => {
+    // Regression guard for the "0 seconds to go" ribbon on /about and /careers.
+    expect(humanizeRemaining(getTimeRemaining("2026-10-02T10:00:00+01:00", LAUNCH))).toBe("moments");
+    // Already past the launch instant.
+    expect(humanizeRemaining(getTimeRemaining("2026-10-02T10:00:00+01:00", LAUNCH + 5 * DAY))).toBe("moments");
+    // Sub-second gap floors `seconds` to 0 without the total being 0.
+    expect(humanizeRemaining(getTimeRemaining("2026-10-02T10:00:00+01:00", LAUNCH - 400))).toBe("moments");
+  });
+
+  it("keeps the ticker sentence readable at every unit boundary", () => {
+    const cfg = DEFAULT_LAUNCH_CONFIG;
+    for (const offset of [0, 400, 8000, MINUTE, HOUR, DAY, 5 * DAY]) {
+      const text = tickerText(cfg, getTimeRemaining(cfg.launchDateTime, LAUNCH - offset));
+      expect(text).not.toContain("0 seconds");
+      expect(text).not.toMatch(/^\s*to go/);
+    }
   });
 
   it("substitutes every {days} placeholder in the ticker template", () => {

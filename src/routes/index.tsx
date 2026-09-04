@@ -1,10 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { serverGet } from "@/lib/api";
-import { settingsApi } from "@/lib/api/settings";
-import type { CmsSection, Faq, Testimonial } from "@/lib/api";
-import type { PublicBranding } from "@/lib/api/settings";
-import { normalizeLaunchConfig, type LaunchConfiguration } from "@/lib/launch/config";
+import { loadPublicPageData } from "@/lib/public-page-data";
 import { CmsProvider } from "@/lib/cms-context";
 import { LaunchStateProvider } from "@/components/launch/launch-state-provider";
 import { LaunchCountdown } from "@/components/launch/launch-countdown";
@@ -21,7 +17,7 @@ import { Partners } from "@/components/landing/partners";
 import { WaitlistSection } from "@/components/landing/waitlist-section";
 import { FAQ } from "@/components/landing/faq";
 import { Footer } from "@/components/landing/footer";
-import { AnnouncementBar } from "@/components/landing/announcement-bar";
+import { BrandColors } from "@/components/landing/brand-colors";
 import { AiAssistant } from "@/components/landing/ai-assistant";
 import { ScrollToTop } from "@/components/landing/scroll-to-top";
 import { SocialFloat } from "@/components/landing/social-float";
@@ -30,26 +26,18 @@ import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
 
 export const Route = createFileRoute("/")({
   /**
-   * Fetch the launch config and the full CMS payload together so the first
-   * painted HTML contains both admin-configured dates and all section content.
-   * FAQs and testimonials come from their own tables and are fetched in
-   * parallel with the CMS to avoid a waterfall.
+   * Everything the page needs comes from `loadPublicPageData`, the same loader
+   * every other public route uses, so the landing page cannot drift from them
+   * again. `content: true` adds the FAQ and testimonial tables, which only this
+   * page renders.
    *
-   * `serverNow` prevents the hydration mismatch (React #418) that occurs when
-   * the server and client read `Date.now()` at different instants.
+   * The extra work here is purely SEO: `head()` cannot await, so the `seo`
+   * section is flattened into `_seo*` keys the head function reads back.
    */
   loader: async () => {
-    const [launchRaw, cmsRaw, faqsRaw, testimonialsRaw, brandingResult] = await Promise.all([
-      serverGet<unknown>("/launch-config"),
-      serverGet<Record<string, CmsSection>>("/cms"),
-      serverGet<Faq[]>("/content/faqs"),
-      serverGet<Testimonial[]>("/content/testimonials"),
-      // Branding endpoint may not be deployed yet — degrade gracefully.
-      settingsApi.publicSettings().catch(() => null),
-    ]);
+    const data = await loadPublicPageData({ content: true });
 
-    const cmsData = (cmsRaw as Record<string, CmsSection>) ?? {};
-    const seoSection = cmsData["seo"]?.data as
+    const seoSection = data.cms["seo"]?.data as
       | {
           title?: string;
           description?: string;
@@ -62,42 +50,10 @@ export const Route = createFileRoute("/")({
         }
       | undefined;
 
-    const branding: PublicBranding = (brandingResult as { data: PublicBranding } | null)?.data ?? {
-      siteName: "MyTijaara",
-      tagline: "One app for food, shopping, deliveries and trusted services.",
-      contactEmail: "",
-      supportEmail: "",
-      phone: "",
-      address: "",
-      launchCity: "",
-      logoUrl: "",
-      logoDarkUrl: "",
-      faviconUrl: "",
-      ogImageUrl: "",
-      primaryColor: "",
-      accentColor: "",
-      secondaryColor: "",
-      backgroundColor: "",
-      surfaceColor: "",
-      social: {
-        instagram: "",
-        twitter: "",
-        facebook: "",
-        linkedin: "",
-        tiktok: "",
-        youtube: "",
-        whatsapp: "",
-      },
-      iosAppUrl: "",
-      androidAppUrl: "",
-      googleAnalyticsId: "",
-      metaPixelId: "",
-    };
-
-    const rawOgImage = seoSection?.ogImage || branding.ogImageUrl || "/og-image.png";
+    const rawOgImage = seoSection?.ogImage || data.branding?.ogImageUrl || "/og-image.png";
     const canonicalUrl = seoSection?.canonicalUrl || "https://mytijaara.com";
 
-    // Ensure ogImage is an absolute URL for WhatsApp / social crawler previews
+    // og:image must be absolute for WhatsApp and the social crawlers.
     let ogImageUrl = rawOgImage;
     if (rawOgImage && !rawOgImage.startsWith("http://") && !rawOgImage.startsWith("https://")) {
       const base = canonicalUrl.replace(/\/$/, "");
@@ -105,12 +61,7 @@ export const Route = createFileRoute("/")({
     }
 
     return {
-      launchConfig: normalizeLaunchConfig(launchRaw),
-      serverNow: Date.now(),
-      cms: cmsData,
-      faqs: (faqsRaw as Faq[]) ?? [],
-      testimonials: (testimonialsRaw as Testimonial[]) ?? [],
-      branding,
+      ...data,
       _seoTitle: seoSection?.title,
       _seoDescription: seoSection?.description,
       _seoKeywords: seoSection?.keywords,
@@ -119,7 +70,7 @@ export const Route = createFileRoute("/")({
       _seoOgDescription: seoSection?.ogDescription || seoSection?.description,
       _seoOgImage: ogImageUrl,
       _seoTwitterHandle: seoSection?.twitterHandle,
-      _faviconUrl: branding.faviconUrl,
+      _faviconUrl: data.branding?.faviconUrl,
     };
   },
   head: ({ loaderData }) => {
@@ -186,37 +137,6 @@ export const Route = createFileRoute("/")({
 });
 
 /**
- * Injects admin-configured brand colors as CSS custom properties, overriding
- * the hardcoded fallbacks in styles.css. Only emits a property when the admin
- * has set a non-empty value, so unset colors keep the stylesheet default.
- */
-function BrandColors({
-  primaryColor,
-  accentColor,
-  secondaryColor,
-  backgroundColor,
-  surfaceColor,
-}: {
-  primaryColor: string;
-  accentColor: string;
-  secondaryColor: string;
-  backgroundColor: string;
-  surfaceColor: string;
-}) {
-  const declarations = [
-    primaryColor    ? `--primary: ${primaryColor};`       : "",
-    accentColor     ? `--gold: ${accentColor};`           : "",
-    secondaryColor  ? `--secondary: ${secondaryColor};`   : "",
-    backgroundColor ? `--background: ${backgroundColor};` : "",
-    surfaceColor    ? `--surface: ${surfaceColor};`        : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
-  if (!declarations) return null;
-  return <style>{`:root { ${declarations} }`}</style>;
-}
-
-/**
  * Wrap the entire page in both LaunchStateProvider and CmsProvider so every
  * landing component can read its CMS data and its launch-phase variant from
  * context without prop drilling.
@@ -224,28 +144,14 @@ function BrandColors({
 function Landing() {
   const { launchConfig, serverNow, cms, faqs, testimonials, branding } = Route.useLoaderData();
 
-  const announcementSec = cms["announcement"];
-  const announcementData = announcementSec?.data as
-    | { enabled?: boolean; text?: string; href?: string }
-    | undefined;
-  const showAnnouncement = announcementSec?.enabled !== false && announcementData?.enabled !== false && Boolean(announcementData?.text);
-
   return (
     <LaunchStateProvider initialConfig={launchConfig} initialNow={serverNow}>
-      <BrandColors
-        primaryColor={branding.primaryColor}
-        accentColor={branding.accentColor}
-        secondaryColor={branding.secondaryColor}
-        backgroundColor={branding.backgroundColor}
-        surfaceColor={branding.surfaceColor}
-      />
+      <BrandColors branding={branding} />
       <CmsProvider sections={cms} faqs={faqs} testimonials={testimonials} branding={branding}>
         <AnalyticsProvider>
-          {showAnnouncement && (
-            <AnnouncementBar text={announcementData?.text ?? ""} href={announcementData?.href ?? "#waitlist"} />
-          )}
           <Particles />
           <div className="min-h-screen bg-background text-foreground">
+            {/* Nav owns the announcement strip and the launch ribbon. */}
             <Nav />
             <main>
               <Hero />

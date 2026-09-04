@@ -53,6 +53,7 @@ return [
             'pptx' => ['application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/zip'],
             'ppt' => ['application/vnd.ms-powerpoint', 'application/vnd.ms-office', 'application/x-ole-storage'],
             'csv' => ['text/csv', 'text/plain', 'application/csv'],
+            'md' => ['text/markdown', 'text/plain', 'text/x-markdown'],
             'png' => ['image/png'],
             'jpg' => ['image/jpeg'],
             'jpeg' => ['image/jpeg'],

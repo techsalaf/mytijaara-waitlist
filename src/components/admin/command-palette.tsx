@@ -13,7 +13,7 @@ import {
 import {
   LayoutDashboard, Users, Award, FileText, Image as ImageIcon, Mail, BarChart3,
   Shield, Settings, Bell, ScrollText, HeartPulse, UserCircle2, LogOut, Sun, Moon,
-  Plus, Download,
+  Plus, Download, Timer,
 } from "lucide-react";
 import { signOut } from "@/lib/auth";
 import { setTheme, getStoredTheme } from "@/lib/theme";
@@ -63,6 +63,7 @@ export function CommandPalette({
     { group: "Navigate", label: "Notifications", icon: Bell, onSelect: () => go("/admin/notifications") },
     { group: "Navigate", label: "Audit Logs", icon: ScrollText, onSelect: () => go("/admin/audit-logs") },
     { group: "Navigate", label: "System Health", icon: HeartPulse, onSelect: () => go("/admin/system-health") },
+    { group: "Navigate", label: "Cron Setup", icon: Timer, onSelect: () => go("/admin/cron-setup"), keywords: "scheduler reminders cpanel cron job verification" },
     { group: "Navigate", label: "Settings", icon: Settings, onSelect: () => go("/admin/settings") },
     { group: "Navigate", label: "My Profile", icon: UserCircle2, onSelect: () => go("/admin/profile") },
 

@@ -17,7 +17,7 @@ import { useCmsData } from "@/lib/cms-context";
 const ICONS = [UtensilsCrossed, ShoppingBasket, Pill, Store, Package, Car, Wrench, Sparkles];
 const ICON_ALT_MASK = [false, true, false, true, false, true, false, true];
 
-type ServiceItem = { title: string; description?: string; body?: string };
+type ServiceItem = { title: string; description?: string; body?: string; enabled?: boolean };
 type ServicesCmsData = { heading?: string; subheading?: string; items?: ServiceItem[] };
 
 const DEFAULT: ServicesCmsData = {
@@ -38,7 +38,16 @@ const DEFAULT: ServicesCmsData = {
 export function Services() {
   const cms = useCmsData("services", DEFAULT);
   if (!cms) return null;
-  const items = (cms.items && cms.items.length > 0 ? cms.items : DEFAULT.items!);
+  // Each row carries its own Active switch in Admin → CMS → Features. Honouring
+  // it here is the whole point of that switch: the editor wrote `enabled: false`
+  // and this component used to render the row anyway, so switching a single
+  // service off did nothing on the page.
+  //
+  // The fallback keys off whether the admin has a list at all, never off the
+  // filtered length — switching every row off is a deliberate choice and must
+  // render nothing, not silently restore the eight bundled defaults.
+  const saved = cms.items && cms.items.length > 0 ? cms.items : DEFAULT.items!;
+  const items = saved.filter((s) => s.enabled !== false);
 
   return (
     <section id="services" className="relative bg-surface py-24 sm:py-32">

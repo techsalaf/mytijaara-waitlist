@@ -32,8 +32,10 @@ export type CmsSectionPatch = {
  *
  * `sections`/`section` hit the admin endpoints (`/cms-admin`), which return
  * unpublished rows and the draft column. `publicSections`/`publicSection` hit
- * the public `/cms` routes the landing page uses, which only ever return rows
- * that are both published and enabled.
+ * the public `/cms` routes the landing page uses, which return every published
+ * row — including rows an administrator has switched off, carrying
+ * `enabled: false` and an empty `data`. The public site needs that flag to tell
+ * "switched off, hide it" apart from "missing, use the bundled default".
  */
 export const cmsApi = {
   sections: () => apiCall<Record<string, CmsSection>>("/cms-admin"),

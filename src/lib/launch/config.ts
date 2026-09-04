@@ -283,7 +283,13 @@ export function humanizeRemaining(remaining: TimeRemaining): string {
   if (remaining.minutes >= 1) {
     return `${remaining.minutes} ${remaining.minutes === 1 ? "minute" : "minutes"}`;
   }
-  return `${remaining.seconds} ${remaining.seconds === 1 ? "second" : "seconds"}`;
+  if (remaining.seconds >= 1) {
+    return `${remaining.seconds} ${remaining.seconds === 1 ? "second" : "seconds"}`;
+  }
+  // Under a second, or the target already passed. "0 seconds" is never the
+  // right answer: it is exactly what the ticker rendered on /about and
+  // /careers while those pages were missing the launch clock entirely.
+  return "moments";
 }
 
 /** Fill `{days}` in the ticker template with the humanized time remaining. */

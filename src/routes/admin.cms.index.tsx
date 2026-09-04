@@ -19,6 +19,8 @@ type HeroService = { icon: string; label: string };
 
 type HeroData = {
   eyebrow?: string;
+  /** Shown instead of `eyebrow` once the launch date has passed. */
+  eyebrowLive?: string;
   heading?: string;
   headingHighlight?: string;
   subtitle?: string;
@@ -38,6 +40,7 @@ const ICON_OPTIONS = [
 
 const defaultHeroData: HeroData = {
   eyebrow: "",
+  eyebrowLive: "",
   heading: "",
   headingHighlight: "",
   subtitle: "",
@@ -109,14 +112,28 @@ function HeroEditor() {
             <Switch checked={enabled} onCheckedChange={setEnabled} />
           </div>
 
-          <div>
-            <Label>Eyebrow tag</Label>
-            <Input
-              value={data.eyebrow ?? ""}
-              placeholder="Built for Nigerians — Launching soon"
-              onChange={(e) => setData({ ...data, eyebrow: e.target.value })}
-              className="mt-1.5"
-            />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label>Eyebrow tag (before launch)</Label>
+              <Input
+                value={data.eyebrow ?? ""}
+                placeholder="Built for Nigerians — Launching soon"
+                onChange={(e) => setData({ ...data, eyebrow: e.target.value })}
+                className="mt-1.5"
+              />
+            </div>
+            <div>
+              <Label>Eyebrow tag (after launch)</Label>
+              <Input
+                value={data.eyebrowLive ?? ""}
+                placeholder="Built for Nigerians — Now live"
+                onChange={(e) => setData({ ...data, eyebrowLive: e.target.value })}
+                className="mt-1.5"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Swapped in automatically the moment the launch date passes.
+              </p>
+            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">

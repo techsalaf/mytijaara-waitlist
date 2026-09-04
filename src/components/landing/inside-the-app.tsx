@@ -124,7 +124,6 @@ function ScreenModal({ screen, onClose }: { screen: Screen | null; onClose: () =
 
 export function InsideTheApp() {
   const cms = useCmsData("inside_the_app", DEFAULT_INSIDE);
-  if (!cms) return null;
   const trackRef = useRef<HTMLDivElement | null>(null);
   const offsetRef = useRef(0);
   const halfWidthRef = useRef(0);
@@ -203,6 +202,11 @@ export function InsideTheApp() {
       /* pointer already released */
     }
   };
+
+  // Switched off from Admin -> CMS -> Inside the app. The guard sits after the
+  // refs, state and both effects on purpose — returning early above a hook is
+  // what triggers "rendered fewer hooks than expected".
+  if (!cms) return null;
 
   return (
     <section id="download" className="relative overflow-hidden bg-background py-24 sm:py-32">

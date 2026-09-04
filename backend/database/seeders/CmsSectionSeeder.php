@@ -15,7 +15,7 @@ class CmsSectionSeeder extends Seeder
     public const SECTIONS = [
         ['section' => 'announcement', 'title' => 'Announcement Bar', 'order' => 0, 'data' => [
             'enabled' => false,
-            'text' => '🎉 MyTijaara is coming to Lagos. Join the waitlist today.',
+            'text' => '🎉 MyTijaara is coming to Ibadan. Join the waitlist today.',
             'href' => '#waitlist',
             'label' => 'Learn more',
             'style' => 'primary',
@@ -140,17 +140,15 @@ class CmsSectionSeeder extends Seeder
                     ],
                 ],
             ],
-            'copyright' => 'Made with love in Nigeria.',
+            // `{year}` and `{heart}` are substituted by the footer renderer.
+            'copyright' => '© {year} MyTijaara Ltd. Made with {heart} in Nigeria.',
         ]],
-        ['section' => 'social', 'title' => 'Social Links', 'order' => 12, 'data' => [
-            'twitter' => 'https://twitter.com/mytijaara',
-            'instagram' => 'https://instagram.com/mytijaara',
-            'facebook' => 'https://facebook.com/mytijaara',
-            'youtube' => 'https://youtube.com/@mytijaara',
-            'linkedin' => 'https://linkedin.com/company/mytijaara',
-            'tiktok' => 'https://tiktok.com/@mytijaara',
-            'whatsapp' => '',
-        ]],
+        // The floating social widget's URLs live in `site_settings` (Settings →
+        // Social), which covers seven platforms and is what both the widget and
+        // the footer read. This row exists only to carry the section's on/off
+        // switch, so it deliberately holds no URLs: two screens writing the same
+        // field means one of them silently loses.
+        ['section' => 'social', 'title' => 'Social Links', 'order' => 12, 'data' => []],
         ['section' => 'statistics', 'title' => 'Statistics', 'order' => 13, 'data' => [
             'items' => [
                 ['label' => 'Local Restaurants', 'value' => '50+', 'enabled' => true],
@@ -174,17 +172,17 @@ class CmsSectionSeeder extends Seeder
             'badge' => 'Get the App',
             'heading' => 'Experience MyTijaara on your device',
             'subheading' => 'Order food, shop groceries & pharmacy items, book artisans, send parcels, and rent cars — all in one super app built for Nigeria.',
+            // No label: the store badge wording is fixed by Google's and Apple's
+            // brand guidelines, so the page renders it verbatim.
             'playStore' => [
                 'enabled' => true,
                 'comingSoon' => false,
                 'url' => 'https://play.google.com/store/apps/details?id=com.mytijaara.app',
-                'label' => 'Google Play',
             ],
             'appStore' => [
                 'enabled' => true,
                 'comingSoon' => true,
                 'url' => 'https://apps.apple.com/app/mytijaara/id000000000',
-                'label' => 'App Store',
             ],
             'webApp' => [
                 'enabled' => true,
@@ -204,11 +202,17 @@ class CmsSectionSeeder extends Seeder
                 'label' => 'Earn with us as a Delivery Rider',
                 'description' => 'Flexible hours, prompt payouts, and guaranteed orders across your city.',
             ],
+            // Rendered by the "What you can do with MyTijaara" grid on /download.
+            // `icon` is a name from `src/lib/cms/content-icons.tsx`, which maps it
+            // to a lucide component and its tint; an unknown name falls back to a
+            // neutral card rather than breaking the page.
             'features' => [
-                ['icon' => 'Zap', 'title' => 'Lightning-fast Orders', 'desc' => 'Order food, essentials, and groceries delivered in minutes.'],
-                ['icon' => 'ShieldCheck', 'title' => '100% Escrow Protection', 'desc' => 'Your payments are held safe until your delivery is confirmed.'],
-                ['icon' => 'Wrench', 'title' => 'Vetted Local Artisans', 'desc' => 'Book plumbers, electricians, carpenters, and technicians on demand.'],
-                ['icon' => 'Sparkles', 'title' => 'Cashback & Referral Perks', 'desc' => 'Earn ₦500 on every friend you invite who completes an order.'],
+                ['icon' => 'UtensilsCrossed', 'title' => 'Hot Food Delivery', 'desc' => 'Order from your favourite local bukas and top fast-food chains delivered hot in under 35 mins.', 'enabled' => true],
+                ['icon' => 'ShoppingBag', 'title' => 'Supermarket & Groceries', 'desc' => 'Fresh vegetables, packaged food, drinks, and household supplies packed and delivered.', 'enabled' => true],
+                ['icon' => 'Pill', 'title' => 'Pharmacy & Health', 'desc' => 'Prescriptions, over-the-counter medicine, supplements, and first-aid supplies with discreet delivery.', 'enabled' => true],
+                ['icon' => 'Wrench', 'title' => 'Vetted Local Artisans', 'desc' => 'Book trusted plumbers, electricians, mechanics, and painters with verified reviews and fixed pricing.', 'enabled' => true],
+                ['icon' => 'Package', 'title' => 'Same-Day Parcel Delivery', 'desc' => 'Send documents and parcels across town with real-time GPS tracking and recipient PIN verification.', 'enabled' => true],
+                ['icon' => 'ShieldCheck', 'title' => 'Secure Escrow Payments', 'desc' => 'Your money stays in automated escrow until you inspect and confirm your order or service.', 'enabled' => true],
             ],
         ]],
     ];

@@ -24,9 +24,13 @@ import {
   ExternalLink,
   Sliders,
   Palette,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import QRCode from "qrcode";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CONTENT_ICON_NAMES, resolveContentIcon } from "@/lib/cms/content-icons";
 import { useCmsSection } from "@/lib/hooks/useCmsSection";
 
 export const Route = createFileRoute("/admin/cms/download")({
@@ -37,17 +41,18 @@ type DownloadCmsData = {
   badge?: string;
   heading?: string;
   subheading?: string;
+  // No `label` for the two store buttons: the badge wording is mandated by the
+  // Google Play and Apple brand guidelines and the page renders it verbatim, so
+  // a field for it would save a value the site can never show.
   playStore?: {
     enabled?: boolean;
     comingSoon?: boolean;
     url?: string;
-    label?: string;
   };
   appStore?: {
     enabled?: boolean;
     comingSoon?: boolean;
     url?: string;
-    label?: string;
   };
   webApp?: {
     enabled?: boolean;
@@ -67,6 +72,19 @@ type DownloadCmsData = {
     label?: string;
     description?: string;
   };
+  /**
+   * The "What you can do with MyTijaara" grid on /download. `icon` is a
+   * `CONTENT_ICONS` registry name; the page resolves it to a lucide component
+   * and its tint, so an administrator never types a Tailwind class.
+   */
+  features?: DownloadFeature[];
+};
+
+type DownloadFeature = {
+  icon?: string;
+  title?: string;
+  desc?: string;
+  enabled?: boolean;
 };
 
 const defaultData: DownloadCmsData = {
@@ -78,13 +96,11 @@ const defaultData: DownloadCmsData = {
     enabled: true,
     comingSoon: false,
     url: "https://play.google.com/store/apps/details?id=com.mytijaara.app",
-    label: "Google Play",
   },
   appStore: {
     enabled: true,
     comingSoon: true,
     url: "https://apps.apple.com/app/mytijaara/id000000000",
-    label: "App Store",
   },
   webApp: {
     enabled: true,
@@ -104,11 +120,31 @@ const defaultData: DownloadCmsData = {
     label: "Earn with us as a Delivery Rider",
     description: "Flexible hours, prompt payouts, and guaranteed orders across your city.",
   },
+  // Empty means "use the six cards bundled with the page". Switching every card
+  // off hides the grid; that is the way to remove it entirely.
+  features: [],
 };
 
 function DownloadCmsEditor() {
   const { data, setData, enabled, setEnabled, loading, saving, save } =
     useCmsSection<DownloadCmsData>("download", defaultData);
+
+  const features = data.features ?? [];
+
+  const updateFeature = (index: number, patch: Partial<DownloadFeature>) =>
+    setData({
+      ...data,
+      features: features.map((feature, i) => (i === index ? { ...feature, ...patch } : feature)),
+    });
+
+  const addFeature = () =>
+    setData({
+      ...data,
+      features: [...features, { icon: CONTENT_ICON_NAMES[0], title: "", desc: "", enabled: true }],
+    });
+
+  const removeFeature = (index: number) =>
+    setData({ ...data, features: features.filter((_, i) => i !== index) });
 
   // QR Studio State
   const [qrUrl, setQrUrl] = useState("https://mytijaara.com/download");
@@ -515,6 +551,98 @@ function DownloadCmsEditor() {
               className="text-xs font-mono"
             />
           </div>
+        </div>
+      </SectionCard>
+
+      {/*
+        Feature cards. Seeded from the first migration and rendered by nobody
+        until now: /download mapped over a hardcoded array, so the six cards in
+        "What you can do with MyTijaara" could not be edited and the seeded rows
+        never reached a page.
+      */}
+      <SectionCard
+        title="Feature cards"
+        description='The "What you can do with MyTijaara" grid. Leave the list empty to use the six cards bundled with the page; switch every card off to hide the grid.'
+        actions={
+          <Button size="sm" variant="outline" onClick={addFeature}>
+            <Plus className="mr-2 h-4 w-4" /> Add card
+          </Button>
+        }
+      >
+        <div className="space-y-3">
+          {features.length === 0 && (
+            <p className="rounded-lg border border-dashed border-border/60 p-3 text-xs text-muted-foreground">
+              No cards defined. The page is showing its six bundled cards: Hot Food Delivery, Supermarket &amp;
+              Groceries, Pharmacy &amp; Health, Vetted Local Artisans, Same-Day Parcel Delivery and Secure Escrow
+              Payments. Add a card to take over the grid.
+            </p>
+          )}
+
+          {features.map((feature, index) => {
+            const { Icon, tint } = resolveContentIcon(feature.icon);
+            return (
+              <div key={index} className="rounded-2xl border border-border/60 p-3">
+                <div className="flex items-start gap-3">
+                  <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl border ${tint}`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div className="grid flex-1 gap-2 sm:grid-cols-[10rem_1fr]">
+                    <div>
+                      <Label className="text-xs">Icon</Label>
+                      <Select
+                        value={feature.icon ?? CONTENT_ICON_NAMES[0]}
+                        onValueChange={(value) => updateFeature(index, { icon: value })}
+                      >
+                        <SelectTrigger className="mt-1 h-8">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CONTENT_ICON_NAMES.map((name) => (
+                            <SelectItem key={name} value={name}>
+                              {name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Title</Label>
+                      <Input
+                        value={feature.title ?? ""}
+                        onChange={(e) => updateFeature(index, { title: e.target.value })}
+                        placeholder="Hot Food Delivery"
+                        className="mt-1 h-8"
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <Label className="text-xs">Description</Label>
+                      <Textarea
+                        rows={2}
+                        value={feature.desc ?? ""}
+                        onChange={(e) => updateFeature(index, { desc: e.target.value })}
+                        placeholder="Order from your favourite local bukas and top fast-food chains."
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 flex-col items-center gap-2">
+                    <Switch
+                      checked={feature.enabled !== false}
+                      onCheckedChange={(value) => updateFeature(index, { enabled: value })}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-red-500"
+                      onClick={() => removeFeature(index)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </SectionCard>
 

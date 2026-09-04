@@ -1,5 +1,6 @@
 import { Reveal } from "@/components/landing/reveal";
 import { useCmsData } from "@/lib/cms-context";
+import { DEFAULT_LAUNCH_CITY, PHASE_TWO_CITIES, useLaunchCity } from "@/lib/launch/city";
 import { Users, Target, Heart, Zap, ShieldCheck, MapPin, Building2, Store, Bike, Award, Sparkles, ArrowRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { Badge } from "@/components/ui/badge";
@@ -58,21 +59,43 @@ const DEFAULT: AboutCmsData = {
 };
 
 const STATS = [
-  { label: "Planned City Zones", value: "12+", desc: "Lagos, Abuja, Ibadan, PH & more" },
+  { label: "Planned City Zones", value: "12+", desc: `${DEFAULT_LAUNCH_CITY}, ${PHASE_TWO_CITIES.join(", ")} & more` },
   { label: "Target Delivery Time", value: "< 35 mins", desc: "Express neighborhood dispatch" },
   { label: "Escrow Protection", value: "100%", desc: "Automated payment safety" },
   { label: "Everyday Services", value: "6-in-1", desc: "Food, stores, artisans, parcels & rides" },
 ];
 
-const CITIES = [
-  { name: "Lagos", status: "Launch Phase 1", zones: "Ikeja, Lekki, Victoria Island, Yaba, Surulere" },
-  { name: "Abuja (FCT)", status: "Launch Phase 1", zones: "Maitama, Wuse 2, Garki, Jabi, Gwarinpa" },
-  { name: "Ibadan", status: "Launch Phase 2", zones: "Bodija, Ring Road, Jericho, Samonda" },
-  { name: "Port Harcourt", status: "Launch Phase 2", zones: "GRA Phase 2, Peter Odili, Trans-Amadi" },
-];
+/**
+ * Rollout roadmap. Phase 1 is the launch city and nothing else — see
+ * `src/lib/launch/city.ts`. The zone lists are per-city, so they are keyed by
+ * name rather than derived.
+ */
+const CITY_ZONES: Record<string, string> = {
+  Ibadan: "Bodija, Ring Road, Jericho, Samonda, Dugbe",
+  Lagos: "Ikeja, Lekki, Victoria Island, Yaba, Surulere",
+  "Abuja (FCT)": "Maitama, Wuse 2, Garki, Jabi, Gwarinpa",
+  "Port Harcourt": "GRA Phase 2, Peter Odili, Trans-Amadi",
+};
+
+function useRolloutCities() {
+  const launchCity = useLaunchCity();
+  return [
+    { name: launchCity, status: "Launch Phase 1", zones: CITY_ZONES[launchCity] ?? "Citywide" },
+    ...PHASE_TWO_CITIES.filter((c) => c !== launchCity).map((name) => ({
+      name,
+      status: "Launch Phase 2",
+      zones: CITY_ZONES[name] ?? "Citywide",
+    })),
+  ];
+}
 
 export function About() {
   const cms = useCmsData("about", DEFAULT);
+  const cities = useRolloutCities();
+  // Switched off from Admin -> CMS. `useCmsData` returns null for a disabled
+  // section, and the whole page body is this section.
+  if (!cms) return null;
+
   const hero = cms.hero ?? DEFAULT.hero!;
   const mission = cms.mission ?? DEFAULT.mission!;
   const values = cms.values ?? DEFAULT.values!;
@@ -81,7 +104,7 @@ export function About() {
   const valueItems = values.items && values.items.length > 0 ? values.items : DEFAULT.values!.items!;
 
   return (
-    <main className="min-h-screen">
+    <div className="min-h-screen">
       {/* Hero */}
       <section className="relative overflow-hidden bg-primary-gradient py-24 text-primary-foreground sm:py-32">
         <div className="pointer-events-none absolute -left-40 top-1/2 h-[500px] w-[500px] -translate-y-1/2 rounded-full bg-gold opacity-15 blur-3xl" />
@@ -181,7 +204,7 @@ export function About() {
               Rollout Roadmap
             </Badge>
             <h2 className="mt-3 font-display text-3xl font-bold sm:text-4xl text-foreground">
-              Starting in Nigeria's Largest Hubs
+              Starting in {cities[0].name}, then across Nigeria
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-base text-muted-foreground">
               Mapping trusted neighborhood suppliers and artisan networks city by city.
@@ -189,7 +212,7 @@ export function About() {
           </div>
 
           <div className="mt-12 grid gap-6 sm:grid-cols-2">
-            {CITIES.map((c, i) => (
+            {cities.map((c, i) => (
               <Reveal key={c.name} delay={i * 60}>
                 <div className="flex items-start gap-4 rounded-3xl border border-border/70 bg-card p-6 transition-all hover:border-primary/30 hover:shadow-soft">
                   <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-emerald-500/10 text-emerald-700">
@@ -239,7 +262,7 @@ export function About() {
           </div>
         </div>
       </section>
-    </main>
+    </div>
   );
 }
 

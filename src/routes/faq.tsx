@@ -13,12 +13,7 @@ import {
   MessageCircle,
   ArrowRight,
 } from "lucide-react";
-import { serverGet } from "@/lib/api";
-import { settingsApi } from "@/lib/api/settings";
-import type { CmsSection } from "@/lib/api";
-import type { PublicBranding } from "@/lib/api/settings";
-import { normalizeLaunchConfig } from "@/lib/launch/config";
-import { LaunchStateProvider } from "@/components/launch/launch-state-provider";
+import { loadPublicPageData } from "@/lib/public-page-data";
 import { PublicLayout } from "@/components/landing/public-layout";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -26,21 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export const Route = createFileRoute("/faq")({
-  loader: async () => {
-    const [launchRaw, cmsRaw, brandingResult] = await Promise.all([
-      serverGet<unknown>("/launch-config").catch(() => null),
-      serverGet<Record<string, CmsSection>>("/cms").catch(() => ({})),
-      settingsApi.publicSettings().catch(() => null),
-    ]);
-    const cms = (cmsRaw as Record<string, CmsSection>) ?? {};
-    const branding = (brandingResult as { data: PublicBranding } | null)?.data;
-    return {
-      launchConfig: normalizeLaunchConfig(launchRaw),
-      serverNow: Date.now(),
-      cms,
-      branding,
-    };
-  },
+  loader: () => loadPublicPageData(),
   head: () => ({
     meta: [
       { title: "FAQ & Help Center — MyTijaara | Frequently Asked Questions" },
@@ -143,122 +124,120 @@ function FaqPage() {
   });
 
   return (
-    <LaunchStateProvider initialConfig={launchConfig} initialNow={serverNow}>
-      <PublicLayout cmsData={cms} branding={branding}>
-        <main className="min-h-screen pb-24">
-          {/* Header */}
-          <section className="relative overflow-hidden bg-primary-gradient py-24 text-primary-foreground sm:py-32">
-            <div className="pointer-events-none absolute -left-40 top-1/2 h-[500px] w-[500px] -translate-y-1/2 rounded-full bg-gold opacity-15 blur-3xl" />
-            <div className="pointer-events-none absolute -right-40 top-10 h-[400px] w-[400px] rounded-full bg-primary-foreground/10 blur-3xl" />
-            <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/15 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gold">
-                <Sparkles className="h-3.5 w-3.5" />
-                Knowledge & FAQ Hub
-              </div>
-              <h1 className="mt-5 font-display text-4xl font-extrabold tracking-tight sm:text-6xl">
-                Frequently Asked Questions
-              </h1>
-              <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-primary-foreground/90 sm:text-xl">
-                Find clear answers about downloading the app, placing orders, escrow safety, vendor onboarding, and rider delivery.
-              </p>
+    <PublicLayout launchConfig={launchConfig} serverNow={serverNow} cmsData={cms} branding={branding}>
+      <div className="min-h-screen pb-24">
+        {/* Header */}
+        <section className="relative overflow-hidden bg-primary-gradient py-24 text-primary-foreground sm:py-32">
+          <div className="pointer-events-none absolute -left-40 top-1/2 h-[500px] w-[500px] -translate-y-1/2 rounded-full bg-gold opacity-15 blur-3xl" />
+          <div className="pointer-events-none absolute -right-40 top-10 h-[400px] w-[400px] rounded-full bg-primary-foreground/10 blur-3xl" />
+          <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6">
+            <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/15 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-gold">
+              <Sparkles className="h-3.5 w-3.5" />
+              Knowledge & FAQ Hub
+            </div>
+            <h1 className="mt-5 font-display text-4xl font-extrabold tracking-tight sm:text-6xl">
+              Frequently Asked Questions
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-primary-foreground/90 sm:text-xl">
+              Find clear answers about downloading the app, placing orders, escrow safety, vendor onboarding, and rider delivery.
+            </p>
 
-              {/* Live Search Input */}
-              <div className="mt-8 mx-auto max-w-xl">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-                  <Input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search keywords (e.g. escrow, vendor payout, delivery time, iphone)..."
-                    className="h-13 rounded-full bg-white pl-12 pr-4 text-sm text-slate-900 shadow-2xl focus:ring-2 focus:ring-gold"
-                  />
-                </div>
+            {/* Live Search Input */}
+            <div className="mt-8 mx-auto max-w-xl">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search keywords (e.g. escrow, vendor payout, delivery time, iphone)..."
+                  className="h-13 rounded-full bg-white pl-12 pr-4 text-sm text-slate-900 shadow-2xl focus:ring-2 focus:ring-gold"
+                />
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* Category Tabs & FAQ Accordion */}
-          <section className="mx-auto max-w-5xl px-4 py-16 sm:px-6">
-            <div className="flex flex-wrap items-center justify-center gap-2 pb-8 border-b border-border/60">
-              {[
-                { id: "all", label: "All Questions", icon: HelpCircle },
-                { id: "customers", label: "Ordering & App", icon: ShoppingBag },
-                { id: "payments", label: "Escrow & Payments", icon: ShieldCheck },
-                { id: "vendors", label: "Vendors & Stores", icon: Store },
-                { id: "riders", label: "Riders & Couriers", icon: Bike },
-                { id: "artisans", label: "Artisans & Pros", icon: Wrench },
-              ].map((tab) => (
-                <Button
-                  key={tab.id}
-                  variant={activeCategory === tab.id ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setActiveCategory(tab.id as FaqCategory)}
-                  className={`rounded-full text-xs font-semibold gap-1.5 ${
-                    activeCategory === tab.id ? "bg-primary text-primary-foreground" : ""
-                  }`}
-                >
-                  <tab.icon className="h-3.5 w-3.5" />
-                  {tab.label}
-                </Button>
-              ))}
-            </div>
+        {/* Category Tabs & FAQ Accordion */}
+        <section className="mx-auto max-w-5xl px-4 py-16 sm:px-6">
+          <div className="flex flex-wrap items-center justify-center gap-2 pb-8 border-b border-border/60">
+            {[
+              { id: "all", label: "All Questions", icon: HelpCircle },
+              { id: "customers", label: "Ordering & App", icon: ShoppingBag },
+              { id: "payments", label: "Escrow & Payments", icon: ShieldCheck },
+              { id: "vendors", label: "Vendors & Stores", icon: Store },
+              { id: "riders", label: "Riders & Couriers", icon: Bike },
+              { id: "artisans", label: "Artisans & Pros", icon: Wrench },
+            ].map((tab) => (
+              <Button
+                key={tab.id}
+                variant={activeCategory === tab.id ? "default" : "outline"}
+                size="sm"
+                onClick={() => setActiveCategory(tab.id as FaqCategory)}
+                className={`rounded-full text-xs font-semibold gap-1.5 ${
+                  activeCategory === tab.id ? "bg-primary text-primary-foreground" : ""
+                }`}
+              >
+                <tab.icon className="h-3.5 w-3.5" />
+                {tab.label}
+              </Button>
+            ))}
+          </div>
 
-            {/* Accordion */}
-            <div className="mt-10">
-              {filteredFaqs.length > 0 ? (
-                <Accordion type="single" collapsible className="space-y-4">
-                  {filteredFaqs.map((faq, i) => (
-                    <AccordionItem
-                      key={i}
-                      value={`item-${i}`}
-                      className="rounded-2xl border border-border bg-card px-6 shadow-sm transition-all hover:border-primary/30"
-                    >
-                      <AccordionTrigger className="text-left font-display text-base font-bold text-foreground hover:no-underline py-5">
-                        {faq.q}
-                      </AccordionTrigger>
-                      <AccordionContent className="text-sm leading-relaxed text-muted-foreground pb-5">
-                        {faq.a}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              ) : (
-                <div className="rounded-3xl border border-dashed border-border p-12 text-center">
-                  <HelpCircle className="mx-auto h-10 w-10 text-muted-foreground/60" />
-                  <h3 className="mt-3 text-base font-bold text-foreground">No questions found matching "{search}"</h3>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Try searching with another keyword or reach out to our team directly.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Support CTA Callout */}
-            <div className="mt-16 rounded-3xl border border-primary/20 bg-primary/5 p-8 text-center sm:p-10">
-              <h3 className="font-display text-xl font-bold text-foreground">Still have questions?</h3>
-              <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-                Our support agents and merchant managers in Lagos are ready to assist you right now.
-              </p>
-              <div className="mt-6 flex flex-wrap justify-center gap-3">
-                <Link
-                  to="/contact"
-                  className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-xs font-bold text-primary-foreground shadow transition-transform hover:scale-105"
-                >
-                  Contact Support <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-                <a
-                  href="https://whatsapp.com/channel/0029VaXXXXX"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-6 py-3 text-xs font-bold text-white shadow transition-transform hover:scale-105"
-                >
-                  <MessageCircle className="h-3.5 w-3.5" /> WhatsApp Help Channel
-                </a>
+          {/* Accordion */}
+          <div className="mt-10">
+            {filteredFaqs.length > 0 ? (
+              <Accordion type="single" collapsible className="space-y-4">
+                {filteredFaqs.map((faq, i) => (
+                  <AccordionItem
+                    key={i}
+                    value={`item-${i}`}
+                    className="rounded-2xl border border-border bg-card px-6 shadow-sm transition-all hover:border-primary/30"
+                  >
+                    <AccordionTrigger className="text-left font-display text-base font-bold text-foreground hover:no-underline py-5">
+                      {faq.q}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-sm leading-relaxed text-muted-foreground pb-5">
+                      {faq.a}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            ) : (
+              <div className="rounded-3xl border border-dashed border-border p-12 text-center">
+                <HelpCircle className="mx-auto h-10 w-10 text-muted-foreground/60" />
+                <h3 className="mt-3 text-base font-bold text-foreground">No questions found matching "{search}"</h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Try searching with another keyword or reach out to our team directly.
+                </p>
               </div>
+            )}
+          </div>
+
+          {/* Support CTA Callout */}
+          <div className="mt-16 rounded-3xl border border-primary/20 bg-primary/5 p-8 text-center sm:p-10">
+            <h3 className="font-display text-xl font-bold text-foreground">Still have questions?</h3>
+            <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+              Our support agents and merchant managers in Lagos are ready to assist you right now.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Link
+                to="/contact"
+                className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-xs font-bold text-primary-foreground shadow transition-transform hover:scale-105"
+              >
+                Contact Support <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+              <a
+                href="https://whatsapp.com/channel/0029VaXXXXX"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-6 py-3 text-xs font-bold text-white shadow transition-transform hover:scale-105"
+              >
+                <MessageCircle className="h-3.5 w-3.5" /> WhatsApp Help Channel
+              </a>
             </div>
-          </section>
-        </main>
-      </PublicLayout>
-    </LaunchStateProvider>
+          </div>
+        </section>
+      </div>
+    </PublicLayout>
   );
 }

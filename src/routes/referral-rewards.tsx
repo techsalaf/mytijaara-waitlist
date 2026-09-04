@@ -21,9 +21,8 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { ROLE_REWARDS, getRoleReward, type WaitlistRole } from "@/lib/referrals/rewards";
+import { loadPublicPageData } from "@/lib/public-page-data";
 import { PublicLayout } from "@/components/landing/public-layout";
-import { settingsApi } from "@/lib/api/settings";
-import type { PublicBranding } from "@/lib/api/settings";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -37,11 +36,7 @@ export const Route = createFileRoute("/referral-rewards")({
       { name: "description", content: "Invite friends to MyTijaara and unlock exclusive rewards based on your role: Customer, Vendor, Artisan, or Rider. 10 referrals unlocks top-tier perks!" },
     ],
   }),
-  loader: async () => {
-    const brandingResult = await settingsApi.publicSettings().catch(() => null);
-    const branding: PublicBranding | undefined = (brandingResult as { data: PublicBranding } | null)?.data;
-    return { branding };
-  },
+  loader: () => loadPublicPageData(),
   component: ReferralRewardsPage,
 });
 
@@ -93,12 +88,12 @@ function ReferralRewardsPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const { branding } = Route.useLoaderData();
+  const { launchConfig, serverNow, cms, branding } = Route.useLoaderData();
 
   return (
-    <PublicLayout branding={branding}>
+    <PublicLayout launchConfig={launchConfig} serverNow={serverNow} cmsData={cms} branding={branding}>
 
-      <main className="pt-24 pb-16">
+      <div className="pt-24 pb-16">
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-gradient-to-b from-primary/10 via-primary/5 to-background py-16 px-4 sm:px-6 lg:py-24">
           <div className="mx-auto max-w-5xl text-center">
@@ -287,7 +282,7 @@ function ReferralRewardsPage() {
             </div>
           </div>
         </section>
-      </main>
+      </div>
 
     </PublicLayout>
   );

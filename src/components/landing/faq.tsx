@@ -3,11 +3,12 @@ import { ChevronDown } from "lucide-react";
 
 import { Reveal } from "./reveal";
 import { useFaqs, useCmsData } from "@/lib/cms-context";
+import { DEFAULT_LAUNCH_CITY, PHASE_TWO_CITIES } from "@/lib/launch/city";
 import { trackEvent } from "@/lib/analytics/track";
 
 const HARDCODED_FAQS = [
   { q: "What is MyTijaara?", a: "MyTijaara is one app that lets you order food, buy groceries and medicine, book artisans, send parcels, rent cars and shop from local businesses — all in Nigeria." },
-  { q: "Where is MyTijaara available?", a: "We're launching first in Lagos, Abuja and Port Harcourt, then rolling out across Nigeria. Join the waitlist and we'll let you know as soon as we're in your city." },
+  { q: "Where is MyTijaara available?", a: `We're launching first in ${DEFAULT_LAUNCH_CITY}, then ${PHASE_TWO_CITIES.join(", ")} and the rest of Nigeria. Join the waitlist and we'll let you know as soon as we're in your city.` },
   { q: "How much does it cost to use?", a: "The app is free to download. You only pay for what you order, at prices set by our vendors and partners. Delivery fees are shown clearly before you check out." },
   { q: "How do I pay?", a: "You can pay with cards, bank transfers or on delivery — whatever works best for you." },
   { q: "How can I become a vendor, rider or artisan?", a: "Pick your role on the waitlist form above. We'll reach out with next steps as we onboard partners in your area." },

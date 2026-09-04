@@ -71,6 +71,9 @@ export type {
 export { healthApi } from "./health";
 export type { SystemHealth, HealthCheck, HealthSample, QueuedJob } from "./health";
 
+export { cronApi } from "./cron";
+export type { CronStatus, CronRunRow, CronRunNowResult, CronPaths } from "./cron";
+
 // Data room. The visitor client has its own transport and its own token
 // namespace on purpose; see the docblock in `./dataroom`.
 export {

@@ -130,16 +130,41 @@ export function LaunchStateProvider({
   return <LaunchContext.Provider value={ctx}>{children}</LaunchContext.Provider>;
 }
 
-const DEFAULT_LAUNCH_CONTEXT: LaunchContextValue = {
-  config: DEFAULT_LAUNCH_CONFIG,
-  status: "pre_launch",
-  remaining: { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0, isPast: false },
-  now: Date.now(),
-  isLaunched: false,
-  showCountdown: true,
-  showWaitlist: true,
-  ready: true,
-};
+/**
+ * Last-resort context used only when a component reads launch state with no
+ * `LaunchStateProvider` above it.
+ *
+ * It derives `remaining` from `DEFAULT_LAUNCH_CONFIG` instead of hardcoding
+ * zeros. The old zeroed version is what rendered "0 seconds to go" in the
+ * header ticker on `/about` and `/careers`, because those routes mounted
+ * `PublicLayout` (and therefore `Nav` -> `LaunchTicker`) without a provider.
+ * The provider now lives inside `PublicLayout`, so this path should be
+ * unreachable; deriving the value means that if it is ever reached again the
+ * symptom is a slightly stale date rather than a nonsense countdown.
+ *
+ * `now` is captured once per module evaluation rather than per call so a render
+ * pass stays internally consistent. It is a constant, not a clock — nothing
+ * ticks without a provider.
+ */
+const FALLBACK_NOW = Date.now();
+
+function fallbackLaunchContext(): LaunchContextValue {
+  const config = DEFAULT_LAUNCH_CONFIG;
+  const status = resolveLaunchStatus(config, FALLBACK_NOW);
+  const isLaunched = status !== "pre_launch";
+  return {
+    config,
+    status,
+    remaining: getTimeRemaining(config.launchDateTime, FALLBACK_NOW),
+    now: FALLBACK_NOW,
+    isLaunched,
+    showCountdown: config.launchEnabled && config.countdownEnabled && !isLaunched,
+    showWaitlist: config.waitlistEnabled && !isLaunched,
+    ready: false,
+  };
+}
+
+const DEFAULT_LAUNCH_CONTEXT: LaunchContextValue = fallbackLaunchContext();
 
 export function useLaunch(): LaunchContextValue {
   const ctx = useContext(LaunchContext);

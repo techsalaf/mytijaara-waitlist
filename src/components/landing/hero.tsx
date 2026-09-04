@@ -23,6 +23,12 @@ type HeroService = { icon: string; label: string };
 
 type HeroCmsData = {
   eyebrow?: string;
+  /**
+   * Eyebrow shown once the launch date has passed. Seeded from day one and, until
+   * now, read from the bundled constant instead of the section, so editing it in
+   * the admin panel changed nothing after launch day.
+   */
+  eyebrowLive?: string;
   heading?: string;
   headingHighlight?: string;
   subtitle?: string;
@@ -41,7 +47,7 @@ const DEFAULT_HERO: HeroCmsData = {
   imageUrl: "",
   secondaryCtaLabel: "See How It Works",
   services: [],
-} as HeroCmsData & { eyebrowLive?: string };
+};
 
 // Lucide icon lookup so service chip icons can be stored as strings in the DB.
 const SERVICE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -70,9 +76,11 @@ export function Hero() {
 
   if (!cms) return null;
 
+  // Both eyebrows come from the section. The launched variant used to be read
+  // off `DEFAULT_HERO`, which made the admin field for it inert after launch.
   const eyebrow = isLaunched
-    ? ((DEFAULT_HERO as HeroCmsData & { eyebrowLive?: string }).eyebrowLive ?? "Built for Nigerians — Now live")
-    : (cms.eyebrow ?? (DEFAULT_HERO as HeroCmsData).eyebrow!);
+    ? cms.eyebrowLive || DEFAULT_HERO.eyebrowLive!
+    : cms.eyebrow || DEFAULT_HERO.eyebrow!;
 
   const heading = cms.heading || DEFAULT_HERO.heading!;
   const headingHighlight = cms.headingHighlight || DEFAULT_HERO.headingHighlight!;

@@ -15,10 +15,12 @@ type FeatureItem = {
 };
 
 type FeaturesData = {
+  heading?: string;
+  subheading?: string;
   items?: FeatureItem[];
 };
 
-const defaultFeaturesData: FeaturesData = { items: [] };
+const defaultFeaturesData: FeaturesData = { heading: "", subheading: "", items: [] };
 
 export const Route = createFileRoute("/admin/cms/features")({
   component: FeaturesEditor,
@@ -61,6 +63,33 @@ function FeaturesEditor() {
               <div className="text-xs text-muted-foreground">Toggle whether feature cards appear on the landing page</div>
             </div>
             <Switch checked={enabled} onCheckedChange={setEnabled} />
+          </div>
+
+          {/*
+            The landing section renders `heading` and `subheading` above the
+            grid. They were seeded and rendered but had no field here, so the
+            two lines of copy at the top of "One app. All your errands." could
+            not be changed from the admin panel at all.
+          */}
+          <div className="grid gap-2 rounded-xl border border-border/60 p-3 sm:grid-cols-2">
+            <div>
+              <Label className="text-xs">Section heading</Label>
+              <Input
+                value={data.heading ?? ""}
+                onChange={(e) => setData({ ...data, heading: e.target.value })}
+                placeholder="One app. All your errands."
+                className="mt-1 h-8"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Section subheading</Label>
+              <Input
+                value={data.subheading ?? ""}
+                onChange={(e) => setData({ ...data, subheading: e.target.value })}
+                placeholder="Stop jumping between five different apps."
+                className="mt-1 h-8"
+              />
+            </div>
           </div>
 
           {features.map((feature, index) => (

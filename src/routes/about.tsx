@@ -1,21 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { serverGet } from "@/lib/api";
-import { settingsApi } from "@/lib/api/settings";
-import type { CmsSection } from "@/lib/api";
-import type { PublicBranding } from "@/lib/api/settings";
+import { loadPublicPageData } from "@/lib/public-page-data";
 import { PublicLayout } from "@/components/landing/public-layout";
 import { About } from "@/components/about/about";
 
 export const Route = createFileRoute("/about")({
-  loader: async () => {
-    const [cmsRaw, brandingResult] = await Promise.all([
-      serverGet<Record<string, CmsSection>>("/cms"),
-      settingsApi.publicSettings().catch(() => null),
-    ]);
-    const cmsData = (cmsRaw as Record<string, CmsSection>) ?? {};
-    const branding: PublicBranding | undefined = (brandingResult as { data: PublicBranding } | null)?.data;
-    return { cmsData, branding, serverNow: Date.now() };
-  },
+  loader: () => loadPublicPageData(),
   head: () => ({
     meta: [
       { title: "About Us — MyTijaara | Everyday Commerce & Services" },
@@ -26,9 +15,9 @@ export const Route = createFileRoute("/about")({
 });
 
 function AboutPage() {
-  const { cmsData, branding } = Route.useLoaderData();
+  const { launchConfig, serverNow, cms, branding } = Route.useLoaderData();
   return (
-    <PublicLayout cmsData={cmsData} branding={branding}>
+    <PublicLayout launchConfig={launchConfig} serverNow={serverNow} cmsData={cms} branding={branding}>
       <About />
     </PublicLayout>
   );

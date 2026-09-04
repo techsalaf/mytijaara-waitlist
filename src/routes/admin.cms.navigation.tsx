@@ -1,23 +1,26 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { SectionCard } from "@/components/admin/ui-bits";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { GripVertical, Plus, Trash2, Loader2, Save } from "lucide-react";
+import { ExternalLink, GripVertical, Plus, Trash2, Loader2, Save } from "lucide-react";
 import { useCmsSection } from "@/lib/hooks/useCmsSection";
 
+/**
+ * The navigation section owns the header link list and nothing else.
+ *
+ * The logo comes from Settings → Branding and the header CTA from CMS → Launch,
+ * so this editor deliberately has no field for either: both used to be written
+ * into `navigation.logo` / `navigation.cta` and read by nobody.
+ */
 type NavigationData = {
-  logo?: string;
   links?: { label?: string; href?: string }[];
-  cta?: { label?: string; href?: string };
 };
 
 const defaultNavigationData: NavigationData = {
-  logo: "",
   links: [],
-  cta: { label: "", href: "" },
 };
 
 export const Route = createFileRoute("/admin/cms/navigation")({
@@ -72,14 +75,12 @@ function NavigationEditor() {
           <Switch checked={enabled} onCheckedChange={setEnabled} />
         </div>
 
-        <div>
-          <Label>Brand logo text</Label>
-          <Input
-            value={data.logo ?? ""}
-            onChange={(e) => setData({ ...data, logo: e.target.value })}
-            className="mt-1"
-          />
-        </div>
+        {/*
+          No "Brand logo text" field. The header renders `<Logo />`, which uses
+          the uploaded image from Settings → Branding; the text mark was removed
+          deliberately, so a field writing `navigation.logo` only ever wrote a
+          value nothing read.
+        */}
 
         <div className="space-y-3">
           {links.map((link, i) => (
@@ -119,23 +120,19 @@ function NavigationEditor() {
           <Plus className="mr-2 h-4 w-4" /> Add link
         </Button>
 
-        <div className="space-y-4 border-t border-border/60 pt-4">
-          <div>
-            <Label>Primary CTA label</Label>
-            <Input
-              value={data.cta?.label ?? ""}
-              onChange={(e) => setData({ ...data, cta: { ...(data.cta ?? {}), label: e.target.value } })}
-              className="mt-1"
-            />
-          </div>
-          <div>
-            <Label>Primary CTA URL</Label>
-            <Input
-              value={data.cta?.href ?? ""}
-              onChange={(e) => setData({ ...data, cta: { ...(data.cta ?? {}), href: e.target.value } })}
-              className="mt-1"
-            />
-          </div>
+        <div className="space-y-2 border-t border-border/60 pt-4">
+          <div className="text-sm font-medium">Header call to action</div>
+          <p className="text-xs text-muted-foreground">
+            Edited in CMS → Launch, not here. The header CTA is launch-aware: it shows the launch primary CTA
+            before launch and flips itself to “Download App” the moment the launch date passes. A second copy
+            of the label on this page could only ever disagree with the one the site uses.
+          </p>
+          <Button asChild size="sm" variant="outline">
+            <Link to="/admin/cms/launch">
+              Open CMS → Launch
+              <ExternalLink className="ml-2 h-3.5 w-3.5" />
+            </Link>
+          </Button>
         </div>
       </div>
     </SectionCard>
