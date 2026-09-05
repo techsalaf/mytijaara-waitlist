@@ -31,6 +31,28 @@ import {
 import { useDataRoomSession } from "./session";
 import { AccessStatusBadge, FileTypeIcon } from "./cards";
 
+/** Render markdown as HTML using a simple, safe parser. */
+function renderMarkdown(markdown: string): string {
+  // Very lightweight markdown → HTML for .md preview.
+  // No external dep, no XSS (we trust server content, but sanitize anyway).
+  return markdown
+    .replace(/&/g, "&")
+    .replace(/</g, "<")
+    .replace(/>/g, ">")
+    .replace(/^### (.*$)/gm, "<h3>$1</h3>")
+    .replace(/^## (.*$)/gm, "<h2>$1</h2>")
+    .replace(/^# (.*$)/gm, "<h1>$1</h1>")
+    .replace(/^\*\* (.*$)/gm, "<ul><li>$1</li></ul>")
+    .replace(/^\- (.*$)/gm, "<ul><li>$1</li></ul>")
+    .replace(/^\d+\. (.*$)/gm, "<ol><li>$1</li></ol>")
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    .replace(/`(.*?)`/g, "<code>$1</code>")
+    .replace(/```([\s\S]*?)```/g, "<pre><code>$1</code></pre>")
+    .replace(/\n\n/g, "</p><p>")
+    .replace(/\n/g, "<br>");
+}
+
 /**
  * Render the preview for one document.
  *
@@ -130,6 +152,7 @@ export function DocumentViewer({ document: doc }: { document: DataRoomDocumentDe
   if (!url) return <ViewerFrame>{null}</ViewerFrame>;
 
   const isImage = (contentType ?? "").startsWith("image/");
+  const isMarkdown = doc.fileType.toLowerCase() === "md";
 
   return (
     <ViewerFrame className="p-0">
@@ -139,6 +162,10 @@ export function DocumentViewer({ document: doc }: { document: DataRoomDocumentDe
           alt={`${doc.title} preview`}
           className="mx-auto max-h-[80vh] w-auto max-w-full rounded-b-2xl object-contain"
         />
+      ) : isMarkdown ? (
+        <div className="h-[80vh] w-full overflow-y-auto p-6 prose prose-sm max-w-none">
+          <MarkdownContent url={url} />
+        </div>
       ) : (
         // An object URL, not a storage URL. A PDF is rendered by the browser's
         // own viewer; the bytes are already authorized for this session.
@@ -255,6 +282,40 @@ export function DocumentMetadataPanel({ document: doc }: { document: DataRoomDoc
       )}
     </aside>
   );
+}
+
+/** Fetch and render markdown content from an object URL. */
+function MarkdownContent({ url }: { url: string }) {
+  const [html, setHtml] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+
+    void (async () => {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Failed to load markdown");
+        const text = await response.text();
+        if (!cancelled) setHtml(renderMarkdown(text));
+      } catch {
+        if (!cancelled) setHtml("<p className=\"text-destructive\">Could not load markdown content.</p>");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [url]);
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-full"><p className="text-muted-foreground">Loading…</p></div>;
+  }
+
+  return <div dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
 function Row({ label, value }: { label: string; value: string }) {

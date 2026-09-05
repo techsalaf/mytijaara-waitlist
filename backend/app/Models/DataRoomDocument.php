@@ -109,14 +109,16 @@ class DataRoomDocument extends Model
     /**
      * Can this type be shown in the in-browser viewer?
      *
-     * Deliberately short. Office formats are not listed because rendering them
-     * would mean handing the original bytes to a third-party viewer, and a
-     * viewer that leaks the file is worse than no viewer. Those show
+     * Deliberately short. Office formats (docx, xlsx, pptx) are not listed because
+     * rendering them would mean handing the original bytes to a third-party viewer,
+     * and a viewer that leaks the file is worse than no viewer. Those show
      * "Preview unavailable" instead.
+     *
+     * Markdown (.md) is previewable as it renders safely as text/HTML.
      */
     public function isPreviewable(): bool
     {
-        return in_array(strtolower((string) $this->file_type), ['pdf', 'png', 'jpg', 'jpeg'], true);
+        return in_array(strtolower((string) $this->file_type), ['pdf', 'png', 'jpg', 'jpeg', 'md'], true);
     }
 
     /** Only PDFs can carry a per-page watermark. */
