@@ -7,6 +7,8 @@ import {
   Car,
   Wrench,
   Sparkles,
+  MessageCircle,
+  ShieldCheck,
 } from "lucide-react";
 
 import { Reveal } from "./reveal";
@@ -14,24 +16,34 @@ import { useCmsData } from "@/lib/cms-context";
 
 // Icons are code — they can't be stored in the DB. Map by position so an
 // admin can reorder or reword items without losing the visual icons.
-const ICONS = [UtensilsCrossed, ShoppingBasket, Pill, Store, Package, Car, Wrench, Sparkles];
+const ICONS = [
+  UtensilsCrossed,
+  ShoppingBasket,
+  MessageCircle,
+  Wrench,
+  Package,
+  Pill,
+  Store,
+  ShieldCheck,
+];
 const ICON_ALT_MASK = [false, true, false, true, false, true, false, true];
 
 type ServiceItem = { title: string; description?: string; body?: string; enabled?: boolean };
 type ServicesCmsData = { heading?: string; subheading?: string; items?: ServiceItem[] };
 
 const DEFAULT: ServicesCmsData = {
-  heading: "One app. All your errands.",
-  subheading: "Stop jumping between five different apps. MyTijaara puts it all in one place.",
+  heading: "The everyday operating system for Nigeria.",
+  subheading:
+    "Food, daily shopping, verified artisans, and package logistics — powered in the app and integrated with WhatsApp.",
   items: [
-    { title: "Order food", body: "Local favourites and top restaurants delivered hot." },
-    { title: "Buy groceries", body: "Fresh produce and weekly essentials in one basket." },
-    { title: "Pharmacy items", body: "Prescription refills and everyday health needs." },
-    { title: "Shop local", body: "Discover businesses and vendors around you." },
-    { title: "Send parcels", body: "Same-day delivery across town, tracked end-to-end." },
-    { title: "Rent a car", body: "Trusted rentals for the day, week, or that big trip." },
-    { title: "Book artisans", body: "Electricians, plumbers, cleaners — vetted and rated." },
-    { title: "Home services", body: "From laundry to fumigation, handled the right way." },
+    { title: "Hot food delivery", body: "Local favourites and top restaurants delivered to your doorstep in minutes." },
+    { title: "Groceries & market", body: "Fresh produce, household supplies, and essentials packed with care." },
+    { title: "WhatsApp shopping", body: "Browse vendor catalogs, order, and pay without leaving your WhatsApp chats." },
+    { title: "Vetted local artisans", body: "Electricians, plumbers, carpenters, and technicians rated by neighbours." },
+    { title: "Same-day parcel runs", body: "Fast, GPS-tracked parcel delivery across your city with recipient PIN verification." },
+    { title: "Pharmacy essentials", body: "Everyday health essentials and OTC medicines delivered promptly." },
+    { title: "Merchant sales engine", body: "Automated orders, inventory tracking, and prompt bank settlement for local sellers." },
+    { title: "100% Escrow safety", body: "Funds stay protected until you receive and verify your order or service." },
   ],
 };
 

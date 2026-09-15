@@ -71,6 +71,26 @@ const TOPICS: Topic[] = [
       "MyTijaara started with a simple observation: hardworking Nigerians selling on WhatsApp Status — food, clothes, pastries — pleading for patronage, trapped in tiny circles of contacts. They weren't lacking talent. They were lacking visibility.\n\nThat, plus a frustrating week trying to find a trustworthy plumber and electrician, planted the idea: what if there was one trusted platform where people could find and be found?\n\n\"Tijaara\" is Arabic for trade — commerce built on trust, not just transactions. \"My\" makes it personal: this belongs to the people who use it.",
   },
 
+  /* ---------------------- The Gojek of Africa ----------------------- */
+  {
+    id: "gojek_of_africa",
+    patterns: [
+      /\b(gojek|gojek\s?of\s?africa|why\s?gojek|super\s?app|indonesia)\b/,
+    ],
+    response:
+      "MyTijaara is often referred to as 'The Gojek of Africa'. Just as Gojek organized informal transport and street commerce into Southeast Asia's indispensable super app, MyTijaara is unifying meals, groceries, vetted artisans, and parcel logistics with WhatsApp-native commerce and automated escrow across Nigeria.",
+  },
+
+  /* ---------------------- WhatsApp Commerce ------------------------- */
+  {
+    id: "whatsapp_commerce",
+    patterns: [
+      /\b(whatsapp\s?(shopping|order(ing)?|commerce|store(front)?|bot)|order\s?on\s?whatsapp)\b/,
+    ],
+    response:
+      "WhatsApp is where Nigerian commerce already happens! MyTijaara enables vendors to convert their WhatsApp into an automated storefront with live product catalogs, automated ordering, escrow protection, and doorstep dispatch without needing coding or extra apps.",
+  },
+
   /* ------------------------------ Waitlist ----------------------------- */
   {
     id: "waitlist",

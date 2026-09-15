@@ -74,9 +74,9 @@ export const Route = createFileRoute("/")({
     };
   },
   head: ({ loaderData }) => {
-    const DEFAULT_TITLE = "MyTijaara — Everything you need, all in one place";
+    const DEFAULT_TITLE = "MyTijaara — The Everyday Super App for Nigeria";
     const DEFAULT_DESC =
-      "Order food, groceries and pharmacy items, book trusted artisans, send packages, rent cars and shop from businesses around you — all from one app built for Nigerians.";
+      "Order hot food and groceries, book vetted artisans, and send parcels across your city — in the app and via WhatsApp. Everyday life, seamlessly delivered.";
 
     const d = loaderData as typeof loaderData & {
       _seoTitle?: string;
@@ -92,7 +92,7 @@ export const Route = createFileRoute("/")({
 
     const title = d._seoTitle || DEFAULT_TITLE;
     const description = d._seoDescription || DEFAULT_DESC;
-    const keywords = d._seoKeywords || "nigeria, super app, food delivery, groceries, pharmacy, artisans, logistics, car rental";
+    const keywords = d._seoKeywords || "nigeria, super app, food delivery, groceries, whatsapp commerce, vetted artisans, logistics, the gojek of africa";
     const ogTitle = d._seoOgTitle || title;
     const ogDescription = d._seoOgDescription || description;
     const ogImage = d._seoOgImage;

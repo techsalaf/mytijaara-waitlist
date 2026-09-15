@@ -8,6 +8,7 @@ import {
   ArrowRight,
   Download,
   Star,
+  MessageCircle,
 } from "lucide-react";
 
 import { Reveal } from "./reveal";
@@ -40,10 +41,10 @@ type HeroCmsData = {
 const DEFAULT_HERO: HeroCmsData = {
   eyebrow: "Built for Nigerians — Launching soon",
   eyebrowLive: "Built for Nigerians — Now live",
-  heading: "Everything you need,",
-  headingHighlight: "all in one place.",
+  heading: "Your everyday life,",
+  headingHighlight: "seamlessly delivered.",
   subtitle:
-    "Order food, groceries and pharmacy items, book trusted artisans, send packages, rent cars, and shop from businesses around you — all from one app built for Nigerians.",
+    "Order food and daily essentials, book trusted local artisans, and send parcels across your city — in the app or straight through WhatsApp. Built for everyday life in Nigeria.",
   imageUrl: "",
   secondaryCtaLabel: "See How It Works",
   services: [],
@@ -57,15 +58,16 @@ const SERVICE_ICONS: Record<string, React.ComponentType<{ className?: string }>>
   Package,
   Car,
   Wrench,
+  MessageCircle,
 };
 
 const DEFAULT_SERVICES = [
   { icon: "UtensilsCrossed", label: "Food" },
   { icon: "ShoppingBasket", label: "Groceries" },
-  { icon: "Pill", label: "Pharmacy" },
+  { icon: "MessageCircle", label: "WhatsApp" },
   { icon: "Package", label: "Parcels" },
-  { icon: "Car", label: "Cars" },
   { icon: "Wrench", label: "Artisans" },
+  { icon: "Car", label: "Rides" },
 ];
 
 export function Hero() {
@@ -210,12 +212,12 @@ export function Hero() {
             <div className="absolute right-0 top-40 z-20 animate-float-slower">
               <div className="glass rounded-2xl px-4 py-3 shadow-soft">
                 <div className="flex items-center gap-3">
-                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-gold-gradient text-gold-foreground">
-                    <Wrench className="h-5 w-5" />
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#25D366]/20 text-[#128C7E]">
+                    <MessageCircle className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Electrician booked</p>
-                    <p className="text-sm font-semibold">Tomorrow, 10am</p>
+                    <p className="text-xs text-muted-foreground">WhatsApp Storefront</p>
+                    <p className="text-sm font-semibold">Order confirmed ✓</p>
                   </div>
                 </div>
               </div>

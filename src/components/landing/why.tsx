@@ -1,21 +1,22 @@
-import { Sparkles, MapPin, Shield, Clock } from "lucide-react";
+import { Sparkles, MessageCircle, ShieldCheck, Clock } from "lucide-react";
 
 import { Reveal } from "./reveal";
 import { useCmsData } from "@/lib/cms-context";
 
-const ICONS = [Sparkles, MapPin, Shield, Clock];
+const ICONS = [Sparkles, MessageCircle, ShieldCheck, Clock];
 
 type WhyPoint = { title: string; body?: string; description?: string };
 type WhyCmsData = { heading?: string; subheading?: string; points?: WhyPoint[] };
 
 const DEFAULT: WhyCmsData = {
-  heading: "Simpler days. Made in Nigeria.",
-  subheading: "We built MyTijaara so you can spend less time managing errands and more time on what actually matters.",
+  heading: "Built for how Nigeria actually works.",
+  subheading:
+    "We built MyTijaara to eliminate daily friction: no more endless WhatsApp screenshots, unverified transfer receipts, or unreliable dispatch riders.",
   points: [
-    { title: "One app for everything", body: "Food, shopping, parcels, artisans and more — no more switching apps." },
-    { title: "Made for Nigeria", body: "Built around how we actually live, order and pay." },
-    { title: "Trusted partners", body: "Every rider, artisan and vendor is verified before they join." },
-    { title: "Fast and reliable", body: "Real-time tracking so you always know what's happening." },
+    { title: "Everyday simplicity", body: "One home for meals, market runs, vetted artisans, and deliveries — without app clutter." },
+    { title: "WhatsApp-native commerce", body: "Order and sell directly where trade already happens, backed by live inventory and automated checkout." },
+    { title: "Escrow-backed trust", body: "Payments stay safe until both customer and vendor confirm successful completion." },
+    { title: "Real-time transparency", body: "Live GPS rider dispatch, recipient PIN codes, and upfront naira pricing with zero surprises." },
   ],
 };
 

@@ -18,9 +18,9 @@ const ICONS = [Users, Target, Heart, Zap, ShieldCheck, Award];
 
 const DEFAULT: AboutCmsData = {
   hero: {
-    heading: "We're building the everyday super app Nigeria deserves.",
+    heading: "The everyday operating system for Nigerian life & trade.",
     subheading:
-      "One single platform that unifies daily commerce, meals, groceries, pharmacies, trusted artisans, parcels, and transport — built for how Nigerians live, order, and pay.",
+      "One single platform that unifies daily commerce, hot meals, groceries, trusted artisans, parcels, and transport — powered in the app and integrated with WhatsApp.",
   },
   mission: {
     heading: "Our Mission & Commitment",
@@ -35,12 +35,16 @@ const DEFAULT: AboutCmsData = {
         body: "Engineered specifically for Nigerian cities, market streets, and real-world logistics challenges — not an imported copy.",
       },
       {
+        title: "WhatsApp-Native Commerce",
+        body: "Empowering everyday vendors and customers to trade where they already chat, with automated catalogs and live order tracking.",
+      },
+      {
         title: "100% Escrow Trust",
         body: "Buyers only release payment upon verified delivery; vendors and artisans receive guaranteed, prompt payouts.",
       },
       {
         title: "Empowering Local Micro-Merchants",
-        body: "Giving local bukaterias, pharmacy stores, and neighbourhood artisans world-class digital tools to expand their sales.",
+        body: "Giving neighbourhood bukaterias, pharmacy stores, and artisans world-class digital tools to expand their sales.",
       },
       {
         title: "Speed & Real-time Transparency",
@@ -154,6 +158,34 @@ export function About() {
               <p className="mt-6 text-base sm:text-lg leading-relaxed text-muted-foreground">
                 {mission.body}
               </p>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* The Moniker: Why The Gojek of Africa */}
+      <section className="bg-background pb-20 sm:pb-28">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6">
+          <Reveal>
+            <div className="relative overflow-hidden rounded-3xl border border-gold/30 bg-gradient-to-br from-gold/10 via-card to-primary/5 p-8 sm:p-12 shadow-soft">
+              <div className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-gold-foreground">
+                <Sparkles className="h-3.5 w-3.5" />
+                The Vision &amp; Moniker
+              </div>
+              <h2 className="mt-4 font-display text-2xl font-bold sm:text-3xl text-foreground">
+                Why we are called &ldquo;The Gojek of Africa&rdquo;
+              </h2>
+              <div className="mt-4 space-y-4 text-base leading-relaxed text-muted-foreground">
+                <p>
+                  In Southeast Asia, Gojek transformed everyday life by organizing informal motorbike transport and local street stalls into an on-demand digital powerhouse for hundreds of millions of people.
+                </p>
+                <p>
+                  Across Nigeria and Africa, commerce already pulses through bustling neighborhood markets and endless WhatsApp Status posts. Hardworking merchants plead for patronage, trapped in small contact lists, while buyers juggle unreliable dispatch riders and payment anxiety.
+                </p>
+                <p>
+                  MyTijaara is engineering that exact multi-service infrastructure for Africa. By combining meals, groceries, vetted artisans, and express parcel logistics with WhatsApp-native storefronts and automated escrow protection, we are turning informal street commerce into an unstoppable, trusted ecosystem.
+                </p>
+              </div>
             </div>
           </Reveal>
         </div>

@@ -7,8 +7,12 @@ export const Route = createFileRoute("/about")({
   loader: () => loadPublicPageData(),
   head: () => ({
     meta: [
-      { title: "About Us — MyTijaara | Everyday Commerce & Services" },
-      { name: "description", content: "Learn about MyTijaara's mission to empower everyday commerce, vendors, riders, and artisans across Nigeria." },
+      { title: "About Us — MyTijaara | The Gojek of Africa & Everyday Commerce" },
+      {
+        name: "description",
+        content:
+          "MyTijaara is engineering the everyday super app and WhatsApp-native commerce engine for Nigeria — empowering daily trade, meals, vetted artisans, and parcel logistics.",
+      },
     ],
   }),
   component: AboutPage,
