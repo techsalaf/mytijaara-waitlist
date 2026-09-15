@@ -6,12 +6,11 @@ import { Link } from "@tanstack/react-router";
 import { Badge } from "@/components/ui/badge";
 
 type Value = { icon?: string; title: string; description?: string; body?: string };
-type TeamMember = { name: string; role: string; bio?: string };
 type AboutCmsData = {
   hero?: { heading?: string; subheading?: string };
   mission?: { heading?: string; body?: string };
+  vision?: { badge?: string; heading?: string; p1?: string; p2?: string; p3?: string };
   values?: { heading?: string; items?: Value[] };
-  team?: { heading?: string; members?: TeamMember[] };
 };
 
 const ICONS = [Users, Target, Heart, Zap, ShieldCheck, Award];
@@ -26,6 +25,13 @@ const DEFAULT: AboutCmsData = {
     heading: "Our Mission & Commitment",
     body:
       "MyTijaara exists to eliminate friction from everyday commerce across Nigeria. We believe you shouldn't need five different apps and endless WhatsApp chats to manage your day. From ordering hot lunch to booking an emergency plumber, every transaction should be fast, reliable, transparent, and protected by escrow.",
+  },
+  vision: {
+    badge: "The Vision & Moniker",
+    heading: 'Why we are called "The Gojek of Africa"',
+    p1: "In Southeast Asia, Gojek transformed everyday life by organizing informal motorbike transport and local street stalls into an on-demand digital powerhouse for hundreds of millions of people.",
+    p2: "Across Nigeria and Africa, commerce already pulses through bustling neighborhood markets and endless WhatsApp Status posts. Hardworking merchants plead for patronage, trapped in small contact lists, while buyers juggle unreliable dispatch riders and payment anxiety.",
+    p3: "MyTijaara is engineering that exact multi-service infrastructure for Africa. By combining meals, groceries, vetted artisans, and express parcel logistics with WhatsApp-native storefronts and automated escrow protection, we are turning informal street commerce into an unstoppable, trusted ecosystem.",
   },
   values: {
     heading: "What drives everything we build",
@@ -50,14 +56,6 @@ const DEFAULT: AboutCmsData = {
         title: "Speed & Real-time Transparency",
         body: "GPS live dispatch, clear naira pricing with zero surprise charges, and responsive 24/7 in-country human support.",
       },
-    ],
-  },
-  team: {
-    heading: "Built by a passionate Nigerian team",
-    members: [
-      { name: "Executive Leadership", role: "Product, Engineering & Operations", bio: "Former founders and operators building infrastructure for everyday African trade." },
-      { name: "Merchant Support Network", role: "Merchant & Artisan Operations", bio: "On-the-ground support teams working hand-in-hand with local traders across Nigerian markets." },
-      { name: "Logistics Dispatch Fleet", role: "Last-Mile Delivery Network", bio: "Dedicated courier partners ensuring secure, rapid package transport across every mapped zone." },
     ],
   },
 };
@@ -102,8 +100,8 @@ export function About() {
 
   const hero = cms.hero ?? DEFAULT.hero!;
   const mission = cms.mission ?? DEFAULT.mission!;
+  const vision = cms.vision ?? DEFAULT.vision!;
   const values = cms.values ?? DEFAULT.values!;
-  const team = cms.team ?? DEFAULT.team!;
 
   const valueItems = values.items && values.items.length > 0 ? values.items : DEFAULT.values!.items!;
 
@@ -170,21 +168,15 @@ export function About() {
             <div className="relative overflow-hidden rounded-3xl border border-gold/30 bg-gradient-to-br from-gold/10 via-card to-primary/5 p-8 sm:p-12 shadow-soft">
               <div className="inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-gold-foreground">
                 <Sparkles className="h-3.5 w-3.5" />
-                The Vision &amp; Moniker
+                {vision.badge || DEFAULT.vision!.badge}
               </div>
               <h2 className="mt-4 font-display text-2xl font-bold sm:text-3xl text-foreground">
-                Why we are called &ldquo;The Gojek of Africa&rdquo;
+                {vision.heading || DEFAULT.vision!.heading}
               </h2>
               <div className="mt-4 space-y-4 text-base leading-relaxed text-muted-foreground">
-                <p>
-                  In Southeast Asia, Gojek transformed everyday life by organizing informal motorbike transport and local street stalls into an on-demand digital powerhouse for hundreds of millions of people.
-                </p>
-                <p>
-                  Across Nigeria and Africa, commerce already pulses through bustling neighborhood markets and endless WhatsApp Status posts. Hardworking merchants plead for patronage, trapped in small contact lists, while buyers juggle unreliable dispatch riders and payment anxiety.
-                </p>
-                <p>
-                  MyTijaara is engineering that exact multi-service infrastructure for Africa. By combining meals, groceries, vetted artisans, and express parcel logistics with WhatsApp-native storefronts and automated escrow protection, we are turning informal street commerce into an unstoppable, trusted ecosystem.
-                </p>
+                <p>{vision.p1 || DEFAULT.vision!.p1}</p>
+                <p>{vision.p2 || DEFAULT.vision!.p2}</p>
+                <p>{vision.p3 || DEFAULT.vision!.p3}</p>
               </div>
             </div>
           </Reveal>

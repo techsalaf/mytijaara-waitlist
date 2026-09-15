@@ -47,6 +47,7 @@ import { Route as AuthSessionExpiredRouteImport } from './routes/auth.session-ex
 import { Route as DataroomIndexRouteImport } from './routes/dataroom.index'
 import { Route as DataroomWorkspaceRouteImport } from './routes/dataroom.workspace'
 import { Route as AdminCmsIndexRouteImport } from './routes/admin.cms.index'
+import { Route as AdminCmsAboutRouteImport } from './routes/admin.cms.about'
 import { Route as AdminCmsAnnouncementRouteImport } from './routes/admin.cms.announcement'
 import { Route as AdminCmsBuiltForNigeriansRouteImport } from './routes/admin.cms.built-for-nigerians'
 import { Route as AdminCmsDownloadRouteImport } from './routes/admin.cms.download'
@@ -284,6 +285,11 @@ const DataroomWorkspaceRoute = DataroomWorkspaceRouteImport.update({
 const AdminCmsIndexRoute = AdminCmsIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
+const AdminCmsAboutRoute = AdminCmsAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => AdminCmsRoute,
 } as any)
 const AdminCmsAnnouncementRoute = AdminCmsAnnouncementRouteImport.update({
@@ -570,6 +576,7 @@ export interface FileRoutesByFullPath {
   '/dataroom/workspace': typeof DataroomWorkspaceRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/dataroom/': typeof DataroomIndexRoute
+  '/admin/cms/about': typeof AdminCmsAboutRoute
   '/admin/cms/announcement': typeof AdminCmsAnnouncementRoute
   '/admin/cms/built-for-nigerians': typeof AdminCmsBuiltForNigeriansRoute
   '/admin/cms/download': typeof AdminCmsDownloadRoute
@@ -648,6 +655,7 @@ export interface FileRoutesByTo {
   '/auth/session-expired': typeof AuthSessionExpiredRoute
   '/admin': typeof AdminIndexRoute
   '/dataroom': typeof DataroomIndexRoute
+  '/admin/cms/about': typeof AdminCmsAboutRoute
   '/admin/cms/announcement': typeof AdminCmsAnnouncementRoute
   '/admin/cms/built-for-nigerians': typeof AdminCmsBuiltForNigeriansRoute
   '/admin/cms/download': typeof AdminCmsDownloadRoute
@@ -737,6 +745,7 @@ export interface FileRoutesById {
   '/dataroom/workspace': typeof DataroomWorkspaceRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/dataroom/': typeof DataroomIndexRoute
+  '/admin/cms/about': typeof AdminCmsAboutRoute
   '/admin/cms/announcement': typeof AdminCmsAnnouncementRoute
   '/admin/cms/built-for-nigerians': typeof AdminCmsBuiltForNigeriansRoute
   '/admin/cms/download': typeof AdminCmsDownloadRoute
@@ -827,6 +836,7 @@ export interface FileRouteTypes {
     | '/dataroom/workspace'
     | '/admin/'
     | '/dataroom/'
+    | '/admin/cms/about'
     | '/admin/cms/announcement'
     | '/admin/cms/built-for-nigerians'
     | '/admin/cms/download'
@@ -905,6 +915,7 @@ export interface FileRouteTypes {
     | '/auth/session-expired'
     | '/admin'
     | '/dataroom'
+    | '/admin/cms/about'
     | '/admin/cms/announcement'
     | '/admin/cms/built-for-nigerians'
     | '/admin/cms/download'
@@ -993,6 +1004,7 @@ export interface FileRouteTypes {
     | '/dataroom/workspace'
     | '/admin/'
     | '/dataroom/'
+    | '/admin/cms/about'
     | '/admin/cms/announcement'
     | '/admin/cms/built-for-nigerians'
     | '/admin/cms/download'
@@ -1328,6 +1340,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/admin/cms/'
       preLoaderRoute: typeof AdminCmsIndexRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/cms/about': {
+      id: '/admin/cms/about'
+      path: '/about'
+      fullPath: '/admin/cms/about'
+      preLoaderRoute: typeof AdminCmsAboutRouteImport
       parentRoute: typeof AdminCmsRoute
     }
     '/admin/cms/announcement': {
@@ -1670,6 +1689,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminCmsRouteChildren {
+  AdminCmsAboutRoute: typeof AdminCmsAboutRoute
   AdminCmsAnnouncementRoute: typeof AdminCmsAnnouncementRoute
   AdminCmsBuiltForNigeriansRoute: typeof AdminCmsBuiltForNigeriansRoute
   AdminCmsDownloadRoute: typeof AdminCmsDownloadRoute
@@ -1690,6 +1710,7 @@ interface AdminCmsRouteChildren {
 }
 
 const AdminCmsRouteChildren: AdminCmsRouteChildren = {
+  AdminCmsAboutRoute: AdminCmsAboutRoute,
   AdminCmsAnnouncementRoute: AdminCmsAnnouncementRoute,
   AdminCmsBuiltForNigeriansRoute: AdminCmsBuiltForNigeriansRoute,
   AdminCmsDownloadRoute: AdminCmsDownloadRoute,

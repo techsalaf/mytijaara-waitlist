@@ -215,6 +215,33 @@ class CmsSectionSeeder extends Seeder
                 ['icon' => 'ShieldCheck', 'title' => 'Secure Escrow Payments', 'desc' => 'Your money stays in automated escrow until you inspect and confirm your order or service.', 'enabled' => true],
             ],
         ]],
+        ['section' => 'about', 'title' => 'About Page', 'order' => 16, 'data' => [
+            'hero' => [
+                'heading' => 'The everyday operating system for Nigerian life & trade.',
+                'subheading' => 'One single platform that unifies daily commerce, hot meals, groceries, trusted artisans, parcels, and transport — powered in the app and integrated with WhatsApp.',
+            ],
+            'mission' => [
+                'heading' => 'Our Mission & Commitment',
+                'body' => 'MyTijaara exists to eliminate friction from everyday commerce across Nigeria. We believe you shouldn\'t need five different apps and endless WhatsApp chats to manage your day. From ordering hot lunch to booking an emergency plumber, every transaction should be fast, reliable, transparent, and protected by escrow.',
+            ],
+            'vision' => [
+                'badge' => 'The Vision & Moniker',
+                'heading' => 'Why we are called "The Gojek of Africa"',
+                'p1' => 'In Southeast Asia, Gojek transformed everyday life by organizing informal motorbike transport and local street stalls into an on-demand digital powerhouse for hundreds of millions of people.',
+                'p2' => 'Across Nigeria and Africa, commerce already pulses through bustling neighborhood markets and endless WhatsApp Status posts. Hardworking merchants plead for patronage, trapped in small contact lists, while buyers juggle unreliable dispatch riders and payment anxiety.',
+                'p3' => 'MyTijaara is engineering that exact multi-service infrastructure for Africa. By combining meals, groceries, vetted artisans, and express parcel logistics with WhatsApp-native storefronts and automated escrow protection, we are turning informal street commerce into an unstoppable, trusted ecosystem.',
+            ],
+            'values' => [
+                'heading' => 'What drives everything we build',
+                'items' => [
+                    ['title' => 'Deeply Local, Proudly Nigerian', 'body' => 'Engineered specifically for Nigerian cities, market streets, and real-world logistics challenges — not an imported copy.'],
+                    ['title' => 'WhatsApp-Native Commerce', 'body' => 'Empowering everyday vendors and customers to trade where they already chat, with automated catalogs and live order tracking.'],
+                    ['title' => '100% Escrow Trust', 'body' => 'Buyers only release payment upon verified delivery; vendors and artisans receive guaranteed, prompt payouts.'],
+                    ['title' => 'Empowering Local Micro-Merchants', 'body' => 'Giving neighbourhood bukaterias, pharmacy stores, and artisans world-class digital tools to expand their sales.'],
+                    ['title' => 'Speed & Real-time Transparency', 'body' => 'GPS live dispatch, clear naira pricing with zero surprise charges, and responsive 24/7 in-country human support.'],
+                ],
+            ],
+        ]],
     ];
 
     public function run(): void

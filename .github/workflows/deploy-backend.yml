@@ -98,6 +98,14 @@ jobs:
 
             echo "Updating repository..."
 
+            if [ ! -d "$REPO/.git" ]; then
+              echo "Repository not initialized at $REPO. Initializing..."
+              mkdir -p "$REPO"
+              cd "$REPO"
+              git init
+              git remote add origin https://github.com/techsalaf/mytijaara-waitlist.git || git remote set-url origin https://github.com/techsalaf/mytijaara-waitlist.git
+            fi
+
             cd "$REPO"
 
             git fetch origin main

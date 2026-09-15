@@ -28,6 +28,7 @@ const tabs = [
   { to: "/admin/cms/social", label: "Social" },
   { to: "/admin/cms/announcement", label: "Announcement" },
   { to: "/admin/cms/download", label: "Download Page" },
+  { to: "/admin/cms/about", label: "About Page" },
   { to: "/admin/cms/seo", label: "SEO" },
 ];
 
