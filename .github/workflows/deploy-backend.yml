@@ -98,8 +98,8 @@ jobs:
 
             echo "Updating repository..."
 
-            if [ ! -d "$REPO/.git" ]; then
-              echo "Repository not initialized at $REPO. Initializing..."
+            if ! git -C "$REPO" rev-parse --git-dir >/dev/null 2>&1; then
+              echo "Repository not initialized or corrupted at $REPO. Initializing..."
               mkdir -p "$REPO"
               cd "$REPO"
               git init
