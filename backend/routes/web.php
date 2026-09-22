@@ -44,3 +44,17 @@ Route::get('/robots.txt', function () {
 
     return response($txt, 200, ['Content-Type' => 'text/plain']);
 });
+
+Route::get('/storage/{path}', function (string $path) {
+    $fullPath = storage_path('app/public/' . $path);
+    if (!file_exists($fullPath)) {
+        abort(404);
+    }
+    $mime = mime_content_type($fullPath) ?: 'application/octet-stream';
+    return response()->file($fullPath, [
+        'Content-Type' => $mime,
+        'Access-Control-Allow-Origin' => '*',
+        'Access-Control-Allow-Methods' => 'GET, OPTIONS',
+    ]);
+})->where('path', '.*');
+

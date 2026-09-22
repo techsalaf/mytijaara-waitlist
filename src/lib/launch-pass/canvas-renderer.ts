@@ -100,13 +100,49 @@ function roundRect(
 }
 
 /**
+ * Normalizes media asset URLs to relative proxy paths when on localhost/same-origin
+ * to prevent CORS restrictions and avoid tainting the HTML5 Canvas.
+ */
+export function normalizeMediaUrl(url?: string): string {
+  if (!url) return "";
+  if (typeof window !== "undefined") {
+    try {
+      const parsed = new URL(url, window.location.origin);
+      if (
+        parsed.pathname.startsWith("/storage/") &&
+        (parsed.hostname === "localhost" ||
+          parsed.hostname === "127.0.0.1" ||
+          parsed.origin === window.location.origin)
+      ) {
+        return parsed.pathname;
+      }
+    } catch {
+      // return as-is
+    }
+  }
+  return url;
+}
+
+/**
  * Safely loads an image for canvas rendering without throwing or blocking.
  */
-async function loadOptionalImage(url?: string): Promise<HTMLImageElement | null> {
-  if (!url || typeof Image === "undefined") return null;
+async function loadOptionalImage(rawUrl?: string): Promise<HTMLImageElement | null> {
+  if (!rawUrl || typeof Image === "undefined") return null;
+  const url = normalizeMediaUrl(rawUrl);
   return new Promise((resolve) => {
     const img = new Image();
-    if (!url.startsWith("data:")) {
+    const isRelative = url.startsWith("/") && !url.startsWith("//");
+    const isData = url.startsWith("data:");
+    let isSameHost = false;
+    if (typeof window !== "undefined" && !isRelative && !isData) {
+      try {
+        isSameHost = new URL(url).origin === window.location.origin;
+      } catch {
+        isSameHost = false;
+      }
+    }
+
+    if (!isData && !isRelative && !isSameHost) {
       img.crossOrigin = "anonymous";
     }
     img.src = url;
@@ -114,7 +150,7 @@ async function loadOptionalImage(url?: string): Promise<HTMLImageElement | null>
       resolve(img);
       return;
     }
-    const timer = setTimeout(() => resolve(null), 600);
+    const timer = setTimeout(() => resolve(null), 1500);
     img.onload = () => {
       clearTimeout(timer);
       resolve(img);

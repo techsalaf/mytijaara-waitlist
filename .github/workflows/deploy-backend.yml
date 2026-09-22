@@ -110,6 +110,8 @@ jobs:
 
             cd "$REPO"
 
+            rm -f "$REPO/.git/*.lock" "$REPO/.git/refs/heads/*.lock" "$REPO/.git/refs/remotes/origin/*.lock" 2>/dev/null || true
+
             git fetch origin main
             git reset --hard origin/main
 
