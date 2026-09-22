@@ -46,6 +46,7 @@ import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-passw
 import { Route as AuthSessionExpiredRouteImport } from './routes/auth.session-expired'
 import { Route as DataroomIndexRouteImport } from './routes/dataroom.index'
 import { Route as DataroomWorkspaceRouteImport } from './routes/dataroom.workspace'
+import { Route as LaunchPassTokenRouteImport } from './routes/launch-pass.$token'
 import { Route as AdminCmsIndexRouteImport } from './routes/admin.cms.index'
 import { Route as AdminCmsAboutRouteImport } from './routes/admin.cms.about'
 import { Route as AdminCmsAnnouncementRouteImport } from './routes/admin.cms.announcement'
@@ -57,6 +58,7 @@ import { Route as AdminCmsFooterRouteImport } from './routes/admin.cms.footer'
 import { Route as AdminCmsHowRouteImport } from './routes/admin.cms.how'
 import { Route as AdminCmsInsideTheAppRouteImport } from './routes/admin.cms.inside-the-app'
 import { Route as AdminCmsLaunchRouteImport } from './routes/admin.cms.launch'
+import { Route as AdminCmsLaunchPassRouteImport } from './routes/admin.cms.launch-pass'
 import { Route as AdminCmsNavigationRouteImport } from './routes/admin.cms.navigation'
 import { Route as AdminCmsPartnersRouteImport } from './routes/admin.cms.partners'
 import { Route as AdminCmsSeoRouteImport } from './routes/admin.cms.seo'
@@ -282,6 +284,11 @@ const DataroomWorkspaceRoute = DataroomWorkspaceRouteImport.update({
   path: '/workspace',
   getParentRoute: () => DataroomRoute,
 } as any)
+const LaunchPassTokenRoute = LaunchPassTokenRouteImport.update({
+  id: '/launch-pass/$token',
+  path: '/launch-pass/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminCmsIndexRoute = AdminCmsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -336,6 +343,11 @@ const AdminCmsInsideTheAppRoute = AdminCmsInsideTheAppRouteImport.update({
 const AdminCmsLaunchRoute = AdminCmsLaunchRouteImport.update({
   id: '/launch',
   path: '/launch',
+  getParentRoute: () => AdminCmsRoute,
+} as any)
+const AdminCmsLaunchPassRoute = AdminCmsLaunchPassRouteImport.update({
+  id: '/launch-pass',
+  path: '/launch-pass',
   getParentRoute: () => AdminCmsRoute,
 } as any)
 const AdminCmsNavigationRoute = AdminCmsNavigationRouteImport.update({
@@ -574,6 +586,7 @@ export interface FileRoutesByFullPath {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/session-expired': typeof AuthSessionExpiredRoute
   '/dataroom/workspace': typeof DataroomWorkspaceRouteWithChildren
+  '/launch-pass/$token': typeof LaunchPassTokenRoute
   '/admin/': typeof AdminIndexRoute
   '/dataroom/': typeof DataroomIndexRoute
   '/admin/cms/about': typeof AdminCmsAboutRoute
@@ -586,6 +599,7 @@ export interface FileRoutesByFullPath {
   '/admin/cms/how': typeof AdminCmsHowRoute
   '/admin/cms/inside-the-app': typeof AdminCmsInsideTheAppRoute
   '/admin/cms/launch': typeof AdminCmsLaunchRoute
+  '/admin/cms/launch-pass': typeof AdminCmsLaunchPassRoute
   '/admin/cms/navigation': typeof AdminCmsNavigationRoute
   '/admin/cms/partners': typeof AdminCmsPartnersRoute
   '/admin/cms/seo': typeof AdminCmsSeoRoute
@@ -653,6 +667,7 @@ export interface FileRoutesByTo {
   '/auth/login': typeof AuthLoginRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/session-expired': typeof AuthSessionExpiredRoute
+  '/launch-pass/$token': typeof LaunchPassTokenRoute
   '/admin': typeof AdminIndexRoute
   '/dataroom': typeof DataroomIndexRoute
   '/admin/cms/about': typeof AdminCmsAboutRoute
@@ -665,6 +680,7 @@ export interface FileRoutesByTo {
   '/admin/cms/how': typeof AdminCmsHowRoute
   '/admin/cms/inside-the-app': typeof AdminCmsInsideTheAppRoute
   '/admin/cms/launch': typeof AdminCmsLaunchRoute
+  '/admin/cms/launch-pass': typeof AdminCmsLaunchPassRoute
   '/admin/cms/navigation': typeof AdminCmsNavigationRoute
   '/admin/cms/partners': typeof AdminCmsPartnersRoute
   '/admin/cms/seo': typeof AdminCmsSeoRoute
@@ -743,6 +759,7 @@ export interface FileRoutesById {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/session-expired': typeof AuthSessionExpiredRoute
   '/dataroom/workspace': typeof DataroomWorkspaceRouteWithChildren
+  '/launch-pass/$token': typeof LaunchPassTokenRoute
   '/admin/': typeof AdminIndexRoute
   '/dataroom/': typeof DataroomIndexRoute
   '/admin/cms/about': typeof AdminCmsAboutRoute
@@ -755,6 +772,7 @@ export interface FileRoutesById {
   '/admin/cms/how': typeof AdminCmsHowRoute
   '/admin/cms/inside-the-app': typeof AdminCmsInsideTheAppRoute
   '/admin/cms/launch': typeof AdminCmsLaunchRoute
+  '/admin/cms/launch-pass': typeof AdminCmsLaunchPassRoute
   '/admin/cms/navigation': typeof AdminCmsNavigationRoute
   '/admin/cms/partners': typeof AdminCmsPartnersRoute
   '/admin/cms/seo': typeof AdminCmsSeoRoute
@@ -834,6 +852,7 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/auth/session-expired'
     | '/dataroom/workspace'
+    | '/launch-pass/$token'
     | '/admin/'
     | '/dataroom/'
     | '/admin/cms/about'
@@ -846,6 +865,7 @@ export interface FileRouteTypes {
     | '/admin/cms/how'
     | '/admin/cms/inside-the-app'
     | '/admin/cms/launch'
+    | '/admin/cms/launch-pass'
     | '/admin/cms/navigation'
     | '/admin/cms/partners'
     | '/admin/cms/seo'
@@ -913,6 +933,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/reset-password'
     | '/auth/session-expired'
+    | '/launch-pass/$token'
     | '/admin'
     | '/dataroom'
     | '/admin/cms/about'
@@ -925,6 +946,7 @@ export interface FileRouteTypes {
     | '/admin/cms/how'
     | '/admin/cms/inside-the-app'
     | '/admin/cms/launch'
+    | '/admin/cms/launch-pass'
     | '/admin/cms/navigation'
     | '/admin/cms/partners'
     | '/admin/cms/seo'
@@ -1002,6 +1024,7 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/auth/session-expired'
     | '/dataroom/workspace'
+    | '/launch-pass/$token'
     | '/admin/'
     | '/dataroom/'
     | '/admin/cms/about'
@@ -1014,6 +1037,7 @@ export interface FileRouteTypes {
     | '/admin/cms/how'
     | '/admin/cms/inside-the-app'
     | '/admin/cms/launch'
+    | '/admin/cms/launch-pass'
     | '/admin/cms/navigation'
     | '/admin/cms/partners'
     | '/admin/cms/seo'
@@ -1072,6 +1096,7 @@ export interface RootRouteChildren {
   ReferralRewardsRoute: typeof ReferralRewardsRoute
   TermsRoute: typeof TermsRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
+  LaunchPassTokenRoute: typeof LaunchPassTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1335,6 +1360,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DataroomWorkspaceRouteImport
       parentRoute: typeof DataroomRoute
     }
+    '/launch-pass/$token': {
+      id: '/launch-pass/$token'
+      path: '/launch-pass/$token'
+      fullPath: '/launch-pass/$token'
+      preLoaderRoute: typeof LaunchPassTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/cms/': {
       id: '/admin/cms/'
       path: '/'
@@ -1410,6 +1442,13 @@ declare module '@tanstack/react-router' {
       path: '/launch'
       fullPath: '/admin/cms/launch'
       preLoaderRoute: typeof AdminCmsLaunchRouteImport
+      parentRoute: typeof AdminCmsRoute
+    }
+    '/admin/cms/launch-pass': {
+      id: '/admin/cms/launch-pass'
+      path: '/launch-pass'
+      fullPath: '/admin/cms/launch-pass'
+      preLoaderRoute: typeof AdminCmsLaunchPassRouteImport
       parentRoute: typeof AdminCmsRoute
     }
     '/admin/cms/navigation': {
@@ -1699,6 +1738,7 @@ interface AdminCmsRouteChildren {
   AdminCmsHowRoute: typeof AdminCmsHowRoute
   AdminCmsInsideTheAppRoute: typeof AdminCmsInsideTheAppRoute
   AdminCmsLaunchRoute: typeof AdminCmsLaunchRoute
+  AdminCmsLaunchPassRoute: typeof AdminCmsLaunchPassRoute
   AdminCmsNavigationRoute: typeof AdminCmsNavigationRoute
   AdminCmsPartnersRoute: typeof AdminCmsPartnersRoute
   AdminCmsSeoRoute: typeof AdminCmsSeoRoute
@@ -1720,6 +1760,7 @@ const AdminCmsRouteChildren: AdminCmsRouteChildren = {
   AdminCmsHowRoute: AdminCmsHowRoute,
   AdminCmsInsideTheAppRoute: AdminCmsInsideTheAppRoute,
   AdminCmsLaunchRoute: AdminCmsLaunchRoute,
+  AdminCmsLaunchPassRoute: AdminCmsLaunchPassRoute,
   AdminCmsNavigationRoute: AdminCmsNavigationRoute,
   AdminCmsPartnersRoute: AdminCmsPartnersRoute,
   AdminCmsSeoRoute: AdminCmsSeoRoute,
@@ -1953,6 +1994,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReferralRewardsRoute: ReferralRewardsRoute,
   TermsRoute: TermsRoute,
   VerifyEmailRoute: VerifyEmailRoute,
+  LaunchPassTokenRoute: LaunchPassTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -30,6 +30,10 @@ class WaitlistEntryResource extends JsonResource
             'lastActive' => optional($this->last_active_at ?? $this->created_at)->toIso8601String(),
             // Position shown to user excludes soft-deleted entries — counts only live waitlist.
             'position' => \App\Models\WaitlistEntry::where('position', '<=', $this->position)->count(),
+            'referralCode' => $this->referral_code,
+            'launchPassToken' => $this->launch_pass_token,
+            'launchPassNumber' => $this->launch_pass_number,
+            'attendingNatcon' => $this->attending_natcon,
         ];
     }
 }

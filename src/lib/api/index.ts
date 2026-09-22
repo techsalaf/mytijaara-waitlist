@@ -7,6 +7,7 @@ export { waitlistApi, toQuery } from "./waitlist";
 export type { WaitlistSignupPayload, WaitlistListParams } from "./waitlist";
 
 export { launchApi } from "./launch";
+export { launchPassApi } from "./launch-pass";
 
 export { authApi, setToken, clearToken, getToken } from "./auth";
 export type { AdminUser, AuthenticatedUser, ProfilePatch } from "./auth";

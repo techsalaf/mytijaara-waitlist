@@ -48,6 +48,10 @@ Route::get('/waitlist/count', [WaitlistController::class, 'count']);
 Route::get('/waitlist/avatars', [WaitlistController::class, 'avatars']);
 Route::get('/waitlist/cities', [WaitlistController::class, 'cities']);
 Route::get('/waitlist/verify/{token}', [WaitlistController::class, 'verify']);
+Route::post('/waitlist/{publicId}/natcon-preference', [\App\Http\Controllers\Api\LaunchPassController::class, 'updatePreference']);
+
+Route::get('/launch-pass/{token}', [\App\Http\Controllers\Api\LaunchPassController::class, 'show']);
+Route::post('/launch-pass/lookup', [\App\Http\Controllers\Api\LaunchPassController::class, 'lookup']);
 
 Route::get('/launch-config', [LaunchConfigController::class, 'show']);
 

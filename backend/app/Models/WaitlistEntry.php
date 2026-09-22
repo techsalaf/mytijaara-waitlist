@@ -17,6 +17,7 @@ class WaitlistEntry extends Model
         'verification_reminders_sent', 'last_verification_reminder_at',
         'last_verification_reminder_error',
         'referral_code', 'referred_by_id', 'referrals', 'position',
+        'attending_natcon', 'launch_pass_token',
         'source', 'device', 'browser', 'country',
         'utm_source', 'utm_medium', 'utm_campaign', 'ip_hash',
         'tags', 'notes', 'last_active_at',
@@ -29,12 +30,19 @@ class WaitlistEntry extends Model
         'tags' => 'array',
         'referrals' => 'integer',
         'position' => 'integer',
+        'attending_natcon' => 'boolean',
         // Reminder cadence tracking. `last_verification_reminder_at` doubles as
         // the claim marker the reminder command compare-and-swaps on, so it has
         // to come back as a Carbon instance for the guard to compare cleanly.
         'verification_reminders_sent' => 'integer',
         'last_verification_reminder_at' => 'datetime',
     ];
+
+    public function getLaunchPassNumberAttribute(): string
+    {
+        $pos = $this->position ?: 1;
+        return '#' . str_pad((string) $pos, 5, '0', STR_PAD_LEFT);
+    }
 
     public function referredBy(): BelongsTo
     {

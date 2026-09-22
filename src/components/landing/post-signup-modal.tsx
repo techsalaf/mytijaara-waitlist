@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Check,
   Copy,
@@ -24,6 +24,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useBranding } from "@/lib/cms-context";
+import { Ticket } from "lucide-react";
+import { LaunchPassModal } from "@/components/launch-pass/launch-pass-modal";
 
 export interface WaitlistSuccessData {
   publicId: string;
@@ -33,6 +35,9 @@ export interface WaitlistSuccessData {
   role?: string;
   referralCode?: string;
   position?: number | null;
+  launchPassToken?: string;
+  launchPassNumber?: string;
+  attendingNatcon?: boolean;
 }
 
 interface PostSignupModalProps {
@@ -44,6 +49,14 @@ interface PostSignupModalProps {
 export function PostSignupModal({ open, data, onClose }: PostSignupModalProps) {
   const { siteName, social } = useBranding();
   const [copied, setCopied] = useState(false);
+  const [passModalOpen, setPassModalOpen] = useState(false);
+  const [attendingNatcon, setAttendingNatcon] = useState<boolean>(Boolean(data?.attendingNatcon));
+
+  useEffect(() => {
+    if (data) {
+      setAttendingNatcon(Boolean(data.attendingNatcon));
+    }
+  }, [data?.publicId, data?.launchPassToken, data?.attendingNatcon]);
 
   if (!data) return null;
 
@@ -76,7 +89,8 @@ export function PostSignupModal({ open, data, onClose }: PostSignupModalProps) {
   const communityChannelUrl = social.whatsapp || "https://whatsapp.com/channel";
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+    <>
+      <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="max-w-xl rounded-3xl border-primary/20 bg-gradient-to-b from-card via-background to-card p-6 sm:p-8 shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
         {/* Top ambient glow */}
         <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-gold/15 blur-3xl" aria-hidden />
@@ -104,6 +118,34 @@ export function PostSignupModal({ open, data, onClose }: PostSignupModalProps) {
 
         {/* 4 Action Steps */}
         <div className="mt-6 space-y-4 text-left">
+
+          {/* Launch Pass Spotlight */}
+          <div className="rounded-2xl border border-gold/40 bg-gradient-to-r from-gold/15 via-emerald-950/40 to-gold/10 p-4 shadow-sm space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm font-bold text-foreground">
+                <div className="grid h-6 w-6 place-items-center rounded-full bg-gold text-slate-950 text-xs font-bold">
+                  <Ticket className="h-3.5 w-3.5" />
+                </div>
+                <span>Your Official Launch Pass is Ready!</span>
+              </div>
+              <Badge className="bg-gold text-slate-950 hover:bg-gold/90 text-[10px] font-extrabold uppercase">
+                {data.launchPassNumber || "PASS READY"}
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground pl-8">
+              Get your personalized digital pass for the October 2, 2026 launch at TAA NATCON 2026. Share directly to WhatsApp Status and social media.
+            </p>
+            <div className="pl-8">
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => setPassModalOpen(true)}
+                className="bg-gold text-slate-950 hover:bg-gold/90 font-bold text-xs gap-1.5 shadow-sm"
+              >
+                <Sparkles className="h-3.5 w-3.5" /> View & Share Launch Pass
+              </Button>
+            </div>
+          </div>
 
           {/* STEP 1: Verify Email */}
           <div className="rounded-2xl border border-border/80 bg-muted/30 p-4 space-y-2">
@@ -220,5 +262,33 @@ export function PostSignupModal({ open, data, onClose }: PostSignupModalProps) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <LaunchPassModal
+      open={passModalOpen}
+      onClose={() => setPassModalOpen(false)}
+      onPreferenceChange={(val) => {
+        setAttendingNatcon(val);
+        if (data) {
+          data.attendingNatcon = val;
+        }
+      }}
+      entry={
+        data
+          ? {
+              publicId: data.publicId,
+              name: data.name,
+              email: data.email,
+              city: data.city,
+              role: data.role,
+              launchPassToken: data.launchPassToken || data.publicId,
+              launchPassNumber: data.launchPassNumber,
+              referralCode: data.referralCode,
+              attendingNatcon: attendingNatcon,
+              position: data.position,
+            }
+          : null
+      }
+    />
+  </>
   );
 }

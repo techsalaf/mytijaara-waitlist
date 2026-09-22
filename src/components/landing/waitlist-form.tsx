@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
 import { waitlistApi } from "@/lib/api";
+import { launchPassApi } from "@/lib/api/launch-pass";
 import {
   NIGERIAN_CITIES,
   WAITLIST_ROLES,
@@ -13,6 +14,8 @@ import {
   type WaitlistSignupData,
 } from "@/lib/schemas/waitlist";
 import { PostSignupModal, type WaitlistSuccessData } from "./post-signup-modal";
+import { LaunchPassLookupDialog } from "@/components/launch-pass/launch-pass-lookup-dialog";
+import type { WaitlistUser } from "@/lib/types";
 
 const ROLE_LABELS: Record<(typeof WAITLIST_ROLES)[number], string> = {
   customer: "I'm a customer",
@@ -40,6 +43,7 @@ export function WaitlistForm() {
   const referralCode = useReferralCode();
   const [successData, setSuccessData] = useState<WaitlistSuccessData | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [lookupOpen, setLookupOpen] = useState(false);
 
   const {
     register,
@@ -102,6 +106,9 @@ export function WaitlistForm() {
         role: entry.role,
         referralCode: entry.referralCode,
         position: entry.position,
+        launchPassToken: entry.launchPassToken,
+        launchPassNumber: entry.launchPassNumber,
+        attendingNatcon: entry.attendingNatcon,
       });
       setModalOpen(true);
       toast.success("You're on the list! 🎉");
@@ -113,6 +120,35 @@ export function WaitlistForm() {
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Something went wrong. Please try again.";
+
+      // If user is already on the waitlist, automatically fetch their existing pass
+      if (
+        message.toLowerCase().includes("already on the waitlist") ||
+        message.toLowerCase().includes("already registered")
+      ) {
+        try {
+          const lookupRes = await launchPassApi.lookup(data.email);
+          const entry = lookupRes.data as WaitlistUser & { publicId?: string; token?: string };
+          setSuccessData({
+            publicId: entry.id || entry.publicId || "",
+            name: entry.name,
+            email: data.email,
+            city: entry.city,
+            role: entry.role || "customer",
+            referralCode: entry.referralCode,
+            position: entry.position,
+            launchPassToken: entry.launchPassToken || entry.token,
+            launchPassNumber: entry.launchPassNumber,
+            attendingNatcon: entry.attendingNatcon,
+          });
+          setModalOpen(true);
+          toast.success(`Welcome back, ${entry.name.split(" ")[0]}! Here is your launch pass 🎉`);
+          return;
+        } catch {
+          // If auto lookup fails, fall through to error message
+        }
+      }
+
       toast.error(message);
       console.error(err);
     }
@@ -258,11 +294,40 @@ export function WaitlistForm() {
         )}
       </button>
 
-      <p className="text-center text-xs text-primary-foreground/60">
-        No spam. Just a launch update when we're live near you.
-      </p>
+      <div className="flex flex-col items-center gap-2 pt-1 text-center">
+        <p className="text-xs text-primary-foreground/60">
+          No spam. Just a launch update when we're live near you.
+        </p>
+        <button
+          type="button"
+          onClick={() => setLookupOpen(true)}
+          className="text-xs font-semibold text-gold/90 hover:text-gold underline underline-offset-4 transition-colors cursor-pointer"
+        >
+          Already joined? Retrieve your Launch Pass &rarr;
+        </button>
+      </div>
 
       <PostSignupModal open={modalOpen} data={successData} onClose={handleModalClose} />
+
+      <LaunchPassLookupDialog
+        open={lookupOpen}
+        onClose={() => setLookupOpen(false)}
+        onSuccess={(user) => {
+          setSuccessData({
+            publicId: user.id || (user as { publicId?: string }).publicId || "",
+            name: user.name,
+            email: user.email || "",
+            city: user.city,
+            role: user.role,
+            referralCode: user.referralCode,
+            position: user.position,
+            launchPassToken: user.launchPassToken || (user as { token?: string }).token,
+            launchPassNumber: user.launchPassNumber,
+            attendingNatcon: user.attendingNatcon,
+          });
+          setModalOpen(true);
+        }}
+      />
     </form>
   );
 }

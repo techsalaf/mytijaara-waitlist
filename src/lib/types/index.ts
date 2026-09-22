@@ -36,6 +36,9 @@ export type WaitlistUser = {
   lastActive: string;
   position: number;
   referralCode?: string;
+  launchPassToken?: string;
+  launchPassNumber?: string;
+  attendingNatcon?: boolean;
 };
 
 export type ReferralLeaderboardEntry = WaitlistUser & {

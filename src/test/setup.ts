@@ -56,3 +56,31 @@ if (!Element.prototype.hasPointerCapture) {
   Element.prototype.setPointerCapture = vi.fn();
   Element.prototype.releasePointerCapture = vi.fn();
 }
+
+// jsdom lacks HTMLCanvasElement 2D context by default
+if (typeof HTMLCanvasElement !== "undefined") {
+  HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
+    createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+    createRadialGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+    fillRect: vi.fn(),
+    strokeRect: vi.fn(),
+    clearRect: vi.fn(),
+    beginPath: vi.fn(),
+    moveTo: vi.fn(),
+    lineTo: vi.fn(),
+    arcTo: vi.fn(),
+    arc: vi.fn(),
+    closePath: vi.fn(),
+    stroke: vi.fn(),
+    fill: vi.fn(),
+    fillText: vi.fn(),
+    measureText: vi.fn(() => ({ width: 100 })),
+    drawImage: vi.fn(),
+    save: vi.fn(),
+    restore: vi.fn(),
+  })) as unknown as typeof HTMLCanvasElement.prototype.getContext;
+
+  if (!HTMLCanvasElement.prototype.toDataURL) {
+    HTMLCanvasElement.prototype.toDataURL = vi.fn(() => "data:image/png;base64,mock");
+  }
+}

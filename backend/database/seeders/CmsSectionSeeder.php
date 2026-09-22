@@ -250,6 +250,26 @@ class CmsSectionSeeder extends Seeder
                 ],
             ],
         ]],
+        ['section' => 'launch_pass', 'title' => 'Launch Pass & NATCON Campaign', 'order' => 17, 'data' => [
+            'campaignTitle' => 'My Launch Pass',
+            'eventName' => 'TAA NATCON 2026',
+            'eventDate' => 'October 2, 2026',
+            'eventDateShort' => '02 • 10 • 26',
+            'headlineGeneral' => "I'M ON THE LIST",
+            'headlineAttendee' => "I'LL BE THERE",
+            'supportingCopyGeneral' => "I'm getting ready for MyTijaara. Officially launching October 2, 2026 at TAA NATCON 2026. Something big is coming.",
+            'supportingCopyAttendee' => "I'll be witnessing the official launch of MyTijaara LIVE at TAA NATCON 2026. 02 • 10 • 26.",
+            'liveHeadlineGeneral' => 'MYTIJAARA IS LIVE',
+            'liveHeadlineAttendee' => 'I WAS THERE',
+            'taaLogoUrl' => '/images/taa-natcon-logo.svg',
+            'sharingMessage' => "I'm on the MyTijaara Launch List! Officially launching Oct 2 at TAA NATCON 2026. Join with me:",
+            'sharingMessageAttendee' => "I'll be witnessing the official launch of MyTijaara LIVE at TAA NATCON 2026! Join the waitlist before launch:",
+            'referralCta' => 'Join the Waitlist',
+            'cardFooterText' => "MyTijaara × TAA NATCON 2026 • Nigeria's Everyday Super App",
+            'enableAttendeeQuestion' => true,
+            'enablePostFormat' => true,
+            'enableStoryFormat' => true,
+        ]],
     ];
 
     public function run(): void
