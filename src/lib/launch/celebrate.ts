@@ -180,6 +180,169 @@ export function celebrate(): Celebration {
   };
 }
 
+/** Active celebrations registry so rehearsal controls can cancel everything instantly. */
+const activeCelebrations = new Set<() => void>();
+
+export function stopAllCelebrations(): void {
+  activeCelebrations.forEach((stop) => {
+    try {
+      stop();
+    } catch {
+      /* ignore */
+    }
+  });
+  activeCelebrations.clear();
+}
+
+/**
+ * Orchestrates the full projector-ready launch event ceremony.
+ *
+ * Staging:
+ * Phase 1 (0-2s): Opening high-velocity side cannons and gold/emerald centre explosion.
+ * Phase 3 (5-20s): Soft gold particles & slow celebratory drift, pausing on hidden tabs.
+ * Clean auto-stop after durationSeconds.
+ */
+export function celebrateCeremony(options: {
+  durationSeconds?: number;
+  ambientParticles?: boolean;
+} = {}): Celebration {
+  if (typeof window === "undefined" || prefersReducedMotion()) {
+    return { started: false, stop: () => {} };
+  }
+
+  const durationMs = Math.max(5, Math.min(120, options.durationSeconds ?? 30)) * 1000;
+  const allowAmbient = options.ambientParticles !== false;
+
+  let cancelled = false;
+  const timers: number[] = [];
+  const intervals: number[] = [];
+
+  const after = (ms: number, fn: () => void) => {
+    if (cancelled) return;
+    timers.push(window.setTimeout(fn, ms));
+  };
+
+  const every = (ms: number, fn: () => void) => {
+    if (cancelled) return;
+    intervals.push(window.setInterval(fn, ms));
+  };
+
+  const cleanup = () => {
+    cancelled = true;
+    timers.forEach((t) => window.clearTimeout(t));
+    timers.length = 0;
+    intervals.forEach((i) => window.clearInterval(i));
+    intervals.length = 0;
+    if (typeof document !== "undefined") {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    }
+    activeCelebrations.delete(cleanup);
+  };
+
+  activeCelebrations.add(cleanup);
+
+  const onVisibilityChange = () => {
+    // If user tabs away, pause heavy work
+    if (document.visibilityState !== "visible") {
+      intervals.forEach((i) => window.clearInterval(i));
+      intervals.length = 0;
+    } else if (!cancelled && allowAmbient) {
+      // Re-enable gentle ambient drift when user returns
+      scheduleAmbient();
+    }
+  };
+
+  if (typeof document !== "undefined") {
+    document.addEventListener("visibilitychange", onVisibilityChange);
+  }
+
+  const scheduleAmbient = () => {
+    every(2800, () => {
+      if (cancelled || document.visibilityState !== "visible") return;
+      void loadConfetti().then((confetti) => {
+        if (cancelled) return;
+        confetti({
+          particleCount: 16,
+          spread: 80,
+          startVelocity: 8,
+          gravity: 0.35,
+          decay: 0.95,
+          scalar: 1.15,
+          origin: { x: 0.15 + Math.random() * 0.7, y: 0.05 },
+          colors: ["#c9a24c", "#f4e4bc", "#2e7d51"],
+          disableForReducedMotion: true,
+        });
+      });
+    });
+  };
+
+  void loadConfetti()
+    .then((confetti) => {
+      if (cancelled) return;
+
+      // 1. Initial shockwave burst: centre origin with wide gold/green palette
+      confetti({
+        particleCount: 180,
+        spread: 120,
+        startVelocity: 55,
+        origin: { x: 0.5, y: 0.35 },
+        colors: CELEBRATION_COLORS,
+        ticks: 300,
+        scalar: 1.1,
+        disableForReducedMotion: true,
+      });
+
+      // 2. High-energy dual side cannons (0 to 3s)
+      const streamRounds = 8;
+      for (let i = 0; i < streamRounds; i++) {
+        after(180 + i * 220, () => {
+          if (cancelled) return;
+          const factor = 1 - i / streamRounds;
+          const count = Math.max(8, Math.round(28 * factor));
+          confetti({
+            particleCount: count,
+            angle: 58,
+            spread: 52,
+            startVelocity: 58,
+            origin: { x: 0, y: 0.88 },
+            colors: CELEBRATION_COLORS,
+            disableForReducedMotion: true,
+          });
+          confetti({
+            particleCount: count,
+            angle: 122,
+            spread: 52,
+            startVelocity: 58,
+            origin: { x: 1, y: 0.88 },
+            colors: CELEBRATION_COLORS,
+            disableForReducedMotion: true,
+          });
+        });
+      }
+
+      // 3. Phase 3: Transition to soft gold sparkles after 4s
+      if (allowAmbient) {
+        after(4000, () => {
+          if (cancelled) return;
+          scheduleAmbient();
+        });
+      }
+
+      // 4. Auto-settle after durationMs
+      after(durationMs, () => {
+        cleanup();
+      });
+    })
+    .catch(() => {
+      cleanup();
+    });
+
+  return {
+    started: true,
+    stop: cleanup,
+  };
+}
+
 /**
  * Celebrate once per visitor for a given launch instant.
  *
@@ -193,4 +356,12 @@ export function celebrateOnce(launchDateTime: string): Celebration {
   // turns the setting off should still get their one celebration.
   if (run.started) markCelebrated(launchDateTime);
   return run;
+}
+
+export function resetCelebratedStatus(launchDateTime: string): void {
+  try {
+    localStorage.removeItem(celebrationKey(launchDateTime));
+  } catch {
+    /* ignore */
+  }
 }

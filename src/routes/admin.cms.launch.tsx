@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Rocket, Loader2, Save, RotateCcw } from "lucide-react";
+import { Rocket, Loader2, Save, RotateCcw, Sparkles, Play, Square, ExternalLink, Eye } from "lucide-react";
 import { toast } from "sonner";
+import { stopAllCelebrations } from "@/lib/launch/celebrate";
 
 import { SectionCard } from "@/components/admin/ui-bits";
 import { Button } from "@/components/ui/button";
@@ -573,6 +574,181 @@ function LaunchCms() {
                 </div>
               </div>
             ))}
+          </div>
+        </SectionCard>
+
+        <SectionCard
+          title="Ceremony & reveal settings"
+          description="Projector-ready live event presentation controls"
+        >
+          <div className="space-y-4">
+            <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
+              <div>
+                <div className="text-sm font-medium">Launch ceremony enabled</div>
+                <div className="text-xs text-muted-foreground">
+                  Triggers 5-phase reveal animation when exact zero is reached
+                </div>
+              </div>
+              <Switch
+                checked={cfg.ceremony.enabled}
+                disabled={locked}
+                onCheckedChange={(v) =>
+                  set("ceremony", { ...cfg.ceremony, enabled: v })
+                }
+              />
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
+              <div>
+                <div className="text-sm font-medium">Final 10-second countdown tension</div>
+                <div className="text-xs text-muted-foreground">
+                  Heightens visual contrast, scale pulse, and ambient glow at T-10s
+                </div>
+              </div>
+              <Switch
+                checked={cfg.ceremony.finalCountdownPulse}
+                disabled={locked || !cfg.ceremony.enabled}
+                onCheckedChange={(v) =>
+                  set("ceremony", { ...cfg.ceremony, finalCountdownPulse: v })
+                }
+              />
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-border/60 p-3">
+              <div>
+                <div className="text-sm font-medium">Ambient gold particle drift</div>
+                <div className="text-xs text-muted-foreground">
+                  Lightweight drifting sparkles after opening cannons (pauses when tab inactive)
+                </div>
+              </div>
+              <Switch
+                checked={cfg.ceremony.ambientParticles}
+                disabled={locked || !cfg.ceremony.enabled}
+                onCheckedChange={(v) =>
+                  set("ceremony", { ...cfg.ceremony, ambientParticles: v })
+                }
+              />
+            </div>
+            <div>
+              <Label htmlFor="ceremony-duration">Ceremony duration (seconds)</Label>
+              <Input
+                id="ceremony-duration"
+                type="number"
+                min={5}
+                max={300}
+                className="mt-1.5"
+                disabled={locked || !cfg.ceremony.enabled}
+                value={cfg.ceremony.ceremonyDurationSeconds}
+                onChange={(e) =>
+                  set("ceremony", {
+                    ...cfg.ceremony,
+                    ceremonyDurationSeconds: Math.max(
+                      5,
+                      Math.min(300, Number(e.target.value) || 30),
+                    ),
+                  })
+                }
+              />
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                How long the event celebration lasts before settling into the permanent live banner.
+              </p>
+            </div>
+            <div>
+              <Label>Stage reveal title (Phase 2)</Label>
+              <Input
+                className="mt-1.5 font-bold"
+                disabled={locked || !cfg.ceremony.enabled}
+                value={cfg.ceremony.liveHeadline}
+                onChange={(e) =>
+                  set("ceremony", { ...cfg.ceremony, liveHeadline: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <Label>Stage reveal supporting copy</Label>
+              <Textarea
+                rows={3}
+                className="mt-1.5"
+                disabled={locked || !cfg.ceremony.enabled}
+                value={cfg.ceremony.liveSubheadline}
+                onChange={(e) =>
+                  set("ceremony", {
+                    ...cfg.ceremony,
+                    liveSubheadline: e.target.value,
+                  })
+                }
+              />
+            </div>
+          </div>
+        </SectionCard>
+
+        <SectionCard
+          title="Presentation rehearsal & safety controls"
+          description="Test ceremony effects safely without affecting the real countdown or database"
+        >
+          <div className="space-y-4">
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Use these rehearsal triggers on the event laptop or projector. They run strictly in-memory or open a sandboxed rehearsal tab — <strong>they never alter production launch timestamps</strong>.
+            </p>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="justify-start gap-2 border-primary/30 hover:bg-primary/10"
+                onClick={() => {
+                  window.open("/?ceremony_preview=final10", "_blank");
+                  toast.success("Opened final 10s rehearsal preview in new tab");
+                }}
+              >
+                <Play className="h-4 w-4 text-primary" />
+                Preview Final 10 Seconds
+                <ExternalLink className="ml-auto h-3.5 w-3.5 opacity-60" />
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                className="justify-start gap-2 border-gold/40 hover:bg-gold/10"
+                onClick={() => {
+                  window.open("/?ceremony_preview=reveal", "_blank");
+                  toast.success("Opened launch reveal rehearsal in new tab");
+                }}
+              >
+                <Sparkles className="h-4 w-4 text-gold" />
+                Replay Launch Reveal
+                <ExternalLink className="ml-auto h-3.5 w-3.5 opacity-60" />
+              </Button>
+
+              <Button
+                type="button"
+                variant="destructive"
+                className="justify-start gap-2"
+                onClick={() => {
+                  stopAllCelebrations();
+                  toast.info("Active celebration effects stopped");
+                }}
+              >
+                <Square className="h-4 w-4" />
+                Stop Celebration Effects
+              </Button>
+
+              <Button
+                type="button"
+                variant="secondary"
+                className="justify-start gap-2"
+                onClick={() => {
+                  window.open("/", "_blank");
+                  toast.info("Opened production homepage");
+                }}
+              >
+                <Eye className="h-4 w-4" />
+                View Normal Site
+                <ExternalLink className="ml-auto h-3.5 w-3.5 opacity-60" />
+              </Button>
+            </div>
+
+            <div className="rounded-lg border border-border/60 bg-surface p-3 text-xs text-muted-foreground">
+              <strong>Event Operator Tip:</strong> For the projector display, press <code>F11</code> in Chrome to toggle borderless full-screen presentation mode.
+            </div>
           </div>
         </SectionCard>
       </div>

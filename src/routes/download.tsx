@@ -18,6 +18,7 @@ import QRCode from "qrcode";
 import { loadPublicPageData } from "@/lib/public-page-data";
 import { resolveContentIcon } from "@/lib/cms/content-icons";
 import { DEFAULT_LAUNCH_CITY, PHASE_TWO_CITIES } from "@/lib/launch/city";
+import { resolveLaunchStatus } from "@/lib/launch/config";
 import { PublicLayout } from "@/components/landing/public-layout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -193,6 +194,32 @@ const DOWNLOAD_FAQS = [
 function DownloadPage() {
   const { launchConfig, serverNow, cms, branding } = Route.useLoaderData();
   const downloadCms: DownloadCmsData = (cms.download?.data as DownloadCmsData) ?? DEFAULT_DOWNLOAD_CMS;
+  const isLaunched = resolveLaunchStatus(launchConfig, serverNow) !== "pre_launch";
+
+  const downloadFaqs = [
+    {
+      q: "Is the MyTijaara app free to download?",
+      a: "Yes! The MyTijaara app is 100% free to download on Google Play and Apple App Store. You only pay for the food, products, or services you order.",
+    },
+    {
+      q: "What if the iOS App Store version is marked as coming soon?",
+      a: "You can immediately tap 'Order Online' to use our full-featured Web App at app.mytijaara.com on Safari or Chrome on your iPhone. It works seamlessly and you can even add it to your Home Screen.",
+    },
+    {
+      q: "How do I sign up as a Vendor or Rider?",
+      a: "Tap the 'Join as a Partner' or 'Earn as a Rider' card below. You will be redirected to the MyTijaara Partner Portal at dashboard.mytijaara.com where you can submit your business details or rider documents in under 5 minutes.",
+    },
+    {
+      q: "What cities are currently supported?",
+      a: isLaunched
+        ? `MyTijaara is live in ${DEFAULT_LAUNCH_CITY}, with rollouts expanding to ${PHASE_TWO_CITIES.join(", ")} and nationwide.`
+        : `${DEFAULT_LAUNCH_CITY} is our first launch city, with ${PHASE_TWO_CITIES.join(", ")} next and a fast ongoing rollout to other Nigerian states.`,
+    },
+    {
+      q: "How do escrow payments work on MyTijaara?",
+      a: "When you place an order or hire an artisan, your payment is held securely in escrow. The seller or service provider is only paid once you confirm that the service was executed properly or your package arrived safely.",
+    },
+  ];
 
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [copiedLink, setCopiedLink] = useState(false);
@@ -524,7 +551,7 @@ function DownloadPage() {
             </div>
 
             <Accordion type="single" collapsible className="mt-6">
-              {DOWNLOAD_FAQS.map((faq, i) => (
+              {downloadFaqs.map((faq, i) => (
                 <AccordionItem key={i} value={`faq-${i}`}>
                   <AccordionTrigger className="text-left font-semibold text-foreground hover:no-underline">
                     {faq.q}
@@ -547,7 +574,9 @@ function DownloadPage() {
                 <Badge className="bg-gold text-slate-950 font-bold mb-2">Earn ₦500 per friend</Badge>
                 <h3 className="font-display text-2xl font-bold sm:text-3xl">Invite friends to MyTijaara</h3>
                 <p className="mt-1 text-sm text-primary-foreground/80 max-w-xl">
-                  Share your unique referral link to earn wallet credits and unlock exclusive VIP perks at launch.
+                  {isLaunched
+                    ? "Share your unique referral link to earn wallet credits and unlock exclusive VIP rewards on your orders."
+                    : "Share your unique referral link to earn wallet credits and unlock exclusive VIP perks at launch."}
                 </p>
               </div>
               <Link

@@ -3,17 +3,9 @@ import { ChevronDown } from "lucide-react";
 
 import { Reveal } from "./reveal";
 import { useFaqs, useCmsData } from "@/lib/cms-context";
+import { useLaunch } from "@/components/launch/launch-state-provider";
 import { DEFAULT_LAUNCH_CITY, PHASE_TWO_CITIES } from "@/lib/launch/city";
 import { trackEvent } from "@/lib/analytics/track";
-
-const HARDCODED_FAQS = [
-  { q: "What is MyTijaara?", a: "MyTijaara is one app that lets you order food, buy groceries and medicine, book artisans, send parcels, rent cars and shop from local businesses — all in Nigeria." },
-  { q: "Where is MyTijaara available?", a: `We're launching first in ${DEFAULT_LAUNCH_CITY}, then ${PHASE_TWO_CITIES.join(", ")} and the rest of Nigeria. Join the waitlist and we'll let you know as soon as we're in your city.` },
-  { q: "How much does it cost to use?", a: "The app is free to download. You only pay for what you order, at prices set by our vendors and partners. Delivery fees are shown clearly before you check out." },
-  { q: "How do I pay?", a: "You can pay with cards, bank transfers or on delivery — whatever works best for you." },
-  { q: "How can I become a vendor, rider or artisan?", a: "Pick your role on the waitlist form above. We'll reach out with next steps as we onboard partners in your area." },
-  { q: "Is my information safe?", a: "Yes. We take your privacy seriously and only use your information to give you a great experience with MyTijaara." },
-];
 
 type FaqCmsData = { heading?: string; subheading?: string };
 const DEFAULT_FAQ: FaqCmsData = {
@@ -25,10 +17,44 @@ export function FAQ() {
   const [open, setOpen] = useState<number | null>(0);
   const dbFaqs = useFaqs();
   const cms = useCmsData("faqs", DEFAULT_FAQ);
+  const { isLaunched } = useLaunch();
+
   if (!cms) return null;
+
+  const hardcodedFaqs = [
+    {
+      q: "What is MyTijaara?",
+      a: "MyTijaara is one app that lets you order food, buy groceries and medicine, book artisans, send parcels, rent cars and shop from local businesses — all in Nigeria.",
+    },
+    {
+      q: "Where is MyTijaara available?",
+      a: isLaunched
+        ? `We are live in ${DEFAULT_LAUNCH_CITY}, with rollouts expanding to ${PHASE_TWO_CITIES.join(", ")} and across Nigeria. Download the app or order online to get started.`
+        : `We're launching first in ${DEFAULT_LAUNCH_CITY}, then ${PHASE_TWO_CITIES.join(", ")} and the rest of Nigeria. Join the waitlist and we'll let you know as soon as we're in your city.`,
+    },
+    {
+      q: "How much does it cost to use?",
+      a: "The app is free to download. You only pay for what you order, at prices set by our vendors and partners. Delivery fees are shown clearly before you check out.",
+    },
+    {
+      q: "How do I pay?",
+      a: "You can pay with cards, bank transfers or on delivery — whatever works best for you.",
+    },
+    {
+      q: "How can I become a vendor, rider or artisan?",
+      a: isLaunched
+        ? "Visit our Partner Portal at dashboard.mytijaara.com or download the app to register as a business partner, rider, or artisan and start earning."
+        : "Pick your role on the waitlist form above. We'll reach out with next steps as we onboard partners in your area.",
+    },
+    {
+      q: "Is my information safe?",
+      a: "Yes. We take your privacy seriously and only use your information to give you a great experience with MyTijaara.",
+    },
+  ];
+
   const FAQS = dbFaqs.length > 0
     ? dbFaqs.map((f) => ({ q: f.question, a: f.answer }))
-    : HARDCODED_FAQS;
+    : hardcodedFaqs;
   return (
     <section id="faq" className="py-24 sm:py-32">
       <div className="mx-auto max-w-4xl px-4 sm:px-6">

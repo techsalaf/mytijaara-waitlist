@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useId } from "react";
 import { MessageCircle, X, Send, Sparkles } from "lucide-react";
 import { getResponse } from "./knowledge-base";
+import { useLaunch } from "@/components/launch/launch-state-provider";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                                */
@@ -13,20 +14,21 @@ interface Message {
 }
 
 /* ------------------------------------------------------------------ */
-/* Knowledge base — see ./knowledge-base.ts                            */
-/* Deterministic, weighted keyword matching. Zero API/token cost.      */
-/* Edit knowledge-base.ts to add or update what Camila knows.          */
-/* ------------------------------------------------------------------ */
-
-/* ------------------------------------------------------------------ */
 /* Quick action chips                                                        */
 /* ------------------------------------------------------------------ */
 
-const QUICK_ACTIONS = [
+const PRE_LAUNCH_ACTIONS = [
   "What is MyTijaara?",
   "How do I join the waitlist?",
   "When does it launch?",
   "What services are offered?",
+];
+
+const LIVE_ACTIONS = [
+  "What is MyTijaara?",
+  "How do I download the app?",
+  "What services are offered?",
+  "How do escrow payments work?",
 ];
 
 /* ------------------------------------------------------------------ */
@@ -88,6 +90,7 @@ function ChatMessage({ message }: { message: Message }) {
  * Animations are CSS-based (tw-animate-css + Tailwind transitions).
  */
 export function AiAssistant() {
+  const { isLaunched } = useLaunch();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -126,7 +129,7 @@ export function AiAssistant() {
     setIsTyping(true);
 
     setTimeout(() => {
-      const reply = getResponse(trimmed);
+      const reply = getResponse(trimmed, isLaunched);
       setIsTyping(false);
       setMessages((prev) => [
         ...prev,
@@ -183,7 +186,7 @@ export function AiAssistant() {
 
         {/* Quick action chips */}
         <div className="flex flex-wrap gap-1.5 border-t border-border px-3 py-2.5">
-          {QUICK_ACTIONS.map((q) => (
+          {(isLaunched ? LIVE_ACTIONS : PRE_LAUNCH_ACTIONS).map((q) => (
             <button
               key={q}
               onClick={() => send(q)}

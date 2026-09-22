@@ -170,6 +170,18 @@ describe("normalizeLaunchConfig", () => {
     expect(normalizeLaunchConfig({ launchCelebrationDays: "abc" as unknown as number }).launchCelebrationDays).toBe(3);
   });
 
+  it("merges ceremony overrides and clamps ceremonyDurationSeconds", () => {
+    const result = normalizeLaunchConfig({
+      ceremony: {
+        liveHeadline: "CUSTOM EVENT REVEAL",
+        ceremonyDurationSeconds: 9999,
+      } as any,
+    });
+    expect(result.ceremony.liveHeadline).toBe("CUSTOM EVENT REVEAL");
+    expect(result.ceremony.enabled).toBe(true);
+    expect(result.ceremony.ceremonyDurationSeconds).toBe(300);
+  });
+
   it("accepts a valid override wholesale", () => {
     const result = normalizeLaunchConfig({ launchDateTime: "2027-01-01T00:00:00+01:00", waitlistEnabled: false });
     expect(result.launchDateTime).toBe("2027-01-01T00:00:00+01:00");
@@ -230,6 +242,12 @@ describe("seeder parity", () => {
   it("seeds every ticker key", () => {
     for (const key of Object.keys(DEFAULT_LAUNCH_CONFIG.ticker)) {
       expect(seeder, `seeder ticker is missing '${key}'`).toContain(`'${key}' =>`);
+    }
+  });
+
+  it("seeds every ceremony key", () => {
+    for (const key of Object.keys(DEFAULT_LAUNCH_CONFIG.ceremony)) {
+      expect(seeder, `seeder ceremony is missing '${key}'`).toContain(`'${key}' =>`);
     }
   });
 });

@@ -66,11 +66,19 @@ export function CmsProvider({
   sections?: CmsSections;
   faqs?: Faq[];
   testimonials?: Testimonial[];
-  branding?: PublicBranding;
+  branding?: Partial<PublicBranding>;
   children: ReactNode;
 }) {
+  const mergedBranding: PublicBranding = branding
+    ? {
+        ...DEFAULT_BRANDING,
+        ...branding,
+        social: { ...DEFAULT_BRANDING.social, ...(branding.social || {}) },
+      }
+    : DEFAULT_BRANDING;
+
   return (
-    <CmsContext.Provider value={{ sections, faqs, testimonials, branding: branding ?? DEFAULT_BRANDING }}>
+    <CmsContext.Provider value={{ sections, faqs, testimonials, branding: mergedBranding }}>
       {children}
     </CmsContext.Provider>
   );

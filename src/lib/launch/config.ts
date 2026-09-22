@@ -51,6 +51,20 @@ export type LaunchTicker = {
   confetti: boolean;
 };
 
+export type LaunchCeremonyConfig = {
+  enabled: boolean;
+  /** Heightens visual tension with number pulses and radial glow during the final 10 seconds. */
+  finalCountdownPulse: boolean;
+  /** Ambient slow-drifting gold celebration sparkles after the initial cannons. */
+  ambientParticles: boolean;
+  /** Duration in seconds of the event reveal celebration before settling into the permanent live banner. */
+  ceremonyDurationSeconds: number;
+  /** Stage-scale title displayed during Phase 2 of the launch ceremony. */
+  liveHeadline: string;
+  /** Supporting stage copy displayed during Phase 2 of the launch ceremony. */
+  liveSubheadline: string;
+};
+
 export type LaunchConfiguration = {
   /** Master switch for the whole launch section. */
   launchEnabled: boolean;
@@ -93,6 +107,9 @@ export type LaunchConfiguration = {
     confetti: boolean;
     stores: AppStoreLink[];
   };
+
+  /** Projector-ready event reveal ceremony settings. */
+  ceremony: LaunchCeremonyConfig;
 };
 
 /**
@@ -150,6 +167,16 @@ export const DEFAULT_LAUNCH_CONFIG: LaunchConfiguration = {
         comingSoon: true,
       },
     ],
+  },
+
+  ceremony: {
+    enabled: true,
+    finalCountdownPulse: true,
+    ambientParticles: true,
+    ceremonyDurationSeconds: 30,
+    liveHeadline: "MYTIJAARA IS LIVE",
+    liveSubheadline:
+      "Nigeria's everyday operating system is officially open. Order food, groceries, book vetted artisans, and dispatch parcels right now.",
   },
 };
 
@@ -269,6 +296,13 @@ export function normalizeLaunchConfig(raw: unknown): LaunchConfiguration {
     secondaryCTA: { ...base.secondaryCTA, ...input.secondaryCTA },
     ticker: { ...base.ticker, ...input.ticker },
     live: { ...base.live, ...input.live, stores },
+    ceremony: {
+      ...base.ceremony,
+      ...input.ceremony,
+      ceremonyDurationSeconds: Number.isFinite(Number(input.ceremony?.ceremonyDurationSeconds))
+        ? Math.max(5, Math.min(300, Number(input.ceremony?.ceremonyDurationSeconds)))
+        : base.ceremony.ceremonyDurationSeconds,
+    },
   };
 }
 

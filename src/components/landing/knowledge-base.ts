@@ -303,7 +303,7 @@ const FALLBACK =
 /* Scoring matcher                                                      */
 /* ------------------------------------------------------------------ */
 
-export function getResponse(input: string): string {
+export function getResponse(input: string, isLaunched = false): string {
   const q = input.toLowerCase().trim();
   if (!q) return FALLBACK;
 
@@ -322,10 +322,6 @@ export function getResponse(input: string): string {
       best = topic;
       tied = false;
     } else if (score === bestScore && score > 0 && topic !== best) {
-      // Two topics matched equally strongly — the generic "about" topic
-      // in particular should never win a tie against something specific,
-      // so treat genuine ties (other than involving "about") as ambiguous
-      // and prefer whichever is NOT the generic about/services catch-all.
       if (best?.id === "about" || best?.id === "services") {
         bestScore = score;
         best = topic;
@@ -335,10 +331,20 @@ export function getResponse(input: string): string {
     }
   }
 
-  if (tied && best) {
-    // Ambiguous but confident match beats silence — keep best, which is
-    // the first non-generic topic that reached this score.
+  if (best) {
+    if (isLaunched) {
+      if (best.id === "waitlist") {
+        return "MyTijaara is officially live! 🎉 You no longer need to wait. Download the app directly from Google Play, or start ordering immediately from your browser at app.mytijaara.com.";
+      }
+      if (best.id === "launch" || best.id === "conference") {
+        return `MyTijaara is already live across Nigeria! 🚀 We launched first in ${LAUNCH_CITY} and are actively rolling out nationwide. Download the app or visit app.mytijaara.com to place your first order.`;
+      }
+      if (best.id === "referral") {
+        return "Our referral rewards are active! 🎁 Share your unique invite link from your account dashboard to earn wallet credits on every successful friend referral.";
+      }
+    }
+    return best.response;
   }
 
-  return best ? best.response : FALLBACK;
+  return FALLBACK;
 }

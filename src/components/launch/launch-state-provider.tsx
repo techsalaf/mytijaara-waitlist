@@ -17,6 +17,8 @@ import {
   type TimeRemaining,
 } from "@/lib/launch/config";
 
+export type CeremonyPreviewMode = "none" | "final10" | "reveal";
+
 type LaunchContextValue = {
   config: LaunchConfiguration;
   /** Effective state right now — recomputed every tick. */
@@ -36,6 +38,11 @@ type LaunchContextValue = {
   showWaitlist: boolean;
   /** Config has been fetched (false during the first paint). */
   ready: boolean;
+  /** Rehearsal preview mode for event operators: "none" | "final10" | "reveal". */
+  ceremonyPreview: CeremonyPreviewMode;
+  setCeremonyPreview: (mode: CeremonyPreviewMode) => void;
+  /** Final 10 seconds remaining before launch (or in final10 preview mode). */
+  isFinalTenSeconds: boolean;
 };
 
 const LaunchContext = createContext<LaunchContextValue | null>(null);
@@ -79,7 +86,51 @@ export function LaunchStateProvider({
   }));
   const [ready, setReady] = useState(seeded);
   const [now, setNow] = useState(() => initialNow ?? Date.now());
+  const [ceremonyPreview, setCeremonyPreview] = useState<CeremonyPreviewMode>("none");
+  const [simulatedSeconds, setSimulatedSeconds] = useState<number | null>(null);
 
+  // Check URL params for rehearsal preview safely after hydration
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const mode = params.get("ceremony_preview");
+      if (mode === "final10" || mode === "reveal") {
+        setCeremonyPreview(mode);
+      }
+    } catch {
+      /* ignore */
+    }
+
+    const onPreviewEvent = (e: Event) => {
+      const detail = (e as CustomEvent<{ mode?: CeremonyPreviewMode }>).detail;
+      if (detail?.mode) {
+        setCeremonyPreview(detail.mode);
+      }
+    };
+    window.addEventListener("mytijaara:ceremony:preview", onPreviewEvent);
+    return () => window.removeEventListener("mytijaara:ceremony:preview", onPreviewEvent);
+  }, []);
+
+  // Handle simulated 10-second countdown for rehearsal preview
+  useEffect(() => {
+    if (ceremonyPreview !== "final10") {
+      setSimulatedSeconds(null);
+      return;
+    }
+    setSimulatedSeconds(10);
+    const interval = window.setInterval(() => {
+      setSimulatedSeconds((s) => {
+        if (s === null || s <= 1) {
+          window.clearInterval(interval);
+          setCeremonyPreview("reveal");
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+    return () => window.clearInterval(interval);
+  }, [ceremonyPreview]);
 
   useEffect(() => {
     if (seeded) return;
@@ -111,9 +162,29 @@ export function LaunchStateProvider({
   }, []);
 
   const ctx = useMemo<LaunchContextValue>(() => {
-    const status = resolveLaunchStatus(config, now);
-    const remaining = getTimeRemaining(config.launchDateTime, now);
+    let status = resolveLaunchStatus(config, now);
+    let remaining = getTimeRemaining(config.launchDateTime, now);
+
+    if (ceremonyPreview === "reveal") {
+      status = "launch_day";
+      remaining = { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0, isPast: true };
+    } else if (ceremonyPreview === "final10" && simulatedSeconds !== null) {
+      status = "pre_launch";
+      remaining = {
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: simulatedSeconds,
+        total: simulatedSeconds * 1000,
+        isPast: false,
+      };
+    }
+
     const isLaunched = status !== "pre_launch";
+    const isFinalTenSeconds =
+      ceremonyPreview === "final10" ||
+      (status === "pre_launch" && remaining.total > 0 && remaining.total <= 10000);
+
     return {
       config,
       status,
@@ -124,8 +195,11 @@ export function LaunchStateProvider({
         config.launchEnabled && config.countdownEnabled && !isLaunched,
       showWaitlist: config.waitlistEnabled && !isLaunched,
       ready,
+      ceremonyPreview,
+      setCeremonyPreview,
+      isFinalTenSeconds,
     };
-  }, [config, now, ready]);
+  }, [config, now, ready, ceremonyPreview, simulatedSeconds]);
 
   return <LaunchContext.Provider value={ctx}>{children}</LaunchContext.Provider>;
 }
@@ -161,6 +235,9 @@ function fallbackLaunchContext(): LaunchContextValue {
     showCountdown: config.launchEnabled && config.countdownEnabled && !isLaunched,
     showWaitlist: config.waitlistEnabled && !isLaunched,
     ready: false,
+    ceremonyPreview: "none",
+    setCeremonyPreview: () => {},
+    isFinalTenSeconds: false,
   };
 }
 

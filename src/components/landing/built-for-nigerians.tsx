@@ -2,6 +2,7 @@ import { Check } from "lucide-react";
 
 import { Reveal } from "./reveal";
 import { useCmsData } from "@/lib/cms-context";
+import { useLaunch } from "@/components/launch/launch-state-provider";
 
 const NG_CARDS = [
   { title: "Suya night", emoji: "🍢", bg: "bg-[oklch(0.94_0.06_70)]", fg: "text-[oklch(0.45_0.15_45)]" },
@@ -10,7 +11,14 @@ const NG_CARDS = [
   { title: "Home fix", emoji: "🔧", bg: "bg-[oklch(0.94_0.06_70)]", fg: "text-[oklch(0.45_0.15_45)]" },
 ];
 
-type BfnCmsData = { heading?: string; body?: string; points?: string[] };
+type BfnCmsData = {
+  heading?: string;
+  body?: string;
+  points?: string[];
+  headingLive?: string;
+  bodyLive?: string;
+  pointsLive?: string[];
+};
 
 const DEFAULT: BfnCmsData = {
   heading: "Made here. For here.",
@@ -21,12 +29,34 @@ const DEFAULT: BfnCmsData = {
     "Support that speaks your language, based in Nigeria.",
     "Works with the shops and services on your street.",
   ],
+  headingLive: "Made here. For here.",
+  bodyLive: "Powering everyday trade, hot food, artisans, and essentials across Nigerian neighborhoods. Built for the rhythm of Nigerian life.",
+  pointsLive: [
+    "Pay how you already pay — card, instant bank transfer, or on delivery.",
+    "Transparent naira pricing with zero surprise conversions.",
+    "24/7 responsive customer support based right here in Nigeria.",
+    "Live GPS delivery dispatch and automated escrow safety.",
+  ],
 };
 
 export function BuiltForNigerians() {
+  const { isLaunched } = useLaunch();
   const cms = useCmsData("built_for_nigerians", DEFAULT);
   if (!cms) return null;
-  const points = cms.points && cms.points.length > 0 ? cms.points : DEFAULT.points!;
+
+  const heading = isLaunched
+    ? (cms.headingLive || cms.heading || DEFAULT.headingLive!)
+    : (cms.heading || DEFAULT.heading!);
+
+  const body = isLaunched
+    ? (cms.bodyLive || cms.body || DEFAULT.bodyLive!)
+    : (cms.body || DEFAULT.body!);
+
+  const points = isLaunched && cms.pointsLive && cms.pointsLive.length > 0
+    ? cms.pointsLive
+    : (cms.points && cms.points.length > 0
+        ? cms.points
+        : (isLaunched ? DEFAULT.pointsLive! : DEFAULT.points!));
 
   return (
     <section className="relative overflow-hidden py-24 sm:py-32">
@@ -35,13 +65,13 @@ export function BuiltForNigerians() {
           <div>
             <Reveal>
               <span className="inline-flex items-center rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-foreground/70">
-                Built for Nigerians
+                {isLaunched ? "Built for Nigeria • Live Every Day" : "Built for Nigerians"}
               </span>
               <h2 className="mt-6 font-display text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-                {cms.heading}
+                {heading}
               </h2>
               <p className="mt-5 max-w-lg text-lg text-muted-foreground">
-                {cms.body}
+                {body}
               </p>
               <ul className="mt-8 space-y-4">
                 {points.map((p) => (

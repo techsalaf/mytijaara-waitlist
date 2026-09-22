@@ -51,6 +51,14 @@ class LaunchConfigSeeder extends Seeder
                         ['platform' => 'ios', 'label' => 'App Store', 'sublabel' => 'Download on the', 'href' => '#', 'comingSoon' => true],
                     ],
                 ],
+                'ceremony' => [
+                    'enabled' => true,
+                    'finalCountdownPulse' => true,
+                    'ambientParticles' => true,
+                    'ceremonyDurationSeconds' => 30,
+                    'liveHeadline' => 'MYTIJAARA IS LIVE',
+                    'liveSubheadline' => "Nigeria's everyday operating system is officially open. Order food, groceries, book vetted artisans, and dispatch parcels right now.",
+                ],
             ],
         ]);
     }

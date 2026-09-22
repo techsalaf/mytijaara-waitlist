@@ -194,7 +194,8 @@ export function Footer() {
 
           <div className="relative z-10 flex flex-col items-center text-center max-w-3xl mx-auto">
             <Badge variant="outline" className="inline-flex items-center gap-1.5 border-white/20 bg-white/10 px-3.5 py-1 text-xs font-semibold text-gold backdrop-blur-md">
-              <Sparkles className="h-3.5 w-3.5 text-gold" /> Built for everyday life in Nigeria
+              <Sparkles className="h-3.5 w-3.5 text-gold" />
+              {isLaunched ? "Built for everyday life in Nigeria • Now Live" : "Built for everyday life in Nigeria"}
             </Badge>
 
             <h2 className="mt-4 font-display text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl text-white">
@@ -203,29 +204,57 @@ export function Footer() {
             </h2>
 
             <p className="mt-4 text-sm sm:text-base text-white/80 leading-relaxed max-w-2xl">
-              Join thousands of vendors, artisans, riders, and customers reserving priority access to Nigeria's next-generation commerce & service ecosystem.
+              {isLaunched
+                ? "Order meals, daily groceries, book vetted artisans, and dispatch parcels across your city — directly in the app or straight through WhatsApp."
+                : "Join thousands of vendors, artisans, riders, and customers reserving priority access to Nigeria's next-generation commerce & service ecosystem."}
             </p>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <Button
-                asChild
-                size="lg"
-                className="bg-gold text-slate-950 hover:bg-gold/90 font-bold px-8 shadow-lg hover:shadow-gold/20 transition-all hover:scale-105 active:scale-95"
-              >
-                <a href="/#waitlist">
-                  Join the Waitlist <ArrowRight className="ml-2 h-4 w-4" />
-                </a>
-              </Button>
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white backdrop-blur-md px-6"
-              >
-                <a href="/referral-rewards">
-                  Explore Referral Perks
-                </a>
-              </Button>
+              {isLaunched ? (
+                <>
+                  <Button
+                    asChild
+                    size="lg"
+                    className="bg-gold text-slate-950 hover:bg-gold/90 font-bold px-8 shadow-lg hover:shadow-gold/20 transition-all hover:scale-105 active:scale-95"
+                  >
+                    <a href="/download">
+                      Download MyTijaara <ArrowRight className="ml-2 h-4 w-4" />
+                    </a>
+                  </Button>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="lg"
+                    className="border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white backdrop-blur-md px-6"
+                  >
+                    <a href="/partners">
+                      Become a Partner
+                    </a>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    asChild
+                    size="lg"
+                    className="bg-gold text-slate-950 hover:bg-gold/90 font-bold px-8 shadow-lg hover:shadow-gold/20 transition-all hover:scale-105 active:scale-95"
+                  >
+                    <a href="/#waitlist">
+                      Join the Waitlist <ArrowRight className="ml-2 h-4 w-4" />
+                    </a>
+                  </Button>
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="lg"
+                    className="border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white backdrop-blur-md px-6"
+                  >
+                    <a href="/referral-rewards">
+                      Explore Referral Perks
+                    </a>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -249,7 +278,10 @@ export function Footer() {
               {launchCity && (
                 <div className="flex items-center gap-2 text-foreground font-semibold">
                   <MapPin className="h-4 w-4 shrink-0 text-primary" />
-                  <span>Launching first in <strong className="text-primary">{launchCity}</strong></span>
+                  <span>
+                    {isLaunched ? "Now live in " : "Launching first in "}
+                    <strong className="text-primary">{launchCity}</strong>
+                  </span>
                 </div>
               )}
               {address && (
@@ -380,7 +412,8 @@ export function Footer() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
-                <Smartphone className="h-4 w-4" /> Coming soon to your phone
+                <Smartphone className="h-4 w-4" />
+                {isLaunched ? "Available now on your phone" : "Coming soon to your phone"}
               </div>
               <h3 className="font-display text-lg font-bold text-foreground">
                 Get the MyTijaara app & take full control

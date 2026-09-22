@@ -95,6 +95,14 @@ class CmsSectionSeeder extends Seeder
                 'Support that speaks your language, based in Nigeria.',
                 'Works with the shops and services on your street.',
             ],
+            'headingLive' => 'Made here. For here.',
+            'bodyLive' => 'Powering everyday trade, hot food, artisans, and essentials across Nigerian neighborhoods. Built for the rhythm of Nigerian life.',
+            'pointsLive' => [
+                'Pay how you already pay — card, instant bank transfer, or on delivery.',
+                'Transparent naira pricing with zero surprise conversions.',
+                '24/7 responsive customer support based right here in Nigeria.',
+                'Live GPS delivery dispatch and automated escrow safety.',
+            ],
         ]],
         ['section' => 'partners', 'title' => 'Partners', 'order' => 8, 'data' => [
             'badge' => 'Grow with us',
