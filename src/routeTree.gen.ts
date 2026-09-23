@@ -19,6 +19,7 @@ import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as DataroomRouteImport } from './routes/dataroom'
 import { Route as DownloadRouteImport } from './routes/download'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as LaunchBadgeRouteImport } from './routes/launch-badge'
 import { Route as PartnersRouteImport } from './routes/partners'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ReferralRewardsRouteImport } from './routes/referral-rewards'
@@ -46,6 +47,7 @@ import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-passw
 import { Route as AuthSessionExpiredRouteImport } from './routes/auth.session-expired'
 import { Route as DataroomIndexRouteImport } from './routes/dataroom.index'
 import { Route as DataroomWorkspaceRouteImport } from './routes/dataroom.workspace'
+import { Route as LaunchPassIndexRouteImport } from './routes/launch-pass.index'
 import { Route as LaunchPassTokenRouteImport } from './routes/launch-pass.$token'
 import { Route as AdminCmsIndexRouteImport } from './routes/admin.cms.index'
 import { Route as AdminCmsAboutRouteImport } from './routes/admin.cms.about'
@@ -147,6 +149,11 @@ const DownloadRoute = DownloadRouteImport.update({
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LaunchBadgeRoute = LaunchBadgeRouteImport.update({
+  id: '/launch-badge',
+  path: '/launch-badge',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PartnersRoute = PartnersRouteImport.update({
@@ -283,6 +290,11 @@ const DataroomWorkspaceRoute = DataroomWorkspaceRouteImport.update({
   id: '/workspace',
   path: '/workspace',
   getParentRoute: () => DataroomRoute,
+} as any)
+const LaunchPassIndexRoute = LaunchPassIndexRouteImport.update({
+  id: '/launch-pass/',
+  path: '/launch-pass/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const LaunchPassTokenRoute = LaunchPassTokenRouteImport.update({
   id: '/launch-pass/$token',
@@ -561,6 +573,7 @@ export interface FileRoutesByFullPath {
   '/dataroom': typeof DataroomRouteWithChildren
   '/download': typeof DownloadRoute
   '/faq': typeof FaqRoute
+  '/launch-badge': typeof LaunchBadgeRoute
   '/partners': typeof PartnersRoute
   '/privacy': typeof PrivacyRoute
   '/referral-rewards': typeof ReferralRewardsRoute
@@ -589,6 +602,7 @@ export interface FileRoutesByFullPath {
   '/launch-pass/$token': typeof LaunchPassTokenRoute
   '/admin/': typeof AdminIndexRoute
   '/dataroom/': typeof DataroomIndexRoute
+  '/launch-pass/': typeof LaunchPassIndexRoute
   '/admin/cms/about': typeof AdminCmsAboutRoute
   '/admin/cms/announcement': typeof AdminCmsAnnouncementRoute
   '/admin/cms/built-for-nigerians': typeof AdminCmsBuiltForNigeriansRoute
@@ -650,6 +664,7 @@ export interface FileRoutesByTo {
   '/cookies': typeof CookiesRoute
   '/download': typeof DownloadRoute
   '/faq': typeof FaqRoute
+  '/launch-badge': typeof LaunchBadgeRoute
   '/partners': typeof PartnersRoute
   '/privacy': typeof PrivacyRoute
   '/referral-rewards': typeof ReferralRewardsRoute
@@ -670,6 +685,7 @@ export interface FileRoutesByTo {
   '/launch-pass/$token': typeof LaunchPassTokenRoute
   '/admin': typeof AdminIndexRoute
   '/dataroom': typeof DataroomIndexRoute
+  '/launch-pass': typeof LaunchPassIndexRoute
   '/admin/cms/about': typeof AdminCmsAboutRoute
   '/admin/cms/announcement': typeof AdminCmsAnnouncementRoute
   '/admin/cms/built-for-nigerians': typeof AdminCmsBuiltForNigeriansRoute
@@ -734,6 +750,7 @@ export interface FileRoutesById {
   '/dataroom': typeof DataroomRouteWithChildren
   '/download': typeof DownloadRoute
   '/faq': typeof FaqRoute
+  '/launch-badge': typeof LaunchBadgeRoute
   '/partners': typeof PartnersRoute
   '/privacy': typeof PrivacyRoute
   '/referral-rewards': typeof ReferralRewardsRoute
@@ -762,6 +779,7 @@ export interface FileRoutesById {
   '/launch-pass/$token': typeof LaunchPassTokenRoute
   '/admin/': typeof AdminIndexRoute
   '/dataroom/': typeof DataroomIndexRoute
+  '/launch-pass/': typeof LaunchPassIndexRoute
   '/admin/cms/about': typeof AdminCmsAboutRoute
   '/admin/cms/announcement': typeof AdminCmsAnnouncementRoute
   '/admin/cms/built-for-nigerians': typeof AdminCmsBuiltForNigeriansRoute
@@ -827,6 +845,7 @@ export interface FileRouteTypes {
     | '/dataroom'
     | '/download'
     | '/faq'
+    | '/launch-badge'
     | '/partners'
     | '/privacy'
     | '/referral-rewards'
@@ -855,6 +874,7 @@ export interface FileRouteTypes {
     | '/launch-pass/$token'
     | '/admin/'
     | '/dataroom/'
+    | '/launch-pass/'
     | '/admin/cms/about'
     | '/admin/cms/announcement'
     | '/admin/cms/built-for-nigerians'
@@ -916,6 +936,7 @@ export interface FileRouteTypes {
     | '/cookies'
     | '/download'
     | '/faq'
+    | '/launch-badge'
     | '/partners'
     | '/privacy'
     | '/referral-rewards'
@@ -936,6 +957,7 @@ export interface FileRouteTypes {
     | '/launch-pass/$token'
     | '/admin'
     | '/dataroom'
+    | '/launch-pass'
     | '/admin/cms/about'
     | '/admin/cms/announcement'
     | '/admin/cms/built-for-nigerians'
@@ -999,6 +1021,7 @@ export interface FileRouteTypes {
     | '/dataroom'
     | '/download'
     | '/faq'
+    | '/launch-badge'
     | '/partners'
     | '/privacy'
     | '/referral-rewards'
@@ -1027,6 +1050,7 @@ export interface FileRouteTypes {
     | '/launch-pass/$token'
     | '/admin/'
     | '/dataroom/'
+    | '/launch-pass/'
     | '/admin/cms/about'
     | '/admin/cms/announcement'
     | '/admin/cms/built-for-nigerians'
@@ -1091,12 +1115,14 @@ export interface RootRouteChildren {
   DataroomRoute: typeof DataroomRouteWithChildren
   DownloadRoute: typeof DownloadRoute
   FaqRoute: typeof FaqRoute
+  LaunchBadgeRoute: typeof LaunchBadgeRoute
   PartnersRoute: typeof PartnersRoute
   PrivacyRoute: typeof PrivacyRoute
   ReferralRewardsRoute: typeof ReferralRewardsRoute
   TermsRoute: typeof TermsRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
   LaunchPassTokenRoute: typeof LaunchPassTokenRoute
+  LaunchPassIndexRoute: typeof LaunchPassIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1169,6 +1195,13 @@ declare module '@tanstack/react-router' {
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/launch-badge': {
+      id: '/launch-badge'
+      path: '/launch-badge'
+      fullPath: '/launch-badge'
+      preLoaderRoute: typeof LaunchBadgeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/partners': {
@@ -1359,6 +1392,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dataroom/workspace'
       preLoaderRoute: typeof DataroomWorkspaceRouteImport
       parentRoute: typeof DataroomRoute
+    }
+    '/launch-pass/': {
+      id: '/launch-pass/'
+      path: '/launch-pass'
+      fullPath: '/launch-pass/'
+      preLoaderRoute: typeof LaunchPassIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/launch-pass/$token': {
       id: '/launch-pass/$token'
@@ -1989,12 +2029,14 @@ const rootRouteChildren: RootRouteChildren = {
   DataroomRoute: DataroomRouteWithChildren,
   DownloadRoute: DownloadRoute,
   FaqRoute: FaqRoute,
+  LaunchBadgeRoute: LaunchBadgeRoute,
   PartnersRoute: PartnersRoute,
   PrivacyRoute: PrivacyRoute,
   ReferralRewardsRoute: ReferralRewardsRoute,
   TermsRoute: TermsRoute,
   VerifyEmailRoute: VerifyEmailRoute,
   LaunchPassTokenRoute: LaunchPassTokenRoute,
+  LaunchPassIndexRoute: LaunchPassIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

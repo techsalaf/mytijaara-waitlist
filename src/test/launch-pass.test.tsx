@@ -12,10 +12,12 @@ import { LaunchPassModal } from "@/components/launch-pass/launch-pass-modal";
 import { LaunchPassLookupDialog } from "@/components/launch-pass/launch-pass-lookup-dialog";
 import { PostSignupModal } from "@/components/landing/post-signup-modal";
 import { WaitlistForm } from "@/components/landing/waitlist-form";
+import { LaunchBadgeView } from "@/routes/launch-badge";
 import { launchPassApi } from "@/lib/api/launch-pass";
 import { DEFAULT_LAUNCH_PASS_CMS, type LaunchPassData } from "@/lib/types/launch-pass";
 import { LaunchStateProvider } from "@/components/launch/launch-state-provider";
 import { DEFAULT_LAUNCH_CONFIG } from "@/lib/launch/config";
+import type { PublicPageData } from "@/lib/public-page-data";
 
 // Mock launchPassApi
 vi.mock("@/lib/api/launch-pass", () => ({
@@ -33,6 +35,16 @@ vi.mock("sonner", () => ({
     error: vi.fn(),
   },
 }));
+
+// Mock @tanstack/react-router useRouterState & Link for components rendered inside PublicLayout
+vi.mock("@tanstack/react-router", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@tanstack/react-router")>();
+  return {
+    ...actual,
+    useRouterState: vi.fn().mockReturnValue("/launch-badge"),
+    Link: ({ children, ...props }: any) => <a {...props}>{children}</a>,
+  };
+});
 
 describe("Launch Pass Feature Suite", () => {
   const samplePassData: LaunchPassData = {
@@ -383,4 +395,86 @@ describe("Launch Pass Feature Suite", () => {
       ).toBeInTheDocument();
     });
   });
+
+  describe("LaunchBadgeView Campaign Qualification Route", () => {
+    const mockPublicData: PublicPageData = {
+      launchConfig: DEFAULT_LAUNCH_CONFIG,
+      serverNow: Date.now(),
+      cms: {
+        launch_pass: {
+          section: "launch_pass",
+          title: "Launch Pass",
+          enabled: true,
+          published: true,
+          order: 1,
+          scheduledAt: null,
+          data: DEFAULT_LAUNCH_PASS_CMS,
+          draft: null,
+        },
+      },
+      branding: {
+        siteName: "MyTijaara",
+        tagline: "Everyday Super App",
+        contactEmail: "contact@mytijaara.com",
+        supportEmail: "support@mytijaara.com",
+        phone: "+2348000000000",
+        launchCity: "Abuja",
+        address: "Abuja, Nigeria",
+        logoUrl: "",
+        logoDarkUrl: "",
+        faviconUrl: "",
+        ogImageUrl: "",
+        primaryColor: "#059669",
+        accentColor: "#F59E0B",
+        secondaryColor: "#10B981",
+        backgroundColor: "#020617",
+        surfaceColor: "#0F172A",
+        social: {
+          instagram: "",
+          twitter: "",
+          facebook: "",
+          linkedin: "",
+          tiktok: "",
+          youtube: "",
+          whatsapp: "",
+        },
+        iosAppUrl: "",
+        androidAppUrl: "",
+        googleAnalyticsId: "",
+        metaPixelId: "",
+      },
+      faqs: [],
+      testimonials: [],
+    };
+
+    it("renders campaign headline and qualification options", () => {
+      render(
+        <LaunchStateProvider initialConfig={DEFAULT_LAUNCH_CONFIG} initialNow={Date.now()}>
+          <LaunchBadgeView data={mockPublicData} />
+        </LaunchStateProvider>,
+      );
+
+      expect(screen.getByText(/Claim Your Official/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/Digital Launch Pass/i).length).toBeGreaterThan(0);
+      expect(screen.getByText(/Have you already joined the waitlist\?/i)).toBeInTheDocument();
+      expect(screen.getByText("Yes, I've Joined")).toBeInTheDocument();
+      expect(screen.getByText("No, I'm New")).toBeInTheDocument();
+    });
+
+    it("opens lookup dialog when 'Yes, I've Joined' is clicked", async () => {
+      const user = userEvent.setup();
+      render(
+        <LaunchStateProvider initialConfig={DEFAULT_LAUNCH_CONFIG} initialNow={Date.now()}>
+          <LaunchBadgeView data={mockPublicData} />
+        </LaunchStateProvider>,
+      );
+
+      const yesButton = screen.getByRole("button", { name: /Yes, I've Joined/i });
+      await user.click(yesButton);
+
+      expect(screen.getByText("Find Your Launch Pass")).toBeInTheDocument();
+      expect(screen.getByPlaceholderText(/you@email.com or 080.../i)).toBeInTheDocument();
+    });
+  });
 });
+

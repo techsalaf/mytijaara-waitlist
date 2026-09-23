@@ -22,6 +22,8 @@ import {
   MessageSquare,
   ShieldCheck,
   Check,
+  ExternalLink,
+  Link as LinkIcon,
 } from "lucide-react";
 import { useCmsSection } from "@/lib/hooks/useCmsSection";
 import { mediaApi } from "@/lib/api/media";
@@ -216,6 +218,18 @@ function LaunchPassCmsEditor() {
         </div>
 
         <div className="flex items-center gap-3">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="text-xs gap-1.5 border-gold/40 text-gold hover:bg-gold/10 hover:text-gold"
+          >
+            <a href="/launch-badge" target="_blank" rel="noreferrer">
+              <ExternalLink className="h-3.5 w-3.5" />
+              Open Campaign Page (/launch-badge)
+            </a>
+          </Button>
+
           <Button
             type="button"
             variant="outline"
