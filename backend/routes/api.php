@@ -50,6 +50,7 @@ Route::get('/waitlist/cities', [WaitlistController::class, 'cities']);
 Route::get('/waitlist/verify/{token}', [WaitlistController::class, 'verify']);
 Route::post('/waitlist/{publicId}/natcon-preference', [\App\Http\Controllers\Api\LaunchPassController::class, 'updatePreference']);
 
+Route::get('/launch-pass/asset-proxy', [\App\Http\Controllers\Api\LaunchPassController::class, 'proxyAsset']);
 Route::get('/launch-pass/{token}', [\App\Http\Controllers\Api\LaunchPassController::class, 'show']);
 Route::post('/launch-pass/lookup', [\App\Http\Controllers\Api\LaunchPassController::class, 'lookup']);
 

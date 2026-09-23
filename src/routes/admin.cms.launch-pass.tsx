@@ -108,7 +108,7 @@ function LaunchPassCmsEditor() {
   const [previewStatus, setPreviewStatus] = useState<"pre_launch" | "launch_day">("pre_launch");
   const [previewRendering, setPreviewRendering] = useState<boolean>(false);
 
-  const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [canvasNode, setCanvasNode] = useState<HTMLCanvasElement | null>(null);
 
   // Active headline and copies for the preview inspection card
   const isLive = previewStatus === "launch_day";
@@ -128,9 +128,9 @@ function LaunchPassCmsEditor() {
     ? data.sharingMessageAttendee || defaultLaunchPassData.sharingMessageAttendee
     : data.sharingMessage || defaultLaunchPassData.sharingMessage;
 
-  // Re-render live canvas preview whenever CMS fields, preview controls, or DB brand logo change
+  // Re-render live canvas preview whenever CMS fields, preview controls, DB brand logo, or canvasNode change
   useEffect(() => {
-    if (!previewCanvasRef.current) return;
+    if (!canvasNode) return;
 
     let cancelled = false;
     setPreviewRendering(true);
@@ -148,7 +148,7 @@ function LaunchPassCmsEditor() {
       joinedAt: new Date().toISOString(),
     };
 
-    renderLaunchPassToCanvas(previewCanvasRef.current, {
+    renderLaunchPassToCanvas(canvasNode, {
       data: sampleData,
       cms: {
         campaignTitle: data.campaignTitle || defaultLaunchPassData.campaignTitle!,
@@ -186,12 +186,12 @@ function LaunchPassCmsEditor() {
     return () => {
       cancelled = true;
     };
-  }, [data, previewFormat, previewAttendee, previewStatus, dbBrandLogo]);
+  }, [data, previewFormat, previewAttendee, previewStatus, dbBrandLogo, canvasNode]);
 
   const handleDownloadPreview = () => {
-    if (!previewCanvasRef.current) return;
+    if (!canvasNode) return;
     downloadLaunchPass(
-      previewCanvasRef.current,
+      canvasNode,
       `mytijaara-preview-${previewFormat}-${previewAttendee ? "attendee" : "general"}.png`,
     );
     toast.success("Sample social card downloaded!");
@@ -430,7 +430,7 @@ function LaunchPassCmsEditor() {
               )}
 
               <canvas
-                ref={previewCanvasRef}
+                ref={setCanvasNode}
                 className="max-h-[540px] w-auto max-w-full rounded-xl shadow-2xl object-contain ring-1 ring-white/10"
               />
             </div>

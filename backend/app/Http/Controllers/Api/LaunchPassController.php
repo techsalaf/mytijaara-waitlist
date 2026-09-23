@@ -7,9 +7,12 @@ use App\Http\Resources\WaitlistEntryResource;
 use App\Models\WaitlistEntry;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
 
 class LaunchPassController extends Controller
 {
@@ -137,5 +140,58 @@ class LaunchPassController extends Controller
                 'referralCode' => $entry->referral_code,
             ],
         ]);
+    }
+
+    /**
+     * GET /launch-pass/asset-proxy?url=... — PUBLIC
+     * Safely streams media storage assets with guaranteed CORS headers for canvas rendering.
+     */
+    public function proxyAsset(Request $request): Response
+    {
+        $rawUrl = $request->query('url');
+        if (! $rawUrl) {
+            return response()->json(['error' => 'URL parameter is required.'], 400);
+        }
+
+        // Extract relative storage path
+        $path = null;
+        if (str_contains($rawUrl, '/storage/')) {
+            $parts = explode('/storage/', $rawUrl);
+            $path = end($parts);
+        } elseif (str_starts_with($rawUrl, 'media/')) {
+            $path = $rawUrl;
+        }
+
+        // Clean query strings from path if any
+        if ($path) {
+            $path = explode('?', $path)[0];
+        }
+
+        if ($path && Storage::disk('public')->exists($path)) {
+            $mime = Storage::disk('public')->mimeType($path) ?: 'image/png';
+            $content = Storage::disk('public')->get($path);
+
+            return response($content, 200, [
+                'Content-Type' => $mime,
+                'Cache-Control' => 'public, max-age=86400',
+                'Access-Control-Allow-Origin' => '*',
+                'Access-Control-Allow-Methods' => 'GET, OPTIONS',
+                'Access-Control-Allow-Headers' => 'Origin, Content-Type, Accept, Authorization, X-Requested-With',
+            ]);
+        }
+
+        // If local static asset from public directory
+        $publicPath = public_path(ltrim($path ?: $rawUrl, '/'));
+        if (file_exists($publicPath) && ! is_dir($publicPath)) {
+            $mime = mime_content_type($publicPath) ?: 'image/png';
+            return response(file_get_contents($publicPath), 200, [
+                'Content-Type' => $mime,
+                'Cache-Control' => 'public, max-age=86400',
+                'Access-Control-Allow-Origin' => '*',
+                'Access-Control-Allow-Methods' => 'GET, OPTIONS',
+            ]);
+        }
+
+        return response()->json(['error' => 'Asset not found.'], 404);
     }
 }

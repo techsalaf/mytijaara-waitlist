@@ -132,49 +132,24 @@ export function normalizeMediaUrl(url?: string): string {
   return url;
 }
 
-/**
- * Safely loads an image for canvas rendering without throwing or blocking.
- */
-async function loadOptionalImage(rawUrl?: string): Promise<HTMLImageElement | null> {
-  if (!rawUrl || typeof Image === "undefined") return null;
-  const url = normalizeMediaUrl(rawUrl);
-  if (imageCache.has(url)) {
-    const cached = imageCache.get(url)!;
-    if (cached.complete && cached.naturalWidth > 0) {
-      return cached;
-    }
-  }
-
+function loadSingleImage(src: string, isCors: boolean): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const img = new Image();
-    const isRelative = url.startsWith("/") && !url.startsWith("//");
-    const isData = url.startsWith("data:");
-    let isSameHost = false;
-    if (typeof window !== "undefined" && !isRelative && !isData) {
-      try {
-        isSameHost = new URL(url).origin === window.location.origin;
-      } catch {
-        isSameHost = false;
-      }
-    }
-
-    if (!isData && !isRelative && !isSameHost) {
+    if (isCors) {
       img.crossOrigin = "anonymous";
     }
-
     let settled = false;
     const timer = setTimeout(() => {
       if (!settled) {
         settled = true;
         resolve(null);
       }
-    }, 1200);
+    }, 1500);
 
     img.onload = () => {
       if (!settled) {
         settled = true;
         clearTimeout(timer);
-        imageCache.set(url, img);
         resolve(img);
       }
     };
@@ -186,14 +161,91 @@ async function loadOptionalImage(rawUrl?: string): Promise<HTMLImageElement | nu
       }
     };
 
-    img.src = url;
+    img.src = src;
     if (img.complete && img.naturalWidth > 0) {
       settled = true;
       clearTimeout(timer);
-      imageCache.set(url, img);
       resolve(img);
     }
   });
+}
+
+async function fetchImageBlob(src: string): Promise<HTMLImageElement | null> {
+  if (typeof fetch === "undefined" || typeof URL === "undefined") return null;
+  try {
+    const res = await fetch(src, { mode: "cors" });
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    return await loadSingleImage(objectUrl, false);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Safely loads an image for canvas rendering without throwing, blocking, or CORS cache issues.
+ */
+async function loadOptionalImage(rawUrl?: string): Promise<HTMLImageElement | null> {
+  if (!rawUrl || typeof Image === "undefined") return null;
+  const url = normalizeMediaUrl(rawUrl);
+  if (imageCache.has(url)) {
+    const cached = imageCache.get(url)!;
+    if (cached.complete && cached.naturalWidth > 0) {
+      return cached;
+    }
+  }
+
+  const isData = url.startsWith("data:");
+  const isRelative = url.startsWith("/") && !url.startsWith("//");
+  let isSameHost = false;
+  if (typeof window !== "undefined" && !isRelative && !isData) {
+    try {
+      isSameHost = new URL(url).origin === window.location.origin;
+    } catch {
+      isSameHost = false;
+    }
+  }
+  const isCrossDomain = !isData && !isRelative && !isSameHost;
+
+  const candidates: string[] = [];
+  const isStorage = url.includes("/storage/") || url.startsWith("/storage/");
+
+  // Candidate 1: Backend asset proxy route which guarantees CORS headers from Laravel
+  if (isStorage) {
+    const apiBase =
+      typeof window !== "undefined" && window.location.origin.includes("localhost")
+        ? "/api/v1"
+        : "https://api.mytijaara.com/api/v1";
+    candidates.push(`${apiBase}/launch-pass/asset-proxy?url=${encodeURIComponent(url)}`);
+  }
+
+  // Candidate 2: Cache-busting URL to bypass any non-CORS browser disk cache
+  if (isCrossDomain) {
+    const bust = url.includes("?") ? `${url}&cv=2` : `${url}?cv=2`;
+    candidates.push(bust);
+  }
+
+  // Candidate 3: Raw URL
+  candidates.push(url);
+
+  for (const candidate of candidates) {
+    // 1. Try Blob fetch first (bypasses browser image tag cache collisions and guarantees clean canvas)
+    const blobImg = await fetchImageBlob(candidate);
+    if (blobImg && blobImg.naturalWidth > 0) {
+      imageCache.set(url, blobImg);
+      return blobImg;
+    }
+
+    // 2. Fall back to standard Image element
+    const directImg = await loadSingleImage(candidate, isCrossDomain);
+    if (directImg && directImg.naturalWidth > 0) {
+      imageCache.set(url, directImg);
+      return directImg;
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -275,7 +327,8 @@ export async function renderLaunchPassToCanvas(
   ctx.stroke();
 
   // 3. Top Header: MyTijaara Brand & Partner (Parallel load)
-  const headerY = margin + (format === "story" ? 110 : 80);
+  const headerY = margin + (format === "story" ? 105 : 75);
+  const containerH = 92;
 
   // Resolve official MyTijaara branding logo from options or CMS database
   const resolvedBrandLogoUrl =
@@ -288,21 +341,46 @@ export async function renderLaunchPassToCanvas(
   ]);
 
   if (brandImg && brandImg.naturalWidth > 0 && brandImg.naturalHeight > 0) {
-    const maxLogoH = 88;
+    const maxLogoH = 70;
+    const maxLogoW = 300;
     const aspect = brandImg.naturalWidth / brandImg.naturalHeight;
-    const logoW = Math.min(340, maxLogoH * aspect);
+    const logoW = Math.min(maxLogoW, maxLogoH * aspect);
     const logoH = logoW / aspect;
-    const logoX = margin + 50;
-    const logoY = headerY;
 
+    const badgePadX = 22;
+    const badgeW = Math.max(180, logoW + badgePadX * 2);
+    const badgeH = containerH;
+    const badgeX = margin + 50;
+    const badgeY = headerY;
+    const badgeRadius = 18;
+
+    // Luminous frosted white plaque so transparent colored/dark logos have 100% clarity
+    if (typeof ctx.save === "function") ctx.save();
+    ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
+    ctx.shadowBlur = 14;
+    ctx.shadowOffsetY = 4;
+    roundRect(ctx, badgeX, badgeY, badgeW, badgeH, badgeRadius);
+    const plateGrad = ctx.createLinearGradient(badgeX, badgeY, badgeX, badgeY + badgeH);
+    plateGrad.addColorStop(0, "#FFFFFF");
+    plateGrad.addColorStop(1, "#F8FAFC");
+    ctx.fillStyle = plateGrad;
+    ctx.fill();
+    ctx.strokeStyle = "rgba(229, 169, 60, 0.5)";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    if (typeof ctx.restore === "function") ctx.restore();
+
+    // Centered brand logo inside plaque
+    const logoX = badgeX + (badgeW - logoW) / 2;
+    const logoY = badgeY + (badgeH - logoH) / 2;
     ctx.drawImage(brandImg, logoX, logoY, logoW, logoH);
 
-    // Brand Sub-badge below the CMS brand logo
+    // Brand Sub-badge below plaque
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
-    ctx.font = "700 13px 'Plus Jakarta Sans', system-ui, sans-serif";
+    ctx.font = "800 13px 'Plus Jakarta Sans', system-ui, sans-serif";
     ctx.fillStyle = "#10B981";
-    ctx.fillText("NIGERIA'S SUPER APP", logoX, logoY + logoH + 6);
+    ctx.fillText("NIGERIA'S SUPER APP", badgeX, badgeY + badgeH + 8);
   } else {
     // Draw Official MyTijaara Vector Emblem (matches Logo component)
     const emblemX = margin + 50;
@@ -347,7 +425,7 @@ export async function renderLaunchPassToCanvas(
     if (typeof ctx.arc === "function") {
       ctx.arc(dotCenterX, dotCenterY, dotRadius + 2.5, 0, Math.PI * 2);
     }
-    ctx.fillStyle = "#05160E"; // Dark border ring
+    ctx.fillStyle = "#05160E";
     ctx.fill();
 
     const dotGrad = ctx.createLinearGradient(
@@ -384,24 +462,49 @@ export async function renderLaunchPassToCanvas(
   const partnerRightX = width - margin - 50;
 
   if (partnerImg && partnerImg.naturalWidth > 0 && partnerImg.naturalHeight > 0) {
-    const maxLogoH = 82;
+    const maxLogoH = 70;
+    const maxLogoW = 200;
     const aspect = partnerImg.naturalWidth / partnerImg.naturalHeight;
-    const logoW = Math.min(260, maxLogoH * aspect);
+    const logoW = Math.min(maxLogoW, maxLogoH * aspect);
     const logoH = logoW / aspect;
-    const logoX = partnerRightX - logoW;
-    const logoY = headerY + 16;
+
+    const badgePadX = 20;
+    const badgeW = Math.max(140, logoW + badgePadX * 2);
+    const badgeH = containerH;
+    const badgeX = partnerRightX - badgeW;
+    const badgeY = headerY;
+    const badgeRadius = 18;
 
     ctx.textAlign = "right";
     ctx.textBaseline = "top";
-    ctx.font = "700 13px 'Plus Jakarta Sans', system-ui, sans-serif";
+    ctx.font = "800 13px 'Plus Jakarta Sans', system-ui, sans-serif";
     ctx.fillStyle = "#E5A93C";
-    ctx.fillText("OFFICIAL LAUNCH PARTNER", partnerRightX, headerY - 4);
+    ctx.fillText("OFFICIAL LAUNCH PARTNER", partnerRightX, headerY - 20);
 
+    // Luminous frosted white plaque matching brand side
+    if (typeof ctx.save === "function") ctx.save();
+    ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
+    ctx.shadowBlur = 14;
+    ctx.shadowOffsetY = 4;
+    roundRect(ctx, badgeX, badgeY, badgeW, badgeH, badgeRadius);
+    const plateGrad = ctx.createLinearGradient(badgeX, badgeY, badgeX, badgeY + badgeH);
+    plateGrad.addColorStop(0, "#FFFFFF");
+    plateGrad.addColorStop(1, "#F8FAFC");
+    ctx.fillStyle = plateGrad;
+    ctx.fill();
+    ctx.strokeStyle = "rgba(229, 169, 60, 0.5)";
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    if (typeof ctx.restore === "function") ctx.restore();
+
+    // Centered partner logo inside plaque
+    const logoX = badgeX + (badgeW - logoW) / 2;
+    const logoY = badgeY + (badgeH - logoH) / 2;
     ctx.drawImage(partnerImg, logoX, logoY, logoW, logoH);
   } else {
     ctx.textAlign = "right";
     ctx.textBaseline = "top";
-    ctx.font = "700 14px 'Plus Jakarta Sans', system-ui, sans-serif";
+    ctx.font = "800 13px 'Plus Jakarta Sans', system-ui, sans-serif";
     ctx.fillStyle = "#E5A93C";
     ctx.fillText("OFFICIAL LAUNCH PARTNER", partnerRightX, headerY);
 
@@ -415,7 +518,7 @@ export async function renderLaunchPassToCanvas(
   }
 
   // Decorative divider line under header
-  const dividerY = headerY + 120;
+  const dividerY = headerY + 130;
   const lineGrad = ctx.createLinearGradient(margin + 50, dividerY, width - margin - 50, dividerY);
   lineGrad.addColorStop(0, "rgba(229, 169, 60, 0.1)");
   lineGrad.addColorStop(0.5, "rgba(229, 169, 60, 0.8)");

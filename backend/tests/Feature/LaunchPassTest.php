@@ -153,4 +153,18 @@ class LaunchPassTest extends TestCase
         $this->postJson("{$this->api}/launch-pass/lookup", ['identifier' => 'nonexistent@example.test'])
             ->assertNotFound();
     }
+
+    public function test_asset_proxy_streams_public_storage_files_with_cors_headers(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+        \Illuminate\Support\Facades\Storage::disk('public')->put('media/launchpass/test-logo.png', 'fake-png-content');
+
+        $response = $this->get("{$this->api}/launch-pass/asset-proxy?url=https://api.mytijaara.com/storage/media/launchpass/test-logo.png");
+
+        $response->assertOk()
+            ->assertHeader('Access-Control-Allow-Origin', '*')
+            ->assertHeader('Content-Type', 'image/png');
+
+        $this->assertSame('fake-png-content', $response->getContent());
+    }
 }
