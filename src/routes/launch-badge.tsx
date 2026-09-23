@@ -12,7 +12,6 @@ import { PublicLayout } from "@/components/landing/public-layout";
 import { loadPublicPageData, type PublicPageData } from "@/lib/public-page-data";
 import { useCmsData } from "@/lib/cms-context";
 import { LaunchPassLookupDialog } from "@/components/launch-pass/launch-pass-lookup-dialog";
-import { WaitlistForm } from "@/components/landing/waitlist-form";
 import type { WaitlistUser } from "@/lib/types";
 
 export const DEFAULT_LAUNCH_PASS_CMS = {
@@ -20,7 +19,7 @@ export const DEFAULT_LAUNCH_PASS_CMS = {
   eventName: "TAA NATCON 2026",
   eventDate: "October 2, 2026",
   eventDateShort: "02 • 10 • 26",
-  taaLogoUrl: "/images/taa-natcon-logo.svg",
+  taaLogoUrl: "/images/taa-natcon-partner-logo.png",
   referralCta: "Join the Waitlist & Get Pass",
 };
 
@@ -56,7 +55,6 @@ export function LaunchBadgeView({ data }: { data: PublicPageData }) {
   const cms = useCmsData("launch_pass", DEFAULT_LAUNCH_PASS_CMS);
 
   const [lookupOpen, setLookupOpen] = useState(false);
-  const [showSignup, setShowSignup] = useState(false);
 
   if (!cms) return null;
 
@@ -64,13 +62,6 @@ export function LaunchBadgeView({ data }: { data: PublicPageData }) {
     if (user.launchPassToken) {
       window.location.href = `/launch-pass/${user.launchPassToken}`;
     }
-  };
-
-  const handleScrollToSignup = () => {
-    setShowSignup(true);
-    setTimeout(() => {
-      document.getElementById("badge-signup-section")?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
   };
 
   return (
@@ -144,9 +135,8 @@ export function LaunchBadgeView({ data }: { data: PublicPageData }) {
               </button>
 
               {/* Option 2: No, Haven't Joined Yet */}
-              <button
-                type="button"
-                onClick={handleScrollToSignup}
+              <a
+                href="/#waitlist"
                 className="group relative flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-emerald-500/40 bg-emerald-500/5 hover:bg-emerald-500/15 hover:border-emerald-500 transition-all text-center cursor-pointer shadow-md"
               >
                 <div className="grid h-12 w-12 place-items-center rounded-2xl bg-emerald-500/20 text-emerald-500 mb-3 group-hover:scale-110 transition-transform">
@@ -161,7 +151,7 @@ export function LaunchBadgeView({ data }: { data: PublicPageData }) {
                 <div className="mt-3 inline-flex items-center text-xs font-bold text-emerald-500 gap-1">
                   Join in 30 Seconds <ArrowRight className="h-3 w-3" />
                 </div>
-              </button>
+              </a>
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-4 pt-2 text-[11px] text-muted-foreground/80">
@@ -171,21 +161,6 @@ export function LaunchBadgeView({ data }: { data: PublicPageData }) {
               <span className="flex items-center gap-1">
                 <Calendar className="h-3.5 w-3.5 text-gold" /> Launches Oct 2, 2026
               </span>
-            </div>
-          </div>
-
-          {/* Waitlist Form Section */}
-          <div id="badge-signup-section" className="mt-16 text-left">
-            <div className="mx-auto max-w-xl text-center mb-6">
-              <h3 className="font-display text-2xl font-bold text-foreground">
-                Join the MyTijaara Waitlist
-              </h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                Complete the quick form below. Your official launch pass will generate automatically on submission.
-              </p>
-            </div>
-            <div className="mx-auto max-w-2xl">
-              <WaitlistForm />
             </div>
           </div>
         </div>

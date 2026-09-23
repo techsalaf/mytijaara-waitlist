@@ -261,7 +261,7 @@ class CmsSectionSeeder extends Seeder
             'supportingCopyAttendee' => "I'll be witnessing the official launch of MyTijaara LIVE at TAA NATCON 2026. 02 • 10 • 26.",
             'liveHeadlineGeneral' => 'MYTIJAARA IS LIVE',
             'liveHeadlineAttendee' => 'I WAS THERE',
-            'taaLogoUrl' => '/images/taa-natcon-logo.svg',
+            'taaLogoUrl' => '/images/taa-natcon-partner-logo.png',
             'sharingMessage' => "I'm on the MyTijaara Launch List! Officially launching Oct 2 at TAA NATCON 2026. Join with me:",
             'sharingMessageAttendee' => "I'll be witnessing the official launch of MyTijaara LIVE at TAA NATCON 2026! Join the waitlist before launch:",
             'referralCta' => 'Join the Waitlist',

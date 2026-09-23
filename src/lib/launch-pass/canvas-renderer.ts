@@ -218,16 +218,18 @@ async function loadOptionalImage(rawUrl?: string): Promise<HTMLImageElement | nu
         ? "/api/v1"
         : "https://api.mytijaara.com/api/v1";
     candidates.push(`${apiBase}/launch-pass/asset-proxy?url=${encodeURIComponent(url)}`);
+    // If not cross-domain (e.g. same origin or dev proxy), we can also try direct pathname
+    if (!isCrossDomain) {
+      candidates.push(url);
+    }
+  } else {
+    // Non-storage assets: try cache-busting if cross-domain, then raw URL
+    if (isCrossDomain) {
+      const bust = url.includes("?") ? `${url}&cv=2` : `${url}?cv=2`;
+      candidates.push(bust);
+    }
+    candidates.push(url);
   }
-
-  // Candidate 2: Cache-busting URL to bypass any non-CORS browser disk cache
-  if (isCrossDomain) {
-    const bust = url.includes("?") ? `${url}&cv=2` : `${url}?cv=2`;
-    candidates.push(bust);
-  }
-
-  // Candidate 3: Raw URL
-  candidates.push(url);
 
   for (const candidate of candidates) {
     // 1. Try Blob fetch first (bypasses browser image tag cache collisions and guarantees clean canvas)
@@ -335,10 +337,16 @@ export async function renderLaunchPassToCanvas(
     options.brandLogoUrl || (await fetchBrandingLogoFromDb()) || "";
 
   // Preload both brand and partner logos in parallel
-  const [brandImg, partnerImg] = await Promise.all([
+  const targetPartnerUrl = cms.taaLogoUrl || "/images/taa-natcon-partner-logo.png";
+  const [brandImg, candidatePartnerImg] = await Promise.all([
     resolvedBrandLogoUrl ? loadOptionalImage(resolvedBrandLogoUrl) : Promise.resolve(null),
-    cms.taaLogoUrl ? loadOptionalImage(cms.taaLogoUrl) : Promise.resolve(null),
+    loadOptionalImage(targetPartnerUrl),
   ]);
+
+  let partnerImg = candidatePartnerImg;
+  if (!partnerImg && targetPartnerUrl !== "/images/taa-natcon-partner-logo.png") {
+    partnerImg = await loadOptionalImage("/images/taa-natcon-partner-logo.png");
+  }
 
   if (brandImg && brandImg.naturalWidth > 0 && brandImg.naturalHeight > 0) {
     const maxLogoH = 70;

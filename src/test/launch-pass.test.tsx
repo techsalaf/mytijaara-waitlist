@@ -461,6 +461,19 @@ describe("Launch Pass Feature Suite", () => {
       expect(screen.getByText("No, I'm New")).toBeInTheDocument();
     });
 
+    it("links 'No, I'm New' directly to /#waitlist without embedded form", () => {
+      render(
+        <LaunchStateProvider initialConfig={DEFAULT_LAUNCH_CONFIG} initialNow={Date.now()}>
+          <LaunchBadgeView data={mockPublicData} />
+        </LaunchStateProvider>,
+      );
+
+      const newLink = screen.getByText("No, I'm New").closest("a");
+      expect(newLink).toBeInTheDocument();
+      expect(newLink).toHaveAttribute("href", "/#waitlist");
+      expect(screen.queryByText(/Join the MyTijaara Waitlist/i)).not.toBeInTheDocument();
+    });
+
     it("opens lookup dialog when 'Yes, I've Joined' is clicked", async () => {
       const user = userEvent.setup();
       render(

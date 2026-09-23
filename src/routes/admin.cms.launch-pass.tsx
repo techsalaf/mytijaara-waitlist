@@ -69,7 +69,7 @@ const defaultLaunchPassData: LaunchPassCmsData = {
     "I'll be witnessing the official launch of MyTijaara LIVE at TAA NATCON 2026. 02 • 10 • 26.",
   liveHeadlineGeneral: "MYTIJAARA IS LIVE",
   liveHeadlineAttendee: "I WAS THERE",
-  taaLogoUrl: "/images/taa-natcon-logo.svg",
+  taaLogoUrl: "/images/taa-natcon-partner-logo.png",
   sharingMessage:
     "I'm on the MyTijaara Launch List! Officially launching Oct 2 at TAA NATCON 2026. Join with me:",
   sharingMessageAttendee:
@@ -133,6 +133,7 @@ function LaunchPassCmsEditor() {
   // Re-render live canvas preview whenever CMS fields, preview controls, DB brand logo, or canvasNode change
   useEffect(() => {
     if (!canvasNode) return;
+    if (loading) return;
 
     let cancelled = false;
     setPreviewRendering(true);
@@ -188,7 +189,7 @@ function LaunchPassCmsEditor() {
     return () => {
       cancelled = true;
     };
-  }, [data, previewFormat, previewAttendee, previewStatus, dbBrandLogo, canvasNode]);
+  }, [data, previewFormat, previewAttendee, previewStatus, dbBrandLogo, canvasNode, loading]);
 
   const handleDownloadPreview = () => {
     if (!canvasNode) return;
@@ -762,7 +763,7 @@ function PartnerLogoUploader({
   };
 
   const handleResetDefault = () => {
-    onChange("/images/taa-natcon-logo.svg");
+    onChange("/images/taa-natcon-partner-logo.png");
     setBroken(false);
     toast.success("Reset to default TAA NATCON logo.");
   };
