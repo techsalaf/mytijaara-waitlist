@@ -43,6 +43,7 @@ class CampaignMail extends Mailable
         $trackingPixelUrl = $apiUrl . '/api/v1/track/open/' . $this->campaign->public_id . '?e=' . urlencode($this->entry->email);
         $referralUrl = $site . '/?ref=' . ($this->entry->referral_code ?? '');
         $verifyUrl = $site . '/verify-email?token=' . ($this->entry->verification_token ?? '');
+        $launchPassUrl = $site . '/launch-pass/' . ($this->entry->launch_pass_token ?? '');
 
         // Personalise the stored HTML with standard tokens.
         $body = strtr((string) $this->campaign->html, [
@@ -52,6 +53,8 @@ class CampaignMail extends Mailable
             '{{email}}' => e($this->entry->email),
             '{{role}}' => e(ucfirst($this->entry->role ?? 'member')),
             '{{position}}' => e((string) ($this->entry->position ?? '1')),
+            '{{launchPassUrl}}' => $launchPassUrl,
+            '{{launch_pass_url}}' => $launchPassUrl,
             '{{referralUrl}}' => $referralUrl,
             '{{referral_url}}' => $referralUrl,
             '{{verifyUrl}}' => $verifyUrl,

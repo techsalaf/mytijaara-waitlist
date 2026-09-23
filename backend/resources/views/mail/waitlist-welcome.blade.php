@@ -60,6 +60,20 @@
                 </table>
               @endif
 
+              @if ($launchPassUrl)
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 22px;background:#05160E;border-radius:10px;border:1px solid #f4e4bc;overflow:hidden;">
+                  <tr>
+                    <td style="padding:16px 18px;background:linear-gradient(135deg, #05160E 0%, #0A2418 100%);">
+                      <span style="font-size:11px;font-weight:700;color:#f4e4bc;letter-spacing:0.8px;text-transform:uppercase;display:block;">Digital Launch Pass</span>
+                      <span style="font-size:13px;color:#e8f4ed;display:block;margin:4px 0 10px;">Get your personalized launch pass for October 2 at TAA NATCON 2026:</span>
+                      <a href="{{ $launchPassUrl }}" style="display:inline-block;background:#f4e4bc;color:#05160E;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:700;text-decoration:none;">
+                        View Your Launch Pass &rarr;
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              @endif
+
               @if ($verifyUrl)
                 <p style="margin:0 0 12px;font-size:15px;line-height:1.6;color:#3f3f3f;">
                   Confirm your email so we can reach you on launch day:

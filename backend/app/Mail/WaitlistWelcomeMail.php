@@ -61,10 +61,15 @@ class WaitlistWelcomeMail extends Mailable
             }
         }
 
+        $launchPassUrl = $this->entry->launch_pass_token
+            ? $site . '/launch-pass/' . $this->entry->launch_pass_token
+            : null;
+
         return new Content(view: 'mail.waitlist-welcome', with: [
             'name'           => $this->entry->name,
             'role'           => $this->entry->role ?? 'customer',
             'position'       => $this->entry->position,
+            'launchPassUrl'  => $launchPassUrl,
             'referralUrl'    => $site.'/?ref='.$this->entry->referral_code,
             'benefitsUrl'    => $site.'/referral-rewards',
             'verifyUrl'      => $this->entry->verification_token
