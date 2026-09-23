@@ -39,6 +39,20 @@ class LaunchPassTest extends TestCase
         $this->assertNotEmpty($entry->launch_pass_number);
     }
 
+    public function test_signup_defaults_attending_natcon_to_true_when_omitted(): void
+    {
+        $payload = $this->signup();
+        unset($payload['attendingNatcon']);
+
+        $response = $this->postJson("{$this->api}/waitlist", $payload);
+
+        $response->assertCreated()
+            ->assertJsonPath('data.attendingNatcon', true);
+
+        $entry = WaitlistEntry::where('email', $payload['email'])->firstOrFail();
+        $this->assertTrue($entry->attending_natcon);
+    }
+
     public function test_public_launch_pass_endpoint_returns_sanitized_card_data(): void
     {
         $entry = WaitlistEntry::create([

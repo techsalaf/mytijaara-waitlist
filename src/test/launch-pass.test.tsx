@@ -178,6 +178,22 @@ describe("Launch Pass Feature Suite", () => {
       expect(screen.getByText("No — Following the launch online")).toBeInTheDocument();
     });
 
+    it("defaults NATCON attendance to true when attendingNatcon is omitted or undefined", () => {
+      render(
+        <LaunchStateProvider initialConfig={DEFAULT_LAUNCH_CONFIG} initialNow={Date.now()}>
+          <LaunchPassModal
+            open={true}
+            onClose={vi.fn()}
+            entry={{ ...samplePassData, attendingNatcon: undefined }}
+            cms={DEFAULT_LAUNCH_PASS_CMS}
+          />
+        </LaunchStateProvider>,
+      );
+
+      const yesRadio = screen.getByLabelText(/Yes — I'll be there LIVE/i);
+      expect(yesRadio).toBeChecked();
+    });
+
     it("updates NATCON attendance preference when radio is selected", async () => {
       const user = userEvent.setup();
 

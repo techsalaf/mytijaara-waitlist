@@ -33,7 +33,7 @@ class WaitlistEntryResource extends JsonResource
             'referralCode' => $this->referral_code,
             'launchPassToken' => $this->launch_pass_token,
             'launchPassNumber' => $this->launch_pass_number,
-            'attendingNatcon' => $this->attending_natcon,
+            'attendingNatcon' => $this->attending_natcon !== null ? (bool) $this->attending_natcon : true,
         ];
     }
 }

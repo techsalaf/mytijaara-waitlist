@@ -44,7 +44,7 @@ class LaunchPassController extends Controller
                 'launchPassNumber' => $entry->launch_pass_number,
                 'position' => $entry->position,
                 'city' => $entry->city ?: 'Nigeria',
-                'attendingNatcon' => (bool) $entry->attending_natcon,
+                'attendingNatcon' => $entry->attending_natcon !== null ? (bool) $entry->attending_natcon : true,
                 'referralCode' => $entry->referral_code,
                 'joinedAt' => optional($entry->created_at)->toIso8601String(),
             ],
@@ -133,7 +133,7 @@ class LaunchPassController extends Controller
                 'launchPassNumber' => $entry->launch_pass_number,
                 'position' => $entry->position,
                 'city' => $entry->city ?: 'Nigeria',
-                'attendingNatcon' => (bool) $entry->attending_natcon,
+                'attendingNatcon' => $entry->attending_natcon !== null ? (bool) $entry->attending_natcon : true,
                 'referralCode' => $entry->referral_code,
             ],
         ]);

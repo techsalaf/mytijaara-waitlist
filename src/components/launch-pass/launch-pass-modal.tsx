@@ -67,12 +67,12 @@ export function LaunchPassModal({
   const { logoUrl, logoDarkUrl } = useBranding();
 
   const [format, setFormat] = useState<CardFormat>("feed");
-  const [attending, setAttending] = useState<boolean>(Boolean(entry?.attendingNatcon));
+  const [attending, setAttending] = useState<boolean>(entry?.attendingNatcon !== false);
   const [rendering, setRendering] = useState<boolean>(true);
   const [sharing, setSharing] = useState<boolean>(false);
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
 
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [canvasNode, setCanvasNode] = useState<HTMLCanvasElement | null>(null);
 
   // Sync initial attending state only when opening or switching to a new entry
   const prevIdRef = useRef<string | null>(null);
@@ -81,7 +81,7 @@ export function LaunchPassModal({
       const currentId = entry.publicId || entry.launchPassToken;
       if (prevIdRef.current !== currentId) {
         prevIdRef.current = currentId;
-        setAttending(Boolean(entry.attendingNatcon));
+        setAttending(entry.attendingNatcon !== false);
       }
     } else if (!open) {
       prevIdRef.current = null;
@@ -92,9 +92,9 @@ export function LaunchPassModal({
   const origin = typeof window !== "undefined" ? window.location.origin : "https://mytijaara.com";
   const passUrl = entry?.launchPassToken ? `${origin}/launch-pass/${entry.launchPassToken}` : origin;
 
-  // Render canvas whenever format, attending, or entry fields change
+  // Render canvas whenever format, attending, entry fields, canvasNode, or branding change
   useEffect(() => {
-    if (!open || !entry || !canvasRef.current) return;
+    if (!open || !entry || !canvasNode) return;
 
     let cancelled = false;
     setRendering(true);
@@ -112,7 +112,7 @@ export function LaunchPassModal({
       joinedAt: entry.joinedAt || new Date().toISOString(),
     };
 
-    renderLaunchPassToCanvas(canvasRef.current, {
+    renderLaunchPassToCanvas(canvasNode, {
       data: passData,
       cms,
       format,
@@ -144,6 +144,9 @@ export function LaunchPassModal({
     cms,
     launchStatus,
     passUrl,
+    canvasNode,
+    logoDarkUrl,
+    logoUrl,
   ]);
 
   if (!entry) return null;
@@ -164,7 +167,7 @@ export function LaunchPassModal({
   };
 
   const handleNativeShare = async () => {
-    if (!canvasRef.current) return;
+    if (!canvasNode) return;
     setSharing(true);
 
     const passData: LaunchPassData = {
@@ -185,7 +188,7 @@ export function LaunchPassModal({
 
     try {
       const result = await shareLaunchPass({
-        canvas: canvasRef.current,
+        canvas: canvasNode,
         title: shareTitle,
         text: shareText,
         url: passUrl,
@@ -206,9 +209,9 @@ export function LaunchPassModal({
   };
 
   const handleDownload = () => {
-    if (!canvasRef.current) return;
+    if (!canvasNode) return;
     downloadLaunchPass(
-      canvasRef.current,
+      canvasNode,
       `mytijaara-pass-${entry.launchPassToken || "download"}.png`,
     );
     toast.success("Launch Pass downloaded!");
@@ -294,7 +297,7 @@ export function LaunchPassModal({
                 </div>
               )}
               <canvas
-                ref={canvasRef}
+                ref={setCanvasNode}
                 className="w-full h-full object-contain block"
                 style={{ imageRendering: "auto" }}
               />

@@ -116,7 +116,7 @@ function LaunchPassPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [lookupOpen, setLookupOpen] = useState(false);
 
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [canvasNode, setCanvasNode] = useState<HTMLCanvasElement | null>(null);
 
   if (!cms) return null;
 
@@ -128,8 +128,11 @@ function LaunchPassPage() {
     launchPassApi
       .get(token)
       .then((res) => {
-        if (!cancelled) {
-          setPassData(res.data);
+        if (!cancelled && res.data) {
+          setPassData({
+            ...res.data,
+            attendingNatcon: res.data.attendingNatcon !== false,
+          });
         }
       })
       .catch((err) => {
@@ -148,11 +151,11 @@ function LaunchPassPage() {
     };
   }, [token]);
 
-  // Render canvas once passData is loaded
+  // Render canvas once passData is loaded and canvas element is attached
   useEffect(() => {
-    if (!passData || !canvasRef.current) return;
+    if (!passData || !canvasNode) return;
 
-    renderLaunchPassToCanvas(canvasRef.current, {
+    renderLaunchPassToCanvas(canvasNode, {
       data: passData,
       cms,
       format,
@@ -160,11 +163,19 @@ function LaunchPassPage() {
       shareUrl: typeof window !== "undefined" ? window.location.href : undefined,
       brandLogoUrl: branding?.logoDarkUrl || branding?.logoUrl,
     }).catch((err) => console.error("Canvas render error:", err));
-  }, [passData, cms, format, launchStatus]);
+  }, [
+    passData,
+    cms,
+    format,
+    launchStatus,
+    canvasNode,
+    branding?.logoDarkUrl,
+    branding?.logoUrl,
+  ]);
 
   const handleDownload = () => {
-    if (!canvasRef.current || !passData) return;
-    downloadLaunchPass(canvasRef.current, `mytijaara-pass-${passData.launchPassToken}.png`);
+    if (!canvasNode || !passData) return;
+    downloadLaunchPass(canvasNode, `mytijaara-pass-${passData.launchPassToken}.png`);
     toast.success("Launch pass downloaded!");
   };
 
@@ -180,7 +191,7 @@ function LaunchPassPage() {
   };
 
   const handleShare = async () => {
-    if (!canvasRef.current || !passData) return;
+    if (!canvasNode || !passData) return;
 
     const shareTitle = `${cms.campaignTitle} • ${passData.name}`;
     const shareText = passData.attendingNatcon
@@ -189,7 +200,7 @@ function LaunchPassPage() {
 
     try {
       const result = await shareLaunchPass({
-        canvas: canvasRef.current,
+        canvas: canvasNode,
         title: shareTitle,
         text: shareText,
         url: window.location.href,
@@ -273,7 +284,7 @@ function LaunchPassPage() {
                   }`}
                 >
                   <canvas
-                    ref={canvasRef}
+                    ref={setCanvasNode}
                     className="w-full h-full object-contain block"
                     style={{ imageRendering: "auto" }}
                   />

@@ -293,7 +293,7 @@ class WaitlistController extends Controller
                 'verification_token' => Str::random(48),
                 'referral_code' => $this->uniqueReferralCode(),
                 'launch_pass_token' => Str::random(32),
-                'attending_natcon' => isset($data['attendingNatcon']) ? (bool) $data['attendingNatcon'] : null,
+                'attending_natcon' => isset($data['attendingNatcon']) ? (bool) $data['attendingNatcon'] : true,
                 'referred_by_id' => $referrer?->id,
                 'referrals' => 0,
                 'position' => $position,

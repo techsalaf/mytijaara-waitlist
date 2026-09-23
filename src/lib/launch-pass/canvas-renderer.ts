@@ -1,6 +1,7 @@
 import QRCode from "qrcode";
 import type { LaunchPassData, LaunchPassCmsData } from "@/lib/types/launch-pass";
 import type { LaunchStatus } from "@/lib/launch/config";
+import { settingsApi } from "@/lib/api/settings";
 
 export type CardFormat = "feed" | "story";
 
@@ -14,6 +15,15 @@ export type RenderLaunchPassOptions = {
 };
 
 let cachedBrandLogoUrl: string | null = null;
+const imageCache = new Map<string, HTMLImageElement>();
+
+/**
+ * Preloads an image into the memory cache.
+ */
+export function preloadLaunchPassImage(rawUrl?: string): void {
+  if (!rawUrl) return;
+  void loadOptionalImage(rawUrl);
+}
 
 /**
  * Fetches the official branding logo from CMS public settings in the database.
@@ -22,10 +32,9 @@ export async function fetchBrandingLogoFromDb(): Promise<string | null> {
   if (cachedBrandLogoUrl !== null) return cachedBrandLogoUrl;
   if (typeof window === "undefined") return null;
   try {
-    const res = await fetch("/api/v1/settings/public");
-    if (res.ok) {
-      const json = await res.json();
-      const url = json?.data?.logoDarkUrl || json?.data?.logoUrl || "";
+    const res = await settingsApi.publicSettings();
+    if (res && res.data) {
+      const url = res.data.logoDarkUrl || res.data.logoUrl || "";
       cachedBrandLogoUrl = url;
       return url;
     }
@@ -129,6 +138,13 @@ export function normalizeMediaUrl(url?: string): string {
 async function loadOptionalImage(rawUrl?: string): Promise<HTMLImageElement | null> {
   if (!rawUrl || typeof Image === "undefined") return null;
   const url = normalizeMediaUrl(rawUrl);
+  if (imageCache.has(url)) {
+    const cached = imageCache.get(url)!;
+    if (cached.complete && cached.naturalWidth > 0) {
+      return cached;
+    }
+  }
+
   return new Promise((resolve) => {
     const img = new Image();
     const isRelative = url.startsWith("/") && !url.startsWith("//");
@@ -145,20 +161,38 @@ async function loadOptionalImage(rawUrl?: string): Promise<HTMLImageElement | nu
     if (!isData && !isRelative && !isSameHost) {
       img.crossOrigin = "anonymous";
     }
-    img.src = url;
-    if (img.complete && img.naturalWidth > 0) {
-      resolve(img);
-      return;
-    }
-    const timer = setTimeout(() => resolve(null), 1500);
+
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        resolve(null);
+      }
+    }, 1200);
+
     img.onload = () => {
-      clearTimeout(timer);
-      resolve(img);
+      if (!settled) {
+        settled = true;
+        clearTimeout(timer);
+        imageCache.set(url, img);
+        resolve(img);
+      }
     };
     img.onerror = () => {
-      clearTimeout(timer);
-      resolve(null);
+      if (!settled) {
+        settled = true;
+        clearTimeout(timer);
+        resolve(null);
+      }
     };
+
+    img.src = url;
+    if (img.complete && img.naturalWidth > 0) {
+      settled = true;
+      clearTimeout(timer);
+      imageCache.set(url, img);
+      resolve(img);
+    }
   });
 }
 
@@ -240,26 +274,23 @@ export async function renderLaunchPassToCanvas(
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
-  // 3. Top Header: MyTijaara Brand & Partner
+  // 3. Top Header: MyTijaara Brand & Partner (Parallel load)
   const headerY = margin + (format === "story" ? 110 : 80);
 
-  // Load official MyTijaara branding logo from CMS database
+  // Resolve official MyTijaara branding logo from options or CMS database
   const resolvedBrandLogoUrl =
     options.brandLogoUrl || (await fetchBrandingLogoFromDb()) || "";
 
-  let brandImg: HTMLImageElement | null = null;
-  if (resolvedBrandLogoUrl) {
-    try {
-      brandImg = await loadOptionalImage(resolvedBrandLogoUrl);
-    } catch {
-      brandImg = null;
-    }
-  }
+  // Preload both brand and partner logos in parallel
+  const [brandImg, partnerImg] = await Promise.all([
+    resolvedBrandLogoUrl ? loadOptionalImage(resolvedBrandLogoUrl) : Promise.resolve(null),
+    cms.taaLogoUrl ? loadOptionalImage(cms.taaLogoUrl) : Promise.resolve(null),
+  ]);
 
   if (brandImg && brandImg.naturalWidth > 0 && brandImg.naturalHeight > 0) {
-    const maxLogoH = 58;
+    const maxLogoH = 88;
     const aspect = brandImg.naturalWidth / brandImg.naturalHeight;
-    const logoW = Math.min(260, maxLogoH * aspect);
+    const logoW = Math.min(340, maxLogoH * aspect);
     const logoH = logoW / aspect;
     const logoX = margin + 50;
     const logoY = headerY;
@@ -276,8 +307,8 @@ export async function renderLaunchPassToCanvas(
     // Draw Official MyTijaara Vector Emblem (matches Logo component)
     const emblemX = margin + 50;
     const emblemY = headerY;
-    const emblemSize = 58;
-    const emblemRadius = 16;
+    const emblemSize = 78;
+    const emblemRadius = 22;
 
     // Outer shadow & background gradient
     if (typeof ctx.save === "function") ctx.save();
@@ -303,14 +334,14 @@ export async function renderLaunchPassToCanvas(
     // Emblem "M" Letter
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.font = "bold 32px 'Plus Jakarta Sans', system-ui, sans-serif";
+    ctx.font = "bold 42px 'Plus Jakarta Sans', system-ui, sans-serif";
     ctx.fillStyle = "#FFFFFF";
     ctx.fillText("M", emblemX + emblemSize / 2, emblemY + emblemSize / 2 + 1);
 
     // Emblem Gold Accent Badge Dot at bottom-right
-    const dotCenterX = emblemX + emblemSize - 4;
-    const dotCenterY = emblemY + emblemSize - 4;
-    const dotRadius = 7.5;
+    const dotCenterX = emblemX + emblemSize - 5;
+    const dotCenterY = emblemY + emblemSize - 5;
+    const dotRadius = 9.5;
 
     ctx.beginPath();
     if (typeof ctx.arc === "function") {
@@ -336,65 +367,55 @@ export async function renderLaunchPassToCanvas(
     ctx.fill();
 
     // Brand Name typography beside emblem
-    const brandTextX = emblemX + emblemSize + 18;
+    const brandTextX = emblemX + emblemSize + 20;
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
-    ctx.font = "800 38px 'Plus Jakarta Sans', system-ui, sans-serif";
+    ctx.font = "800 44px 'Plus Jakarta Sans', system-ui, sans-serif";
     ctx.fillStyle = "#FFFFFF";
-    ctx.fillText("MyTijaara", brandTextX, headerY + 1);
+    ctx.fillText("MyTijaara", brandTextX, headerY + 4);
 
     // Brand Sub-badge
-    ctx.font = "700 13px 'Plus Jakarta Sans', system-ui, sans-serif";
+    ctx.font = "700 14px 'Plus Jakarta Sans', system-ui, sans-serif";
     ctx.fillStyle = "#10B981";
-    ctx.fillText("NIGERIA'S SUPER APP", brandTextX, headerY + 41);
+    ctx.fillText("NIGERIA'S SUPER APP", brandTextX, headerY + 48);
   }
 
   // Partner Info (TAA NATCON 2026) on Right
   const partnerRightX = width - margin - 50;
 
-  // Try loading partner logo if provided
-  let partnerImg: HTMLImageElement | null = null;
-  if (cms.taaLogoUrl) {
-    try {
-      partnerImg = await loadOptionalImage(cms.taaLogoUrl);
-    } catch {
-      partnerImg = null;
-    }
-  }
-
   if (partnerImg && partnerImg.naturalWidth > 0 && partnerImg.naturalHeight > 0) {
-    const maxLogoH = 52;
+    const maxLogoH = 82;
     const aspect = partnerImg.naturalWidth / partnerImg.naturalHeight;
-    const logoW = Math.min(140, maxLogoH * aspect);
+    const logoW = Math.min(260, maxLogoH * aspect);
     const logoH = logoW / aspect;
     const logoX = partnerRightX - logoW;
-    const logoY = headerY + 10;
+    const logoY = headerY + 16;
 
     ctx.textAlign = "right";
     ctx.textBaseline = "top";
-    ctx.font = "700 12px 'Plus Jakarta Sans', system-ui, sans-serif";
+    ctx.font = "700 13px 'Plus Jakarta Sans', system-ui, sans-serif";
     ctx.fillStyle = "#E5A93C";
-    ctx.fillText("OFFICIAL LAUNCH PARTNER", partnerRightX, headerY - 8);
+    ctx.fillText("OFFICIAL LAUNCH PARTNER", partnerRightX, headerY - 4);
 
     ctx.drawImage(partnerImg, logoX, logoY, logoW, logoH);
   } else {
     ctx.textAlign = "right";
     ctx.textBaseline = "top";
-    ctx.font = "700 15px 'Plus Jakarta Sans', system-ui, sans-serif";
+    ctx.font = "700 14px 'Plus Jakarta Sans', system-ui, sans-serif";
     ctx.fillStyle = "#E5A93C";
     ctx.fillText("OFFICIAL LAUNCH PARTNER", partnerRightX, headerY);
 
-    ctx.font = "800 24px 'Plus Jakarta Sans', system-ui, sans-serif";
+    ctx.font = "800 28px 'Plus Jakarta Sans', system-ui, sans-serif";
     ctx.fillStyle = "#FFFFFF";
     ctx.fillText(cms.eventName, partnerRightX, headerY + 24);
 
-    ctx.font = "600 15px 'Plus Jakarta Sans', system-ui, sans-serif";
+    ctx.font = "600 16px 'Plus Jakarta Sans', system-ui, sans-serif";
     ctx.fillStyle = "#94A3B8";
-    ctx.fillText(cms.eventDate, partnerRightX, headerY + 56);
+    ctx.fillText(cms.eventDate, partnerRightX, headerY + 58);
   }
 
   // Decorative divider line under header
-  const dividerY = headerY + 95;
+  const dividerY = headerY + 120;
   const lineGrad = ctx.createLinearGradient(margin + 50, dividerY, width - margin - 50, dividerY);
   lineGrad.addColorStop(0, "rgba(229, 169, 60, 0.1)");
   lineGrad.addColorStop(0.5, "rgba(229, 169, 60, 0.8)");
@@ -407,7 +428,7 @@ export async function renderLaunchPassToCanvas(
   ctx.stroke();
 
   // 4. Variant Badge Pill (Attendee vs General)
-  const badgeY = dividerY + (format === "story" ? 70 : 40);
+  const badgeY = dividerY + (format === "story" ? 60 : 35);
   const badgeText = isAttendee ? "CONFERENCE LAUNCH ATTENDEE" : "OFFICIAL LAUNCH PASS";
 
   ctx.font = "bold 16px 'Plus Jakarta Sans', system-ui, sans-serif";
@@ -445,7 +466,7 @@ export async function renderLaunchPassToCanvas(
     headline = isAttendee ? cms.headlineAttendee : cms.headlineGeneral;
   }
 
-  const headlineY = badgeY + (format === "story" ? 110 : 80);
+  const headlineY = badgeY + (format === "story" ? 95 : 70);
   ctx.font = "900 68px 'Plus Jakarta Sans', system-ui, sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "top";
@@ -459,7 +480,7 @@ export async function renderLaunchPassToCanvas(
 
   // Supporting copy
   const copy = isAttendee ? cms.supportingCopyAttendee : cms.supportingCopyGeneral;
-  const copyY = headlineY + 95;
+  const copyY = headlineY + 90;
   ctx.font = "500 21px 'Plus Jakarta Sans', system-ui, sans-serif";
   ctx.fillStyle = "#CBD5E1";
   const copyLines = wrapText(ctx, copy, cardW - 140);
@@ -468,8 +489,8 @@ export async function renderLaunchPassToCanvas(
   });
 
   // 6. Ticket Pass Container (Middle Section)
-  const ticketY = copyY + copyLines.length * 32 + (format === "story" ? 60 : 35);
-  const ticketH = format === "story" ? 440 : 340;
+  const ticketY = copyY + copyLines.length * 32 + (format === "story" ? 50 : 25);
+  const ticketH = format === "story" ? 440 : 330;
   const ticketX = margin + 50;
   const ticketW = cardW - 100;
 
