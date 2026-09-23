@@ -63,7 +63,6 @@ async function httpCall<T>(endpoint: string, opts: ApiCallOptions = {}): Promise
   if (!baseUrl) {
     throw new ApiError("The API is not configured. Set VITE_API_BASE_URL.", 503);
   }
-  const url = `${baseUrl}${endpoint}`;
   const headers: Record<string, string> = {
     Accept: "application/json",
   };
@@ -102,14 +101,49 @@ async function httpCall<T>(endpoint: string, opts: ApiCallOptions = {}): Promise
     init.signal = controller.signal;
   }
 
-  let response: Response;
+  const primaryUrl = `${baseUrl}${endpoint}`;
+  const candidateUrls: string[] = [primaryUrl];
+  if (primaryUrl.startsWith("https://api.mytijaara.com/api/v1")) {
+    candidateUrls.push(primaryUrl.replace("https://api.mytijaara.com/api/v1", "/api/v1"));
+  } else if (primaryUrl.startsWith("/api/v1") && typeof window !== "undefined") {
+    candidateUrls.push(`https://api.mytijaara.com${primaryUrl}`);
+  }
+
+  let response: Response | undefined;
+  let lastError: unknown;
+
   try {
-    response = await fetch(url, init);
-  } catch (error) {
-    if (error instanceof DOMException && error.name === "AbortError") {
-      throw new ApiError("The request timed out. Check your connection and try again.", 408);
+    for (let i = 0; i < candidateUrls.length; i++) {
+      const currentUrl = candidateUrls[i];
+      try {
+        const res = await fetch(currentUrl, init);
+        // Valid server response (2xx, or standard client validation errors like 422, 401, etc.)
+        if (res.ok || (res.status >= 400 && res.status < 500)) {
+          response = res;
+          lastError = null;
+          break;
+        }
+        // If 5xx server error and there is another candidate, try it
+        if (i < candidateUrls.length - 1) {
+          continue;
+        }
+        response = res;
+        lastError = null;
+        break;
+      } catch (error) {
+        lastError = error;
+        if (error instanceof DOMException && error.name === "AbortError") {
+          break;
+        }
+      }
     }
-    throw new ApiError("Could not reach the server. Check your connection and try again.", 0);
+
+    if (!response) {
+      if (lastError instanceof DOMException && lastError.name === "AbortError") {
+        throw new ApiError("The request timed out. Check your connection and try again.", 408);
+      }
+      throw new ApiError("Could not reach the server. Check your connection and try again.", 0);
+    }
   } finally {
     if (timer) clearTimeout(timer);
   }

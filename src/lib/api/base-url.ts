@@ -8,12 +8,12 @@
  * the backend origin from the environment.
  */
 
-/** Raw value as configured for the browser. May be relative or unset. */
+/** Raw value as configured for the browser. Defaults to the live production API URL. */
 export const API_BASE_URL: string | undefined =
   typeof import.meta !== "undefined" && import.meta.env
     ? ((import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/+$/, "") ||
-      undefined)
-    : undefined;
+      (import.meta.env.DEV ? "/api/v1" : "https://api.mytijaara.com/api/v1"))
+    : "https://api.mytijaara.com/api/v1";
 
 /** Dev fallback origin — matches the `/api` proxy target in vite.config.ts. */
 const DEV_BACKEND_ORIGIN = "http://127.0.0.1:8000";

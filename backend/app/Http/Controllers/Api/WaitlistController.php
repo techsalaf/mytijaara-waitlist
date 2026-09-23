@@ -337,21 +337,15 @@ class WaitlistController extends Controller
      */
     private function afterSignup(WaitlistEntry $entry): void
     {
-        // Apply SMTP settings & send welcome email automatically on signup.
+        // Dispatch welcome email to background queue so SMTP latency/failure never blocks or delays signup response.
         try {
-            SmtpConfig::apply();
-            Mail::to($entry->email)->send(new WaitlistWelcomeMail($entry));
-        } catch (\Throwable $e) {
-            Log::warning('waitlist welcome mail direct send failed, dispatching to queue', [
+            \App\Jobs\SendWaitlistWelcomeJob::dispatch($entry->id);
+        } catch (\Throwable $qe) {
+            Log::warning('waitlist welcome queue dispatch failed', [
                 'entry' => $entry->public_id,
                 'email' => $entry->email,
-                'error' => $e->getMessage(),
+                'error' => $qe->getMessage(),
             ]);
-            try {
-                \App\Jobs\SendWaitlistWelcomeJob::dispatch($entry->id);
-            } catch (\Throwable $qe) {
-                Log::warning('waitlist welcome queue dispatch failed', ['error' => $qe->getMessage()]);
-            }
         }
 
         try {

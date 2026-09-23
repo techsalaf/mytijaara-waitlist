@@ -9,6 +9,7 @@ return [
         env('FRONTEND_URL', 'http://localhost:3000'),
         'https://mytijaara.com',
         'https://www.mytijaara.com',
+        'https://mytijaara-waitlist.vercel.app',
         'http://localhost:3000',
         'http://127.0.0.1:3000',
         'http://localhost:8080',
@@ -17,7 +18,12 @@ return [
         'http://127.0.0.1:5173',
     ])),
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [
+        '#^https://.*\.vercel\.app$#',
+        '#^https://.*\.lovable\.app$#',
+        '#^https://.*\.lovableproject\.com$#',
+        '#^https://.*\.mytijaara\.com$#',
+    ],
 
     'allowed_headers' => ['*'],
 

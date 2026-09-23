@@ -53,3 +53,11 @@ Schedule::command(SendScheduledCampaigns::class)
 Schedule::command(SendVerificationReminders::class, ['--trigger=schedule'])
     ->hourly()
     ->withoutOverlapping();
+
+/**
+ * Process queued jobs (such as welcome emails) on shared hosting without a persistent supervisor.
+ */
+Schedule::command('queue:work', ['--stop-when-empty', '--max-time=50'])
+    ->everyFiveMinutes()
+    ->withoutOverlapping();
+
