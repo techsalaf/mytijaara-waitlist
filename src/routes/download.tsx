@@ -13,6 +13,7 @@ import {
   HelpCircle,
   Copy,
   Check,
+  Download,
 } from "lucide-react";
 import QRCode from "qrcode";
 import { loadPublicPageData } from "@/lib/public-page-data";
@@ -23,6 +24,13 @@ import { PublicLayout } from "@/components/landing/public-layout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { trackEvent } from "@/lib/analytics/track";
 
@@ -54,6 +62,14 @@ type DownloadCmsData = {
     enabled?: boolean;
     comingSoon?: boolean;
     url?: string;
+    apkUrl?: string;
+  };
+  apkDownload?: {
+    enabled?: boolean;
+    url?: string;
+    label?: string;
+    version?: string;
+    size?: string;
   };
   appStore?: {
     enabled?: boolean;
@@ -71,6 +87,7 @@ type DownloadCmsData = {
     url?: string;
     label?: string;
     description?: string;
+    apkUrl?: string;
   };
   riderPartner?: {
     enabled?: boolean;
@@ -139,8 +156,16 @@ const DEFAULT_DOWNLOAD_CMS: DownloadCmsData = {
     "Order food, shop groceries & pharmacy items, book trusted artisans, send parcels, and rent cars — all in one super app built for Nigeria.",
   playStore: {
     enabled: true,
-    comingSoon: false,
+    comingSoon: true,
     url: "https://play.google.com/store/apps/details?id=com.mytijaara.app",
+    apkUrl: "https://dashboard.mytijaara.com/downloads/mytijaara-user.apk",
+  },
+  apkDownload: {
+    enabled: true,
+    url: "https://dashboard.mytijaara.com/downloads/mytijaara-user.apk",
+    label: "Download Customer App",
+    version: "v1.0.0",
+    size: "57 MB",
   },
   appStore: {
     enabled: true,
@@ -158,6 +183,7 @@ const DEFAULT_DOWNLOAD_CMS: DownloadCmsData = {
     url: "https://dashboard.mytijaara.com",
     label: "Join as a Business Partner",
     description: "Sell food, groceries, pharmacy, or retail goods to thousands of ready customers in your city.",
+    apkUrl: "https://dashboard.mytijaara.com/downloads/mytijaara-store.apk",
   },
   riderPartner: {
     enabled: true,
@@ -191,6 +217,141 @@ const DOWNLOAD_FAQS = [
   },
 ];
 
+export interface DownloadModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onHelpClick?: () => void;
+}
+
+// GEMINI-MYTJ: Instant download modal opens immediately on visit to eliminate friction
+export function DownloadModal({ open, onOpenChange, onHelpClick }: DownloadModalProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md p-6 rounded-3xl border-border bg-card shadow-2xl">
+        <DialogHeader className="text-center sm:text-center space-y-2">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Sparkles className="h-6 w-6 text-gold" />
+          </div>
+          <DialogTitle className="font-display text-2xl font-extrabold tracking-tight text-foreground">
+            Get MyTijaara
+          </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
+            What would you like to do?
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="mt-4 grid gap-3.5">
+          {/* Customer Option Card */}
+          <a
+            href="https://dashboard.mytijaara.com/downloads/mytijaara-user.apk"
+            download="mytijaara-user.apk"
+            onClick={() => {
+              trackEvent("download_click", { platform: "android_apk", type: "customer" });
+              toast.success("Download started!", {
+                description: "Tap the downloaded file on your phone to install.",
+                action: {
+                  label: "Install Guide",
+                  onClick: () => {
+                    onOpenChange(false);
+                    onHelpClick?.();
+                  },
+                },
+              });
+            }}
+            className="group relative flex items-center justify-between gap-4 rounded-2xl border-2 border-primary/25 bg-primary/[0.04] p-4 text-left transition-all duration-200 hover:border-primary hover:bg-primary/[0.09] hover:shadow-md cursor-pointer active:scale-[0.98]"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-2xl shadow-sm">
+                🛍️
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-display text-base font-bold text-foreground">
+                    Shop on MyTijaara
+                  </span>
+                  <Badge variant="outline" className="border-gold/50 bg-gold/15 text-[10px] font-bold text-amber-800 dark:text-gold px-1.5 py-0.5">
+                    Customer
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Order food, groceries and more.
+                </p>
+              </div>
+            </div>
+            <div className="shrink-0 flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-bold text-primary-foreground shadow group-hover:bg-primary/90">
+              <Download className="h-3.5 w-3.5" />
+              <span>Download</span>
+            </div>
+          </a>
+
+          {/* Store / Merchant Option Card */}
+          <a
+            href="https://dashboard.mytijaara.com/downloads/mytijaara-store.apk"
+            download="mytijaara-store.apk"
+            onClick={() => {
+              trackEvent("download_click", { platform: "android_apk", type: "store" });
+              toast.success("Download started!", {
+                description: "Tap the downloaded file on your phone to install.",
+                action: {
+                  label: "Install Guide",
+                  onClick: () => {
+                    onOpenChange(false);
+                    onHelpClick?.();
+                  },
+                },
+              });
+            }}
+            className="group relative flex items-center justify-between gap-4 rounded-2xl border border-border bg-card p-4 text-left transition-all duration-200 hover:border-emerald-600 hover:bg-emerald-500/[0.06] hover:shadow-md cursor-pointer active:scale-[0.98]"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-2xl shadow-sm">
+                🏪
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-display text-base font-bold text-foreground">
+                    Sell on MyTijaara
+                  </span>
+                  <Badge variant="outline" className="border-emerald-600/30 bg-emerald-50 text-[10px] font-bold text-emerald-800 dark:text-emerald-400 px-1.5 py-0.5">
+                    Store
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Manage your store and orders.
+                </p>
+              </div>
+            </div>
+            <div className="shrink-0 flex items-center gap-1.5 rounded-full border border-border bg-muted/60 px-3.5 py-1.5 text-xs font-bold text-foreground group-hover:bg-emerald-600 group-hover:text-white group-hover:border-transparent transition-colors">
+              <Download className="h-3.5 w-3.5" />
+              <span>Download</span>
+            </div>
+          </a>
+        </div>
+
+        {/* Micro Footer Note */}
+        <div className="mt-3 text-center space-y-1">
+          <p className="text-[11px] font-semibold text-foreground/80">
+            Android APK &middot; Official MyTijaara Release
+          </p>
+          <p className="text-[10px] text-muted-foreground">
+            Google Play version coming shortly.
+          </p>
+        </div>
+
+        <div className="mt-2 text-center">
+          <button
+            type="button"
+            onClick={() => onOpenChange(false)}
+            className="text-xs font-medium text-muted-foreground hover:text-foreground underline underline-offset-4 cursor-pointer"
+          >
+            Maybe later &rarr;
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function DownloadPage() {
   const { launchConfig, serverNow, cms, branding } = Route.useLoaderData();
   const downloadCms: DownloadCmsData = (cms.download?.data as DownloadCmsData) ?? DEFAULT_DOWNLOAD_CMS;
@@ -216,11 +377,17 @@ function DownloadPage() {
         : `${DEFAULT_LAUNCH_CITY} is our first launch city, with ${PHASE_TWO_CITIES.join(", ")} next and a fast ongoing rollout to other Nigerian states.`,
     },
     {
+      q: "How do I install the Android APK directly?",
+      a: "1. Tap 'Download' on the Customer or Store app to start downloading the .apk file. 2. When the download completes, tap the notification or open 'Downloads' on your device. 3. If prompted, tap 'Settings' and enable 'Allow from this source'. 4. Tap 'Install' and launch MyTijaara!",
+    },
+    {
       q: "How do escrow payments work on MyTijaara?",
       a: "When you place an order or hire an artisan, your payment is held securely in escrow. The seller or service provider is only paid once you confirm that the service was executed properly or your package arrived safely.",
     },
   ];
 
+  // GEMINI-MYTJ: Instant download modal opens immediately on visit to eliminate friction
+  const [modalOpen, setModalOpen] = useState(true);
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [copiedLink, setCopiedLink] = useState(false);
 
@@ -261,6 +428,16 @@ function DownloadPage() {
 
   return (
     <PublicLayout launchConfig={launchConfig} serverNow={serverNow} cmsData={cms} branding={branding}>
+      {/* GEMINI-MYTJ: Instant download modal opens immediately on visit to eliminate friction */}
+      <DownloadModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        onHelpClick={() => {
+          const faqEl = document.getElementById("faq-section");
+          faqEl?.scrollIntoView({ behavior: "smooth" });
+        }}
+      />
+
       <div className="min-h-screen pb-24">
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-primary-gradient pt-28 pb-20 text-primary-foreground sm:pt-36 sm:pb-28">
@@ -287,11 +464,32 @@ function DownloadPage() {
 
                 {/* Primary Download Badges */}
                 <div className="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
-                  {/* Google Play Store */}
+                  {/* Direct Android APK Download Button */}
+                  <a
+                    href="https://dashboard.mytijaara.com/downloads/mytijaara-user.apk"
+                    download="mytijaara-user.apk"
+                    onClick={() => trackEvent("download_click", { platform: "android_apk", type: "customer" })}
+                    className="group inline-flex items-center gap-3.5 rounded-2xl bg-white px-6 py-3.5 text-slate-900 shadow-xl transition-all duration-300 hover:scale-[1.03] hover:bg-gold hover:text-slate-950"
+                  >
+                    <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-emerald-700 text-white shadow-sm transition-transform group-hover:scale-110">
+                      <Download className="h-4 w-4" />
+                    </div>
+                    <div className="text-left">
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold tracking-wider uppercase text-emerald-800">
+                        DIRECT DOWNLOAD
+                        <span className="rounded bg-emerald-100 px-1 py-0.2 text-[9px] font-extrabold text-emerald-800">
+                          APK
+                        </span>
+                      </div>
+                      <div className="text-base font-extrabold leading-tight">Download Android App</div>
+                    </div>
+                  </a>
+
+                  {/* Google Play Store Badge / Review Status */}
                   {playStore.enabled !== false && (
                     <div className="flex flex-col items-center sm:items-start">
                       {playStore.comingSoon ? (
-                        <div className="relative inline-flex items-center gap-3 rounded-2xl border border-white/20 bg-white/10 px-6 py-3.5 opacity-80 backdrop-blur">
+                        <div className="relative inline-flex items-center gap-3 rounded-2xl border border-white/20 bg-white/10 px-5 py-3.5 opacity-80 backdrop-blur">
                           <Smartphone className="h-7 w-7 text-gold" />
                           <div className="text-left">
                             <div className="text-[11px] font-medium text-white/75">COMING SOON ON</div>
@@ -320,6 +518,19 @@ function DownloadPage() {
                       )}
                     </div>
                   )}
+
+                  {/* Choose App Modal Trigger */}
+                  <Button
+                    variant="outline"
+                    onClick={() => setModalOpen(true)}
+                    className="rounded-2xl border-white/20 bg-white/10 px-5 py-3.5 h-auto text-white hover:bg-white/20 cursor-pointer"
+                  >
+                    <Sparkles className="h-4 w-4 text-gold mr-2" />
+                    <div className="text-left">
+                      <div className="text-[10px] font-medium text-white/75 uppercase tracking-wide">CHOOSE APP</div>
+                      <div className="text-sm font-bold">Customer or Store</div>
+                    </div>
+                  </Button>
 
                   {/* Apple App Store */}
                   {appStore.enabled !== false && (
@@ -459,7 +670,7 @@ function DownloadPage() {
                       "List your restaurant, grocery shop, pharmacy, or retail business to reach thousands of buyers."}
                   </p>
                 </div>
-                <div className="mt-6 pt-4 border-t border-border/60">
+                <div className="mt-6 pt-4 border-t border-border/60 flex flex-wrap items-center justify-between gap-3">
                   <a
                     href={vendorPartner.url || "https://dashboard.mytijaara.com"}
                     target="_blank"
@@ -467,6 +678,14 @@ function DownloadPage() {
                     className="inline-flex items-center gap-2 text-sm font-bold text-emerald-700 transition-colors group-hover:text-emerald-800"
                   >
                     Partner Portal <ChevronRight className="h-4 w-4" />
+                  </a>
+                  <a
+                    href={vendorPartner.apkUrl || "https://dashboard.mytijaara.com/downloads/mytijaara-store.apk"}
+                    download="mytijaara-store.apk"
+                    onClick={() => trackEvent("download_click", { platform: "android_apk", type: "store" })}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-emerald-600/30 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800 transition-colors hover:bg-emerald-100"
+                  >
+                    <Download className="h-3.5 w-3.5" /> Store App APK
                   </a>
                 </div>
               </div>
@@ -538,7 +757,7 @@ function DownloadPage() {
         )}
 
         {/* Download & Installation FAQ */}
-        <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
+        <section id="faq-section" className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
           <div className="rounded-3xl border border-border/70 bg-surface/50 p-8 sm:p-12">
             <div className="flex items-center gap-3">
               <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
