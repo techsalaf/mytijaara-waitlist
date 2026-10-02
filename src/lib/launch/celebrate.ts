@@ -292,12 +292,15 @@ export function celebrateCeremony(options: {
         disableForReducedMotion: true,
       });
 
-      // 2. High-energy dual side cannons (0 to 3s)
-      const streamRounds = 8;
+      // 2. High-energy dual side cannons (runs for the full duration)
+      const intervalMs = 250;
+      const streamRounds = Math.floor((durationMs - 180) / intervalMs);
       for (let i = 0; i < streamRounds; i++) {
-        after(180 + i * 220, () => {
+        after(180 + i * intervalMs, () => {
           if (cancelled) return;
-          const factor = 1 - i / streamRounds;
+          // Taper off intensity only in the last 2 seconds (8 rounds)
+          const remainingRounds = streamRounds - i;
+          const factor = remainingRounds < 8 ? remainingRounds / 8 : 1;
           const count = Math.max(8, Math.round(28 * factor));
           confetti({
             particleCount: count,
