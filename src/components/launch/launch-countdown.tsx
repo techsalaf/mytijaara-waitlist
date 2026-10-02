@@ -24,8 +24,12 @@ export function LaunchCountdown() {
   const [ceremonyCompleted, setCeremonyCompleted] = useState(false);
   const reducedMotion = prefersReducedMotion();
 
-  // If already celebrated earlier in this session or prior visit, skip ceremony straight to banner
-  const alreadyCelebrated = typeof window !== "undefined" && hasCelebrated(config.launchDateTime);
+  // If already celebrated earlier in this session or prior visit, skip ceremony straight to banner.
+  // We read this once into state so that if another component (like LaunchTicker) marks it
+  // as celebrated exactly at T=0, it doesn't instantly abort the active ceremony.
+  const [alreadyCelebrated] = useState(() => 
+    typeof window !== "undefined" && hasCelebrated(config.launchDateTime)
+  );
 
   // Trigger ceremony if:
   // 1. We are in launch_day, ceremony is enabled, and visitor has NOT yet seen ceremony (or in rehearsal preview)
