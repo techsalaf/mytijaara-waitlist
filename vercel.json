@@ -2,6 +2,18 @@
   "buildCommand": "NITRO_PRESET=vercel npm run build",
   "outputDirectory": ".vercel/output/static",
   "framework": "vite",
+  "redirects": [
+    {
+      "source": "/download/mytijaara-user.apk",
+      "destination": "https://dashboard.mytijaara.com/downloads/mytijaara-user.apk",
+      "permanent": false
+    },
+    {
+      "source": "/download/mytijaara-store.apk",
+      "destination": "https://dashboard.mytijaara.com/downloads/mytijaara-store.apk",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/:path*",

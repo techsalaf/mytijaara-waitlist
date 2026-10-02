@@ -158,11 +158,11 @@ const DEFAULT_DOWNLOAD_CMS: DownloadCmsData = {
     enabled: true,
     comingSoon: true,
     url: "https://play.google.com/store/apps/details?id=com.mytijaara.app",
-    apkUrl: "https://dashboard.mytijaara.com/downloads/mytijaara-user.apk",
+    apkUrl: "https://mytijaara.com/download/mytijaara-user.apk",
   },
   apkDownload: {
     enabled: true,
-    url: "https://dashboard.mytijaara.com/downloads/mytijaara-user.apk",
+    url: "https://mytijaara.com/download/mytijaara-user.apk",
     label: "Download Customer App",
     version: "v1.0.0",
     size: "57 MB",
@@ -183,7 +183,7 @@ const DEFAULT_DOWNLOAD_CMS: DownloadCmsData = {
     url: "https://dashboard.mytijaara.com",
     label: "Join as a Business Partner",
     description: "Sell food, groceries, pharmacy, or retail goods to thousands of ready customers in your city.",
-    apkUrl: "https://dashboard.mytijaara.com/downloads/mytijaara-store.apk",
+    apkUrl: "https://mytijaara.com/download/mytijaara-store.apk",
   },
   riderPartner: {
     enabled: true,
@@ -243,7 +243,7 @@ export function DownloadModal({ open, onOpenChange, onHelpClick }: DownloadModal
         <div className="mt-4 grid gap-3.5">
           {/* Customer Option Card */}
           <a
-            href="https://dashboard.mytijaara.com/downloads/mytijaara-user.apk"
+            href="https://mytijaara.com/download/mytijaara-user.apk"
             download="mytijaara-user.apk"
             onClick={() => {
               trackEvent("download_click", { platform: "android_apk", type: "customer" });
@@ -286,7 +286,7 @@ export function DownloadModal({ open, onOpenChange, onHelpClick }: DownloadModal
 
           {/* Store / Merchant Option Card */}
           <a
-            href="https://dashboard.mytijaara.com/downloads/mytijaara-store.apk"
+            href="https://mytijaara.com/download/mytijaara-store.apk"
             download="mytijaara-store.apk"
             onClick={() => {
               trackEvent("download_click", { platform: "android_apk", type: "store" });
@@ -466,7 +466,7 @@ function DownloadPage() {
                 <div className="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
                   {/* Direct Android APK Download Button */}
                   <a
-                    href="https://dashboard.mytijaara.com/downloads/mytijaara-user.apk"
+                    href="https://mytijaara.com/download/mytijaara-user.apk"
                     download="mytijaara-user.apk"
                     onClick={() => trackEvent("download_click", { platform: "android_apk", type: "customer" })}
                     className="group inline-flex items-center gap-3.5 rounded-2xl bg-white px-6 py-3.5 text-slate-900 shadow-xl transition-all duration-300 hover:scale-[1.03] hover:bg-gold hover:text-slate-950"
@@ -680,7 +680,7 @@ function DownloadPage() {
                     Partner Portal <ChevronRight className="h-4 w-4" />
                   </a>
                   <a
-                    href={vendorPartner.apkUrl || "https://dashboard.mytijaara.com/downloads/mytijaara-store.apk"}
+                    href={vendorPartner.apkUrl || "https://mytijaara.com/download/mytijaara-store.apk"}
                     download="mytijaara-store.apk"
                     onClick={() => trackEvent("download_click", { platform: "android_apk", type: "store" })}
                     className="inline-flex items-center gap-1.5 rounded-full border border-emerald-600/30 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-800 transition-colors hover:bg-emerald-100"
