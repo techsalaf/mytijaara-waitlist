@@ -47,6 +47,15 @@ function isH3SwallowedErrorBody(body: string): boolean {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      // GEMINI-MYTJ: Intercept APK download requests directly at server entry before TanStack Router 404s
+      const url = new URL(request.url);
+      if (url.pathname === "/download/mytijaara-user.apk") {
+        return Response.redirect("https://dashboard.mytijaara.com/downloads/mytijaara-user.apk", 302);
+      }
+      if (url.pathname === "/download/mytijaara-store.apk") {
+        return Response.redirect("https://dashboard.mytijaara.com/downloads/mytijaara-store.apk", 302);
+      }
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
