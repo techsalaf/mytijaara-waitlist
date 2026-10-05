@@ -17,7 +17,7 @@ describe("DownloadModal component", () => {
     const customerLink = screen.getByRole("link", { name: /Shop on MyTijaara/i });
     expect(customerLink).toHaveAttribute(
       "href",
-      "https://mytijaara.com/download/mytijaara-user.apk"
+      "https://dashboard.mytijaara.com/downloads/mytijaara-user.apk"
     );
     expect(customerLink).toHaveAttribute("download", "mytijaara-user.apk");
 
@@ -27,7 +27,7 @@ describe("DownloadModal component", () => {
     const storeLink = screen.getByRole("link", { name: /Sell on MyTijaara/i });
     expect(storeLink).toHaveAttribute(
       "href",
-      "https://mytijaara.com/download/mytijaara-store.apk"
+      "https://dashboard.mytijaara.com/downloads/mytijaara-store.apk"
     );
     expect(storeLink).toHaveAttribute("download", "mytijaara-store.apk");
 
