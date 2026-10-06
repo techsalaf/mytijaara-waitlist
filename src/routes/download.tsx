@@ -15,6 +15,7 @@ import {
   Check,
   Download,
   Info,
+  MessageCircle,
 } from "lucide-react";
 import QRCode from "qrcode";
 import { loadPublicPageData } from "@/lib/public-page-data";
@@ -416,13 +417,22 @@ export function InstallGuideModal({ open, onOpenChange }: InstallGuideModalProps
           </div>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-6 flex flex-col gap-3">
           <button
             onClick={() => onOpenChange(false)}
             className="w-full rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-md transition-all hover:bg-primary/90 hover:shadow-lg active:scale-[0.98] cursor-pointer"
           >
             Got it, thanks!
           </button>
+          <a
+            href="https://wa.me/2347049147825?text=Hi%20MyTijaara%2C%20I%20need%20help%20installing%20the%20app%20on%20my%20phone."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[#25D366] bg-[#25D366]/10 px-5 py-3 text-sm font-bold text-[#25D366] transition-colors hover:bg-[#25D366]/20 cursor-pointer"
+          >
+            <MessageCircle className="h-4 w-4" />
+            Chat with Support
+          </a>
         </div>
       </DialogContent>
     </Dialog>
