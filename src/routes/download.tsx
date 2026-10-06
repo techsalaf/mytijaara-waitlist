@@ -14,6 +14,7 @@ import {
   Copy,
   Check,
   Download,
+  Info,
 } from "lucide-react";
 import QRCode from "qrcode";
 import { loadPublicPageData } from "@/lib/public-page-data";
@@ -225,7 +226,10 @@ export interface DownloadModalProps {
 
 // GEMINI-MYTJ: Instant download modal opens immediately on visit to eliminate friction
 export function DownloadModal({ open, onOpenChange, onHelpClick }: DownloadModalProps) {
+  const [guideOpen, setGuideOpen] = useState(false);
+
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md p-6 rounded-3xl border-border bg-card shadow-2xl">
         <DialogHeader className="text-center sm:text-center space-y-2">
@@ -253,7 +257,7 @@ export function DownloadModal({ open, onOpenChange, onHelpClick }: DownloadModal
                   label: "Install Guide",
                   onClick: () => {
                     onOpenChange(false);
-                    onHelpClick?.();
+                    setGuideOpen(true);
                   },
                 },
               });
@@ -296,7 +300,7 @@ export function DownloadModal({ open, onOpenChange, onHelpClick }: DownloadModal
                   label: "Install Guide",
                   onClick: () => {
                     onOpenChange(false);
-                    onHelpClick?.();
+                    setGuideOpen(true);
                   },
                 },
               });
@@ -328,6 +332,20 @@ export function DownloadModal({ open, onOpenChange, onHelpClick }: DownloadModal
           </a>
         </div>
 
+        <div className="mt-3 text-center">
+          <button
+            type="button"
+            onClick={() => {
+              onOpenChange(false);
+              setGuideOpen(true);
+            }}
+            className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-[11px] font-bold text-primary transition-colors hover:bg-primary/20 hover:text-primary/90 cursor-pointer"
+          >
+            <Info className="h-3.5 w-3.5" />
+            Installation Guide / Tips
+          </button>
+        </div>
+
         {/* Micro Footer Note */}
         <div className="mt-3 text-center space-y-1">
           <p className="text-[11px] font-semibold text-foreground/80">
@@ -345,6 +363,65 @@ export function DownloadModal({ open, onOpenChange, onHelpClick }: DownloadModal
             className="text-xs font-medium text-muted-foreground hover:text-foreground underline underline-offset-4 cursor-pointer"
           >
             Maybe later &rarr;
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    <InstallGuideModal open={guideOpen} onOpenChange={setGuideOpen} />
+    </>
+  );
+}
+
+export interface InstallGuideModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export function InstallGuideModal({ open, onOpenChange }: InstallGuideModalProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md p-6 rounded-3xl border-border bg-card shadow-2xl">
+        <DialogHeader className="text-left space-y-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Info className="h-6 w-6" />
+          </div>
+          <DialogTitle className="font-display text-2xl font-extrabold tracking-tight text-foreground">
+            Installation Guide
+          </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
+            Follow these simple steps to securely install the MyTijaara app on your Android device.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="mt-4 space-y-4">
+          <div className="flex gap-3">
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">1</div>
+            <p className="text-sm text-foreground"><span className="font-bold">Download</span> the app using the buttons on the previous screen.</p>
+          </div>
+          
+          <div className="flex gap-3">
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">2</div>
+            <p className="text-sm text-foreground"><span className="font-bold">Open the file:</span> Tap the downloaded <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">.apk</code> file from your notifications or your Downloads folder.</p>
+          </div>
+
+          <div className="flex gap-3">
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">3</div>
+            <p className="text-sm text-foreground"><span className="font-bold">Allow Unknown Sources:</span> If your phone blocks it, tap <strong>Settings</strong> on the popup and turn on <strong>"Allow from this source"</strong>.</p>
+          </div>
+          
+          <div className="flex gap-3">
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary">4</div>
+            <p className="text-sm text-foreground"><span className="font-bold">Bypass Play Protect:</span> If Google Play Protect shows a warning ("Unsafe app blocked"), tap <strong>"More details"</strong> and then select <strong>"Install anyway"</strong>.</p>
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <button
+            onClick={() => onOpenChange(false)}
+            className="w-full rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground shadow-md transition-all hover:bg-primary/90 hover:shadow-lg active:scale-[0.98] cursor-pointer"
+          >
+            Got it, thanks!
           </button>
         </div>
       </DialogContent>
