@@ -18,7 +18,7 @@ function TermsPage() {
   return (
     <PublicLayout launchConfig={launchConfig} serverNow={serverNow} cmsData={cms} branding={branding}>
       <div className="mx-auto max-w-3xl px-4 py-24 sm:px-6 sm:py-32">
-        <LegalHeader title="Terms of Service" updated="1 August 2026" />
+        <LegalHeader title="Terms of Service" updated="7 October 2026" />
           <Section title="1. Acceptance">
             <p>By accessing or using MyTijaara, you agree to these Terms. If you disagree, do not use the platform. MyTijaara Ltd reserves the right to update these Terms; continued use after notice constitutes acceptance.</p>
           </Section>
@@ -41,7 +41,7 @@ function TermsPage() {
           </Section>
           <Section title="5. Vendors, riders and artisans">
             <ul className="list-disc space-y-1 pl-5">
-              <li>Partner accounts are subject to a separate Partner Agreement signed during onboarding.</li>
+              <li>Vendor, rider and artisan accounts are governed by these Terms, which they accept during onboarding.</li>
               <li>You are responsible for the accuracy of your listings, pricing, and availability.</li>
               <li>MyTijaara may remove listings or suspend accounts that receive sustained negative feedback or violate applicable Nigerian law.</li>
             </ul>
